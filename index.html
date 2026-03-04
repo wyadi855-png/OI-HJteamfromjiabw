@@ -495,16 +495,38 @@ body.light .modal{background:rgba(248,250,255,0.98);}
   .lb-row{padding:12px;}
   .blog-grid{grid-template-columns:1fr;}
 }
+
+/* ── LECTURE UPGRADES ── */
+.lecture-title-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.lecture-title-text{font-size:15px;font-weight:600;}
+.lecture-level-tag{font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,179,71,0.1);border:1px solid rgba(255,179,71,0.2);color:var(--yellow);font-family:var(--mono);}
+.lecture-section-label{font-size:10px;color:var(--text3);letter-spacing:0.1em;font-family:var(--mono);margin-bottom:5px;}
+.lecture-conclusions{margin-top:12px;padding:12px 16px;background:rgba(108,142,245,0.05);border-left:2px solid rgba(108,142,245,0.3);border-radius:0 8px 8px 0;}
+.conclusions-list{padding-left:18px;margin:0;}
+.conclusions-list li{font-size:13px;color:var(--text2);margin-bottom:4px;line-height:1.6;}
+.chip-blue{background:rgba(108,142,245,0.08);border-color:rgba(108,142,245,0.18);color:var(--accent);}
+.chip-green{background:rgba(45,232,176,0.07);border-color:rgba(45,232,176,0.18);color:var(--accent2);}
+
+/* ── COPY PROBLEMS ── */
+.problems-row{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin:8px 0;}
+.copy-problems-btn{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid rgba(108,142,245,0.2);background:rgba(108,142,245,0.06);color:var(--text2);cursor:pointer;white-space:nowrap;transition:all 0.2s;flex-shrink:0;margin-top:2px;}
+.copy-problems-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(108,142,245,0.12);}
+.chip-name{opacity:0.65;font-size:10px;}
+
+/* ── NAV MORE TRIGGER ── */
+.nav-more-trigger{cursor:pointer;}
 </style>
 </head>
 <body>
 <canvas id="bg-canvas"></canvas>
 <nav>
   <div class="nav-top">
-    <div class="nav-logo">OI · TEAM</div>
-    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
-    <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()"><span>🔔</span><div class="notif-dot" id="notif-dot"></div></button>
-    <div class="nav-right" id="nav-auth-area"></div>
+    <div class="nav-logo" onclick="show('home')" style="cursor:pointer">OI <span>·</span> TEAM</div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
+      <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()"><span>🔔</span><div class="notif-dot" id="notif-dot"></div></button>
+      <div id="nav-auth-area"></div>
+    </div>
   </div>
   <div class="nav-bottom">
     <ul class="nav-links">
@@ -516,12 +538,17 @@ body.light .modal{background:rgba(248,250,255,0.98);}
       <li><a onclick="show('lectures')" id="nav-lectures">课程</a></li>
       <li><a onclick="show('archive')" id="nav-archive">题库</a></li>
       <li><a onclick="show('leaderboard')" id="nav-leaderboard">排行榜</a></li>
-      <li><a onclick="show('members')" id="nav-members">成员</a></li>
-      <li><a onclick="show('bookmarks')" id="nav-bookmarks">收藏</a></li>
-      <li><a onclick="show('search')" id="nav-search">搜索</a></li>
-      <li><a onclick="show('stats')" id="nav-stats">统计</a></li>
-      <li><a onclick="show('resources')" id="nav-resources">资料</a></li>
-      <li><a onclick="show('admin')" id="nav-admin" style="display:none">后台</a></li>
+      <li class="nav-more-wrap">
+        <a onclick="toggleMoreMenu(event)" class="nav-more-trigger">更多 ▾</a>
+        <div class="nav-more-menu" id="nav-more-menu">
+          <a onclick="closeMoreMenu();show('members')" id="nav-members">👥 成员</a>
+          <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
+          <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
+          <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
+          <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
+          <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
+        </div>
+      </li>
     </ul>
   </div>
 </nav>
@@ -746,14 +773,21 @@ body.light .modal{background:rgba(248,250,255,0.98);}
 </div></div>
 
 <!-- LECTURE MODAL -->
-<div class="modal-overlay" id="lecture-modal"><div class="modal" style="width:540px">
+<div class="modal-overlay" id="lecture-modal"><div class="modal" style="width:620px">
   <h2>📖 添加课程记录</h2>
   <div class="form-row">
     <div class="form-group"><label>日期</label><input type="date" id="l-date"></div>
-    <div class="form-group"><label>主题</label><input type="text" id="l-topic" placeholder="例：树形DP进阶"></div>
+    <div class="form-group"><label>难度方向</label>
+      <select id="l-level"><option value="">不限</option><option value="入门">入门</option><option value="普及-">普及-</option><option value="普及">普及</option><option value="普及+/提高-">普及+/提高-</option><option value="提高">提高</option><option value="省选/NOI">省选/NOI</option></select>
+    </div>
   </div>
-  <div class="form-group"><label>课程内容描述</label><textarea id="l-content" placeholder="本节课讲了什么，重点难点…"></textarea></div>
-  <div class="form-group"><label>练习题（空格或逗号分隔）</label><input type="text" id="l-problems" placeholder="P1352 P2015 P1122"></div>
+  <div class="form-group"><label>主题</label><input type="text" id="l-topic" placeholder="例：线段树区间修改 · 懒标记"></div>
+  <div class="form-group"><label>课程内容 / 讲解要点</label><textarea id="l-content" placeholder="本节课讲了什么，重点难点…" style="min-height:70px"></textarea></div>
+  <div class="form-group"><label>关键结论（每行一条，建议3~5条）</label><textarea id="l-conclusions" style="min-height:90px" placeholder="1. 懒标记下推时机&#10;2. pushdown 在修改和查询前都需调用&#10;3. 区间加与区间乘合并时先乘后加"></textarea></div>
+  <div class="form-row">
+    <div class="form-group"><label>讲解题（洛谷题号，空格分隔）</label><input type="text" id="l-problems" placeholder="P3372 P3373"></div>
+    <div class="form-group"><label>作业题（洛谷题号，空格分隔）</label><input type="text" id="l-homework" placeholder="P3374 P3953"></div>
+  </div>
   <div id="lecture-error" class="form-error"></div>
   <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('lecture-modal')">取消</button><button class="btn btn-primary" onclick="submitLecture()">保存</button></div>
 </div></div>
@@ -815,7 +849,15 @@ body.light .modal{background:rgba(248,250,255,0.98);}
   <div class="form-group"><label>反思与总结</label><textarea id="edit-note-reflection" style="min-height:70px"></textarea></div>
   <div id="edit-note-error" class="form-error"></div>
   <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('edit-note-modal')">取消<取消</button><button class="btn btn-primary" onclick="submitEditNote()">保存</button></div></div></div>
+
 <script>
+function copyProblems(ids,btnId){
+  navigator.clipboard.writeText(ids).then(()=>{
+    const btn=document.getElementById(btnId);
+    if(btn){const orig=btn.textContent;btn.textContent='✓ 已复制';setTimeout(()=>btn.textContent=orig,2000);}
+  });
+}
+
 // ── Utilities ──────────────────────────────────────────────
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function fmtDate(s){if(!s)return'';const d=new Date(s);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -1143,6 +1185,13 @@ async function loadContests(){
       }
     });
 
+    // wire up copy buttons
+    card.querySelectorAll('.copy-problems-btn').forEach(btn=>{
+      btn.addEventListener('click',e=>{
+        e.stopPropagation();
+        copyProblems(btn.dataset.ids, btn.dataset.bid);
+      });
+    });
     list.appendChild(card);
   });
 }
@@ -1331,18 +1380,48 @@ async function loadLectures(){
   const{data}=await sb.from('lectures').select('*').order('lecture_date',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty">暂无课程记录</div>';return;}
   const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-  list.innerHTML=data.map(l=>{
-    const problems=(l.problems||'').split(/[\s,]+/).filter(Boolean);const d=new Date(l.lecture_date);
-    return`<div class="lecture-item"><div class="lecture-date-col"><div>${months[d.getMonth()]}</div><div class="lday">${d.getDate()}</div><div>${d.getFullYear()}</div></div><div class="lecture-content"><h3>${escHtml(l.topic)}</h3>${l.content?`<p>${escHtml(l.content).replace(/\n/g,'<br>')}</p>`:''}${problems.length?`<div class="problem-chips">${problems.map(p=>`<a href="https://www.luogu.com.cn/problem/${escHtml(p)}" target="_blank" class="problem-chip">${escHtml(p)}</a>`).join('')}</div>`:''}${isCoach()?`<button class="btn btn-danger btn-sm" style="margin-top:10px" onclick="deleteLecture(${l.id})">删除</button>`:''}</div></div>`;
-  }).join('');
+  list.innerHTML='';
+  data.forEach(l=>{
+    const problems=(l.problems||'').split(/[\s,]+/).filter(Boolean);
+    const homework=(l.homework||'').split(/[\s,]+/).filter(Boolean);
+    const conclusions=(l.conclusions||'').split('\n').map(s=>s.trim()).filter(Boolean);
+    const d=new Date(l.lecture_date);
+    const item=document.createElement('div');item.className='lecture-item';
+    function pchips(arr,cls){return arr.map(p=>'<a href="https://www.luogu.com.cn/problem/'+escHtml(p)+'" target="_blank" class="problem-chip '+cls+'">'+escHtml(p)+'</a>').join('');}
+    item.innerHTML=
+      '<div class="lecture-date-block">'
+      +'<div class="lecture-month">'+months[d.getMonth()]+'</div>'
+      +'<div class="lecture-day">'+d.getDate()+'</div>'
+      +'<div class="lecture-year">'+d.getFullYear()+'</div>'
+      +'</div>'
+      +'<div class="lecture-body">'
+      +'<div class="lecture-title-row"><span class="lecture-title-text">'+escHtml(l.topic)+'</span>'+(l.level?'<span class="lecture-level-tag">'+escHtml(l.level)+'</span>':'')+'</div>'
+      +(l.content?'<div class="lecture-desc">'+escHtml(l.content)+'</div>':'')
+      +(conclusions.length?'<div class="lecture-conclusions"><div class="lecture-section-label">💡 关键结论</div><ol class="conclusions-list">'+conclusions.map(c=>'<li>'+escHtml(c)+'</li>').join('')+'</ol></div>':'')
+      +(problems.length?'<div class="lecture-section-label" style="margin-top:10px">📌 讲解题</div><div class="problem-chips">'+pchips(problems,'chip-blue')+'</div>':'')
+      +(homework.length?'<div class="lecture-section-label" style="margin-top:8px">📝 作业题</div><div class="problem-chips">'+pchips(homework,'chip-green')+'</div>':'')
+      +(isCoach()?'<button class="btn btn-danger btn-sm" style="margin-top:10px" data-lid="'+l.id+'">删除</button>':'')
+      +'</div>';
+    if(isCoach()){const db=item.querySelector('[data-lid]');if(db)db.addEventListener('click',()=>deleteLecture(+db.dataset.lid));}
+    list.appendChild(item);
+  });;
 }
 function openLectureModal(){if(!isCoach())return;openModal('lecture-modal');}
 async function submitLecture(){
   const date=document.getElementById('l-date').value,topic=document.getElementById('l-topic').value.trim();
   if(!date||!topic){document.getElementById('lecture-error').textContent='请填写日期和主题';return;}
-  const{error}=await sb.from('lectures').insert({lecture_date:date,topic,content:document.getElementById('l-content').value.trim(),problems:document.getElementById('l-problems').value.trim(),created_by:currentUser.id});
+  const row={lecture_date:date,topic,
+    content:document.getElementById('l-content').value.trim(),
+    problems:document.getElementById('l-problems').value.trim(),
+    homework:document.getElementById('l-homework').value.trim(),
+    conclusions:document.getElementById('l-conclusions').value.trim(),
+    level:document.getElementById('l-level').value,
+    created_by:currentUser.id};
+  const{error}=await sb.from('lectures').insert(row);
   if(error){document.getElementById('lecture-error').textContent=error.message;return;}
-  closeModal('lecture-modal');['l-date','l-topic','l-content','l-problems'].forEach(id=>document.getElementById(id).value='');
+  closeModal('lecture-modal');
+  ['l-date','l-topic','l-content','l-problems','l-homework','l-conclusions'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('l-level').value='';
   showToast('课程记录已保存 ✓','success');loadLectures();
 }
 async function deleteLecture(id){if(!confirm('确认删除？'))return;await sb.from('lectures').delete().eq('id',id);showToast('已删除','success');loadLectures();}
