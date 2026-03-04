@@ -707,6 +707,37 @@ body.light .modal{background:rgba(248,250,255,0.98);}
 .error-text{font-family:var(--mono);font-size:12px;color:var(--text3);}
 .error-retry{font-family:var(--mono);font-size:11px;padding:6px 16px;border-radius:6px;border:1px solid rgba(255,83,112,0.2);background:rgba(255,83,112,0.06);color:var(--red);cursor:pointer;transition:all 0.2s;margin-top:4px;}
 .error-retry:hover{background:rgba(255,83,112,0.12);}
+
+/* ── SEARCH HIGHLIGHT ── */
+mark.search-hl{
+  background:rgba(255,203,107,0.25);color:var(--yellow);
+  border-radius:2px;padding:0 1px;font-weight:600;
+  box-shadow:0 0 0 1px rgba(255,203,107,0.2);}
+
+/* ── ANNOUNCEMENT READ STATE ── */
+.ann-unread{border-color:rgba(108,142,245,0.25)!important;}
+.ann-unread .ann-title{color:var(--text);}
+.ann-new-dot{
+  display:inline-block;width:7px;height:7px;
+  background:var(--accent);border-radius:50%;
+  margin-left:8px;vertical-align:middle;
+  animation:pulse 2s infinite;}
+.ann-preview{
+  font-size:13px;color:var(--text2);line-height:1.7;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.ann-read-btn{
+  font-family:var(--mono);font-size:10px;
+  color:var(--text3);background:none;border:none;
+  cursor:pointer;padding:8px 0 0;transition:color 0.2s;display:block;}
+.ann-read-btn:hover{color:var(--accent2);}
+
+/* ── NAV BADGE ── */
+.nav-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--red);color:#fff;
+  font-size:9px;font-family:var(--space);font-weight:700;
+  margin-left:4px;vertical-align:middle;line-height:1;}
 </style>
 </head>
 <body>
@@ -1293,8 +1324,50 @@ async function loadAnnouncements(){
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('announcements').select('*,profiles(username)').order('is_pinned',{ascending:false}).order('created_at',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty-state"><div class="empty-state-icon">📢</div><h3>暂无公告</h3><p>教练发布的比赛通知和训练安排会出现在这里。</p></div>';return;}
-  list.innerHTML=data.map(a=>`<div class="ann-card ${a.is_pinned?'pinned':''}"><div class="ann-card-top"><div class="ann-title">${escHtml(a.title)}</div><div style="display:flex;gap:6px;align-items:center;flex-shrink:0">${a.is_pinned?'<span class="ann-pin">📌 置顶</span>':''}${isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteAnn(${a.id})">删除</button>`:''}</div></div><div class="ann-meta">${fmtDate(a.created_at)} · ${a.profiles?.username||'教练'}</div><div class="ann-content">${escHtml(a.content)}</div></div>`).join('');
+  const readIds=new Set(JSON.parse(localStorage.getItem('read_anns')||'[]'));
+  list.innerHTML='';
+  data.forEach(a=>{
+    const isRead=readIds.has(a.id);
+    const card=document.createElement('div');
+    card.className='ann-card'+(a.is_pinned?' pinned':'')+(isRead?'':' ann-unread');
+    card.innerHTML=
+      '<div class="ann-card-top">'
+      +'<div class="ann-title">'+escHtml(a.title)+(isRead?'':'<span class="ann-new-dot"></span>')+'</div>'
+      +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'
+      +(a.is_pinned?'<span class="ann-pin">📌 置顶</span>':'')
+      +(isCoach()?'<button class="btn btn-danger btn-sm" onclick="deleteAnn('+a.id+')">删除</button>':'')
+      +'</div></div>'
+      +'<div class="ann-meta">'+fmtDate(a.created_at)+' · '+(a.profiles?.username||'教练')+'</div>'
+      +'<div class="ann-content ann-preview">'+escHtml(a.content)+'</div>'
+      +'<button class="ann-read-btn" data-id="'+a.id+'">'+(isRead?'已读':'标记已读')+'</button>';
+    card.querySelector('.ann-read-btn').addEventListener('click', ()=>{
+      readIds.add(a.id);
+      localStorage.setItem('read_anns', JSON.stringify([...readIds]));
+      card.classList.remove('ann-unread');
+      card.querySelector('.ann-new-dot')?.remove();
+      card.querySelector('.ann-read-btn').textContent='已读';
+      updateUnreadAnnBadge(data);
+    });
+    list.appendChild(card);
+  });
+  updateUnreadAnnBadge(data);
   } catch(e){ console.error("loadAnnouncements:", e); showToast("加载失败，请刷新重试", "error"); }
+}
+
+function updateUnreadAnnBadge(anns){
+  const readIds=new Set(JSON.parse(localStorage.getItem('read_anns')||'[]'));
+  const unread=(anns||[]).filter(a=>!readIds.has(a.id)).length;
+  const navAnn=document.getElementById('nav-announcements');
+  if(navAnn){
+    const existing=navAnn.querySelector('.nav-badge');
+    if(existing)existing.remove();
+    if(unread>0){
+      const b=document.createElement('span');
+      b.className='nav-badge';
+      b.textContent=unread;
+      navAnn.appendChild(b);
+    }
+  }
 }
 function openAnnModal(){if(!isCoach())return;openModal('ann-modal');}
 async function submitAnn(){
@@ -1799,13 +1872,20 @@ function doSearch(){
     return;
   }
   // Highlight match
-  function hl(text,q){
-    if(!text||!q)return escHtml(text||'');
-    const idx=text.toLowerCase().indexOf(q);
-    if(idx===-1)return escHtml(text.slice(0,100));
-    const start=Math.max(0,idx-20);
-    const end=Math.min(text.length,idx+q.length+60);
-    return escHtml(text.slice(start,idx))+'<mark style="background:rgba(108,142,245,0.3);color:var(--text);border-radius:2px">'+escHtml(text.slice(idx,idx+q.length))+'</mark>'+escHtml(text.slice(idx+q.length,end));
+  function hl(text,q,maxLen=120){
+    if(!text||!q)return escHtml((text||'').slice(0,maxLen));
+    const lower=text.toLowerCase();
+    const qi=q.toLowerCase();
+    const first=lower.indexOf(qi);
+    if(first===-1)return escHtml(text.slice(0,maxLen));
+    // Extract snippet around first match
+    const start=Math.max(0,first-30);
+    const end=Math.min(text.length,first+qi.length+80);
+    let snippet=text.slice(start,end);
+    // Highlight all matches in snippet
+    const re=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+    const escaped=escHtml(snippet);
+    return (start>0?'…':'')+escaped.replace(re, m=>'<mark class="search-hl">'+m+'</mark>')+(end<text.length?'…':'');
   }
   el.innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:14px">找到 '+results.length+' 条结果</div>';
   const grid=document.createElement('div');grid.className='blog-grid';
