@@ -12,24 +12,24 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:var(--serif);font-size:15px;line-height:1.8;min-height:100vh;}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,15,20,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;}
-.nav-top{display:flex;align-items:center;justify-content:space-between;padding:10px 28px 6px;}
-.nav-bottom{display:flex;align-items:center;padding:0 28px 8px;gap:4px;}
-.nav-logo{font-family:var(--space);font-size:15px;color:var(--accent2);letter-spacing:0.08em;white-space:nowrap;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,15,20,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;min-height:64px;}
+.nav-top{display:flex;align-items:center;justify-content:space-between;padding:10px 32px 5px;}
+.nav-bottom{display:flex;align-items:center;padding:0 32px 10px;gap:4px;}
+.nav-logo{font-family:var(--space);font-size:17px;color:var(--accent2);letter-spacing:0.08em;white-space:nowrap;}
 .nav-links{display:flex;gap:3px;list-style:none;flex-wrap:wrap;}
-.nav-links a{font-family:var(--serif);font-size:13px;color:var(--text2);text-decoration:none;padding:4px 12px;border-radius:4px;transition:all 0.15s;cursor:pointer;}
+.nav-links a{font-family:var(--serif);font-size:14px;color:var(--text2);text-decoration:none;padding:5px 14px;border-radius:4px;transition:all 0.15s;cursor:pointer;}
 .nav-links a:hover{color:var(--text);background:var(--surface2);}
 .nav-links a.active{color:var(--accent);background:rgba(91,138,240,0.12);}
 .nav-right{display:flex;align-items:center;gap:10px;}
-.nav-user{font-family:var(--mono);font-size:12px;color:var(--accent2);}
+.nav-user{font-family:var(--mono);font-size:13px;color:var(--accent2);}
 .coach-badge{font-family:var(--mono);font-size:10px;padding:2px 7px;background:rgba(255,209,102,0.15);border:1px solid rgba(255,209,102,0.3);border-radius:3px;color:var(--yellow);}
-.btn{font-family:var(--mono);font-size:12px;padding:6px 16px;border-radius:5px;border:1px solid;cursor:pointer;transition:all 0.15s;}
+.btn{font-family:var(--mono);font-size:13px;padding:7px 18px;border-radius:5px;border:1px solid;cursor:pointer;transition:all 0.15s;}
 .btn-outline{border-color:var(--border);color:var(--text2);background:none;}.btn-outline:hover{border-color:var(--accent);color:var(--accent);}
 .btn-primary{border-color:var(--accent);color:var(--bg);background:var(--accent);}.btn-primary:hover{background:#7aa3f5;}
 .btn-danger{border-color:var(--red);color:var(--red);background:none;}.btn-danger:hover{background:rgba(255,107,107,0.1);}
 .btn-yellow{border-color:var(--yellow);color:var(--yellow);background:none;}.btn-yellow:hover{background:rgba(255,209,102,0.1);}
 .btn-sm{font-size:10px;padding:3px 9px;}
-.main{padding-top:72px;}
+.main{padding-top:80px;}
 section{display:none;}section.active{display:block;}
 .container{max-width:920px;margin:0 auto;padding:44px 28px;}
 .page-header{margin-bottom:36px;padding-bottom:22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-end;}
@@ -185,6 +185,32 @@ code{font-family:var(--mono);font-size:12px;color:var(--accent2);line-height:1.7
 .loading{text-align:center;padding:36px 0;color:var(--text3);font-family:var(--mono);font-size:12px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 8px;}
+
+.ann-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:12px;transition:border-color 0.2s;}
+.ann-card.pinned{border-color:rgba(255,209,102,0.4);background:rgba(255,209,102,0.04);}
+.ann-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;}
+.ann-title{font-size:16px;font-weight:500;}
+.ann-pin{font-family:var(--mono);font-size:10px;color:var(--yellow);padding:2px 6px;background:rgba(255,209,102,0.1);border:1px solid rgba(255,209,102,0.3);border-radius:3px;}
+.ann-meta{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;}
+.ann-content{font-size:14px;color:var(--text2);line-height:1.8;white-space:pre-wrap;}
+.tag-ann{background:rgba(255,107,107,0.1);color:var(--red);}
+.search-bar{display:flex;gap:10px;margin-bottom:28px;}
+.search-bar input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 16px;color:var(--text);font-family:var(--serif);font-size:14px;}
+.search-bar input:focus{outline:none;border-color:var(--accent);}
+.search-filters{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.filter-btn{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);color:var(--text3);background:none;cursor:pointer;transition:all 0.15s;}
+.filter-btn:hover{border-color:var(--accent);color:var(--accent);}
+.filter-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(91,138,240,0.1);}
+.profile-hero{display:flex;gap:24px;align-items:flex-start;padding:32px 0 28px;border-bottom:1px solid var(--border);margin-bottom:32px;}
+.profile-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:26px;color:var(--bg);font-weight:700;}
+.profile-name{font-size:22px;font-weight:500;margin-bottom:4px;}
+.profile-role{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.profile-stats{display:flex;gap:24px;margin-top:12px;}
+.profile-stat{text-align:center;}
+.profile-stat .num{font-family:var(--mono);font-size:20px;color:var(--accent);font-weight:600;}
+.profile-stat .label{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px;}
+.profile-section{margin-bottom:32px;}
+.profile-section h2{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
 footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mono);font-size:11px;color:var(--text3);text-align:center;margin-top:60px;}
 @media(max-width:680px){.home-grid,.resource-grid,.form-row{grid-template-columns:1fr;}.hero h1{font-size:28px;}.nav-top{padding:8px 14px 4px;}.nav-bottom{padding:0 14px 6px;}.container{padding:26px 14px;}.coach-card{flex-direction:column;}.lecture-item{grid-template-columns:1fr;gap:6px;}.nav-links a{font-size:10px;padding:4px 6px;}}
 </style>
@@ -198,11 +224,13 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
   <div class="nav-bottom">
     <ul class="nav-links">
       <li><a onclick="show('home')" id="nav-home" class="active">首页</a></li>
+      <li><a onclick="show('announcements')" id="nav-announcements">公告</a></li>
       <li><a onclick="show('contests')" id="nav-contests">模拟赛</a></li>
       <li><a onclick="show('notes')" id="nav-notes">题解</a></li>
       <li><a onclick="show('emotions')" id="nav-emotions">随笔</a></li>
       <li><a onclick="show('lectures')" id="nav-lectures">课程</a></li>
       <li><a onclick="show('archive')" id="nav-archive">题库</a></li>
+      <li><a onclick="show('search')" id="nav-search">搜索</a></li>
       <li><a onclick="show('resources')" id="nav-resources">资料</a></li>
       <li><a onclick="show('admin')" id="nav-admin" style="display:none">后台</a></li>
     </ul>
@@ -219,10 +247,10 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
   </div>
   <div class="home-grid">
     <div class="info-card coach-card">
-      <div class="coach-avatar">师</div>
+      <div class="coach-avatar">万</div>
       <div class="coach-info">
-        <div class="coach-title">// 指导老师</div>
-        <div class="coach-name">训练队教练</div>
+        <div class="coach-title">// 指导教练</div>
+        <div class="coach-name">万家宝 老师</div>
         <p style="font-size:13px;color:var(--text2);margin-top:7px;">扎实基础、重视思维、保持对算法之美的好奇心。比赛固然重要，但更希望大家学到的是面对难题时沉下心来的能力。</p>
       </div>
     </div>
@@ -230,6 +258,36 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
     <div class="info-card"><div class="card-label">团队目标</div><h3>赛季计划</h3><p>冲刺 CSP-S 提高组，部分成员备战 NOI 联赛。每周训练，月度模拟赛检验成果。</p></div>
   </div>
   <div class="updates-section"><h2>// recent activity</h2><div id="home-feed"><div class="loading"><div class="spinner"></div>加载中…</div></div></div>
+</div></section>
+
+
+<!-- ANNOUNCEMENTS -->
+<section id="announcements"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// announcements</div><h1>通知公告</h1><p>万家宝 老师发布的比赛通知与训练安排。</p></div>
+    <button class="btn btn-yellow btn-sm" id="btn-new-ann" onclick="openAnnModal()" style="display:none">+ 发布公告</button>
+  </div>
+  <div id="ann-list"></div>
+</div></section>
+
+<!-- SEARCH -->
+<section id="search"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// search</div><h1>搜索题解</h1><p>按题号、知识点或关键词搜索。</p></div>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="输入题号（如 P3376）、知识点（如 网络流）或关键词…" oninput="doSearch()">
+  </div>
+  <div class="search-filters">
+    <button class="filter-btn active" onclick="setFilter('')">全部</button>
+    <button class="filter-btn" onclick="setFilter('图论')">图论</button>
+    <button class="filter-btn" onclick="setFilter('动态规划')">动态规划</button>
+    <button class="filter-btn" onclick="setFilter('数据结构')">数据结构</button>
+    <button class="filter-btn" onclick="setFilter('数论')">数论</button>
+    <button class="filter-btn" onclick="setFilter('字符串')">字符串</button>
+    <button class="filter-btn" onclick="setFilter('网络流')">网络流</button>
+  </div>
+  <div id="search-results"><div class="empty">输入关键词开始搜索</div></div>
 </div></section>
 
 <!-- CONTESTS -->
@@ -390,6 +448,20 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
   <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('problem-modal')">取消</button><button class="btn btn-primary" onclick="submitProblem()">保存</button></div>
 </div></div>
 
+
+<!-- ANN MODAL -->
+<div class="modal-overlay" id="ann-modal"><div class="modal" style="width:540px">
+  <h2>📢 发布公告</h2>
+  <div class="form-group"><label>标题</label><input type="text" id="ann-title" placeholder="例：CSP-S 报名通知"></div>
+  <div class="form-group"><label>内容</label><textarea id="ann-content" placeholder="公告详情…" style="min-height:120px"></textarea></div>
+  <div class="form-group" style="display:flex;align-items:center;gap:10px">
+    <input type="checkbox" id="ann-pinned" style="width:auto">
+    <label style="display:inline;font-family:var(--mono);font-size:11px;color:var(--text3);text-transform:none;letter-spacing:0">置顶此公告</label>
+  </div>
+  <div id="ann-error" class="form-error"></div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('ann-modal')">取消</button><button class="btn btn-primary" onclick="submitAnn()">发布</button></div>
+</div></div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -405,7 +477,7 @@ function show(id){
   document.getElementById(id).classList.add('active');
   document.getElementById('nav-'+id).classList.add('active');
   window.scrollTo(0,0);
-  const loaders={contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin};
+  const loaders={contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:()=>{}};
   if(loaders[id])loaders[id]();
 }
 
@@ -416,11 +488,11 @@ function renderAuthArea(){
     area.innerHTML=`<span class="nav-user">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}<button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
     if(isCoach())coachNav.style.display='';
     ['btn-new-note','btn-new-post'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
-    if(isCoach())['btn-new-contest','btn-new-lecture','btn-new-problem'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
+    if(isCoach())['btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
   }else{
     area.innerHTML=`<button class="btn btn-outline btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button>`;
     coachNav.style.display='none';
-    ['btn-new-note','btn-new-post','btn-new-contest','btn-new-lecture','btn-new-problem'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+    ['btn-new-note','btn-new-post','btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   }
 }
 
@@ -473,13 +545,14 @@ async function doLogout(){await sb.auth.signOut();showToast('已退出登录','s
 async function loadHomeFeed(){
   const feed=document.getElementById('home-feed');
   feed.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const[{data:notes},{data:posts},{data:contests},{data:lectures}]=await Promise.all([
+  const[{data:notes},{data:posts},{data:contests},{data:lectures},{data:anns}]=await Promise.all([
     sb.from('notes').select('id,title,created_at,profiles(username)').order('created_at',{ascending:false}).limit(4),
     sb.from('posts').select('id,content,created_at,profiles(username)').order('created_at',{ascending:false}).limit(4),
     sb.from('contests').select('id,title,created_at').order('created_at',{ascending:false}).limit(3),
     sb.from('lectures').select('id,topic,created_at').order('created_at',{ascending:false}).limit(3),
+    sb.from('announcements').select('id,title,created_at').order('created_at',{ascending:false}).limit(3),
   ]);
-  const items=[...(notes||[]).map(n=>({...n,type:'note'})),...(posts||[]).map(p=>({...p,type:'post'})),...(contests||[]).map(c=>({...c,type:'contest'})),...(lectures||[]).map(l=>({...l,type:'lecture'}))].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,10);
+  const items=[...(notes||[]).map(n=>({...n,type:'note'})),...(posts||[]).map(p=>({...p,type:'post'})),...(contests||[]).map(c=>({...c,type:'contest'})),...(lectures||[]).map(l=>({...l,type:'lecture'})),...(anns||[]).map(a=>({...a,type:'ann'}))].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,10);
   if(!items.length){feed.innerHTML='<div class="empty">暂无动态</div>';return;}
   feed.innerHTML=items.map(item=>{
     let content='';
@@ -487,6 +560,7 @@ async function loadHomeFeed(){
     else if(item.type==='post')content=`<strong>${item.profiles?.username||'匿名'}</strong> 写了随笔：${escHtml((item.content||'').slice(0,40))}… <span class="update-tag tag-post">随笔</span>`;
     else if(item.type==='contest')content=`新增模拟赛：<strong>${escHtml(item.title)}</strong> <span class="update-tag tag-contest">模拟赛</span>`;
     else if(item.type==='lecture')content=`新增课程：<strong>${escHtml(item.topic)}</strong> <span class="update-tag tag-lecture">课程</span>`;
+    else if(item.type==='ann')content=`<strong>新公告：${escHtml(item.title)}</strong> <span class="update-tag tag-ann">公告</span>`;
     return`<div class="update-item"><div class="update-date">${fmtDate(item.created_at)}</div><div class="update-content">${content}</div></div>`;
   }).join('');
 }
@@ -635,6 +709,71 @@ async function loadAdmin(){
   notesEl.innerHTML=notes&&notes.length?notes.map(n=>`<div class="admin-row"><div class="admin-row-info"><strong>${escHtml(n.title)}</strong><div class="admin-sub">by @${n.profiles?.username||'?'} · ${fmtDate(n.created_at)}</div></div><div class="admin-actions"><button class="btn btn-outline btn-sm" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)">查看</button><button class="btn btn-danger btn-sm" onclick="deleteNote(${n.id})">删除</button></div></div>`).join(''):'<div class="empty">暂无题解</div>';
 }
 async function setRole(userId,role){await sb.from('profiles').update({role}).eq('id',userId);showToast(`已更新为 ${role}`,'success');loadAdmin();}
+
+
+// ── Announcements ──────────────────────────────────────────
+async function loadAnnouncements(){
+  const list=document.getElementById('ann-list');
+  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const{data}=await sb.from('announcements').select('*,profiles(username)').order('is_pinned',{ascending:false}).order('created_at',{ascending:false});
+  if(!data||!data.length){list.innerHTML='<div class="empty">暂无公告</div>';return;}
+  list.innerHTML=data.map(a=>`
+    <div class="ann-card ${a.is_pinned?'pinned':''}">
+      <div class="ann-card-top">
+        <div class="ann-title">${escHtml(a.title)}</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+          ${a.is_pinned?'<span class="ann-pin">📌 置顶</span>':''}
+          ${isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteAnn(${a.id})">删除</button>`:''}
+        </div>
+      </div>
+      <div class="ann-meta">${fmtDate(a.created_at)} · ${a.profiles?.username||'教练'}</div>
+      <div class="ann-content">${escHtml(a.content)}</div>
+    </div>`).join('');
+}
+function openAnnModal(){if(!isCoach())return;openModal('ann-modal');}
+async function submitAnn(){
+  const title=document.getElementById('ann-title').value.trim();
+  const content=document.getElementById('ann-content').value.trim();
+  if(!title||!content){document.getElementById('ann-error').textContent='请填写标题和内容';return;}
+  const is_pinned=document.getElementById('ann-pinned').checked;
+  const{error}=await sb.from('announcements').insert({title,content,is_pinned,created_by:currentUser.id});
+  if(error){document.getElementById('ann-error').textContent=error.message;return;}
+  closeModal('ann-modal');document.getElementById('ann-title').value='';document.getElementById('ann-content').value='';document.getElementById('ann-pinned').checked=false;
+  showToast('公告发布成功 ✓','success');loadAnnouncements();
+}
+async function deleteAnn(id){if(!confirm('确认删除？'))return;await sb.from('announcements').delete().eq('id',id);showToast('已删除','success');loadAnnouncements();}
+
+// ── Search ─────────────────────────────────────────────────
+let allNotes=[];
+let searchFilter='';
+async function initSearch(){
+  if(allNotes.length)return;
+  const{data}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,profiles(username)').order('created_at',{ascending:false});
+  allNotes=data||[];
+}
+function setFilter(f){
+  searchFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.textContent===f||(f===''&&b.textContent==='全部')));
+  doSearch();
+}
+async function doSearch(){
+  await initSearch();
+  const q=document.getElementById('search-input').value.trim().toLowerCase();
+  const el=document.getElementById('search-results');
+  let results=allNotes.filter(n=>{
+    const matchFilter=!searchFilter||(n.topic||'').includes(searchFilter);
+    const matchQ=!q||(n.title||'').toLowerCase().includes(q)||(n.problem_id||'').toLowerCase().includes(q)||(n.topic||'').toLowerCase().includes(q)||(n.content||'').toLowerCase().includes(q);
+    return matchFilter&&matchQ;
+  });
+  if(!q&&!searchFilter){el.innerHTML='<div class="empty">输入关键词开始搜索</div>';return;}
+  if(!results.length){el.innerHTML='<div class="empty">没有找到相关题解</div>';return;}
+  el.innerHTML='<div class="blog-grid">'+results.map(n=>`
+    <div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)">
+      <div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div>
+      <div class="blog-meta"><span class="author">${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''}</div>
+      <p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p>
+    </div>`).join('')+'</div>';
+}
 
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
