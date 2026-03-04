@@ -885,10 +885,6 @@ body.light .modal{background:rgba(248,250,255,0.98);}
 function copyProblems(ids,btnId){
   navigator.clipboard.writeText(ids).then(()=>{
     const btn=document.getElementById(btnId);
-    if(btn){const 
-function copyProblems(ids,btnId){
-  navigator.clipboard.writeText(ids).then(()=>{
-    const btn=document.getElementById(btnId);
     if(btn){const orig=btn.textContent;btn.textContent='✓ 已复制';setTimeout(()=>btn.textContent=orig,2000);}
   });
 }
