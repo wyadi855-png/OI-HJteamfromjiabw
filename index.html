@@ -416,6 +416,18 @@ footer{border-top:1px solid var(--border);padding:20px 28px;font-family:var(--mo
 
 
 
+
+/* CONTEST TABS */
+.contest-body{padding:0 4px 4px;}
+.contest-tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px;}
+.contest-tab{font-family:var(--mono);font-size:12px;padding:6px 16px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--text2);cursor:pointer;transition:all 0.2s;}
+.contest-tab.active{background:rgba(108,142,245,0.15);border-color:rgba(108,142,245,0.4);color:#6c8ef5;}
+.contest-tab:hover{border-color:var(--accent);}
+.contest-panel{display:block;}
+.contest-toggle{font-size:11px;color:var(--text3);transition:transform 0.2s;margin-left:4px;}
+.contest-header{cursor:pointer;user-select:none;}
+.contest-header:hover .contest-title{color:var(--accent);}
+
 /* CONTEST DIV SECTIONS */
 .div-section{margin-top:12px;}
 .div-label{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.08em;padding:4px 10px;border-radius:4px;display:inline-block;margin-bottom:10px;}
@@ -883,23 +895,7 @@ body.light .rank-table-wrap{background:var(--surface2);}
   <div class="form-group"><label>C++ 代码</label><textarea id="edit-note-code" class="code-input"></textarea></div>
   <div class="form-group"><label>反思与总结</label><textarea id="edit-note-reflection" style="min-height:70px"></textarea></div>
   <div id="edit-note-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('edit-note-modal')">取消</button><button class="btn btn-primary" onclick="submitEditNote()">保存</button></div>
-</div></div>
-
-<!-- EDIT POST MODAL -->
-<div class="modal-overlay" id="edit-post-modal"><div class="modal">
-  <h2>✏️ 编辑随笔</h2>
-  <input type="hidden" id="edit-post-id">
-  <div class="form-group"><label>内容</label><textarea id="edit-post-content" style="min-height:130px"></textarea></div>
-  <div id="edit-post-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('edit-post-modal')">取消</button><button class="btn btn-primary" onclick="submitEditPost()">保存</button></div>
-</div></div>
-
-<!-- ANN MODAL -->
-<div class="modal-overlay" id="ann-modal"><div class="modal" style="width:540px">
-  <h2>📢
-
-<script>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('edit-note-modal')">取消<
 // ── Utilities ──────────────────────────────────────────────
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function fmtDate(s){if(!s)return'';const d=new Date(s);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -1114,96 +1110,121 @@ async function loadContests(){
   list.innerHTML='';
   contests.forEach(c=>{
     const cr=rm[c.id]||[];
-    // Parse problems JSON if available
-    let div2Problems=[], div1Problems=[];
-    try{
-      const p=typeof c.problems==='string'?JSON.parse(c.problems):c.problems;
-      if(p&&p.div2)div2Problems=p.div2;
-      if(p&&p.div1)div1Problems=p.div1;
-    }catch(e){}
-    // Split results by div based on score ranges or just show both pools separately
-    // Since we stored them sequentially: div2 first (16), div1 after (6)
-    // We detect by checking if same username appears with different scores
+    let div2Problems=[],div1Problems=[];
+    try{const p=typeof c.problems==='string'?JSON.parse(c.problems):c.problems;if(p&&p.div2)div2Problems=p.div2;if(p&&p.div1)div1Problems=p.div1;}catch(e){}
+    // Split into div1/div2 by detecting duplicate usernames
     const seen={};const div2=[],div1=[];
-    cr.forEach(r=>{
-      if(seen[r.student_name]){div1.push(r);}
-      else{seen[r.student_name]=true;div2.push(r);}
-    });
-    // Re-rank each div by score
-    div2.sort((a,b)=>b.score-a.score);
-    div1.sort((a,b)=>b.score-a.score);
-    function rankList(arr){return arr.map((r,i)=>({...r,rank:i+1}));}
-    const div2Ranked=rankList(div2);
-    const div1Ranked=rankList(div1);
-    const maxD2=div2Ranked[0]?.score||1;
-    const maxD1=div1Ranked[0]?.score||1;
+    cr.forEach(r=>{if(seen[r.student_name])div1.push(r);else{seen[r.student_name]=true;div2.push(r);}});
+    div2.sort((a,b)=>b.score-a.score);div1.sort((a,b)=>b.score-a.score);
+    const div2R=div2.map((r,i)=>({...r,rank:i+1}));
+    const div1R=div1.map((r,i)=>({...r,rank:i+1}));
 
     function renderTable(rows,maxScore){
       if(!rows.length)return'';
-      return '<div class="rank-table-wrap"><table class="rank-table"><thead><tr><th>排名</th><th>用户名</th><th>总分</th></tr></thead><tbody>'
-        +rows.map(r=>'<tr>'
-          +'<td class="'+(r.rank===1?'rank-1':r.rank===2?'rank-2':r.rank===3?'rank-3':'')+'">'+
-          (r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':r.rank)+'</td>'
+      return '<table class="rank-table"><thead><tr><th>排名</th><th>用户名</th><th>总分</th></tr></thead><tbody>'
+        +rows.map(r=>'<tr><td class="'+(r.rank<=3?'rank-'+r.rank:'')+'">'+(r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':r.rank)+'</td>'
           +'<td class="rank-name">'+escHtml(r.student_name)+'</td>'
-          +'<td>'+r.score+'<span class="score-bar"><span class="score-fill" style="width:'+Math.round(r.score/maxScore*100)+'%"></span></span></td>'
-          +'</tr>').join('')
-        +'</tbody></table></div>';
+          +'<td>'+r.score+'<span class="score-bar"><span class="score-fill" style="width:'+Math.round(r.score/maxScore*100)+'%"></span></span></td></tr>').join('')
+        +'</tbody></table>';
     }
-
     function renderProblems(probs){
       if(!probs||!probs.length)return'';
-      return '<div class="problem-chips">'
-        +probs.map(p=>'<a href="https://www.luogu.com.cn/problem/'+escHtml(p.luogu_id||p)+'" target="_blank" class="problem-chip" title="'+escHtml(p.name||'')+'">'+escHtml(p.luogu_id||p)+(p.name?' · '+escHtml(p.name):'')+'</a>').join('')
-        +'</div>';
+      return '<div class="problem-chips">'+probs.map(p=>'<a href="https://www.luogu.com.cn/problem/'+escHtml(p.luogu_id||'')+'" target="_blank" class="problem-chip">'+escHtml(p.luogu_id||'')+(p.name?' · '+escHtml(p.name):'')+'</a>').join('')+'</div>';
     }
 
+    // Build card - collapsed by default
     const card=document.createElement('div');
     card.className='contest-card';
-    let html='<div class="contest-header">'
-      +'<div class="contest-title">'+escHtml(c.title)+'</div>'
-      +'<div style="display:flex;gap:8px;align-items:center">'
-      +'<span class="contest-date">'+(c.date||c.contest_date||'')+'</span>'
-      +(isCoach()?'<button class="btn btn-danger btn-sm" data-cid="'+c.id+'" onclick="deleteContest(+this.dataset.cid)">删除</button>':'')
-      +'</div></div>';
+    card.dataset.open='0';
 
-    // Div.2 section
-    if(div2Ranked.length){
-      html+='<div class="div-section">'
-        +'<div class="div-label div-label-2">Div.2 <span style="font-size:10px;opacity:0.7">入门 / 普及</span></div>'
+    // Header row (always visible)
+    const header=document.createElement('div');
+    header.className='contest-header';
+    header.innerHTML='<div class="contest-title">'+escHtml(c.title)+'</div>'
+      +'<div style="display:flex;gap:10px;align-items:center">'
+      +(div2R.length?'<span class="div-label div-label-2">Div.2</span>':'')
+      +(div1R.length?'<span class="div-label div-label-1">Div.1</span>':'')
+      +'<span class="contest-date">'+(c.date||c.contest_date||'')+'</span>'
+      +(isCoach()?'<button class="btn btn-danger btn-sm" data-cid="'+c.id+'" onclick="event.stopPropagation();deleteContest(+this.dataset.cid)">删除</button>':'')
+      +'<span class="contest-toggle">▼</span>'
+      +'</div>';
+    card.appendChild(header);
+
+    // Body (hidden by default)
+    const body=document.createElement('div');
+    body.className='contest-body';
+    body.style.display='none';
+
+    // Tabs
+    const hasBoth=div2R.length>0&&div1R.length>0;
+    if(hasBoth){
+      const tabs=document.createElement('div');
+      tabs.className='contest-tabs';
+      tabs.innerHTML='<button class="contest-tab active" data-div="2">Div.2 <span style="opacity:0.6;font-size:10px">入门/普及</span></button>'
+        +'<button class="contest-tab" data-div="1">Div.1 <span style="opacity:0.6;font-size:10px">普及+/提高</span></button>';
+      body.appendChild(tabs);
+    }
+
+    // Div2 panel
+    if(div2R.length){
+      const panel=document.createElement('div');
+      panel.className='contest-panel';panel.dataset.panel='2';
+      panel.innerHTML=(hasBoth?'':'<div class="div-label div-label-2" style="margin-bottom:12px">Div.2</div>')
         +renderProblems(div2Problems)
-        +renderTable(div2Ranked,maxD2)
-        +'<div class="contest-chart-wrap" id="cchart-'+c.id+'-2" style="display:none"><h3>📊 Div.2 成绩分布</h3><div class="chart-container"><canvas id="cc-'+c.id+'-2"></canvas></div></div>'
-        +'</div>';
+        +'<div class="rank-table-wrap">'+renderTable(div2R,div2R[0]?.score||1)+'</div>'
+        +'<div class="contest-chart-wrap" id="cchart-'+c.id+'-2" style="display:none"><h3>📊 成绩分布</h3><div class="chart-container"><canvas id="cc-'+c.id+'-2"></canvas></div></div>';
+      body.appendChild(panel);
     }
-    // Div.1 section
-    if(div1Ranked.length){
-      html+='<div class="div-section" style="margin-top:16px">'
-        +'<div class="div-label div-label-1">Div.1 <span style="font-size:10px;opacity:0.7">普及+ / 提高</span></div>'
+
+    // Div1 panel
+    if(div1R.length){
+      const panel=document.createElement('div');
+      panel.className='contest-panel';panel.dataset.panel='1';
+      panel.style.display=hasBoth?'none':'block';
+      panel.innerHTML=(hasBoth?'':'<div class="div-label div-label-1" style="margin-bottom:12px">Div.1</div>')
         +renderProblems(div1Problems)
-        +renderTable(div1Ranked,maxD1)
-        +'<div class="contest-chart-wrap" id="cchart-'+c.id+'-1" style="display:none"><h3>📊 Div.1 成绩分布</h3><div class="chart-container"><canvas id="cc-'+c.id+'-1"></canvas></div></div>'
-        +'</div>';
+        +'<div class="rank-table-wrap">'+renderTable(div1R,div1R[0]?.score||1)+'</div>'
+        +'<div class="contest-chart-wrap" id="cchart-'+c.id+'-1" style="display:none"><h3>📊 成绩分布</h3><div class="chart-container"><canvas id="cc-'+c.id+'-1"></canvas></div></div>';
+      body.appendChild(panel);
     }
+
     if(c.comment||c.note){
-      html+='<div class="contest-comment">'+escHtml(c.comment||c.note)+'</div>';
+      const note=document.createElement('div');
+      note.className='contest-comment';note.textContent=c.comment||c.note;
+      body.appendChild(note);
     }
-    card.innerHTML=html;
-    // Click to expand/show charts
-    card.querySelector('.contest-header').addEventListener('click',()=>{
-      const body=card.querySelector('.div-section');
-      if(body){
-        const open=card.dataset.open==='1';
-        card.dataset.open=open?'0':'1';
-        card.querySelectorAll('.div-section').forEach(s=>s.style.display=open?'none':'block');
-        if(!open){
-          if(div2Ranked.length)showContestChart(c.id+'-2',div2Ranked,'Div.2');
-          if(div1Ranked.length)showContestChart(c.id+'-1',div1Ranked,'Div.1');
-        }
+    card.appendChild(body);
+
+    // Tab switching
+    body.querySelectorAll('.contest-tab').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        body.querySelectorAll('.contest-tab').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const div=btn.dataset.div;
+        body.querySelectorAll('.contest-panel').forEach(p=>p.style.display=p.dataset.panel===div?'block':'none');
+        if(div==='2'&&div2R.length)showContestChart(c.id+'-2',div2R,'Div.2');
+        if(div==='1'&&div1R.length)showContestChart(c.id+'-1',div1R,'Div.1');
+      });
+    });
+
+    // Toggle expand/collapse
+    header.addEventListener('click',()=>{
+      const open=card.dataset.open==='1';
+      card.dataset.open=open?'0':'1';
+      body.style.display=open?'none':'block';
+      header.querySelector('.contest-toggle').textContent=open?'▼':'▲';
+      if(!open){
+        // Show chart for active tab
+        const activeDiv=body.querySelector('.contest-tab.active')?.dataset.div||'2';
+        if(activeDiv==='2'&&div2R.length)showContestChart(c.id+'-2',div2R,'Div.2');
+        else if(activeDiv==='1'&&div1R.length)showContestChart(c.id+'-1',div1R,'Div.1');
       }
     });
+
     list.appendChild(card);
   });
 }
+
 function openContestModal(){if(!isCoach())return;document.getElementById('results-rows').innerHTML='';addResultRow();addResultRow();addResultRow();openModal('contest-modal');}
 function addResultRow(){const tr=document.createElement('tr');tr.innerHTML=`<td><input type="text" placeholder="姓名"></td><td><input type="number" placeholder="0" min="0" style="width:60px"></td><td><input type="number" placeholder="0" min="0" style="width:70px"></td><td><input type="number" placeholder="1" min="1" style="width:55px"></td><td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">×</button></td>`;document.getElementById('results-rows').appendChild(tr);}
 async function submitContest(){
@@ -1948,6 +1969,27 @@ async function showContestChart(contestId, preloaded, title){
         label:'得分',
         data:scores,
         backgroundColor:scores.map(s=>{
+          const pct=s/maxScore;
+          if(pct>=0.9)return'rgba(45,232,176,0.7)';
+          if(pct>=0.7)return'rgba(108,142,245,0.7)';
+          if(pct>=0.5)return'rgba(255,179,71,0.7)';
+          return'rgba(255,83,112,0.7)';
+        }),
+        borderRadius:6,
+        borderSkipped:false,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'得分: '+ctx.raw}}},
+      scales:{
+        x:{ticks:{color:'#7a86a8',font:{family:'JetBrains Mono',size:11}},grid:{color:'rgba(30,37,64,0.8)'}},
+        y:{ticks:{color:'#7a86a8',font:{family:'JetBrains Mono',size:11}},grid:{color:'rgba(30,37,64,0.5)'},beginAtZero:true}
+      }
+    }
+  });
+}
+es.map(s=>{
           const pct=s/maxScore;
           if(pct>=0.9)return'rgba(45,232,176,0.7)';
           if(pct>=0.7)return'rgba(108,142,245,0.7)';
