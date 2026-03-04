@@ -524,6 +524,12 @@ body.light .modal{background:rgba(248,250,255,0.98);}
 .lb-div-score.div1{color:var(--red);background:rgba(255,83,112,0.08);}
 .lb-div-score.div2{color:var(--accent);background:rgba(108,142,245,0.08);}
 .lb-div-cnt{font-size:9px;opacity:0.7;font-family:var(--mono);font-weight:400;}
+
+/* ── NAV MORE MENU GROUPS ── */
+.nav-more-group-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;padding:6px 12px 3px;pointer-events:none;margin-top:2px;}
+.nav-more-divider{height:1px;background:rgba(108,142,245,0.08);margin:4px 8px;}
+.nav-more-menu a{display:block;padding:6px 12px;border-radius:6px;font-size:12px;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.15s;}
+.nav-more-menu a:hover{background:rgba(108,142,245,0.1);color:var(--accent);}
 </style>
 </head>
 <body>
@@ -550,10 +556,18 @@ body.light .modal{background:rgba(248,250,255,0.98);}
       <li class="nav-more-wrap">
         <a onclick="toggleMoreMenu(event)" class="nav-more-trigger">更多 ▾</a>
         <div class="nav-more-menu" id="nav-more-menu">
+          <div class="nav-more-group-label">社区</div>
           <a onclick="closeMoreMenu();show('members')" id="nav-members">👥 成员</a>
+          <a onclick="closeMoreMenu();show('emotions')" id="nav-emotions-m">✍️ 随笔</a>
+          <div class="nav-more-divider"></div>
+          <div class="nav-more-group-label">工具</div>
           <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
           <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
+          <div class="nav-more-divider"></div>
+          <div class="nav-more-group-label">数据</div>
           <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
+          <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">🏆 排行榜</a>
+          <div class="nav-more-divider"></div>
           <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
           <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
         </div>
