@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -515,6 +516,14 @@ body.light .modal{background:rgba(248,250,255,0.98);}
 
 /* ── NAV MORE TRIGGER ── */
 .nav-more-trigger{cursor:pointer;}
+
+/* ── LEADERBOARD RULES ── */
+.lb-rules{font-family:var(--mono);font-size:11px;color:var(--text3);padding:10px 14px;background:rgba(108,142,245,0.05);border:1px solid rgba(108,142,245,0.1);border-radius:8px;margin-bottom:18px;line-height:1.6;}
+.lb-div-scores{display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
+.lb-div-score{font-family:var(--space);font-size:13px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.lb-div-score.div1{color:var(--red);background:rgba(255,83,112,0.08);}
+.lb-div-score.div2{color:var(--accent);background:rgba(108,142,245,0.08);}
+.lb-div-cnt{font-size:9px;opacity:0.7;font-family:var(--mono);font-weight:400;}
 </style>
 </head>
 <body>
@@ -646,8 +655,8 @@ body.light .modal{background:rgba(248,250,255,0.98);}
 <section id="search"><div class="container">
   <div class="page-header"><div class="page-header-left"><div class="label">// search</div><h1>搜索题解</h1><p>按题号、知识点或关键词搜索。</p></div></div>
   <div class="search-bar"><input type="text" id="search-input" placeholder="输入题号（如 P3376）、知识点（如 网络流）或关键词…" oninput="doSearch()"></div>
-  <div class="search-filters">
-    <button class="filter-btn active" onclick="setFilter('')">全部</button>
+  <div class="search-filters" id="search-filter-bar">
+    <button class="filter-btn active" data-f="" onclick="setFilter('')">全部</button>
     <button class="filter-btn" onclick="setFilter('图论')">图论</button>
     <button class="filter-btn" onclick="setFilter('动态规划')">动态规划</button>
     <button class="filter-btn" onclick="setFilter('数据结构')">数据结构</button>
@@ -1242,7 +1251,7 @@ async function showNote(id){
   const[{data:likes},{data:bms}]=await Promise.all([sb.from('likes').select('id,user_id').eq('note_id',id),currentUser?sb.from('bookmarks').select('id').eq('note_id',id).eq('user_id',currentUser?.id||''):Promise.resolve({data:[]})]);const bookmarked=bms&&bms.length>0;
   const likeCount=likes?likes.length:0;const liked=currentUser&&likes&&likes.some(l=>l.user_id===currentUser.id);
   const isOwner=currentUser&&n.profiles?.id===currentUser.id;
-  const renderMd=s=>{ if(!s)return ''; const html=marked.parse(s); return html; };
+  const renderMd=s=>{ if(!s)return ''; const html=DOMPurify.sanitize(marked.parse(s)); return html; };
   detail._pendingHljs=true;
   detail.innerHTML=`<button class="back-btn" onclick="loadNotes()">← 返回列表</button>
     <div class="post-title">${escHtml(n.title)}</div>
@@ -1346,6 +1355,7 @@ function openNoteModal(){
   document.getElementById('note-drawer-overlay').classList.add('open');
   document.getElementById('note-drawer').classList.add('open');
   document.body.style.overflow='hidden';
+  setTimeout(()=>initTopicAutocomplete('note-topic'),100);
 }
 function closeNoteDrawer(){
   document.getElementById('note-drawer-overlay').classList.remove('open');
@@ -1455,6 +1465,14 @@ async function initSearch(){
   if(!allPosts.length){
     const{data}=await sb.from('posts').select('id,content,created_at,profiles(username)').order('created_at',{ascending:false});
     allPosts=data||[];
+  }
+  // Build dynamic filter tags from actual note topics
+  const tagSet=new Set();
+  allNotes.forEach(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).forEach(t=>tagSet.add(t)));
+  const filterBar=document.getElementById('search-filter-bar');
+  if(filterBar){
+    filterBar.innerHTML='<button class="filter-btn active" data-f="" onclick="setFilter(\'\')">全部</button>'
+      +[...tagSet].sort().map(t=>'<button class="filter-btn" data-f="'+escHtml(t)+'" onclick="setFilter(\''+escHtml(t)+'\')">'+escHtml(t)+'</button>').join('');
   }
   const inp=document.getElementById('search-input');
   inp.removeEventListener('input',onSearchInput);
@@ -1696,6 +1714,23 @@ async function submitEditPost(){
 }
 
 // ── Init ────────────────────────────────────────────────────
+const TOPIC_LIST=["图论", "动态规划", "数据结构", "数论", "字符串", "网络流", "贪心", "二分", "搜索", "模拟", "数学", "计算几何", "博弈论", "概率期望", "多项式", "线性代数", "树论", "排列组合", "位运算", "双指针", "单调栈", "单调队列", "线段树", "树状数组", "平衡树", "堆", "哈希", "KMP", "Trie", "后缀数组", "并查集", "最短路", "最小生成树", "拓扑排序", "强连通分量", "二分图", "最大流", "费用流", "树形DP", "区间DP", "状压DP", "数位DP", "背包", "记忆化搜索", "分治", "倍增", "分块", "莫队"];
+
+function initTopicAutocomplete(inputId){
+  const inp=document.getElementById(inputId);
+  if(!inp)return;
+  // Remove existing datalist
+  const old=document.getElementById(inputId+'-dl');
+  if(old)old.remove();
+  const dl=document.createElement('datalist');
+  dl.id=inputId+'-dl';
+  // Load all used topics from notes + standard list
+  const allTopics=new Set(TOPIC_LIST);
+  allNotes.forEach(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).forEach(t=>allTopics.add(t)));
+  [...allTopics].sort().forEach(t=>{const opt=document.createElement('option');opt.value=t;dl.appendChild(opt);});
+  inp.setAttribute('list',inputId+'-dl');
+  document.body.appendChild(dl);
+}
 loadSession();
 
 // ── Nav scroll shrink ────────────────────────────────────
@@ -1766,33 +1801,73 @@ async function loadLeaderboard(mode){
   const{data:profiles}=await sb.from('profiles').select('*').order('created_at');
   if(!profiles||!profiles.length){el.innerHTML='<div class="empty">暂无数据</div>';return;}
   let rows=[];
+  let rulesHtml='';
   if(lbMode==='notes'){
     const{data:notes}=await sb.from('notes').select('author_id');
     const cnt={};(notes||[]).forEach(n=>{cnt[n.author_id]=(cnt[n.author_id]||0)+1;});
     rows=profiles.map(p=>({...p,score:cnt[p.id]||0,unit:'篇题解'})).filter(p=>p.score>0).sort((a,b)=>b.score-a.score);
+    rulesHtml='<div class="lb-rules">📋 统计全部发布的题解笔记，按数量排名</div>';
   } else {
-    const{data:results}=await sb.from('contest_results').select('student_name,score');
-    const sm={},sc={};
-    (results||[]).forEach(r=>{sm[r.student_name]=(sm[r.student_name]||0)+r.score;sc[r.student_name]=(sc[r.student_name]||0)+1;});
-    rows=profiles.map(p=>{const s=sm[p.username]||0;const c=sc[p.username]||0;return{...p,score:c?Math.round(s/c):0,total:s,contests:c,unit:'分均分'};}).filter(p=>p.contests>0).sort((a,b)=>b.score-a.score);
+    // Fetch all contests to detect div (using stored problems JSON)
+    const{data:contests}=await sb.from('contests').select('id,problems');
+    const{data:results}=await sb.from('contest_results').select('student_name,score,contest_id,rank');
+    // Build a set of contest IDs that have both div1 and div2
+    // Detect div per result: for each contest, sort results by score desc,
+    // duplicate usernames mean div1 entries follow div2 entries
+    const byContest={};
+    (results||[]).forEach(r=>{
+      if(!byContest[r.contest_id])byContest[r.contest_id]=[];
+      byContest[r.contest_id].push(r);
+    });
+    // For each contest, split into div2/div1 (same logic as display)
+    const d2scores={},d1scores={},d2cnt={},d1cnt={};
+    Object.entries(byContest).forEach(([cid,rs])=>{
+      rs.sort((a,b)=>b.score-a.score);
+      const seen={};const d2=[],d1=[];
+      rs.forEach(r=>{if(seen[r.student_name])d1.push(r);else{seen[r.student_name]=true;d2.push(r);}});
+      const maxD2=d2[0]?.score||1;
+      const maxD1=d1[0]?.score||1;
+      d2.forEach(r=>{d2scores[r.student_name]=(d2scores[r.student_name]||0)+r.score;d2cnt[r.student_name]=(d2cnt[r.student_name]||0)+1;});
+      d1.forEach(r=>{d1scores[r.student_name]=(d1scores[r.student_name]||0)+r.score;d1cnt[r.student_name]=(d1cnt[r.student_name]||0)+1;});
+    });
+    // Build rows with both div averages
+    rows=profiles.map(p=>{
+      const n=p.username;
+      const d2c=d2cnt[n]||0,d1c=d1cnt[n]||0;
+      const d2avg=d2c?Math.round(d2scores[n]/d2c):null;
+      const d1avg=d1c?Math.round(d1scores[n]/d1c):null;
+      const totalC=d2c+d1c;
+      // Sort key: prefer d1 avg if exists, else d2
+      const sortKey=d1avg!==null?d1avg:(d2avg||0);
+      return{...p,sortKey,d2avg,d1avg,d2c,d1c,totalC,score:sortKey,unit:''};
+    }).filter(p=>p.totalC>0).sort((a,b)=>b.sortKey-a.sortKey);
+    rulesHtml='<div class="lb-rules">📋 Div.1 / Div.2 分开统计均分 · 按 Div.1 均分排名（无 Div.1 成绩则用 Div.2）· 统计全赛季</div>';
   }
   if(!rows.length){el.innerHTML='<div class="empty">暂无数据</div>';return;}
   const max=rows[0].score||1;
   const wrap=document.createElement('div');
+  wrap.innerHTML=rulesHtml;
   rows.forEach((r,i)=>{
     const rank=i+1;
     const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':String(rank);
     const rankCls=rank===1?'lb-rank-1':rank===2?'lb-rank-2':rank===3?'lb-rank-3':'';
     const row=document.createElement('div');
-    row.className='lb-row';
-    row.dataset.u=r.username;
+    row.className='lb-row';row.dataset.u=r.username;
     row.addEventListener('click',()=>showProfile(row.dataset.u));
+    let scoreHtml='';
+    if(lbMode==='score'){
+      const d1Str=r.d1avg!==null?'<span class="lb-div-score div1">Div.1 '+r.d1avg+'<span class="lb-div-cnt"> ('+r.d1c+'场)</span></span>':'';
+      const d2Str=r.d2avg!==null?'<span class="lb-div-score div2">Div.2 '+r.d2avg+'<span class="lb-div-cnt"> ('+r.d2c+'场)</span></span>':'';
+      scoreHtml='<div class="lb-div-scores">'+d1Str+d2Str+'</div>';
+    } else {
+      scoreHtml='<div><span class="lb-score">'+r.score+'</span><span class="lb-score-unit">'+r.unit+'</span></div>';
+    }
     row.innerHTML='<div class="lb-rank '+rankCls+'">'+medal+'</div>'
       +'<div class="lb-avatar" style="background:'+avatarGradient(r.username)+'">'+r.username.charAt(0).toUpperCase()+'</div>'
       +'<div class="lb-info"><div class="lb-name">@'+escHtml(r.username)+'</div>'
-      +'<div class="lb-sub">'+(lbMode==='score'?r.contests+' 场 · 总分 '+r.total:'加入 '+fmtDate(r.created_at).slice(0,7))+'</div>'
+      +'<div class="lb-sub">'+(lbMode==='score'?r.totalC+' 场':'加入 '+fmtDate(r.created_at).slice(0,7))+'</div>'
       +'<div class="lb-bar-wrap"><div class="lb-bar" style="width:'+Math.round(r.score/max*100)+'%"></div></div></div>'
-      +'<div><span class="lb-score">'+r.score+'</span><span class="lb-score-unit">'+r.unit+'</span></div>';
+      +scoreHtml;
     wrap.appendChild(row);
   });
   el.innerHTML='';el.appendChild(wrap);
@@ -1927,6 +2002,7 @@ async function openEditNote(id){
   document.getElementById('edit-note-reflection').value=n.reflection||'';
   updatePreview('edit-note-content','edit-preview-content');
   openModal('edit-note-modal');
+  setTimeout(()=>initTopicAutocomplete('edit-note-topic'),100);
 }
 
 // ── Edit Post ──────────────────────────────────────────────
