@@ -415,6 +415,13 @@ footer{border-top:1px solid var(--border);padding:20px 28px;font-family:var(--mo
 .drawer-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
 
 
+
+/* CONTEST DIV SECTIONS */
+.div-section{margin-top:12px;}
+.div-label{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.08em;padding:4px 10px;border-radius:4px;display:inline-block;margin-bottom:10px;}
+.div-label-1{background:rgba(255,83,112,0.12);color:#ff5370;border:1px solid rgba(255,83,112,0.25);}
+.div-label-2{background:rgba(108,142,245,0.12);color:#6c8ef5;border:1px solid rgba(108,142,245,0.25);}
+
 /* CONTEST CHART */
 .contest-chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-top:24px;}
 .contest-chart-wrap h3{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;}
@@ -890,12 +897,7 @@ body.light .rank-table-wrap{background:var(--surface2);}
 
 <!-- ANN MODAL -->
 <div class="modal-overlay" id="ann-modal"><div class="modal" style="width:540px">
-  <h2>📢 发布公告</h2>
-  <div class="form-group"><label>标题</label><input type="text" id="ann-title" placeholder="例：CSP-S 报名通知"></div>
-  <div class="form-group"><label>内容</label><textarea id="ann-content" placeholder="公告详情…" style="min-height:120px"></textarea></div>
-  <div class="form-group" style="display:flex;align-items:center;gap:10px">
-    <input type="checkbox" id="ann-pinned" style="width:auto;accent-color:var(--yellow)">
-<script>
+  <h2>📢
 
 // ── Utilities ──────────────────────────────────────────────
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -1106,13 +1108,100 @@ async function loadContests(){
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data:contests}=await sb.from('contests').select('*').order('contest_date',{ascending:false});
   if(!contests||!contests.length){list.innerHTML='<div class="empty">暂无模拟赛记录</div>';return;}
-  const{data:results}=await sb.from('contest_results').select('*').in('contest_id',contests.map(c=>c.id)).order('rank');
+  const{data:results}=await sb.from('contest_results').select('*').in('contest_id',contests.map(c=>c.id)).order('score',{ascending:false});
   const rm={};(results||[]).forEach(r=>{if(!rm[r.contest_id])rm[r.contest_id]=[];rm[r.contest_id].push(r);});
-  list.innerHTML=contests.map(c=>{
-    const problems=(c.problems||'').split(/[\s,]+/).filter(Boolean);
-    const cr=rm[c.id]||[];const maxScore=Math.max(...cr.map(r=>r.score),1);
-    return`<div class="contest-card"><div class="contest-header"><div class="contest-title">${escHtml(c.title)}</div><div style="display:flex;gap:8px;align-items:center"><span class="contest-date">${c.contest_date}</span>${isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteContest(${c.id})">删除</button>`:''}</div></div>${problems.length?`<div class="problem-chips">${problems.map(p=>`<a href="https://www.luogu.com.cn/problem/${escHtml(p)}" target="_blank" class="problem-chip">${escHtml(p)}</a>`).join('')}</div>`:''} ${cr.length?`<div class="rank-table-wrap" style="margin-bottom:12px"><table class="rank-table"><thead><tr><th>排名</th><th>姓名</th><th>AC数</th><th>总分</th></tr></thead><tbody>${cr.map(r=>`<tr><td class="${r.rank===1?'rank-1':r.rank===2?'rank-2':r.rank===3?'rank-3':''}">${r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':r.rank}</td><td class="rank-name">${escHtml(r.student_name)}</td><td>${r.solved}</td><td>${r.score}<span class="score-bar"><span class="score-fill" style="width:${Math.round(r.score/maxScore*100)}%"></span></span></td></tr>`).join('')}</tbody></table></div>`:''} ${c.comment?`<div class="contest-comment">${escHtml(c.comment)}</div>`:''}</div>`;
-  }).join('');
+  list.innerHTML='';
+  contests.forEach(c=>{
+    const cr=rm[c.id]||[];
+    // Parse problems JSON if available
+    let div2Problems=[], div1Problems=[];
+    try{
+      const p=typeof c.problems==='string'?JSON.parse(c.problems):c.problems;
+      if(p&&p.div2)div2Problems=p.div2;
+      if(p&&p.div1)div1Problems=p.div1;
+    }catch(e){}
+    // Split results by div based on score ranges or just show both pools separately
+    // Since we stored them sequentially: div2 first (16), div1 after (6)
+    // We detect by checking if same username appears with different scores
+    const seen={};const div2=[],div1=[];
+    cr.forEach(r=>{
+      if(seen[r.student_name]){div1.push(r);}
+      else{seen[r.student_name]=true;div2.push(r);}
+    });
+    // Re-rank each div by score
+    div2.sort((a,b)=>b.score-a.score);
+    div1.sort((a,b)=>b.score-a.score);
+    function rankList(arr){return arr.map((r,i)=>({...r,rank:i+1}));}
+    const div2Ranked=rankList(div2);
+    const div1Ranked=rankList(div1);
+    const maxD2=div2Ranked[0]?.score||1;
+    const maxD1=div1Ranked[0]?.score||1;
+
+    function renderTable(rows,maxScore){
+      if(!rows.length)return'';
+      return '<div class="rank-table-wrap"><table class="rank-table"><thead><tr><th>排名</th><th>用户名</th><th>总分</th></tr></thead><tbody>'
+        +rows.map(r=>'<tr>'
+          +'<td class="'+(r.rank===1?'rank-1':r.rank===2?'rank-2':r.rank===3?'rank-3':'')+'">'+
+          (r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':r.rank)+'</td>'
+          +'<td class="rank-name">'+escHtml(r.student_name)+'</td>'
+          +'<td>'+r.score+'<span class="score-bar"><span class="score-fill" style="width:'+Math.round(r.score/maxScore*100)+'%"></span></span></td>'
+          +'</tr>').join('')
+        +'</tbody></table></div>';
+    }
+
+    function renderProblems(probs){
+      if(!probs||!probs.length)return'';
+      return '<div class="problem-chips">'
+        +probs.map(p=>'<a href="https://www.luogu.com.cn/problem/'+escHtml(p.luogu_id||p)+'" target="_blank" class="problem-chip" title="'+escHtml(p.name||'')+'">'+escHtml(p.luogu_id||p)+(p.name?' · '+escHtml(p.name):'')+'</a>').join('')
+        +'</div>';
+    }
+
+    const card=document.createElement('div');
+    card.className='contest-card';
+    let html='<div class="contest-header">'
+      +'<div class="contest-title">'+escHtml(c.title)+'</div>'
+      +'<div style="display:flex;gap:8px;align-items:center">'
+      +'<span class="contest-date">'+(c.date||c.contest_date||'')+'</span>'
+      +(isCoach()?'<button class="btn btn-danger btn-sm" data-cid="'+c.id+'" onclick="deleteContest(+this.dataset.cid)">删除</button>':'')
+      +'</div></div>';
+
+    // Div.2 section
+    if(div2Ranked.length){
+      html+='<div class="div-section">'
+        +'<div class="div-label div-label-2">Div.2 <span style="font-size:10px;opacity:0.7">入门 / 普及</span></div>'
+        +renderProblems(div2Problems)
+        +renderTable(div2Ranked,maxD2)
+        +'<div class="contest-chart-wrap" id="cchart-'+c.id+'-2" style="display:none"><h3>📊 Div.2 成绩分布</h3><div class="chart-container"><canvas id="cc-'+c.id+'-2"></canvas></div></div>'
+        +'</div>';
+    }
+    // Div.1 section
+    if(div1Ranked.length){
+      html+='<div class="div-section" style="margin-top:16px">'
+        +'<div class="div-label div-label-1">Div.1 <span style="font-size:10px;opacity:0.7">普及+ / 提高</span></div>'
+        +renderProblems(div1Problems)
+        +renderTable(div1Ranked,maxD1)
+        +'<div class="contest-chart-wrap" id="cchart-'+c.id+'-1" style="display:none"><h3>📊 Div.1 成绩分布</h3><div class="chart-container"><canvas id="cc-'+c.id+'-1"></canvas></div></div>'
+        +'</div>';
+    }
+    if(c.comment||c.note){
+      html+='<div class="contest-comment">'+escHtml(c.comment||c.note)+'</div>';
+    }
+    card.innerHTML=html;
+    // Click to expand/show charts
+    card.querySelector('.contest-header').addEventListener('click',()=>{
+      const body=card.querySelector('.div-section');
+      if(body){
+        const open=card.dataset.open==='1';
+        card.dataset.open=open?'0':'1';
+        card.querySelectorAll('.div-section').forEach(s=>s.style.display=open?'none':'block');
+        if(!open){
+          if(div2Ranked.length)showContestChart(c.id+'-2',div2Ranked,'Div.2');
+          if(div1Ranked.length)showContestChart(c.id+'-1',div1Ranked,'Div.1');
+        }
+      }
+    });
+    list.appendChild(card);
+  });
 }
 function openContestModal(){if(!isCoach())return;document.getElementById('results-rows').innerHTML='';addResultRow();addResultRow();addResultRow();openModal('contest-modal');}
 function addResultRow(){const tr=document.createElement('tr');tr.innerHTML=`<td><input type="text" placeholder="姓名"></td><td><input type="number" placeholder="0" min="0" style="width:60px"></td><td><input type="number" placeholder="0" min="0" style="width:70px"></td><td><input type="number" placeholder="1" min="1" style="width:55px"></td><td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">×</button></td>`;document.getElementById('results-rows').appendChild(tr);}
@@ -1839,13 +1928,10 @@ document.addEventListener('visibilitychange',async()=>{
 
 // ── Contest Chart ──────────────────────────────────────────
 let contestChart=null;
-async function showContestChart(contestId, title){
-  const{data:results}=await sb.from('contest_results')
-    .select('student_name,score,rank')
-    .eq('contest_id',contestId)
-    .order('score',{ascending:false});
+async function showContestChart(contestId, preloaded, title){
+  const results=preloaded||[];
   if(!results||results.length<2)return;
-  const wrap=document.getElementById('contest-chart-'+contestId);
+  const wrap=document.getElementById('cchart-'+contestId);
   if(!wrap)return;
   wrap.style.display='block';
   const canvas=wrap.querySelector('canvas');
@@ -1871,6 +1957,18 @@ async function showContestChart(contestId, title){
         borderSkipped:false,
       }]
     },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'得分: '+ctx.raw}}},
+      scales:{
+        x:{ticks:{color:'#7a86a8',font:{family:'JetBrains Mono',size:11}},grid:{color:'rgba(30,37,64,0.8)'}},
+        y:{ticks:{color:'#7a86a8',font:{family:'JetBrains Mono',size:11}},grid:{color:'rgba(30,37,64,0.5)'},beginAtZero:true}
+      }
+    }
+  });
+}
+
+ },
     options:{
       responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'得分: '+ctx.raw}}},
