@@ -12,14 +12,14 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:var(--serif);font-size:15px;line-height:1.8;min-height:100vh;}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,15,20,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 24px;justify-content:space-between;}
-.nav-left{display:flex;align-items:center;}
-.nav-logo{font-family:var(--space);font-size:13px;color:var(--accent2);letter-spacing:0.08em;margin-right:28px;white-space:nowrap;}
-.nav-links{display:flex;gap:2px;list-style:none;flex-wrap:wrap;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,15,20,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 20px;justify-content:space-between;gap:12px;}
+.nav-left{display:flex;align-items:center;min-width:0;flex:1;overflow:hidden;}
+.nav-logo{font-family:var(--space);font-size:13px;color:var(--accent2);letter-spacing:0.08em;margin-right:16px;white-space:nowrap;flex-shrink:0;}
+.nav-links{display:flex;gap:1px;list-style:none;flex-wrap:nowrap;overflow:hidden;}
 .nav-links a{font-family:var(--mono);font-size:11px;color:var(--text2);text-decoration:none;padding:5px 9px;border-radius:4px;transition:all 0.15s;cursor:pointer;}
 .nav-links a:hover{color:var(--text);background:var(--surface2);}
 .nav-links a.active{color:var(--accent);background:rgba(91,138,240,0.1);}
-.nav-right{display:flex;align-items:center;gap:8px;}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .nav-user{font-family:var(--mono);font-size:11px;color:var(--accent2);}
 .coach-badge{font-family:var(--mono);font-size:9px;padding:2px 6px;background:rgba(255,209,102,0.15);border:1px solid rgba(255,209,102,0.3);border-radius:3px;color:var(--yellow);}
 .btn{font-family:var(--mono);font-size:11px;padding:5px 13px;border-radius:4px;border:1px solid;cursor:pointer;transition:all 0.15s;}
