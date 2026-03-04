@@ -556,6 +556,84 @@ body.light .modal{background:rgba(248,250,255,0.98);}
 
 .nav-links{list-style:none;padding:0;margin:0;}
 .nav-links li{list-style:none;}
+
+/* ── HOME BENTO LAYOUT ── */
+.home-bento{display:grid;grid-template-columns:340px 1fr;gap:16px;margin-bottom:48px;}
+.home-bento-left{display:flex;flex-direction:column;gap:14px;}
+.bento-card{
+  background:var(--glass-bg);backdrop-filter:blur(12px);
+  border:1px solid var(--glass-border);border-radius:var(--radius);
+  padding:20px 22px;position:relative;overflow:hidden;
+  transition:border-color 0.3s;}
+.bento-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(108,142,245,0.15),transparent);
+}
+.bento-card:hover{border-color:rgba(108,142,245,0.22);}
+.bento-label{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:0.14em;margin-bottom:14px;opacity:0.8;}
+
+/* coach card */
+.bento-coach-row{display:flex;gap:14px;align-items:flex-start;}
+.bento-coach-avatar{
+  width:46px;height:46px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#6c8ef5,#2de8b0);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--space);font-size:18px;font-weight:700;color:var(--bg);}
+.bento-coach-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.bento-coach-quote{font-size:12px;color:var(--text3);line-height:1.65;font-style:italic;}
+
+/* skills */
+.skill-tags{display:flex;flex-wrap:wrap;gap:7px;}
+.skill-tag{
+  font-family:var(--mono);font-size:11px;padding:4px 11px;
+  background:rgba(108,142,245,0.07);border:1px solid rgba(108,142,245,0.15);
+  border-radius:20px;color:var(--text2);transition:all 0.2s;cursor:default;}
+.skill-tag:hover{background:rgba(108,142,245,0.14);color:var(--accent);border-color:rgba(108,142,245,0.3);}
+
+/* goals */
+.bento-goal-items{display:flex;flex-direction:column;gap:10px;}
+.bento-goal-item{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2);}
+.goal-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot-green{background:var(--accent2);box-shadow:0 0 6px var(--accent2);}
+.dot-blue{background:var(--accent);box-shadow:0 0 6px var(--accent);}
+.dot-yellow{background:var(--yellow);box-shadow:0 0 6px var(--yellow);}
+
+/* feed */
+.bento-feed{display:flex;flex-direction:column;}
+.bento-feed #home-feed{flex:1;overflow-y:auto;max-height:340px;}
+.bento-more-btn{
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+  background:none;border:none;cursor:pointer;padding:12px 0 0;
+  text-align:left;transition:color 0.2s;border-top:1px solid rgba(108,142,245,0.08);
+  margin-top:12px;}
+.bento-more-btn:hover{color:var(--accent);}
+
+/* feed items */
+.update-item{
+  display:flex;gap:12px;padding:10px 0;
+  border-bottom:1px solid rgba(30,37,64,0.4);}
+.update-item:last-child{border-bottom:none;}
+.update-date{font-family:var(--mono);font-size:10px;color:var(--text3);white-space:nowrap;padding-top:2px;min-width:68px;}
+.update-content{font-size:13px;color:var(--text2);line-height:1.55;flex:1;}
+
+/* empty state */
+.empty-home{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 20px;gap:12px;color:var(--text3);}
+.empty-home-icon{font-size:32px;opacity:0.4;}
+.empty-home-text{font-size:13px;font-family:var(--mono);}
+.empty-home-action{
+  font-family:var(--mono);font-size:12px;padding:7px 16px;
+  border-radius:8px;border:1px solid rgba(108,142,245,0.2);
+  background:rgba(108,142,245,0.06);color:var(--accent);
+  cursor:pointer;transition:all 0.2s;margin-top:4px;}
+.empty-home-action:hover{background:rgba(108,142,245,0.14);}
+
+/* responsive */
+@media(max-width:900px){
+  .home-bento{grid-template-columns:1fr;}
+  .bento-feed #home-feed{max-height:280px;}
+}
 </style>
 </head>
 <body>
@@ -612,20 +690,44 @@ body.light .modal{background:rgba(248,250,255,0.98);}
     <h1>在代码里<br>寻找<span id="typewriter-text">思维的边界</span><span class="typewriter-cursor">_</span></h1>
     <p class="hero-desc">我们是一支专注于信息学竞赛的训练团队。从图论到动态规划，每一道题都是一次与自己的对话。</p>
   </div>
-  <div class="home-grid">
-    <div class="info-card coach-card">
-      <div class="coach-avatar">万</div>
-      <div class="coach-info">
-        <div class="coach-title">// 指导教练</div>
-        <div class="coach-name">万家宝 老师</div>
-        <p style="font-size:13px;color:var(--text2);margin-top:8px;">扎实基础、重视思维、保持对算法之美的好奇心。比赛固然重要，但更希望大家学到的是面对难题时沉下心来的能力。</p>
+  <div id="hero-stats-bar" style="margin-bottom:48px"></div>
+
+  <div class="home-bento">
+    <!-- Left column: coach + skills -->
+    <div class="home-bento-left">
+      <div class="bento-card bento-coach">
+        <div class="bento-label">// 指导教练</div>
+        <div class="bento-coach-row">
+          <div class="bento-coach-avatar">万</div>
+          <div>
+            <div class="bento-coach-name">万家宝 老师</div>
+            <div class="bento-coach-quote">「面对难题时沉下心来的能力，比比赛名次更重要。」</div>
+          </div>
+        </div>
+      </div>
+      <div class="bento-card bento-skills">
+        <div class="bento-label">// 核心技能树</div>
+        <div class="skill-tags">
+          <span class="skill-tag">图论</span><span class="skill-tag">动态规划</span><span class="skill-tag">数据结构</span><span class="skill-tag">数论</span><span class="skill-tag">字符串</span><span class="skill-tag">网络流</span><span class="skill-tag">计算几何</span><span class="skill-tag">博弈论</span>
+        </div>
+      </div>
+      <div class="bento-card bento-goal">
+        <div class="bento-label">// 赛季目标</div>
+        <div class="bento-goal-items">
+          <div class="bento-goal-item"><span class="goal-dot dot-green"></span>冲刺 CSP-S 提高组</div>
+          <div class="bento-goal-item"><span class="goal-dot dot-blue"></span>部分成员备战 NOI 联赛</div>
+          <div class="bento-goal-item"><span class="goal-dot dot-yellow"></span>每周训练 · 月度模拟赛</div>
+        </div>
       </div>
     </div>
-    <div class="info-card"><div class="card-label">训练方向</div><h3>核心技能树</h3><p>图论 · 动态规划 · 数据结构 · 数论 · 字符串 · 网络流</p></div>
-    <div class="info-card"><div class="card-label">团队目标</div><h3>赛季计划</h3><p>冲刺 CSP-S 提高组，部分成员备战 NOI 联赛。每周训练，月度模拟赛检验成果。</p></div>
+
+    <!-- Right column: activity feed -->
+    <div class="bento-card bento-feed">
+      <div class="bento-label">// recent activity</div>
+      <div id="home-feed"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+      <button class="bento-more-btn" onclick="show('notes')">查看全部动态 →</button>
+    </div>
   </div>
-  <div id="hero-stats-bar" style="margin-bottom:40px"></div>
-  <div class="updates-section"><h2>// recent activity</h2><div id="home-feed"><div class="loading"><div class="spinner"></div>加载中…</div></div></div>
 </div></section>
 
 <!-- ANNOUNCEMENTS -->
@@ -1090,7 +1192,14 @@ async function loadHomeFeed(){
     sb.from('announcements').select('id,title,created_at').order('created_at',{ascending:false}).limit(3),
   ]);
   const items=[...(notes||[]).map(n=>({...n,type:'note'})),...(posts||[]).map(p=>({...p,type:'post'})),...(contests||[]).map(c=>({...c,type:'contest'})),...(lectures||[]).map(l=>({...l,type:'lecture'})),...(anns||[]).map(a=>({...a,type:'ann'}))].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,12);
-  if(!items.length){feed.innerHTML='<div class="empty">暂无动态</div>';return;}
+  if(!items.length){
+    feed.innerHTML=`<div class="empty-home">
+      <div class="empty-home-icon">⌨️</div>
+      <div class="empty-home-text">// 还没有动态</div>
+      <button class="empty-home-action" onclick="openNoteModal()">发布第一篇题解 →</button>
+    </div>`;
+    return;
+  }
   feed.innerHTML=items.map(item=>{
     let content='';
     if(item.type==='note')content=`<span class="clickable-name" onclick="showProfile('${item.profiles?.username||''}')">${item.profiles?.username||'匿名'}</span> 发布了题解：<strong>${escHtml(item.title)}</strong> <span class="update-tag tag-note">题解</span>`;
@@ -1381,9 +1490,23 @@ async function loadHeroStats(){
   </div>`;
   // Animate count up
   function countUp(id,target){
-    const el=document.getElementById(id);if(!el)return;
-    let cur=0;const step=Math.ceil(target/30);
-    const t=setInterval(()=>{cur=Math.min(cur+step,target);el.textContent=cur;if(cur>=target)clearInterval(t);},40);
+    const el=document.getElementById(id);if(!el||!target)return;
+    let start=null;
+    const dur=1200;
+    function ease(t){return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+    function frame(ts){
+      if(!start)start=ts;
+      const p=Math.min((ts-start)/dur,1);
+      el.textContent=Math.round(ease(p)*target);
+      if(p<1){requestAnimationFrame(frame);}
+      else{
+        el.textContent=target;
+        el.style.transition='text-shadow 0.3s';
+        el.style.textShadow='0 0 20px var(--accent2)';
+        setTimeout(()=>el.style.textShadow='',600);
+      }
+    }
+    requestAnimationFrame(frame);
   }
   countUp('hs-notes',nc||0);
   countUp('hs-members',uc||0);
