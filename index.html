@@ -1505,6 +1505,244 @@ async function submitEditPost(){
 
 // ── Init ────────────────────────────────────────────────────
 loadSession();
+
+// ── Admin ──────────────────────────────────────────────────
+async function loadAdmin(){
+  if(!isCoach()){show('home');return;}
+  const usersEl=document.getElementById('admin-users');
+  const notesEl=document.getElementById('admin-notes');
+  usersEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  notesEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const{data:users}=await sb.from('profiles').select('*').order('created_at');
+  if(users&&users.length){
+    usersEl.innerHTML=users.map(u=>{
+      let actions='';
+      if(u.id===currentUser.id){
+        actions='<span style="font-family:var(--mono);font-size:10px;color:var(--text3)">（自己）</span>';
+      } else if(u.role==='student'){
+        actions='<button class="btn btn-yellow btn-sm" data-id="'+u.id+'" data-role="coach" onclick="setRoleBtn(this)">设为教练</button>';
+      } else {
+        actions='<button class="btn btn-outline btn-sm" data-id="'+u.id+'" data-role="student" onclick="setRoleBtn(this)">降为学生</button>';
+      }
+      return '<div class="admin-row"><div class="admin-row-info">'
+        +'<strong class="admin-profile-link" data-u="'+escHtml(u.username)+'">@'+escHtml(u.username)+'</strong>'
+        +'<span class="user-role role-'+u.role+'" style="margin-left:8px">'+u.role+'</span>'
+        +'<div class="admin-sub">加入 '+fmtDate(u.created_at)+'</div>'
+        +'</div><div class="admin-actions">'+actions+'</div></div>';
+    }).join('');
+    usersEl.querySelectorAll('.admin-profile-link').forEach(el=>el.addEventListener('click',()=>showProfile(el.dataset.u)));
+  } else { usersEl.innerHTML='<div class="empty">暂无用户</div>'; }
+  const{data:notes}=await sb.from('notes').select('id,title,created_at,profiles(username)').order('created_at',{ascending:false}).limit(30);
+  if(notes&&notes.length){
+    notesEl.innerHTML=notes.map(n=>'<div class="admin-row"><div class="admin-row-info"><strong>'+escHtml(n.title)+'</strong>'
+      +'<div class="admin-sub">by @'+(n.profiles?.username||'?')+' · '+fmtDate(n.created_at)+'</div></div>'
+      +'<div class="admin-actions">'
+      +'<button class="btn btn-outline btn-sm" data-nid="'+n.id+'" onclick="adminViewNote(+this.dataset.nid)">查看</button>'
+      +'<button class="btn btn-danger btn-sm" data-nid="'+n.id+'" onclick="deleteNote(+this.dataset.nid)">删除</button>'
+      +'</div></div>').join('');
+  } else { notesEl.innerHTML='<div class="empty">暂无题解</div>'; }
+}
+function adminViewNote(id){show('notes');setTimeout(()=>showNote(id),300);}
+async function setRoleBtn(el){
+  const userId=el.dataset.id,role=el.dataset.role;
+  await sb.from('profiles').update({role}).eq('id',userId);
+  showToast('已更新为 '+role,'success');loadAdmin();
+}
+async function setRole(userId,role){
+  await sb.from('profiles').update({role}).eq('id',userId);
+  showToast('已更新为 '+role,'success');loadAdmin();
+}
+
+// ── Leaderboard ────────────────────────────────────────────
+let lbMode='notes';
+async function loadLeaderboard(mode){
+  lbMode=mode||lbMode;
+  document.querySelectorAll('.lb-tab').forEach((t,i)=>t.classList.toggle('active',i===(lbMode==='notes'?0:1)));
+  const el=document.getElementById('lb-list');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const{data:profiles}=await sb.from('profiles').select('*').order('created_at');
+  if(!profiles||!profiles.length){el.innerHTML='<div class="empty">暂无数据</div>';return;}
+  let rows=[];
+  if(lbMode==='notes'){
+    const{data:notes}=await sb.from('notes').select('author_id');
+    const cnt={};(notes||[]).forEach(n=>{cnt[n.author_id]=(cnt[n.author_id]||0)+1;});
+    rows=profiles.map(p=>({...p,score:cnt[p.id]||0,unit:'篇题解'})).filter(p=>p.score>0).sort((a,b)=>b.score-a.score);
+  } else {
+    const{data:results}=await sb.from('contest_results').select('student_name,score');
+    const sm={},sc={};
+    (results||[]).forEach(r=>{sm[r.student_name]=(sm[r.student_name]||0)+r.score;sc[r.student_name]=(sc[r.student_name]||0)+1;});
+    rows=profiles.map(p=>{const s=sm[p.username]||0;const c=sc[p.username]||0;return{...p,score:c?Math.round(s/c):0,total:s,contests:c,unit:'分均分'};}).filter(p=>p.contests>0).sort((a,b)=>b.score-a.score);
+  }
+  if(!rows.length){el.innerHTML='<div class="empty">暂无数据</div>';return;}
+  const max=rows[0].score||1;
+  const wrap=document.createElement('div');
+  rows.forEach((r,i)=>{
+    const rank=i+1;
+    const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':String(rank);
+    const rankCls=rank===1?'lb-rank-1':rank===2?'lb-rank-2':rank===3?'lb-rank-3':'';
+    const row=document.createElement('div');
+    row.className='lb-row';
+    row.dataset.u=r.username;
+    row.addEventListener('click',()=>showProfile(row.dataset.u));
+    row.innerHTML='<div class="lb-rank '+rankCls+'">'+medal+'</div>'
+      +'<div class="lb-avatar" style="background:'+avatarGradient(r.username)+'">'+r.username.charAt(0).toUpperCase()+'</div>'
+      +'<div class="lb-info"><div class="lb-name">@'+escHtml(r.username)+'</div>'
+      +'<div class="lb-sub">'+(lbMode==='score'?r.contests+' 场 · 总分 '+r.total:'加入 '+fmtDate(r.created_at).slice(0,7))+'</div>'
+      +'<div class="lb-bar-wrap"><div class="lb-bar" style="width:'+Math.round(r.score/max*100)+'%"></div></div></div>'
+      +'<div><span class="lb-score">'+r.score+'</span><span class="lb-score-unit">'+r.unit+'</span></div>';
+    wrap.appendChild(row);
+  });
+  el.innerHTML='';el.appendChild(wrap);
+}
+
+// ── Members ────────────────────────────────────────────────
+async function loadMembers(){
+  const el=document.getElementById('members-list');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const{data:profiles}=await sb.from('profiles').select('id,username,role,created_at,avatar_url').order('role').order('created_at');
+  if(!profiles||!profiles.length){el.innerHTML='<div class="empty">暂无成员</div>';return;}
+  const{data:notes}=await sb.from('notes').select('author_id');
+  const{data:posts}=await sb.from('posts').select('author_id');
+  const nc={},pc={};
+  (notes||[]).forEach(n=>{nc[n.author_id]=(nc[n.author_id]||0)+1;});
+  (posts||[]).forEach(p=>{pc[p.author_id]=(pc[p.author_id]||0)+1;});
+  const coaches=profiles.filter(p=>p.role==='coach');
+  const students=profiles.filter(p=>p.role!=='coach');
+  function renderCard(p){
+    const card=document.createElement('div');
+    card.className='member-card';
+    card.dataset.u=p.username;
+    card.addEventListener('click',()=>showProfile(card.dataset.u));
+    card.innerHTML='<div style="margin:0 auto 12px">'+avatarEl(p.username,p.avatar_url||'',60,22)+'</div>'
+      +'<div class="member-name">@'+escHtml(p.username)+'</div>'
+      +'<div class="member-role">'+(p.role==='coach'?'🎓 教练':'🧑‍💻 学生')+'</div>'
+      +'<div class="member-stats">'
+      +'<div class="member-stat"><div class="n">'+(nc[p.id]||0)+'</div><div class="l">题解</div></div>'
+      +'<div class="member-stat"><div class="n">'+(pc[p.id]||0)+'</div><div class="l">随笔</div></div>'
+      +'</div>';
+    return card;
+  }
+  el.innerHTML='';
+  if(coaches.length){
+    const t=document.createElement('div');t.className='section-sub-title';t.textContent='教练';el.appendChild(t);
+    const g=document.createElement('div');g.className='members-grid';g.style.marginBottom='32px';
+    coaches.forEach(p=>g.appendChild(renderCard(p)));el.appendChild(g);
+  }
+  if(students.length){
+    const t=document.createElement('div');t.className='section-sub-title';t.textContent='学生成员 ('+students.length+')';el.appendChild(t);
+    const g=document.createElement('div');g.className='members-grid';
+    students.forEach(p=>g.appendChild(renderCard(p)));el.appendChild(g);
+  }
+}
+
+// ── Stats ──────────────────────────────────────────────────
+async function loadStats(){
+  const el=document.getElementById('stats-content');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const[{count:noteCount},{count:postCount},{count:userCount},{count:contestCount},{count:lectureCount},{count:archiveCount},{data:notes},{data:members}]=await Promise.all([
+    sb.from('notes').select('*',{count:'exact',head:true}),
+    sb.from('posts').select('*',{count:'exact',head:true}),
+    sb.from('profiles').select('*',{count:'exact',head:true}),
+    sb.from('contests').select('*',{count:'exact',head:true}),
+    sb.from('lectures').select('*',{count:'exact',head:true}),
+    sb.from('problem_archive').select('*',{count:'exact',head:true}),
+    sb.from('notes').select('author_id,profiles(username)'),
+    sb.from('profiles').select('id,username,created_at').order('created_at'),
+  ]);
+  const firstJoin=members&&members.length?fmtDate(members[0].created_at):'—';
+  const today=new Date();
+  const start=members&&members.length?new Date(members[0].created_at):today;
+  const trainDays=Math.floor((today-start)/86400000);
+  const nc={};(notes||[]).forEach(n=>{const u=n.profiles?.username;if(u)nc[u]=(nc[u]||0)+1;});
+  const topAuthors=Object.entries(nc).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxNotes=topAuthors[0]?.[1]||1;
+  el.innerHTML='<div class="stats-grid">'
+    +'<div class="stat-card blue"><div class="stat-num">'+(noteCount||0)+'</div><div class="stat-label">题解总数</div></div>'
+    +'<div class="stat-card green"><div class="stat-num">'+(postCount||0)+'</div><div class="stat-label">随笔总数</div></div>'
+    +'<div class="stat-card pink"><div class="stat-num">'+(userCount||0)+'</div><div class="stat-label">注册成员</div><div class="stat-sub">自 '+firstJoin+' 起</div></div>'
+    +'<div class="stat-card yellow"><div class="stat-num">'+trainDays+'</div><div class="stat-label">训练天数</div></div>'
+    +'<div class="stat-card blue"><div class="stat-num">'+(contestCount||0)+'</div><div class="stat-label">模拟赛场数</div></div>'
+    +'<div class="stat-card purple"><div class="stat-num">'+(archiveCount||0)+'</div><div class="stat-label">题库题目数</div></div>'
+    +'</div>';
+  if(topAuthors.length){
+    const section=document.createElement('div');
+    section.innerHTML='<div class="section-sub-title">题解贡献排行</div>'
+      +'<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:28px" id="stats-authors"></div>';
+    el.appendChild(section);
+    const authorsEl=el.querySelector('#stats-authors');
+    topAuthors.forEach(([name,cnt])=>{
+      const row=document.createElement('div');
+      row.className='activity-row';
+      row.innerHTML='<div class="activity-name" style="cursor:pointer;color:var(--accent2)">@'+escHtml(name)+'</div>'
+        +'<div class="activity-bar-bg"><div class="activity-bar-fill" style="width:'+Math.round(cnt/maxNotes*100)+'%"></div></div>'
+        +'<div class="activity-count">'+cnt+'</div>';
+      row.querySelector('.activity-name').addEventListener('click',()=>showProfile(name));
+      authorsEl.appendChild(row);
+    });
+  }
+}
+
+// ── Bookmarks ──────────────────────────────────────────────
+async function toggleBookmark(noteId,isBookmarked){
+  if(!currentUser){showToast('请先登录','error');return;}
+  if(isBookmarked)await sb.from('bookmarks').delete().eq('note_id',noteId).eq('user_id',currentUser.id);
+  else await sb.from('bookmarks').insert({note_id:noteId,user_id:currentUser.id});
+  showNote(noteId);
+  showToast(isBookmarked?'已取消收藏':'收藏成功 ✓','success');
+}
+async function loadBookmarks(){
+  const el=document.getElementById('bookmarks-list');
+  if(!currentUser){el.innerHTML='<div class="empty">登录后查看收藏</div>';return;}
+  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const{data:bms}=await sb.from('bookmarks').select('note_id').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  if(!bms||!bms.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🔖</div><h3>还没有收藏</h3><p>在题解详情页点击收藏按钮保存感兴趣的题解。</p></div>';return;}
+  const ids=bms.map(b=>b.note_id);
+  const{data:notes}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,view_count,profiles(username)').in('id',ids);
+  if(!notes||!notes.length){el.innerHTML='<div class="empty">收藏的题解已被删除</div>';return;}
+  const grid=document.createElement('div');grid.className='blog-grid';
+  notes.forEach(n=>{
+    const card=document.createElement('div');card.className='blog-card';
+    card.innerHTML='<div class="blog-card-top"><h3>'+escHtml(n.title)+'</h3>'+(n.topic?'<span class="topic-badge">'+escHtml(n.topic)+'</span>':'')+'</div>'
+      +'<div class="blog-meta"><span class="author">@'+escHtml(n.profiles?.username||'匿名')+'</span><span>'+fmtDate(n.created_at)+'</span></div>'
+      +'<p class="blog-excerpt">'+escHtml((n.content||'').slice(0,100))+'…</p>';
+    card.querySelector('.author').addEventListener('click',e=>{e.stopPropagation();showProfile(n.profiles?.username||'');});
+    card.addEventListener('click',()=>{show('notes');setTimeout(()=>showNote(n.id),300);});
+    grid.appendChild(card);
+  });
+  el.innerHTML='';el.appendChild(grid);
+}
+
+// ── Edit Note ──────────────────────────────────────────────
+async function openEditNote(id){
+  const{data:n}=await sb.from('notes').select('*').eq('id',id).single();
+  document.getElementById('edit-note-id').value=id;
+  document.getElementById('edit-note-title').value=n.title||'';
+  document.getElementById('edit-note-problem').value=n.problem_id||'';
+  document.getElementById('edit-note-topic').value=n.topic||'';
+  document.getElementById('edit-note-content').value=n.content||'';
+  document.getElementById('edit-note-code').value=n.code||'';
+  document.getElementById('edit-note-reflection').value=n.reflection||'';
+  updatePreview('edit-note-content','edit-preview-content');
+  openModal('edit-note-modal');
+}
+
+// ── Edit Post ──────────────────────────────────────────────
+function openEditPost(id,postContent){
+  document.getElementById('edit-post-id').value=id;
+  document.getElementById('edit-post-content').value=postContent;
+  openModal('edit-post-modal');
+}
+
+// ── checkNotifDot ──────────────────────────────────────────
+async function checkNotifDot(){
+  if(!currentUser)return;
+  const{data:myNotes}=await sb.from('notes').select('id').eq('author_id',currentUser.id);
+  if(!myNotes||!myNotes.length)return;
+  const{data:comments}=await sb.from('comments').select('id').in('note_id',myNotes.map(n=>n.id)).neq('author_id',currentUser.id);
+  const hasUnread=(comments||[]).some(c=>!readIds.has(c.id));
+  document.getElementById('notif-dot').classList.toggle('show',hasUnread);
+}
+
 </script>
 </body>
 </html>
