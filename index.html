@@ -9,9 +9,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<!-- highlight.js loaded on demand -->
 <style>
 /* ── Variables ── */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Noto+Serif+SC:wght@400;700&display=swap');
@@ -886,6 +885,10 @@ body.light .modal{background:rgba(248,250,255,0.98);}
 function copyProblems(ids,btnId){
   navigator.clipboard.writeText(ids).then(()=>{
     const btn=document.getElementById(btnId);
+    if(btn){const 
+function copyProblems(ids,btnId){
+  navigator.clipboard.writeText(ids).then(()=>{
+    const btn=document.getElementById(btnId);
     if(btn){const orig=btn.textContent;btn.textContent='✓ 已复制';setTimeout(()=>btn.textContent=orig,2000);}
   });
 }
@@ -1263,7 +1266,18 @@ async function loadNotes(filterTag){
   if(!filtered.length){list.innerHTML='<div class="empty">该标签下暂无题解</div>';return;}
   list.innerHTML='<div class="blog-grid">'+filtered.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<div style="display:flex;gap:4px;flex-wrap:wrap">${(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge" onclick="event.stopPropagation();loadNotes('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?'<span class="view-count">${n.view_count}</span>':''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
 }
+function restoreNotesList(){
+  const savedFilter=sessionStorage.getItem('notes_filter')||'';
+  const savedScroll=parseInt(sessionStorage.getItem('notes_scroll')||'0');
+  loadNotes(savedFilter).then(()=>{
+    requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:savedScroll,behavior:'instant'})));
+  });
+}
+
 async function showNote(id){
+  // Save scroll position and active filter before entering detail
+  sessionStorage.setItem('notes_scroll', window.scrollY);
+  sessionStorage.setItem('notes_filter', activeNoteTag||'');
   document.getElementById('notes-list').style.display='none';
   const detail=document.getElementById('note-detail');detail.style.display='block';
   detail.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
@@ -1276,14 +1290,28 @@ async function showNote(id){
   const isOwner=currentUser&&n.profiles?.id===currentUser.id;
   const renderMd=s=>{ if(!s)return ''; const html=DOMPurify.sanitize(marked.parse(s)); return html; };
   detail._pendingHljs=true;
-  detail.innerHTML=`<button class="back-btn" onclick="loadNotes()">← 返回列表</button>
+  detail.innerHTML=`<button class="back-btn" onclick="restoreNotesList()">← 返回列表</button>
     <div class="post-title">${escHtml(n.title)}</div>
     <div class="post-meta"><span class="author" onclick="showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span><a href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} ↗</a></span>`:''} ${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}<span class="view-count">${n.view_count||0}</span><button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>${isOwner?`<button class="btn btn-outline btn-sm" onclick="openEditNote(${id})">编辑</button>`:''}<button class="export-btn" onclick="window.print()">📄 导出PDF</button> ${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''} <button class="bookmark-btn ${bookmarked?'saved':''}" onclick="toggleBookmark(${id},${bookmarked})">🔖 ${bookmarked?'已收藏':'收藏'}</button></div>
     <div class="post-body md-body">${n.content?`<h4>解题思路</h4>${renderMd(n.content)}`:''} ${n.code?`<h4>C++ 代码</h4><pre><code>${escHtml(n.code)}</code></pre>`:''} ${n.reflection?`<h4>反思与总结</h4>${renderMd(n.reflection)}`:''}</div>
     <div class="post-body md-body" id="note-body-rendered"></div>
     <div class="comments-section"><h3>评论 (${comments?comments.length:0})</h3><div id="cl-${id}">${comments&&comments.length?comments.map(c=>`<div class="comment-item"><div class="comment-meta"><span class="author" onclick="showProfile('${c.profiles?.username||''}')">@${c.profiles?.username||'匿名'}</span><span>${fmtDate(c.created_at)}</span></div><div class="comment-text">${escHtml(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:10px 0">// 暂无评论</div>'}</div>${currentUser?`<div class="comment-form"><input type="text" id="ci-${id}" placeholder="写下你的评论…"><button class="btn btn-primary btn-sm" onclick="submitComment(${id})">发送</button></div>`:'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:10px">登录后参与评论</div>'}</div>`;
 }
-function applyHljs(){if(typeof hljs==='undefined')return;document.querySelectorAll('#note-detail pre code').forEach(b=>hljs.highlightElement(b));}
+async function applyHljs(){
+  if(typeof hljs==='undefined'){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js';
+      // Load core first, then cpp
+      const core=document.createElement('script');
+      core.src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/core.min.js';
+      core.onload=()=>{document.head.appendChild(s);};
+      core.onerror=rej;s.onload=res;s.onerror=rej;
+      document.head.appendChild(core);
+    });
+  }
+  document.querySelectorAll('#note-detail pre code').forEach(b=>hljs.highlightElement(b));
+}
 async function toggleLike(noteId,isLiked){if(!currentUser){showToast('请先登录','error');return;}if(isLiked)await sb.from('likes').delete().eq('note_id',noteId).eq('user_id',currentUser.id);else await sb.from('likes').insert({note_id:noteId,user_id:currentUser.id});showNote(noteId);}
 async function submitComment(noteId){const input=document.getElementById(`ci-${noteId}`);const content=input.value.trim();if(!content)return;const{error}=await sb.from('comments').insert({note_id:noteId,author_id:currentUser.id,content});if(error){showToast('评论失败','error');return;}input.value='';showNote(noteId);showToast('评论成功 ✓','success');}
 async function deleteNote(id){if(!confirm('确认删除这篇题解？'))return;await sb.from('notes').delete().eq('id',id);showToast('已删除','success');loadNotes();}
@@ -1969,6 +1997,14 @@ async function loadMembers(){
 
 // ── Stats ──────────────────────────────────────────────────
 async function loadStats(){
+  if(typeof Chart==='undefined'){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';
+      s.onload=res;s.onerror=rej;
+      document.head.appendChild(s);
+    });
+  }
   const el=document.getElementById('stats-content');
   el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const[{count:noteCount},{count:postCount},{count:userCount},{count:contestCount},{count:lectureCount},{count:archiveCount},{data:notes},{data:members}]=await Promise.all([
@@ -2093,6 +2129,9 @@ document.addEventListener('visibilitychange',async()=>{
 // ── Contest Chart ──────────────────────────────────────────
 let contestChart=null;
 async function showContestChart(contestId, preloaded, title){
+  if(typeof Chart==='undefined'){
+    await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+  }
   const results=preloaded||[];
   if(!results||results.length<2)return;
   const wrap=document.getElementById('cchart-'+contestId);
@@ -2131,7 +2170,3 @@ async function showContestChart(contestId, preloaded, title){
     }
   });
 }
-
-</script>
-</body>
-</html>
