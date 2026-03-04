@@ -747,6 +747,36 @@ mark.search-hl{
   cursor:pointer;font-size:16px;transition:all 0.2s;color:var(--text);}
 .theme-btn:hover,.notif-btn:hover{
   background:rgba(108,142,245,0.15);border-color:rgba(108,142,245,0.3);}
+
+/* ── MEMBERS GROUPS ── */
+.members-section{margin-bottom:36px;}
+.members-section-title{
+  font-family:var(--mono);font-size:11px;color:var(--accent);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.members-section-count{
+  background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.15);
+  border-radius:20px;padding:1px 8px;font-size:10px;color:var(--text3);}
+
+/* ── FOLLOW BUTTON ── */
+.follow-btn{
+  font-family:var(--mono);font-size:10px;padding:4px 10px;
+  border-radius:6px;border:1px solid rgba(108,142,245,0.25);
+  background:rgba(108,142,245,0.07);color:var(--accent);
+  cursor:pointer;transition:all 0.2s;margin-top:6px;width:100%;}
+.follow-btn:hover{background:rgba(108,142,245,0.15);}
+.follow-btn.following{
+  background:rgba(45,232,176,0.07);border-color:rgba(45,232,176,0.2);
+  color:var(--accent2);}
+.follow-btn.following:hover{background:rgba(255,83,112,0.07);border-color:rgba(255,83,112,0.2);color:var(--red);}
+.follow-btn.following:hover::after{content:' 取消';}
+.mutual-badge{
+  font-family:var(--mono);font-size:9px;color:var(--accent2);
+  background:rgba(45,232,176,0.08);border:1px solid rgba(45,232,176,0.15);
+  border-radius:4px;padding:2px 6px;margin-top:4px;text-align:center;}
+.member-bio{
+  font-size:11px;color:var(--text3);margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
 </style>
 </head>
 <body>
@@ -2044,9 +2074,11 @@ async function loadSettingsData(){
 async function saveSettings(){
   const avatar_url=document.getElementById('set-avatar').value.trim();
   const bio=document.getElementById('set-bio').value.trim();
-  const{error}=await sb.from('profiles').update({avatar_url,bio}).eq('id',currentUser.id);
+  const gv=document.getElementById('set-group')?.value;
+  const group_id=gv?parseInt(gv):null;
+  const{error}=await sb.from('profiles').update({avatar_url,bio,group_id}).eq('id',currentUser.id);
   if(error){document.getElementById('settings-avatar-error').textContent=error.message;return;}
-  currentProfile={...currentProfile,avatar_url,bio};
+  currentProfile={...currentProfile,avatar_url,bio,group_id};
   closeModal('settings-modal');showToast('设置已保存 ✓','success');
 }
 async function savePassword(){
@@ -2322,41 +2354,65 @@ async function loadMembers(){
   try{
   const el=document.getElementById('members-list');
   el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const{data:profiles}=await sb.from('profiles').select('id,username,role,created_at,avatar_url').order('role').order('created_at');
-  if(!profiles||!profiles.length){el.innerHTML='<div class="empty">暂无成员</div>';return;}
-  const{data:notes}=await sb.from('notes').select('author_id');
-  const{data:posts}=await sb.from('posts').select('author_id');
-  const nc={},pc={};
-  (notes||[]).forEach(n=>{nc[n.author_id]=(nc[n.author_id]||0)+1;});
-  (posts||[]).forEach(p=>{pc[p.author_id]=(pc[p.author_id]||0)+1;});
-  const coaches=profiles.filter(p=>p.role==='coach');
-  const students=profiles.filter(p=>p.role!=='coach');
-  function renderCard(p){
-    const card=document.createElement('div');
-    card.className='member-card';
-    card.dataset.u=p.username;
-    card.addEventListener('click',()=>showProfile(card.dataset.u));
-    card.innerHTML='<div style="margin:0 auto 12px">'+avatarEl(p.username,p.avatar_url||'',60,22)+'</div>'
-      +'<div class="member-name">@'+escHtml(p.username)+'</div>'
-      +'<div class="member-role">'+(p.role==='coach'?'🎓 教练':'🧑‍💻 学生')+'</div>'
-      +'<div class="member-stats">'
-      +'<div class="member-stat"><div class="n">'+(nc[p.id]||0)+'</div><div class="l">题解</div></div>'
-      +'<div class="member-stat"><div class="n">'+(pc[p.id]||0)+'</div><div class="l">随笔</div></div>'
-      +'</div>';
-    return card;
-  }
+  const[{data:profiles},{data:grps},{data:follows}]=await Promise.all([
+    sb.from('profiles').select('id,username,role,created_at,avatar_url,bio,group_id').order('role').order('created_at'),
+    sb.from('groups').select('*').order('id'),
+    sb.from('follows').select('follower_id,following_id'),
+  ]);
+  if(!profiles||!profiles.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><h3>暂无成员</h3></div>';return;}
+  const myFollowing=new Set((follows||[]).filter(f=>f.follower_id===currentUser?.id).map(f=>f.following_id));
+  const myFollowers=new Set((follows||[]).filter(f=>f.following_id===currentUser?.id).map(f=>f.follower_id));
   el.innerHTML='';
+  const coaches=profiles.filter(p=>p.role==='coach');
   if(coaches.length){
-    const t=document.createElement('div');t.className='section-sub-title';t.textContent='教练';el.appendChild(t);
-    const g=document.createElement('div');g.className='members-grid';g.style.marginBottom='32px';
-    coaches.forEach(p=>g.appendChild(renderCard(p)));el.appendChild(g);
+    const sec=document.createElement('div');sec.className='members-section';
+    sec.innerHTML='<div class="members-section-title">🎓 教练</div><div class="members-grid" id="mg-coach"></div>';
+    el.appendChild(sec);coaches.forEach(p=>sec.querySelector('#mg-coach').appendChild(makeMemberCard(p,myFollowing,myFollowers)));
   }
-  if(students.length){
-    const t=document.createElement('div');t.className='section-sub-title';t.textContent='学生成员 ('+students.length+')';el.appendChild(t);
-    const g=document.createElement('div');g.className='members-grid';
-    students.forEach(p=>g.appendChild(renderCard(p)));el.appendChild(g);
+  (grps||[]).forEach(g=>{
+    const members=(profiles||[]).filter(p=>p.role!=='coach'&&p.group_id===g.id);
+    if(!members.length)return;
+    const sec=document.createElement('div');sec.className='members-section';
+    sec.innerHTML='<div class="members-section-title">'+escHtml(g.name)+'<span class="members-section-count">'+members.length+' 人</span></div><div class="members-grid" id="mg-g'+g.id+'"></div>';
+    el.appendChild(sec);members.forEach(p=>sec.querySelector('#mg-g'+g.id).appendChild(makeMemberCard(p,myFollowing,myFollowers)));
+  });
+  const ungrouped=(profiles||[]).filter(p=>p.role!=='coach'&&!p.group_id);
+  if(ungrouped.length){
+    const sec=document.createElement('div');sec.className='members-section';
+    sec.innerHTML='<div class="members-section-title">其他成员<span class="members-section-count">'+ungrouped.length+' 人</span></div><div class="members-grid" id="mg-none"></div>';
+    el.appendChild(sec);ungrouped.forEach(p=>sec.querySelector('#mg-none').appendChild(makeMemberCard(p,myFollowing,myFollowers)));
   }
   } catch(e){ console.error("loadMembers:", e); showToast("加载失败，请刷新重试", "error"); }
+}
+
+function makeMemberCard(p,myFollowing,myFollowers){
+  const card=document.createElement('div');card.className='member-card';
+  const isSelf=currentUser&&p.id===currentUser.id;
+  const isFollowing=myFollowing.has(p.id);
+  const isMutual=isFollowing&&myFollowers.has(p.id);
+  card.innerHTML=
+    '<div class="member-avatar" style="background:'+avatarGradient(p.username)+'">'+(p.avatar_url?'<img src="'+escHtml(p.avatar_url)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':p.username.charAt(0).toUpperCase())+'</div>'
+    +'<div class="member-name">@'+escHtml(p.username)+'</div>'
+    +(p.bio?'<div class="member-bio">'+escHtml(p.bio.slice(0,20))+'</div>':'')
+    +(isMutual?'<div class="mutual-badge">互关</div>':'')
+    +(!isSelf&&currentUser?'<button class="follow-btn'+(isFollowing?' following':'')+'" data-uid="'+p.id+'" data-following="'+isFollowing+'">'+(isFollowing?'已关注':'+ 关注')+'</button>':'');
+  card.addEventListener('click',e=>{if(e.target.classList.contains('follow-btn'))return;showProfile(p.username);});
+  const fbtn=card.querySelector('.follow-btn');
+  if(fbtn)fbtn.addEventListener('click',e=>{e.stopPropagation();toggleFollow(p.id,fbtn.dataset.following==='true',fbtn);});
+  return card;
+}
+
+async function toggleFollow(uid,isFollowing,btn){
+  if(!currentUser){showToast('请先登录','error');return;}
+  btn.disabled=true;
+  if(isFollowing){
+    await sb.from('follows').delete().eq('follower_id',currentUser.id).eq('following_id',uid);
+    btn.textContent='+ 关注';btn.classList.remove('following');btn.dataset.following='false';
+  } else {
+    await sb.from('follows').insert({follower_id:currentUser.id,following_id:uid});
+    btn.textContent='已关注';btn.classList.add('following');btn.dataset.following='true';
+  }
+  btn.disabled=false;
 }
 
 // ── Stats ──────────────────────────────────────────────────
