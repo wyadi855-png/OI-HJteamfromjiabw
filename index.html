@@ -700,6 +700,13 @@ body.light .modal{background:rgba(248,250,255,0.98);}
   .home-bento{grid-template-columns:1fr;}
   .bento-feed #home-feed{max-height:280px;}
 }
+
+/* ── ERROR STATES ── */
+.error-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:10px;}
+.error-icon{font-size:28px;opacity:0.5;}
+.error-text{font-family:var(--mono);font-size:12px;color:var(--text3);}
+.error-retry{font-family:var(--mono);font-size:11px;padding:6px 16px;border-radius:6px;border:1px solid rgba(255,83,112,0.2);background:rgba(255,83,112,0.06);color:var(--red);cursor:pointer;transition:all 0.2s;margin-top:4px;}
+.error-retry:hover{background:rgba(255,83,112,0.12);}
 </style>
 </head>
 <body>
@@ -1247,6 +1254,7 @@ async function doLogout(){await sb.auth.signOut();showToast('已退出登录','s
 
 // ── Home ───────────────────────────────────────────────────
 async function loadHomeFeed(){
+  try{
   loadHeroStats();
   const feed=document.getElementById('home-feed');
   feed.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
@@ -1275,15 +1283,18 @@ async function loadHomeFeed(){
     else if(item.type==='ann')content=`📢 <span class="clickable-name" onclick="show('announcements')">${escHtml(item.title)}</span> <span class="update-tag tag-ann">公告</span>`;
     return`<div class="update-item"><div class="update-date">${fmtDate(item.created_at)}</div><div class="update-content">${content}</div></div>`;
   }).join('');
+  } catch(e){ console.error("loadHomeFeed:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 
 // ── Announcements ──────────────────────────────────────────
 async function loadAnnouncements(){
+  try{
   const list=document.getElementById('ann-list');
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('announcements').select('*,profiles(username)').order('is_pinned',{ascending:false}).order('created_at',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty-state"><div class="empty-state-icon">📢</div><h3>暂无公告</h3><p>教练发布的比赛通知和训练安排会出现在这里。</p></div>';return;}
   list.innerHTML=data.map(a=>`<div class="ann-card ${a.is_pinned?'pinned':''}"><div class="ann-card-top"><div class="ann-title">${escHtml(a.title)}</div><div style="display:flex;gap:6px;align-items:center;flex-shrink:0">${a.is_pinned?'<span class="ann-pin">📌 置顶</span>':''}${isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteAnn(${a.id})">删除</button>`:''}</div></div><div class="ann-meta">${fmtDate(a.created_at)} · ${a.profiles?.username||'教练'}</div><div class="ann-content">${escHtml(a.content)}</div></div>`).join('');
+  } catch(e){ console.error("loadAnnouncements:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 function openAnnModal(){if(!isCoach())return;openModal('ann-modal');}
 async function submitAnn(){
@@ -1298,6 +1309,7 @@ async function deleteAnn(id){if(!confirm('确认删除？'))return;await sb.from
 
 // ── Contests ───────────────────────────────────────────────
 async function loadContests(){
+  try{
   const list=document.getElementById('contests-list');
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data:contests}=await sb.from('contests').select('*').order('contest_date',{ascending:false});
@@ -1427,6 +1439,7 @@ async function loadContests(){
     });
     list.appendChild(card);
   });
+  } catch(e){ console.error("loadContests:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 
 function openContestModal(){if(!isCoach())return;document.getElementById('results-rows').innerHTML='';addResultRow();addResultRow();addResultRow();openModal('contest-modal');}
@@ -1447,6 +1460,7 @@ async function deleteContest(id){if(!confirm('确认删除这场模拟赛及其�
 // ── Notes ──────────────────────────────────────────────────
 let activeNoteTag='';
 async function loadNotes(filterTag){
+  try{
   if(filterTag!==undefined)activeNoteTag=filterTag;
   const list=document.getElementById('notes-list'),detail=document.getElementById('note-detail');
   detail.style.display='none';list.style.display='block';
@@ -1463,6 +1477,7 @@ async function loadNotes(filterTag){
   const filtered=activeNoteTag?data.filter(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).includes(activeNoteTag)):data;
   if(!filtered.length){list.innerHTML='<div class="empty">该标签下暂无题解</div>';return;}
   list.innerHTML='<div class="blog-grid">'+filtered.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<div style="display:flex;gap:4px;flex-wrap:wrap">${(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge" onclick="event.stopPropagation();loadNotes('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?'<span class="view-count">${n.view_count}</span>':''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
+  } catch(e){ console.error("loadNotes:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 function restoreNotesList(){
   const savedFilter=sessionStorage.getItem('notes_filter')||'';
@@ -1533,6 +1548,7 @@ function closeMoreMenuOutside(e){
 
 // ── Hero Stats Bar ─────────────────────────────────────────
 async function loadHeroStats(){
+  try{
   const el=document.getElementById('hero-stats-bar');
   if(!el)return;
   const[{count:nc},{count:uc},{count:cc}]=await Promise.all([
@@ -1577,6 +1593,7 @@ async function loadHeroStats(){
   countUp('hs-notes',nc||0);
   countUp('hs-members',uc||0);
   countUp('hs-contests',cc||0);
+  } catch(e){ console.error("loadHeroStats:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 
 // ── Heatmap ────────────────────────────────────────────────
@@ -1648,6 +1665,7 @@ async function deletePost(id){if(!confirm('确认删除？'))return;await sb.fro
 
 // ── Lectures ───────────────────────────────────────────────
 async function loadLectures(){
+  try{
   const list=document.getElementById('lectures-list');
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('lectures').select('*').order('lecture_date',{ascending:false});
@@ -1678,6 +1696,7 @@ async function loadLectures(){
     if(isCoach()){const db=item.querySelector('[data-lid]');if(db)db.addEventListener('click',()=>deleteLecture(+db.dataset.lid));}
     list.appendChild(item);
   });;
+  } catch(e){ console.error("loadLectures:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 function openLectureModal(){if(!isCoach())return;openModal('lecture-modal');}
 async function submitLecture(){
@@ -1701,11 +1720,13 @@ async function deleteLecture(id){if(!confirm('确认删除？'))return;await sb.
 
 // ── Archive ────────────────────────────────────────────────
 async function loadArchive(){
+  try{
   const list=document.getElementById('archive-list');
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('problem_archive').select('*').order('created_at',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty">暂无题目，教练可添加</div>';return;}
   list.innerHTML=`<div class="archive-table-wrap"><table class="archive-table"><thead><tr><th>题目</th><th>链接</th><th>难度</th><th>知识点</th>${isCoach()?'<th></th>':''}</tr></thead><tbody>${data.map(p=>`<tr><td>${escHtml(p.title)}</td><td><a href="https://www.luogu.com.cn/problem/${escHtml(p.problem_id)}" target="_blank">${escHtml(p.problem_id)}</a></td><td><span class="diff-badge diff-${p.difficulty||''}">${p.difficulty||'-'}</span></td><td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${escHtml(p.topic||'-')}</td>${isCoach()?`<td><button class="btn btn-danger btn-sm" onclick="deleteProblem(${p.id})">删除</button></td>`:''}</tr>`).join('')}</tbody></table></div>`;
+  } catch(e){ console.error("loadArchive:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 function openProblemModal(){if(!isCoach())return;openModal('problem-modal');}
 async function submitProblem(){
@@ -1721,6 +1742,7 @@ async function deleteProblem(id){if(!confirm('确认删除？'))return;await sb.
 // ── Search (realtime) ────────────────────────────────────
 let allNotes=[],allPosts=[],searchFilter='';
 async function initSearch(){
+  try{
   if(!allNotes.length){
     const{data}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,view_count,profiles(username)').order('created_at',{ascending:false});
     allNotes=data||[];
@@ -1742,6 +1764,7 @@ async function initSearch(){
   inp.addEventListener('input',onSearchInput);
   inp.focus();
   doSearch();
+  } catch(e){ console.error("initSearch:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 function onSearchInput(){doSearch();}
 function setFilter(f){
@@ -2025,6 +2048,40 @@ function initTopicAutocomplete(inputId){
   }
   setTimeout(tick,1200);
 })();
+
+// ── Global Error Handling ────────────────────────────────
+function showNetworkError(container, retryFn){
+  const el = typeof container === 'string' ? document.getElementById(container) : container;
+  if(!el) return;
+  el.innerHTML = `<div class="error-state">
+    <div class="error-icon">⚠</div>
+    <div class="error-text">加载失败，请检查网络</div>
+    ${retryFn ? `<button class="error-retry" onclick="(${retryFn.toString()})()">重试</button>` : ''}
+  </div>`;
+}
+
+window.addEventListener('unhandledrejection', e => {
+  console.error('Unhandled:', e.reason);
+  // Only show toast for network errors, not logic errors
+  if(e.reason && (e.reason.message||'').includes('fetch')){
+    showToast('网络请求失败，请检查连接', 'error');
+  }
+});
+
+window.addEventListener('online',  () => showToast('网络已恢复 ✓', 'success'));
+window.addEventListener('offline', () => showToast('网络已断开', 'error'));
+
+async function safeLoad(fn, fallbackEl, label){
+  try {
+    await fn();
+  } catch(e) {
+    console.error(`${label || 'load'} failed:`, e);
+    if(fallbackEl){
+      const el = typeof fallbackEl === 'string' ? document.getElementById(fallbackEl) : fallbackEl;
+      if(el) el.innerHTML = '<div class="error-state"><div class="error-icon">⚠</div><div class="error-text">加载失败</div></div>';
+    }
+  }
+}
 loadSession();
 
 // ── Nav scroll shrink ────────────────────────────────────
@@ -2040,6 +2097,7 @@ window.addEventListener('scroll',()=>{
 
 // ── Admin ──────────────────────────────────────────────────
 async function loadAdmin(){
+  try{
   if(!isCoach()){show('home');return;}
   const usersEl=document.getElementById('admin-users');
   const notesEl=document.getElementById('admin-notes');
@@ -2073,6 +2131,7 @@ async function loadAdmin(){
       +'<button class="btn btn-danger btn-sm" data-nid="'+n.id+'" onclick="deleteNote(+this.dataset.nid)">删除</button>'
       +'</div></div>').join('');
   } else { notesEl.innerHTML='<div class="empty">暂无题解</div>'; }
+  } catch(e){ console.error("loadAdmin:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 function adminViewNote(id){show('notes');setTimeout(()=>showNote(id),300);}
 async function setRoleBtn(el){
@@ -2088,6 +2147,7 @@ async function setRole(userId,role){
 // ── Leaderboard ────────────────────────────────────────────
 let lbMode='notes';
 async function loadLeaderboard(mode){
+  try{
   lbMode=mode||lbMode;
   document.querySelectorAll('.lb-tab').forEach((t,i)=>t.classList.toggle('active',i===(lbMode==='notes'?0:1)));
   const el=document.getElementById('lb-list');
@@ -2165,10 +2225,12 @@ async function loadLeaderboard(mode){
     wrap.appendChild(row);
   });
   el.innerHTML='';el.appendChild(wrap);
+  } catch(e){ console.error("loadLeaderboard:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 
 // ── Members ────────────────────────────────────────────────
 async function loadMembers(){
+  try{
   const el=document.getElementById('members-list');
   el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data:profiles}=await sb.from('profiles').select('id,username,role,created_at,avatar_url').order('role').order('created_at');
@@ -2205,10 +2267,12 @@ async function loadMembers(){
     const g=document.createElement('div');g.className='members-grid';
     students.forEach(p=>g.appendChild(renderCard(p)));el.appendChild(g);
   }
+  } catch(e){ console.error("loadMembers:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 
 // ── Stats ──────────────────────────────────────────────────
 async function loadStats(){
+  try{
   if(typeof Chart==='undefined'){
     await new Promise((res,rej)=>{
       const s=document.createElement('script');
@@ -2260,6 +2324,7 @@ async function loadStats(){
       authorsEl.appendChild(row);
     });
   }
+  } catch(e){ console.error("loadStats:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 
 // ── Bookmarks ──────────────────────────────────────────────
@@ -2271,6 +2336,7 @@ async function toggleBookmark(noteId,isBookmarked){
   showToast(isBookmarked?'已取消收藏':'收藏成功 ✓','success');
 }
 async function loadBookmarks(){
+  try{
   const el=document.getElementById('bookmarks-list');
   if(!currentUser){el.innerHTML='<div class="empty">登录后查看收藏</div>';return;}
   el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
@@ -2290,6 +2356,7 @@ async function loadBookmarks(){
     grid.appendChild(card);
   });
   el.innerHTML='';el.appendChild(grid);
+  } catch(e){ console.error("loadBookmarks:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 
 // ── Edit Note ──────────────────────────────────────────────
