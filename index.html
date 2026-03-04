@@ -895,7 +895,8 @@ body.light .rank-table-wrap{background:var(--surface2);}
   <div class="form-group"><label>C++ 代码</label><textarea id="edit-note-code" class="code-input"></textarea></div>
   <div class="form-group"><label>反思与总结</label><textarea id="edit-note-reflection" style="min-height:70px"></textarea></div>
   <div id="edit-note-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('edit-note-modal')">取消<
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('edit-note-modal')">取消<取消</button><button class="btn btn-primary" onclick="submitEditNote()">保存</button></div></div></div>
+<script>
 // ── Utilities ──────────────────────────────────────────────
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function fmtDate(s){if(!s)return'';const d=new Date(s);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -1969,27 +1970,6 @@ async function showContestChart(contestId, preloaded, title){
         label:'得分',
         data:scores,
         backgroundColor:scores.map(s=>{
-          const pct=s/maxScore;
-          if(pct>=0.9)return'rgba(45,232,176,0.7)';
-          if(pct>=0.7)return'rgba(108,142,245,0.7)';
-          if(pct>=0.5)return'rgba(255,179,71,0.7)';
-          return'rgba(255,83,112,0.7)';
-        }),
-        borderRadius:6,
-        borderSkipped:false,
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'得分: '+ctx.raw}}},
-      scales:{
-        x:{ticks:{color:'#7a86a8',font:{family:'JetBrains Mono',size:11}},grid:{color:'rgba(30,37,64,0.8)'}},
-        y:{ticks:{color:'#7a86a8',font:{family:'JetBrains Mono',size:11}},grid:{color:'rgba(30,37,64,0.5)'},beginAtZero:true}
-      }
-    }
-  });
-}
-es.map(s=>{
           const pct=s/maxScore;
           if(pct>=0.9)return'rgba(45,232,176,0.7)';
           if(pct>=0.7)return'rgba(108,142,245,0.7)';
