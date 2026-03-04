@@ -2,221 +2,305 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:;">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>算法竞赛训练队</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;--border:#232737;--accent:#5b8af0;--accent2:#3dffc0;--text:#e2e6f0;--text2:#8891a8;--text3:#555e75;--red:#ff6b6b;--yellow:#ffd166;--green:#3dffc0;--mono:'JetBrains Mono',monospace;--serif:'Noto Serif SC',serif;--space:'Space Mono',monospace;}
+:root{
+  --bg:#080b12;--surface:#0f1320;--surface2:#161c2e;--border:#1e2540;
+  --accent:#6c8ef5;--accent2:#2de8b0;--accent3:#f06292;--accent4:#ffb347;
+  --text:#e8edf8;--text2:#7a86a8;--text3:#404d6a;
+  --red:#ff5370;--yellow:#ffcb6b;--green:#2de8b0;--purple:#c792ea;
+  --mono:'JetBrains Mono',monospace;--serif:'Noto Serif SC',serif;--space:'Space Mono',monospace;
+  --glow-blue:0 0 20px rgba(108,142,245,0.25);
+  --glow-green:0 0 20px rgba(45,232,176,0.25);
+}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:var(--serif);font-size:15px;line-height:1.8;min-height:100vh;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--serif);font-size:15px;line-height:1.8;min-height:100vh;overflow-x:hidden;}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,15,20,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;min-height:64px;}
+
+/* CANVAS BACKGROUND */
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.4;}
+
+/* CLICK PARTICLES */
+.particle{position:fixed;pointer-events:none;z-index:9999;border-radius:50%;animation:particle-fly 0.8s ease-out forwards;}
+@keyframes particle-fly{0%{opacity:1;transform:scale(1) translate(0,0);}100%{opacity:0;transform:scale(0) translate(var(--tx),var(--ty));}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(8,11,18,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;min-height:64px;}
 .nav-top{display:flex;align-items:center;justify-content:space-between;padding:10px 32px 5px;}
 .nav-bottom{display:flex;align-items:center;padding:0 32px 10px;gap:4px;}
-.nav-logo{font-family:var(--space);font-size:17px;color:var(--accent2);letter-spacing:0.08em;white-space:nowrap;}
+.nav-logo{font-family:var(--space);font-size:17px;color:var(--accent2);letter-spacing:0.08em;white-space:nowrap;text-shadow:var(--glow-green);}
 .nav-links{display:flex;gap:3px;list-style:none;flex-wrap:wrap;}
-.nav-links a{font-family:var(--serif);font-size:14px;color:var(--text2);text-decoration:none;padding:5px 14px;border-radius:4px;transition:all 0.15s;cursor:pointer;}
+.nav-links a{font-family:var(--serif);font-size:14px;color:var(--text2);text-decoration:none;padding:5px 14px;border-radius:6px;transition:all 0.2s;cursor:pointer;position:relative;}
 .nav-links a:hover{color:var(--text);background:var(--surface2);}
-.nav-links a.active{color:var(--accent);background:rgba(91,138,240,0.12);}
+.nav-links a.active{color:var(--accent);background:rgba(108,142,245,0.12);box-shadow:inset 0 0 0 1px rgba(108,142,245,0.2);}
 .nav-right{display:flex;align-items:center;gap:10px;}
 .nav-user{font-family:var(--mono);font-size:13px;color:var(--accent2);}
-.coach-badge{font-family:var(--mono);font-size:10px;padding:2px 7px;background:rgba(255,209,102,0.15);border:1px solid rgba(255,209,102,0.3);border-radius:3px;color:var(--yellow);}
-.btn{font-family:var(--mono);font-size:13px;padding:7px 18px;border-radius:5px;border:1px solid;cursor:pointer;transition:all 0.15s;}
-.btn-outline{border-color:var(--border);color:var(--text2);background:none;}.btn-outline:hover{border-color:var(--accent);color:var(--accent);}
-.btn-primary{border-color:var(--accent);color:var(--bg);background:var(--accent);}.btn-primary:hover{background:#7aa3f5;}
-.btn-danger{border-color:var(--red);color:var(--red);background:none;}.btn-danger:hover{background:rgba(255,107,107,0.1);}
-.btn-yellow{border-color:var(--yellow);color:var(--yellow);background:none;}.btn-yellow:hover{background:rgba(255,209,102,0.1);}
+.coach-badge{font-family:var(--mono);font-size:10px;padding:2px 7px;background:rgba(255,203,107,0.12);border:1px solid rgba(255,203,107,0.3);border-radius:3px;color:var(--yellow);}
+
+/* BUTTONS */
+.btn{font-family:var(--mono);font-size:13px;padding:7px 18px;border-radius:6px;border:1px solid;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.btn::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.2s;background:white;}
+.btn:active::after{opacity:0.07;}
+.btn-outline{border-color:var(--border);color:var(--text2);background:none;}.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px rgba(108,142,245,0.15);}
+.btn-primary{border-color:var(--accent);color:#fff;background:linear-gradient(135deg,var(--accent),#8fa8ff);box-shadow:var(--glow-blue);}.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(108,142,245,0.4);}
+.btn-danger{border-color:var(--red);color:var(--red);background:none;}.btn-danger:hover{background:rgba(255,83,112,0.08);}
+.btn-yellow{border-color:var(--yellow);color:var(--yellow);background:none;}.btn-yellow:hover{background:rgba(255,203,107,0.08);box-shadow:0 0 12px rgba(255,203,107,0.15);}
+.btn-green{border-color:var(--accent2);color:var(--accent2);background:none;}.btn-green:hover{background:rgba(45,232,176,0.08);}
 .btn-sm{font-size:10px;padding:3px 9px;}
-.main{padding-top:80px;}
-section{display:none;}section.active{display:block;}
+
+/* LAYOUT */
+.main{padding-top:80px;position:relative;z-index:1;}
+section{display:none;}section.active{display:block;animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 .container{max-width:920px;margin:0 auto;padding:44px 28px;}
+
+/* PAGE HEADER */
 .page-header{margin-bottom:36px;padding-bottom:22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-end;}
 .page-header-left .label{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;}
 .page-header-left h1{font-size:25px;font-weight:500;letter-spacing:-0.02em;}
 .page-header-left p{color:var(--text2);font-size:13px;margin-top:5px;}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;padding:16px;}
-.modal-overlay.open{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:28px;width:480px;max-width:100%;max-height:90vh;overflow-y:auto;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;animation:fadeIn 0.2s ease;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:480px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,0.6);}
 .modal h2{font-size:17px;font-weight:500;margin-bottom:22px;}
 .modal-tabs{display:flex;margin-bottom:22px;border-bottom:1px solid var(--border);}
 .modal-tab{font-family:var(--mono);font-size:12px;padding:7px 14px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;transition:all 0.15s;background:none;border-top:none;border-left:none;border-right:none;}
 .modal-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .form-group{margin-bottom:14px;}
 .form-group label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;display:block;margin-bottom:5px;}
-.form-group input,.form-group textarea,.form-group select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:8px 11px;color:var(--text);font-family:var(--serif);font-size:14px;transition:border-color 0.15s;resize:vertical;}
-.form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--accent);}
+.form-group input,.form-group textarea,.form-group select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--text);font-family:var(--serif);font-size:14px;transition:all 0.15s;resize:vertical;}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,142,245,0.1);}
 .form-group textarea{min-height:90px;}
 .code-input{font-family:var(--mono)!important;font-size:12px!important;min-height:150px!important;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .form-error{font-family:var(--mono);font-size:11px;color:var(--red);margin-top:10px;}
 .form-success{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:10px;}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
-.results-editor{margin-top:16px;}
+
+/* RESULTS EDITOR */
 .results-editor table{width:100%;border-collapse:collapse;}
 .results-editor th{font-family:var(--mono);font-size:10px;color:var(--text3);padding:6px 8px;text-align:left;letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border);}
 .results-editor td{padding:5px 4px;}
 .results-editor input{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:5px 8px;color:var(--text);font-family:var(--mono);font-size:12px;width:100%;}
 .results-editor input:focus{outline:none;border-color:var(--accent);}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:11px 16px;font-family:var(--mono);font-size:12px;color:var(--text2);z-index:300;opacity:0;transform:translateY(8px);transition:all 0.25s;pointer-events:none;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 18px;font-family:var(--mono);font-size:12px;color:var(--text2);z-index:300;opacity:0;transform:translateY(12px);transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;}
 .toast.show{opacity:1;transform:translateY(0);}
-.toast.success{border-color:var(--accent2);color:var(--accent2);}
+.toast.success{border-color:var(--accent2);color:var(--accent2);box-shadow:var(--glow-green);}
 .toast.error{border-color:var(--red);color:var(--red);}
-.hero{padding:52px 0 36px;border-bottom:1px solid var(--border);margin-bottom:44px;}
-.hero-tag{font-family:var(--mono);font-size:11px;color:var(--accent2);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.hero-tag::before{content:'';width:18px;height:1px;background:var(--accent2);}
-.hero h1{font-size:36px;font-weight:400;line-height:1.2;letter-spacing:-0.03em;margin-bottom:12px;}
-.hero h1 span{color:var(--accent);}
-.hero-desc{font-size:14px;color:var(--text2);max-width:500px;line-height:1.9;}
-.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:44px;}
-.info-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;}
+
+/* HOME */
+.hero{padding:56px 0 40px;border-bottom:1px solid var(--border);margin-bottom:48px;position:relative;}
+.hero-tag{font-family:var(--mono);font-size:11px;color:var(--accent2);letter-spacing:0.16em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.hero-tag::before{content:'';width:24px;height:1px;background:linear-gradient(90deg,var(--accent2),transparent);}
+.hero h1{font-size:40px;font-weight:400;line-height:1.15;letter-spacing:-0.03em;margin-bottom:14px;}
+.hero h1 span{background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-desc{font-size:14px;color:var(--text2);max-width:520px;line-height:1.95;}
+.hero-glow{position:absolute;top:20px;right:0;width:400px;height:300px;background:radial-gradient(ellipse,rgba(108,142,245,0.06) 0%,transparent 70%);pointer-events:none;}
+
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:48px;}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px;transition:all 0.25s;position:relative;overflow:hidden;}
+.info-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.25s;background:linear-gradient(135deg,rgba(108,142,245,0.04),transparent);}
+.info-card:hover{border-color:rgba(108,142,245,0.3);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.3);}
+.info-card:hover::before{opacity:1;}
 .info-card .card-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px;}
-.info-card h3{font-size:14px;font-weight:500;margin-bottom:5px;}
+.info-card h3{font-size:14px;font-weight:500;margin-bottom:6px;}
 .info-card p{font-size:13px;color:var(--text2);line-height:1.75;}
-.coach-card{grid-column:1/-1;display:flex;gap:18px;align-items:flex-start;}
-.coach-avatar{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:18px;color:var(--bg);font-weight:700;}
+.coach-card{grid-column:1/-1;display:flex;gap:20px;align-items:flex-start;}
+.coach-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:18px;color:var(--bg);font-weight:700;box-shadow:var(--glow-blue);}
 .coach-info .coach-title{font-family:var(--mono);font-size:10px;color:var(--accent);margin-bottom:4px;}
 .coach-info .coach-name{font-size:15px;font-weight:500;}
-.updates-section h2{font-size:12px;font-weight:400;margin-bottom:12px;color:var(--text2);font-family:var(--mono);letter-spacing:0.04em;}
-.update-item{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border);}
+
+.updates-section h2{font-size:12px;font-weight:400;margin-bottom:14px;color:var(--text2);font-family:var(--mono);letter-spacing:0.04em;}
+.update-item{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);transition:background 0.15s;border-radius:4px;}
 .update-date{font-family:var(--mono);font-size:10px;color:var(--text3);white-space:nowrap;padding-top:3px;width:72px;flex-shrink:0;}
 .update-content{font-size:13px;color:var(--text2);}
 .update-content strong{color:var(--text);font-weight:500;}
-.update-tag{display:inline-block;font-family:var(--mono);font-size:9px;padding:1px 5px;border-radius:3px;margin-left:5px;vertical-align:middle;}
-.tag-note{background:rgba(61,255,192,0.1);color:var(--accent2);}
-.tag-post{background:rgba(255,209,102,0.1);color:var(--yellow);}
-.tag-contest{background:rgba(91,138,240,0.1);color:var(--accent);}
-.tag-lecture{background:rgba(255,107,107,0.1);color:var(--red);}
+.update-tag{display:inline-block;font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:3px;margin-left:5px;vertical-align:middle;}
+.tag-note{background:rgba(45,232,176,0.1);color:var(--accent2);}
+.tag-post{background:rgba(255,203,107,0.1);color:var(--yellow);}
+.tag-contest{background:rgba(108,142,245,0.1);color:var(--accent);}
+.tag-lecture{background:rgba(240,98,146,0.1);color:var(--accent3);}
+.tag-ann{background:rgba(200,114,234,0.1);color:var(--purple);}
+
+/* BLOG CARDS */
 .blog-grid{display:flex;flex-direction:column;gap:12px;}
-.blog-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;cursor:pointer;transition:all 0.2s;}
-.blog-card:hover{border-color:var(--accent2);transform:translateY(-1px);}
-.blog-card-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;}
+.blog-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;}
+.blog-card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--accent),var(--accent2));opacity:0;transition:opacity 0.25s;border-radius:3px 0 0 3px;}
+.blog-card:hover{border-color:rgba(108,142,245,0.3);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.3);}
+.blog-card:hover::after{opacity:1;}
+.blog-card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
 .blog-card h3{font-size:15px;font-weight:500;flex:1;}
-.blog-meta{font-family:var(--mono);font-size:10.5px;color:var(--text3);display:flex;gap:10px;margin-bottom:7px;flex-wrap:wrap;}
-.blog-meta .author{color:var(--accent2);}
+.blog-meta{font-family:var(--mono);font-size:10.5px;color:var(--text3);display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap;align-items:center;}
+.blog-meta .author{color:var(--accent2);cursor:pointer;transition:color 0.15s;}
+.blog-meta .author:hover{color:var(--accent);}
 .blog-excerpt{font-size:13px;color:var(--text2);line-height:1.7;}
-.topic-badge{font-family:var(--mono);font-size:10px;padding:2px 6px;background:rgba(91,138,240,0.1);border:1px solid rgba(91,138,240,0.3);border-radius:3px;color:var(--accent);white-space:nowrap;flex-shrink:0;}
-.like-btn{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px;color:var(--text3);background:none;border:1px solid var(--border);border-radius:4px;padding:3px 8px;cursor:pointer;transition:all 0.15s;}
-.like-btn:hover,.like-btn.liked{border-color:var(--red);color:var(--red);}
+.topic-badge{font-family:var(--mono);font-size:10px;padding:2px 7px;background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.25);border-radius:4px;color:var(--accent);white-space:nowrap;flex-shrink:0;}
+.like-btn{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px;color:var(--text3);background:none;border:1px solid var(--border);border-radius:4px;padding:3px 9px;cursor:pointer;transition:all 0.15s;}
+.like-btn:hover,.like-btn.liked{border-color:var(--red);color:var(--red);background:rgba(255,83,112,0.06);}
+
+/* POST DETAIL */
 .post-detail{display:none;}
-.back-btn{font-family:var(--mono);font-size:12px;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:5px;margin-bottom:24px;transition:color 0.15s;background:none;border:none;}
-.back-btn:hover{color:var(--accent);}
-.post-title{font-size:23px;font-weight:500;margin-bottom:9px;letter-spacing:-0.02em;}
-.post-meta{font-family:var(--mono);font-size:11px;color:var(--text3);display:flex;gap:12px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
-.post-meta .author{color:var(--accent2);}
+.back-btn{font-family:var(--mono);font-size:12px;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:28px;transition:color 0.15s;background:none;border:none;padding:6px 12px;border-radius:6px;border:1px solid var(--border);}
+.back-btn:hover{color:var(--accent);border-color:var(--accent);}
+.post-title{font-size:24px;font-weight:500;margin-bottom:10px;letter-spacing:-0.02em;}
+.post-meta{font-family:var(--mono);font-size:11px;color:var(--text3);display:flex;gap:12px;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
+.post-meta .author{color:var(--accent2);cursor:pointer;}
+.post-meta .author:hover{color:var(--accent);}
 .post-meta a{color:var(--accent);text-decoration:none;}
 .post-meta a:hover{text-decoration:underline;}
-.post-body{color:var(--text2);font-size:14px;line-height:1.9;}
-.post-body h4{font-size:12px;font-family:var(--mono);color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin:22px 0 9px;}
-pre{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:16px;overflow-x:auto;margin:12px 0;}
-code{font-family:var(--mono);font-size:12px;color:var(--accent2);line-height:1.7;}
-.comments-section{margin-top:36px;padding-top:24px;border-top:1px solid var(--border);}
-.comments-section h3{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;}
-.comment-item{padding:12px 0;border-bottom:1px solid var(--border);}
-.comment-meta{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:5px;display:flex;gap:8px;}
-.comment-meta .author{color:var(--accent2);}
+.post-body{color:var(--text2);font-size:14px;line-height:1.95;}
+.post-body h4{font-size:11px;font-family:var(--mono);color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;margin:26px 0 10px;display:flex;align-items:center;gap:8px;}
+.post-body h4::after{content:'';flex:1;height:1px;background:var(--border);}
+pre{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:14px 0;position:relative;}
+pre::before{content:'C++';position:absolute;top:8px;right:12px;font-family:var(--mono);font-size:10px;color:var(--text3);}
+code{font-family:var(--mono);font-size:12.5px;color:var(--accent2);line-height:1.75;}
+
+/* COMMENTS */
+.comments-section{margin-top:40px;padding-top:28px;border-top:1px solid var(--border);}
+.comments-section h3{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:18px;}
+.comment-item{padding:14px 0;border-bottom:1px solid var(--border);}
+.comment-meta{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px;display:flex;gap:8px;}
+.comment-meta .author{color:var(--accent2);cursor:pointer;}
 .comment-text{font-size:13px;color:var(--text2);}
-.comment-form{margin-top:16px;display:flex;gap:8px;}
-.comment-form input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:7px 11px;color:var(--text);font-family:var(--serif);font-size:13px;}
+.comment-form{margin-top:18px;display:flex;gap:8px;}
+.comment-form input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:var(--serif);font-size:13px;}
 .comment-form input:focus{outline:none;border-color:var(--accent);}
-.emotion-feed{max-width:640px;}
-.emotion-post{border-left:2px solid var(--border);padding:0 0 24px 20px;position:relative;transition:border-color 0.2s;}
+
+/* EMOTIONS */
+.emotion-feed{max-width:660px;}
+.emotion-post{border-left:2px solid var(--border);padding:0 0 28px 22px;position:relative;transition:border-color 0.25s;}
 .emotion-post:hover{border-color:var(--accent2);}
-.emotion-dot{width:8px;height:8px;border-radius:50%;background:var(--border);position:absolute;left:-5px;top:5px;transition:background 0.2s;}
-.emotion-post:hover .emotion-dot{background:var(--accent2);}
-.emotion-date{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:5px;display:flex;gap:10px;align-items:center;}
-.emotion-author{color:var(--accent2);}
-.emotion-text{font-size:14px;color:var(--text2);line-height:1.85;}
-.contest-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:16px;transition:border-color 0.2s;}
-.contest-card:hover{border-color:var(--accent);}
-.contest-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.emotion-dot{width:10px;height:10px;border-radius:50%;background:var(--border);position:absolute;left:-6px;top:4px;transition:all 0.25s;border:2px solid var(--bg);}
+.emotion-post:hover .emotion-dot{background:var(--accent2);box-shadow:0 0 8px var(--accent2);}
+.emotion-date{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:7px;display:flex;gap:10px;align-items:center;}
+.emotion-author{color:var(--accent2);cursor:pointer;transition:color 0.15s;}
+.emotion-author:hover{color:var(--accent);}
+.emotion-text{font-size:14px;color:var(--text2);line-height:1.9;}
+
+/* CONTEST */
+.contest-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:26px;margin-bottom:16px;transition:all 0.25s;}
+.contest-card:hover{border-color:rgba(108,142,245,0.3);box-shadow:0 6px 24px rgba(0,0,0,0.3);}
+.contest-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
 .contest-title{font-size:16px;font-weight:500;}
 .contest-date{font-family:var(--mono);font-size:11px;color:var(--text3);}
-.problem-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
-.problem-chip{font-family:var(--mono);font-size:11px;padding:3px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text2);text-decoration:none;transition:all 0.15s;}
-.problem-chip:hover{border-color:var(--accent);color:var(--accent);}
-.contest-comment{font-size:13px;color:var(--text2);background:var(--surface2);border-left:3px solid var(--accent);padding:9px 14px;border-radius:0 4px 4px 0;font-style:italic;}
-.rank-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:12px;}
+.problem-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.problem-chip{font-family:var(--mono);font-size:11px;padding:3px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text2);text-decoration:none;transition:all 0.15s;}
+.problem-chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(108,142,245,0.06);}
+.contest-comment{font-size:13px;color:var(--text2);background:linear-gradient(135deg,rgba(108,142,245,0.05),rgba(45,232,176,0.03));border-left:3px solid var(--accent);padding:10px 16px;border-radius:0 6px 6px 0;font-style:italic;}
+.rank-table-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:14px;}
 .rank-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px;}
-.rank-table th{text-align:left;padding:9px 14px;color:var(--text3);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border);font-weight:400;}
-.rank-table td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text2);}
+.rank-table th{text-align:left;padding:10px 14px;color:var(--text3);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border);font-weight:400;}
+.rank-table td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text2);}
 .rank-table tr:last-child td{border-bottom:none;}
-.rank-table tr:hover td{background:var(--surface2);}
-.rank-1{color:var(--yellow)!important;font-weight:600;}.rank-2{color:#c0c0c0!important;}.rank-3{color:#cd7f32!important;}
+.rank-table tr:hover td{background:rgba(108,142,245,0.04);}
+.rank-1{color:var(--yellow)!important;font-weight:600;}.rank-2{color:#b0b8d0!important;}.rank-3{color:#c49a6c!important;}
 .rank-name{color:var(--text)!important;font-size:13px;}
-.score-bar{display:inline-block;width:50px;height:3px;background:var(--border);border-radius:2px;margin-left:6px;vertical-align:middle;position:relative;}
-.score-fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:2px;}
-.lecture-item{display:grid;grid-template-columns:90px 1fr;gap:20px;padding:22px 0;border-bottom:1px solid var(--border);}
+.score-bar{display:inline-block;width:56px;height:3px;background:var(--border);border-radius:2px;margin-left:8px;vertical-align:middle;position:relative;}
+.score-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;}
+
+/* LECTURE */
+.lecture-item{display:grid;grid-template-columns:90px 1fr;gap:22px;padding:24px 0;border-bottom:1px solid var(--border);}
 .lecture-date-col{font-family:var(--mono);font-size:11px;color:var(--text3);padding-top:2px;}
-.lecture-date-col .lday{font-size:20px;color:var(--text2);line-height:1.2;}
-.lecture-content h3{font-size:15px;font-weight:500;margin-bottom:6px;}
-.lecture-content p{font-size:13px;color:var(--text2);margin-bottom:8px;}
-.archive-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.lecture-date-col .lday{font-size:22px;color:var(--accent);line-height:1.2;font-weight:600;}
+.lecture-content h3{font-size:15px;font-weight:500;margin-bottom:7px;}
+.lecture-content p{font-size:13px;color:var(--text2);margin-bottom:10px;}
+
+/* ARCHIVE */
+.archive-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .archive-table{width:100%;border-collapse:collapse;}
-.archive-table th{text-align:left;padding:9px 13px;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border);font-weight:400;}
-.archive-table td{padding:11px 13px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);}
+.archive-table th{text-align:left;padding:10px 14px;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border);font-weight:400;}
+.archive-table td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);}
 .archive-table tr:last-child td{border-bottom:none;}
-.archive-table tr:hover td{background:var(--surface2);}
+.archive-table tr:hover td{background:rgba(108,142,245,0.04);}
 .archive-table a{color:var(--accent);text-decoration:none;font-family:var(--mono);font-size:12px;}
-.archive-table a:hover{text-decoration:underline;}
-.diff-badge{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px;}
-.diff-普及{background:rgba(61,255,192,0.1);color:var(--accent2);}
-.diff-提高{background:rgba(91,138,240,0.1);color:var(--accent);}
-.diff-省选{background:rgba(255,209,102,0.1);color:var(--yellow);}
-.diff-NOI{background:rgba(255,107,107,0.1);color:var(--red);}
+.archive-table a:hover{text-decoration:underline;color:var(--accent2);}
+.diff-badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;}
+.diff-普及{background:rgba(45,232,176,0.1);color:var(--accent2);border:1px solid rgba(45,232,176,0.2);}
+.diff-提高{background:rgba(108,142,245,0.1);color:var(--accent);border:1px solid rgba(108,142,245,0.2);}
+.diff-省选{background:rgba(255,203,107,0.1);color:var(--yellow);border:1px solid rgba(255,203,107,0.2);}
+.diff-NOI{background:rgba(255,83,112,0.1);color:var(--red);border:1px solid rgba(255,83,112,0.2);}
+
+/* ANNOUNCEMENTS */
+.ann-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 26px;margin-bottom:14px;transition:all 0.25s;}
+.ann-card:hover{border-color:rgba(200,114,234,0.3);box-shadow:0 6px 24px rgba(0,0,0,0.25);}
+.ann-card.pinned{border-color:rgba(255,203,107,0.35);background:linear-gradient(135deg,rgba(255,203,107,0.03),var(--surface));}
+.ann-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:10px;}
+.ann-title{font-size:16px;font-weight:500;}
+.ann-pin{font-family:var(--mono);font-size:10px;color:var(--yellow);padding:2px 7px;background:rgba(255,203,107,0.1);border:1px solid rgba(255,203,107,0.3);border-radius:3px;}
+.ann-meta{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:10px;}
+.ann-content{font-size:14px;color:var(--text2);line-height:1.85;white-space:pre-wrap;}
+
+/* SEARCH */
+.search-bar{display:flex;gap:10px;margin-bottom:24px;}
+.search-bar input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 18px;color:var(--text);font-family:var(--serif);font-size:14px;transition:all 0.2s;}
+.search-bar input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,142,245,0.1);}
+.search-filters{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
+.filter-btn{font-family:var(--mono);font-size:11px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);color:var(--text3);background:none;cursor:pointer;transition:all 0.2s;}
+.filter-btn:hover{border-color:var(--accent);color:var(--accent);}
+.filter-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(108,142,245,0.1);}
+
+/* PROFILE */
+.profile-hero{padding:36px 0 30px;border-bottom:1px solid var(--border);margin-bottom:36px;display:flex;gap:26px;align-items:flex-start;}
+.profile-avatar-lg{width:80px;height:80px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:28px;color:var(--bg);font-weight:700;box-shadow:0 0 30px rgba(108,142,245,0.3);}
+.profile-name{font-size:24px;font-weight:500;margin-bottom:5px;}
+.profile-role-tag{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.profile-stats{display:flex;gap:28px;margin-top:16px;}
+.profile-stat .num{font-family:var(--mono);font-size:24px;font-weight:600;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.profile-stat .lbl{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px;}
+.profile-section{margin-bottom:36px;}
+.profile-section-title{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+
+/* ADMIN */
 .admin-section{margin-bottom:40px;}
 .admin-section h2{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
-.admin-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);}
+.admin-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);}
 .admin-row-info{font-size:13.5px;}
 .admin-row-info .admin-sub{font-family:var(--mono);font-size:10.5px;color:var(--text3);margin-top:2px;}
 .admin-actions{display:flex;gap:6px;flex-shrink:0;margin-left:12px;}
-.user-role{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px;}
-.role-coach{background:rgba(255,209,102,0.15);color:var(--yellow);}
-.role-student{background:rgba(91,138,240,0.1);color:var(--accent);}
-.resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.resource-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;text-decoration:none;display:flex;align-items:flex-start;gap:12px;transition:all 0.2s;}
-.resource-card:hover{border-color:var(--accent);transform:translateY(-1px);}
-.resource-icon{width:32px;height:32px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--accent);flex-shrink:0;border:1px solid var(--border);}
-.resource-card h3{font-size:14px;font-weight:500;margin-bottom:2px;}
-.resource-card p{font-size:12px;color:var(--text3);line-height:1.5;}
-.resource-url{font-family:var(--mono);font-size:10px;color:var(--accent);margin-top:3px;}
-.empty{text-align:center;padding:56px 0;color:var(--text3);font-family:var(--mono);font-size:12px;}.empty::before{content:'// ';}
-.loading{text-align:center;padding:36px 0;color:var(--text3);font-family:var(--mono);font-size:12px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 8px;}
+.user-role{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;}
+.role-coach{background:rgba(255,203,107,0.12);color:var(--yellow);}
+.role-student{background:rgba(108,142,245,0.1);color:var(--accent);}
 
-.ann-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:12px;transition:border-color 0.2s;}
-.ann-card.pinned{border-color:rgba(255,209,102,0.4);background:rgba(255,209,102,0.04);}
-.ann-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;}
-.ann-title{font-size:16px;font-weight:500;}
-.ann-pin{font-family:var(--mono);font-size:10px;color:var(--yellow);padding:2px 6px;background:rgba(255,209,102,0.1);border:1px solid rgba(255,209,102,0.3);border-radius:3px;}
-.ann-meta{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;}
-.ann-content{font-size:14px;color:var(--text2);line-height:1.8;white-space:pre-wrap;}
-.tag-ann{background:rgba(255,107,107,0.1);color:var(--red);}
-.search-bar{display:flex;gap:10px;margin-bottom:28px;}
-.search-bar input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 16px;color:var(--text);font-family:var(--serif);font-size:14px;}
-.search-bar input:focus{outline:none;border-color:var(--accent);}
-.search-filters{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-.filter-btn{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);color:var(--text3);background:none;cursor:pointer;transition:all 0.15s;}
-.filter-btn:hover{border-color:var(--accent);color:var(--accent);}
-.filter-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(91,138,240,0.1);}
-.profile-hero{display:flex;gap:24px;align-items:flex-start;padding:32px 0 28px;border-bottom:1px solid var(--border);margin-bottom:32px;}
-.profile-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:26px;color:var(--bg);font-weight:700;}
-.profile-name{font-size:22px;font-weight:500;margin-bottom:4px;}
-.profile-role{font-family:var(--mono);font-size:11px;color:var(--text3);}
-.profile-stats{display:flex;gap:24px;margin-top:12px;}
-.profile-stat{text-align:center;}
-.profile-stat .num{font-family:var(--mono);font-size:20px;color:var(--accent);font-weight:600;}
-.profile-stat .label{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px;}
-.profile-section{margin-bottom:32px;}
-.profile-section h2{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
-footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mono);font-size:11px;color:var(--text3);text-align:center;margin-top:60px;}
-@media(max-width:680px){.home-grid,.resource-grid,.form-row{grid-template-columns:1fr;}.hero h1{font-size:28px;}.nav-top{padding:8px 14px 4px;}.nav-bottom{padding:0 14px 6px;}.container{padding:26px 14px;}.coach-card{flex-direction:column;}.lecture-item{grid-template-columns:1fr;gap:6px;}.nav-links a{font-size:10px;padding:4px 6px;}}
+/* RESOURCES */
+.resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.resource-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 22px;text-decoration:none;display:flex;align-items:flex-start;gap:14px;transition:all 0.25s;}
+.resource-card:hover{border-color:rgba(108,142,245,0.3);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.3);}
+.resource-icon{width:36px;height:36px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--accent);flex-shrink:0;border:1px solid var(--border);}
+.resource-card h3{font-size:14px;font-weight:500;margin-bottom:3px;}
+.resource-card p{font-size:12px;color:var(--text3);line-height:1.5;}
+.resource-url{font-family:var(--mono);font-size:10px;color:var(--accent);margin-top:4px;}
+
+/* MISC */
+.empty{text-align:center;padding:60px 0;color:var(--text3);font-family:var(--mono);font-size:12px;}.empty::before{content:'// ';}
+.loading{text-align:center;padding:40px 0;color:var(--text3);font-family:var(--mono);font-size:12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px;}
+footer{border-top:1px solid var(--border);padding:20px 28px;font-family:var(--mono);font-size:11px;color:var(--text3);text-align:center;margin-top:60px;position:relative;z-index:1;}
+
+@media(max-width:680px){
+  .home-grid,.resource-grid,.form-row{grid-template-columns:1fr;}
+  .hero h1{font-size:30px;}
+  .nav-top{padding:8px 16px 4px;}
+  .nav-bottom{padding:0 16px 6px;}
+  .container{padding:28px 16px;}
+  .coach-card{flex-direction:column;}
+  .lecture-item{grid-template-columns:1fr;gap:6px;}
+  .nav-links a{font-size:11px;padding:4px 8px;}
+  .profile-hero{flex-direction:column;}
+}
 </style>
 </head>
 <body>
+<canvas id="bg-canvas"></canvas>
 <nav>
   <div class="nav-top">
     <div class="nav-logo">OI · TEAM</div>
@@ -242,6 +326,7 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
 <!-- HOME -->
 <section id="home" class="active"><div class="container">
   <div class="hero">
+    <div class="hero-glow"></div>
     <div class="hero-tag">算法竞赛训练队</div>
     <h1>在代码里<br>寻找<span>思维的边界</span></h1>
     <p class="hero-desc">我们是一支专注于信息学竞赛的训练团队。从图论到动态规划，每一道题都是一次与自己的对话。</p>
@@ -252,7 +337,7 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
       <div class="coach-info">
         <div class="coach-title">// 指导教练</div>
         <div class="coach-name">万家宝 老师</div>
-        <p style="font-size:13px;color:var(--text2);margin-top:7px;">扎实基础、重视思维、保持对算法之美的好奇心。比赛固然重要，但更希望大家学到的是面对难题时沉下心来的能力。</p>
+        <p style="font-size:13px;color:var(--text2);margin-top:8px;">扎实基础、重视思维、保持对算法之美的好奇心。比赛固然重要，但更希望大家学到的是面对难题时沉下心来的能力。</p>
       </div>
     </div>
     <div class="info-card"><div class="card-label">训练方向</div><h3>核心技能树</h3><p>图论 · 动态规划 · 数据结构 · 数论 · 字符串 · 网络流</p></div>
@@ -261,7 +346,6 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
   <div class="updates-section"><h2>// recent activity</h2><div id="home-feed"><div class="loading"><div class="spinner"></div>加载中…</div></div></div>
 </div></section>
 
-
 <!-- ANNOUNCEMENTS -->
 <section id="announcements"><div class="container">
   <div class="page-header">
@@ -269,26 +353,6 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
     <button class="btn btn-yellow btn-sm" id="btn-new-ann" onclick="openAnnModal()" style="display:none">+ 发布公告</button>
   </div>
   <div id="ann-list"></div>
-</div></section>
-
-<!-- SEARCH -->
-<section id="search"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// search</div><h1>搜索题解</h1><p>按题号、知识点或关键词搜索。</p></div>
-  </div>
-  <div class="search-bar">
-    <input type="text" id="search-input" placeholder="输入题号（如 P3376）、知识点（如 网络流）或关键词…" oninput="doSearch()">
-  </div>
-  <div class="search-filters">
-    <button class="filter-btn active" onclick="setFilter('')">全部</button>
-    <button class="filter-btn" onclick="setFilter('图论')">图论</button>
-    <button class="filter-btn" onclick="setFilter('动态规划')">动态规划</button>
-    <button class="filter-btn" onclick="setFilter('数据结构')">数据结构</button>
-    <button class="filter-btn" onclick="setFilter('数论')">数论</button>
-    <button class="filter-btn" onclick="setFilter('字符串')">字符串</button>
-    <button class="filter-btn" onclick="setFilter('网络流')">网络流</button>
-  </div>
-  <div id="search-results"><div class="empty">输入关键词开始搜索</div></div>
 </div></section>
 
 <!-- CONTESTS -->
@@ -337,6 +401,22 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
   <div id="archive-list"></div>
 </div></section>
 
+<!-- SEARCH -->
+<section id="search"><div class="container">
+  <div class="page-header"><div class="page-header-left"><div class="label">// search</div><h1>搜索题解</h1><p>按题号、知识点或关键词搜索。</p></div></div>
+  <div class="search-bar"><input type="text" id="search-input" placeholder="输入题号（如 P3376）、知识点（如 网络流）或关键词…" oninput="doSearch()"></div>
+  <div class="search-filters">
+    <button class="filter-btn active" onclick="setFilter('')">全部</button>
+    <button class="filter-btn" onclick="setFilter('图论')">图论</button>
+    <button class="filter-btn" onclick="setFilter('动态规划')">动态规划</button>
+    <button class="filter-btn" onclick="setFilter('数据结构')">数据结构</button>
+    <button class="filter-btn" onclick="setFilter('数论')">数论</button>
+    <button class="filter-btn" onclick="setFilter('字符串')">字符串</button>
+    <button class="filter-btn" onclick="setFilter('网络流')">网络流</button>
+  </div>
+  <div id="search-results"><div class="empty">输入关键词开始搜索</div></div>
+</div></section>
+
 <!-- RESOURCES -->
 <section id="resources"><div class="container">
   <div class="page-header"><div class="page-header-left"><div class="label">// resources</div><h1>学习资源</h1><p>竞赛常用平台与文档。</p></div></div>
@@ -350,6 +430,12 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
   </div>
 </div></section>
 
+<!-- PROFILE -->
+<section id="profile"><div class="container">
+  <button class="back-btn" onclick="history.back();show('notes')">← 返回</button>
+  <div id="profile-content"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div></section>
+
 <!-- ADMIN -->
 <section id="admin"><div class="container">
   <div class="page-header"><div class="page-header-left"><div class="label">// coach_admin</div><h1>教练后台</h1><p>管理用户权限与内容。</p></div></div>
@@ -358,7 +444,7 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
 </div></section>
 
 </main>
-<footer>// OI Training Team · Powered by Supabase</footer>
+<footer>// OI Training Team · 万家宝 老师 · Powered by Supabase</footer>
 
 <!-- AUTH MODAL -->
 <div class="modal-overlay" id="auth-modal"><div class="modal">
@@ -449,15 +535,14 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
   <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('problem-modal')">取消</button><button class="btn btn-primary" onclick="submitProblem()">保存</button></div>
 </div></div>
 
-
 <!-- ANN MODAL -->
 <div class="modal-overlay" id="ann-modal"><div class="modal" style="width:540px">
   <h2>📢 发布公告</h2>
   <div class="form-group"><label>标题</label><input type="text" id="ann-title" placeholder="例：CSP-S 报名通知"></div>
   <div class="form-group"><label>内容</label><textarea id="ann-content" placeholder="公告详情…" style="min-height:120px"></textarea></div>
   <div class="form-group" style="display:flex;align-items:center;gap:10px">
-    <input type="checkbox" id="ann-pinned" style="width:auto">
-    <label style="display:inline;font-family:var(--mono);font-size:11px;color:var(--text3);text-transform:none;letter-spacing:0">置顶此公告</label>
+    <input type="checkbox" id="ann-pinned" style="width:auto;accent-color:var(--yellow)">
+    <label style="display:inline;font-family:var(--mono);font-size:12px;color:var(--text2);text-transform:none;letter-spacing:0">置顶此公告</label>
   </div>
   <div id="ann-error" class="form-error"></div>
   <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('ann-modal')">取消</button><button class="btn btn-primary" onclick="submitAnn()">发布</button></div>
@@ -466,32 +551,79 @@ footer{border-top:1px solid var(--border);padding:18px 28px;font-family:var(--mo
 <div class="toast" id="toast"></div>
 
 <script>
+// ── Canvas Background ──────────────────────────────────────
+(function(){
+  const canvas=document.getElementById('bg-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,dots=[];
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  const colors=['rgba(108,142,245,','rgba(45,232,176,','rgba(200,114,234,','rgba(255,83,112,'];
+  for(let i=0;i<55;i++)dots.push({x:Math.random()*1600,y:Math.random()*900,vx:(Math.random()-0.5)*0.18,vy:(Math.random()-0.5)*0.18,r:Math.random()*1.5+0.5,c:colors[Math.floor(Math.random()*colors.length)]});
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    dots.forEach(d=>{
+      d.x+=d.vx;d.y+=d.vy;
+      if(d.x<0||d.x>W)d.vx*=-1;
+      if(d.y<0||d.y>H)d.vy*=-1;
+      ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+      ctx.fillStyle=d.c+'0.7)';ctx.fill();
+    });
+    dots.forEach((a,i)=>dots.slice(i+1).forEach(b=>{
+      const dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<120){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(108,142,245,${0.06*(1-dist/120)})`;ctx.lineWidth=0.5;ctx.stroke();}
+    }));
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Click Particles ────────────────────────────────────────
+document.addEventListener('click',function(e){
+  if(e.target.closest('.modal-overlay')||e.target.closest('input')||e.target.closest('textarea'))return;
+  const colors=['#6c8ef5','#2de8b0','#f06292','#ffb347','#c792ea','#ff5370'];
+  for(let i=0;i<10;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    const size=Math.random()*6+3;
+    const angle=Math.random()*Math.PI*2;
+    const dist=Math.random()*60+20;
+    p.style.cssText=`left:${e.clientX-size/2}px;top:${e.clientY-size/2}px;width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};--tx:${Math.cos(angle)*dist}px;--ty:${Math.sin(angle)*dist}px;`;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),800);
+  }
+});
+
+// ── Supabase ───────────────────────────────────────────────
 const SUPABASE_URL='https://dgsugcvedimcecudstkq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDA2MDYsImV4cCI6MjA4ODIxNjYwNn0.0AnkF5MMrtiqwbau9q6pLD6pDrzXRkyPIoNsx4au8xI';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,currentProfile=null;
 const isCoach=()=>currentProfile?.role==='coach';
 
+// ── Navigation ─────────────────────────────────────────────
 function show(id){
   document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.getElementById('nav-'+id).classList.add('active');
+  const navEl=document.getElementById('nav-'+id);
+  if(navEl)navEl.classList.add('active');
   window.scrollTo(0,0);
   const loaders={contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:()=>{}};
   if(loaders[id])loaders[id]();
 }
 
+// ── Auth UI ────────────────────────────────────────────────
 function renderAuthArea(){
   const area=document.getElementById('nav-auth-area');
   const coachNav=document.getElementById('nav-admin');
   if(currentUser&&currentProfile){
-    area.innerHTML=`<span class="nav-user">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}<button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
+    area.innerHTML=`<span class="nav-user" style="cursor:pointer" onclick="showProfile('${currentProfile.username}')">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}<button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
     if(isCoach())coachNav.style.display='';
     ['btn-new-note','btn-new-post'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
     if(isCoach())['btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
   }else{
-    area.innerHTML=`<button class="btn btn-outline btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button>`;
+    area.innerHTML=`<button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button>`;
     coachNav.style.display='none';
     ['btn-new-note','btn-new-post','btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   }
@@ -502,7 +634,6 @@ async function loadSession(){
   if(session){currentUser=session.user;const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();currentProfile=data;}
   renderAuthArea();loadHomeFeed();
 }
-
 sb.auth.onAuthStateChange(async(_,session)=>{
   if(session){currentUser=session.user;const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();currentProfile=data;}
   else{currentUser=null;currentProfile=null;}
@@ -515,7 +646,6 @@ function switchAuthTab(tab){
   document.getElementById('login-form').style.display=tab==='login'?'block':'none';
   document.getElementById('register-form').style.display=tab==='register'?'block':'none';
 }
-
 async function doLogin(){
   const username=document.getElementById('login-username').value.trim();
   const password=document.getElementById('login-password').value;
@@ -525,7 +655,6 @@ async function doLogin(){
   if(error){document.getElementById('login-error').textContent='用户名或密码错误';return;}
   closeModal('auth-modal');showToast('登录成功 ✓','success');loadHomeFeed();
 }
-
 async function doRegister(){
   const username=document.getElementById('reg-username').value.trim();
   const password=document.getElementById('reg-password').value;
@@ -540,9 +669,9 @@ async function doRegister(){
   document.getElementById('reg-success').textContent='注册成功，正在登录…';
   setTimeout(async()=>{const{error:le}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});if(!le){closeModal('auth-modal');showToast('注册并登录成功 ✓','success');loadHomeFeed();}},800);
 }
-
 async function doLogout(){await sb.auth.signOut();showToast('已退出登录','success');loadHomeFeed();}
 
+// ── Home ───────────────────────────────────────────────────
 async function loadHomeFeed(){
   const feed=document.getElementById('home-feed');
   feed.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
@@ -553,19 +682,39 @@ async function loadHomeFeed(){
     sb.from('lectures').select('id,topic,created_at').order('created_at',{ascending:false}).limit(3),
     sb.from('announcements').select('id,title,created_at').order('created_at',{ascending:false}).limit(3),
   ]);
-  const items=[...(notes||[]).map(n=>({...n,type:'note'})),...(posts||[]).map(p=>({...p,type:'post'})),...(contests||[]).map(c=>({...c,type:'contest'})),...(lectures||[]).map(l=>({...l,type:'lecture'})),...(anns||[]).map(a=>({...a,type:'ann'}))].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,10);
+  const items=[...(notes||[]).map(n=>({...n,type:'note'})),...(posts||[]).map(p=>({...p,type:'post'})),...(contests||[]).map(c=>({...c,type:'contest'})),...(lectures||[]).map(l=>({...l,type:'lecture'})),...(anns||[]).map(a=>({...a,type:'ann'}))].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,12);
   if(!items.length){feed.innerHTML='<div class="empty">暂无动态</div>';return;}
   feed.innerHTML=items.map(item=>{
     let content='';
-    if(item.type==='note')content=`<strong>${item.profiles?.username||'匿名'}</strong> 发布了题解：<strong>${escHtml(item.title)}</strong> <span class="update-tag tag-note">题解</span>`;
-    else if(item.type==='post')content=`<strong>${item.profiles?.username||'匿名'}</strong> 写了随笔：${escHtml((item.content||'').slice(0,40))}… <span class="update-tag tag-post">随笔</span>`;
+    if(item.type==='note')content=`<span class="clickable-name" onclick="showProfile('${item.profiles?.username||''}')">${item.profiles?.username||'匿名'}</span> 发布了题解：<strong>${escHtml(item.title)}</strong> <span class="update-tag tag-note">题解</span>`;
+    else if(item.type==='post')content=`<span class="clickable-name" onclick="showProfile('${item.profiles?.username||''}')">${item.profiles?.username||'匿名'}</span> 写了随笔：${escHtml((item.content||'').slice(0,40))}… <span class="update-tag tag-post">随笔</span>`;
     else if(item.type==='contest')content=`新增模拟赛：<strong>${escHtml(item.title)}</strong> <span class="update-tag tag-contest">模拟赛</span>`;
     else if(item.type==='lecture')content=`新增课程：<strong>${escHtml(item.topic)}</strong> <span class="update-tag tag-lecture">课程</span>`;
-    else if(item.type==='ann')content=`<strong>新公告：${escHtml(item.title)}</strong> <span class="update-tag tag-ann">公告</span>`;
+    else if(item.type==='ann')content=`📢 <strong>${escHtml(item.title)}</strong> <span class="update-tag tag-ann">公告</span>`;
     return`<div class="update-item"><div class="update-date">${fmtDate(item.created_at)}</div><div class="update-content">${content}</div></div>`;
   }).join('');
 }
 
+// ── Announcements ──────────────────────────────────────────
+async function loadAnnouncements(){
+  const list=document.getElementById('ann-list');
+  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const{data}=await sb.from('announcements').select('*,profiles(username)').order('is_pinned',{ascending:false}).order('created_at',{ascending:false});
+  if(!data||!data.length){list.innerHTML='<div class="empty">暂无公告</div>';return;}
+  list.innerHTML=data.map(a=>`<div class="ann-card ${a.is_pinned?'pinned':''}"><div class="ann-card-top"><div class="ann-title">${escHtml(a.title)}</div><div style="display:flex;gap:6px;align-items:center;flex-shrink:0">${a.is_pinned?'<span class="ann-pin">📌 置顶</span>':''}${isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteAnn(${a.id})">删除</button>`:''}</div></div><div class="ann-meta">${fmtDate(a.created_at)} · ${a.profiles?.username||'教练'}</div><div class="ann-content">${escHtml(a.content)}</div></div>`).join('');
+}
+function openAnnModal(){if(!isCoach())return;openModal('ann-modal');}
+async function submitAnn(){
+  const title=document.getElementById('ann-title').value.trim(),content=document.getElementById('ann-content').value.trim();
+  if(!title||!content){document.getElementById('ann-error').textContent='请填写标题和内容';return;}
+  const{error}=await sb.from('announcements').insert({title,content,is_pinned:document.getElementById('ann-pinned').checked,created_by:currentUser.id});
+  if(error){document.getElementById('ann-error').textContent=error.message;return;}
+  closeModal('ann-modal');['ann-title','ann-content'].forEach(id=>document.getElementById(id).value='');document.getElementById('ann-pinned').checked=false;
+  showToast('公告发布成功 ✓','success');loadAnnouncements();
+}
+async function deleteAnn(id){if(!confirm('确认删除？'))return;await sb.from('announcements').delete().eq('id',id);showToast('已删除','success');loadAnnouncements();}
+
+// ── Contests ───────────────────────────────────────────────
 async function loadContests(){
   const list=document.getElementById('contests-list');
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
@@ -575,68 +724,51 @@ async function loadContests(){
   const rm={};(results||[]).forEach(r=>{if(!rm[r.contest_id])rm[r.contest_id]=[];rm[r.contest_id].push(r);});
   list.innerHTML=contests.map(c=>{
     const problems=(c.problems||'').split(/[\s,]+/).filter(Boolean);
-    const cr=rm[c.id]||[];
-    const maxScore=Math.max(...cr.map(r=>r.score),1);
-    return`<div class="contest-card">
-      <div class="contest-header">
-        <div class="contest-title">${escHtml(c.title)}</div>
-        <div style="display:flex;gap:8px;align-items:center"><span class="contest-date">${c.contest_date}</span>${isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteContest(${c.id})">删除</button>`:''}</div>
-      </div>
-      ${problems.length?`<div class="problem-chips">${problems.map(p=>`<a href="https://www.luogu.com.cn/problem/${escHtml(p)}" target="_blank" class="problem-chip">${escHtml(p)}</a>`).join('')}</div>`:''}
-      ${cr.length?`<div class="rank-table-wrap" style="margin-bottom:12px"><table class="rank-table"><thead><tr><th>排名</th><th>姓名</th><th>AC数</th><th>总分</th></tr></thead><tbody>${cr.map(r=>`<tr><td class="${r.rank===1?'rank-1':r.rank===2?'rank-2':r.rank===3?'rank-3':''}">${r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':r.rank}</td><td class="rank-name">${escHtml(r.student_name)}</td><td>${r.solved}</td><td>${r.score}<span class="score-bar"><span class="score-fill" style="width:${Math.round(r.score/maxScore*100)}%"></span></span></td></tr>`).join('')}</tbody></table></div>`:''}
-      ${c.comment?`<div class="contest-comment">${escHtml(c.comment)}</div>`:''}
-    </div>`;
+    const cr=rm[c.id]||[];const maxScore=Math.max(...cr.map(r=>r.score),1);
+    return`<div class="contest-card"><div class="contest-header"><div class="contest-title">${escHtml(c.title)}</div><div style="display:flex;gap:8px;align-items:center"><span class="contest-date">${c.contest_date}</span>${isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteContest(${c.id})">删除</button>`:''}</div></div>${problems.length?`<div class="problem-chips">${problems.map(p=>`<a href="https://www.luogu.com.cn/problem/${escHtml(p)}" target="_blank" class="problem-chip">${escHtml(p)}</a>`).join('')}</div>`:''} ${cr.length?`<div class="rank-table-wrap" style="margin-bottom:12px"><table class="rank-table"><thead><tr><th>排名</th><th>姓名</th><th>AC数</th><th>总分</th></tr></thead><tbody>${cr.map(r=>`<tr><td class="${r.rank===1?'rank-1':r.rank===2?'rank-2':r.rank===3?'rank-3':''}">${r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':r.rank}</td><td class="rank-name">${escHtml(r.student_name)}</td><td>${r.solved}</td><td>${r.score}<span class="score-bar"><span class="score-fill" style="width:${Math.round(r.score/maxScore*100)}%"></span></span></td></tr>`).join('')}</tbody></table></div>`:''} ${c.comment?`<div class="contest-comment">${escHtml(c.comment)}</div>`:''}</div>`;
   }).join('');
 }
-
 function openContestModal(){if(!isCoach())return;document.getElementById('results-rows').innerHTML='';addResultRow();addResultRow();addResultRow();openModal('contest-modal');}
 function addResultRow(){const tr=document.createElement('tr');tr.innerHTML=`<td><input type="text" placeholder="姓名"></td><td><input type="number" placeholder="0" min="0" style="width:60px"></td><td><input type="number" placeholder="0" min="0" style="width:70px"></td><td><input type="number" placeholder="1" min="1" style="width:55px"></td><td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">×</button></td>`;document.getElementById('results-rows').appendChild(tr);}
-
 async function submitContest(){
-  const title=document.getElementById('c-title').value.trim();
-  const date=document.getElementById('c-date').value;
+  const title=document.getElementById('c-title').value.trim(),date=document.getElementById('c-date').value;
   if(!title||!date){document.getElementById('contest-error').textContent='请填写赛名和日期';return;}
   const{data:contest,error}=await sb.from('contests').insert({title,contest_date:date,problems:document.getElementById('c-problems').value.trim(),comment:document.getElementById('c-comment').value.trim(),created_by:currentUser.id}).select().single();
   if(error){document.getElementById('contest-error').textContent=error.message;return;}
-  const rows=document.querySelectorAll('#results-rows tr');
-  const rd=[];
+  const rows=document.querySelectorAll('#results-rows tr');const rd=[];
   rows.forEach(row=>{const inputs=row.querySelectorAll('input');const name=inputs[0].value.trim();if(name)rd.push({contest_id:contest.id,student_name:name,solved:parseInt(inputs[1].value)||0,score:parseInt(inputs[2].value)||0,rank:parseInt(inputs[3].value)||0});});
   if(rd.length)await sb.from('contest_results').insert(rd);
   closeModal('contest-modal');showToast('模拟赛录入成功 ✓','success');loadContests();
   ['c-title','c-date','c-problems','c-comment'].forEach(id=>document.getElementById(id).value='');
 }
-
 async function deleteContest(id){if(!confirm('确认删除这场模拟赛及其所有成绩？'))return;await sb.from('contests').delete().eq('id',id);showToast('已删除','success');loadContests();}
 
+// ── Notes ──────────────────────────────────────────────────
 async function loadNotes(){
-  const list=document.getElementById('notes-list');
-  const detail=document.getElementById('note-detail');
+  const list=document.getElementById('notes-list'),detail=document.getElementById('note-detail');
   detail.style.display='none';list.style.display='block';
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,profiles(username)').order('created_at',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty">暂无题解，登录后发布第一篇</div>';return;}
-  list.innerHTML='<div class="blog-grid">'+data.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span class="author">${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
+  list.innerHTML='<div class="blog-grid">'+data.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
 }
-
 async function showNote(id){
   document.getElementById('notes-list').style.display='none';
-  const detail=document.getElementById('note-detail');
-  detail.style.display='block';detail.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const detail=document.getElementById('note-detail');detail.style.display='block';
+  detail.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data:n}=await sb.from('notes').select('*,profiles(username,id)').eq('id',id).single();
   const{data:comments}=await sb.from('comments').select('*,profiles(username)').eq('note_id',id).order('created_at');
   const{data:likes}=await sb.from('likes').select('id,user_id').eq('note_id',id);
-  const likeCount=likes?likes.length:0;
-  const liked=currentUser&&likes&&likes.some(l=>l.user_id===currentUser.id);
+  const likeCount=likes?likes.length:0;const liked=currentUser&&likes&&likes.some(l=>l.user_id===currentUser.id);
   const isOwner=currentUser&&n.profiles?.id===currentUser.id;
   detail.innerHTML=`<button class="back-btn" onclick="loadNotes()">← 返回列表</button>
     <div class="post-title">${escHtml(n.title)}</div>
-    <div class="post-meta"><span class="author">${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span><a href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} → luogu ↗</a></span>`:''} ${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}<button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''}</div>
+    <div class="post-meta"><span class="author" onclick="showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span><a href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} ↗</a></span>`:''} ${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}<button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''}</div>
     <div class="post-body">${n.content?`<h4>解题思路</h4><p>${escHtml(n.content).replace(/\n/g,'<br>')}</p>`:''} ${n.code?`<h4>C++ 代码</h4><pre><code>${escHtml(n.code)}</code></pre>`:''} ${n.reflection?`<h4>反思与总结</h4><p>${escHtml(n.reflection).replace(/\n/g,'<br>')}</p>`:''}</div>
-    <div class="comments-section"><h3>评论 (${comments?comments.length:0})</h3><div id="comments-list-${id}">${comments&&comments.length?comments.map(c=>`<div class="comment-item"><div class="comment-meta"><span class="author">${c.profiles?.username||'匿名'}</span><span>${fmtDate(c.created_at)}</span></div><div class="comment-text">${escHtml(c.content).replace(/\n/g,'<br>')}</div></div>`).join(''):'<div style="font-family:var(--mono);font-size:11px;color:var(--text3);padding:10px 0">// 暂无评论</div>'}</div>${currentUser?`<div class="comment-form"><input type="text" id="comment-input-${id}" placeholder="写下你的评论…"><button class="btn btn-primary btn-sm" onclick="submitComment(${id})">发送</button></div>`:'<div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:10px">登录后参与评论</div>'}</div>`;
+    <div class="comments-section"><h3>评论 (${comments?comments.length:0})</h3><div id="cl-${id}">${comments&&comments.length?comments.map(c=>`<div class="comment-item"><div class="comment-meta"><span class="author" onclick="showProfile('${c.profiles?.username||''}')">@${c.profiles?.username||'匿名'}</span><span>${fmtDate(c.created_at)}</span></div><div class="comment-text">${escHtml(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:10px 0">// 暂无评论</div>'}</div>${currentUser?`<div class="comment-form"><input type="text" id="ci-${id}" placeholder="写下你的评论…"><button class="btn btn-primary btn-sm" onclick="submitComment(${id})">发送</button></div>`:'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:10px">登录后参与评论</div>'}</div>`;
 }
-
 async function toggleLike(noteId,isLiked){if(!currentUser){showToast('请先登录','error');return;}if(isLiked)await sb.from('likes').delete().eq('note_id',noteId).eq('user_id',currentUser.id);else await sb.from('likes').insert({note_id:noteId,user_id:currentUser.id});showNote(noteId);}
-async function submitComment(noteId){const input=document.getElementById(`comment-input-${noteId}`);const content=input.value.trim();if(!content)return;const{error}=await sb.from('comments').insert({note_id:noteId,author_id:currentUser.id,content});if(error){showToast('评论失败','error');return;}input.value='';showNote(noteId);showToast('评论成功 ✓','success');}
+async function submitComment(noteId){const input=document.getElementById(`ci-${noteId}`);const content=input.value.trim();if(!content)return;const{error}=await sb.from('comments').insert({note_id:noteId,author_id:currentUser.id,content});if(error){showToast('评论失败','error');return;}input.value='';showNote(noteId);showToast('评论成功 ✓','success');}
 async function deleteNote(id){if(!confirm('确认删除这篇题解？'))return;await sb.from('notes').delete().eq('id',id);showToast('已删除','success');loadNotes();}
 function openNoteModal(){if(!currentUser){openModal('auth-modal');return;}openModal('note-modal');}
 async function submitNote(){
@@ -648,17 +780,19 @@ async function submitNote(){
   showToast('题解发布成功 ✓','success');loadNotes();
 }
 
+// ── Posts ──────────────────────────────────────────────────
 async function loadPosts(){
   const list=document.getElementById('emotions-list');
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('posts').select('*,profiles(username,id)').order('created_at',{ascending:false});
-  if(!data||!data.length){list.innerHTML='<div class="empty">暂无随笔，登录后写下第一篇</div>';return;}
-  list.innerHTML=data.map(p=>`<div class="emotion-post"><div class="emotion-dot"></div><div class="emotion-date"><span>${fmtDate(p.created_at)}</span><span class="emotion-author">${p.profiles?.username||'匿名'}</span>${(currentUser&&p.profiles?.id===currentUser.id)||isCoach()?`<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deletePost(${p.id})">删除</button>`:''}</div><div class="emotion-text">${escHtml(p.content).replace(/\n/g,'<br>')}</div></div>`).join('');
+  if(!data||!data.length){list.innerHTML='<div class="empty">暂无随笔</div>';return;}
+  list.innerHTML=data.map(p=>`<div class="emotion-post"><div class="emotion-dot"></div><div class="emotion-date"><span>${fmtDate(p.created_at)}</span><span class="emotion-author" onclick="showProfile('${p.profiles?.username||''}')">@${p.profiles?.username||'匿名'}</span>${(currentUser&&p.profiles?.id===currentUser.id)||isCoach()?`<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deletePost(${p.id})">删除</button>`:''}</div><div class="emotion-text">${escHtml(p.content).replace(/\n/g,'<br>')}</div></div>`).join('');
 }
 function openPostModal(){if(!currentUser){openModal('auth-modal');return;}openModal('post-modal');}
 async function submitPost(){const content=document.getElementById('post-content').value.trim();if(!content){document.getElementById('post-error').textContent='请填写内容';return;}const{error}=await sb.from('posts').insert({author_id:currentUser.id,content});if(error){document.getElementById('post-error').textContent=error.message;return;}closeModal('post-modal');document.getElementById('post-content').value='';showToast('随笔发布成功 ✓','success');loadPosts();}
 async function deletePost(id){if(!confirm('确认删除？'))return;await sb.from('posts').delete().eq('id',id);showToast('已删除','success');loadPosts();}
 
+// ── Lectures ───────────────────────────────────────────────
 async function loadLectures(){
   const list=document.getElementById('lectures-list');
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
@@ -666,8 +800,7 @@ async function loadLectures(){
   if(!data||!data.length){list.innerHTML='<div class="empty">暂无课程记录</div>';return;}
   const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   list.innerHTML=data.map(l=>{
-    const problems=(l.problems||'').split(/[\s,]+/).filter(Boolean);
-    const d=new Date(l.lecture_date);
+    const problems=(l.problems||'').split(/[\s,]+/).filter(Boolean);const d=new Date(l.lecture_date);
     return`<div class="lecture-item"><div class="lecture-date-col"><div>${months[d.getMonth()]}</div><div class="lday">${d.getDate()}</div><div>${d.getFullYear()}</div></div><div class="lecture-content"><h3>${escHtml(l.topic)}</h3>${l.content?`<p>${escHtml(l.content).replace(/\n/g,'<br>')}</p>`:''}${problems.length?`<div class="problem-chips">${problems.map(p=>`<a href="https://www.luogu.com.cn/problem/${escHtml(p)}" target="_blank" class="problem-chip">${escHtml(p)}</a>`).join('')}</div>`:''}${isCoach()?`<button class="btn btn-danger btn-sm" style="margin-top:10px" onclick="deleteLecture(${l.id})">删除</button>`:''}</div></div>`;
   }).join('');
 }
@@ -682,6 +815,7 @@ async function submitLecture(){
 }
 async function deleteLecture(id){if(!confirm('确认删除？'))return;await sb.from('lectures').delete().eq('id',id);showToast('已删除','success');loadLectures();}
 
+// ── Archive ────────────────────────────────────────────────
 async function loadArchive(){
   const list=document.getElementById('archive-list');
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
@@ -700,90 +834,85 @@ async function submitProblem(){
 }
 async function deleteProblem(id){if(!confirm('确认删除？'))return;await sb.from('problem_archive').delete().eq('id',id);showToast('已删除','success');loadArchive();}
 
+// ── Search ─────────────────────────────────────────────────
+let allNotes=[],searchFilter='';
+async function initSearch(){if(allNotes.length)return;const{data}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,profiles(username)').order('created_at',{ascending:false});allNotes=data||[];}
+function setFilter(f){searchFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.textContent===f||(f===''&&b.textContent==='全部')));doSearch();}
+async function doSearch(){
+  await initSearch();
+  const q=document.getElementById('search-input').value.trim().toLowerCase();
+  const el=document.getElementById('search-results');
+  const results=allNotes.filter(n=>{const mf=!searchFilter||(n.topic||'').includes(searchFilter);const mq=!q||(n.title||'').toLowerCase().includes(q)||(n.problem_id||'').toLowerCase().includes(q)||(n.topic||'').toLowerCase().includes(q)||(n.content||'').toLowerCase().includes(q);return mf&&mq;});
+  if(!q&&!searchFilter){el.innerHTML='<div class="empty">输入关键词开始搜索</div>';return;}
+  if(!results.length){el.innerHTML='<div class="empty">没有找到相关题解</div>';return;}
+  el.innerHTML='<div class="blog-grid">'+results.map(n=>`<div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
+}
+
+// ── Profile ────────────────────────────────────────────────
+function avatarGradient(username){
+  const gs=[['#6c8ef5','#2de8b0'],['#f06292','#ffb347'],['#c792ea','#6c8ef5'],['#2de8b0','#ffb347'],['#ff5370','#c792ea']];
+  const i=username.charCodeAt(0)%gs.length;return`linear-gradient(135deg,${gs[i][0]},${gs[i][1]})`;
+}
+async function showProfile(username){
+  if(!username)return;
+  show('profile');
+  const el=document.getElementById('profile-content');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const{data:profile}=await sb.from('profiles').select('*').eq('username',username).single();
+  if(!profile){el.innerHTML='<div class="empty">用户不存在</div>';return;}
+  const[{data:notes},{data:posts}]=await Promise.all([
+    sb.from('notes').select('id,title,topic,problem_id,content,created_at').eq('author_id',profile.id).order('created_at',{ascending:false}),
+    sb.from('posts').select('id,content,created_at').eq('author_id',profile.id).order('created_at',{ascending:false}),
+  ]);
+  const initial=username.charAt(0).toUpperCase();
+  el.innerHTML=`
+    <div class="profile-hero">
+      <div class="profile-avatar-lg" style="background:${avatarGradient(username)}">${initial}</div>
+      <div>
+        <div class="profile-name">@${escHtml(username)}</div>
+        <div class="profile-role-tag">${profile.role==='coach'?'🎓 教练':'🧑‍💻 学生'}</div>
+        <div class="profile-stats">
+          <div class="profile-stat"><div class="num">${notes?notes.length:0}</div><div class="lbl">题解</div></div>
+          <div class="profile-stat"><div class="num">${posts?posts.length:0}</div><div class="lbl">随笔</div></div>
+          <div class="profile-stat"><div class="num">${fmtDate(profile.created_at).slice(0,7)}</div><div class="lbl">加入</div></div>
+        </div>
+      </div>
+    </div>
+    ${notes&&notes.length?`<div class="profile-section"><div class="profile-section-title">题解笔记</div><div class="blog-grid">${notes.map(n=>`<div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,80))}…</p></div>`).join('')}</div></div>`:''}
+    ${posts&&posts.length?`<div class="profile-section"><div class="profile-section-title">随笔日志</div><div class="emotion-feed">${posts.map(p=>`<div class="emotion-post"><div class="emotion-dot"></div><div class="emotion-date"><span>${fmtDate(p.created_at)}</span></div><div class="emotion-text">${escHtml(p.content).replace(/\n/g,'<br>')}</div></div>`).join('')}</div></div>`:''}
+    ${(!notes||!notes.length)&&(!posts||!posts.length)?'<div class="empty">这位同学还没有发布任何内容</div>':''}
+  `;
+}
+
+// ── Admin ──────────────────────────────────────────────────
 async function loadAdmin(){
   if(!isCoach()){show('home');return;}
   const usersEl=document.getElementById('admin-users'),notesEl=document.getElementById('admin-notes');
   usersEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';notesEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   const{data:users}=await sb.from('profiles').select('*').order('created_at');
-  usersEl.innerHTML=users&&users.length?users.map(u=>`<div class="admin-row"><div class="admin-row-info"><strong>@${escHtml(u.username)}</strong><span class="user-role role-${u.role}" style="margin-left:8px">${u.role}</span><div class="admin-sub">加入 ${fmtDate(u.created_at)}</div></div><div class="admin-actions">${u.id!==currentUser.id?u.role==='student'?`<button class="btn btn-yellow btn-sm" onclick="setRole('${u.id}','coach')">设为教练</button>`:`<button class="btn btn-outline btn-sm" onclick="setRole('${u.id}','student')">降为学生</button>`:'<span style="font-family:var(--mono);font-size:10px;color:var(--text3)">（自己）</span>'}</div></div>`).join(''):'<div class="empty">暂无用户</div>';
+  usersEl.innerHTML=users&&users.length?users.map(u=>`<div class="admin-row"><div class="admin-row-info"><strong style="cursor:pointer;color:var(--accent2)" onclick="showProfile('${escHtml(u.username)}')">@${escHtml(u.username)}</strong><span class="user-role role-${u.role}" style="margin-left:8px">${u.role}</span><div class="admin-sub">加入 ${fmtDate(u.created_at)}</div></div><div class="admin-actions">${u.id!==currentUser.id?u.role==='student'?`<button class="btn btn-yellow btn-sm" onclick="setRole('${u.id}','coach')">设为教练</button>`:`<button class="btn btn-outline btn-sm" onclick="setRole('${u.id}','student')">降为学生</button>`:'<span style="font-family:var(--mono);font-size:10px;color:var(--text3)">（自己）</span>'}</div></div>`).join(''):'<div class="empty">暂无用户</div>';
   const{data:notes}=await sb.from('notes').select('id,title,created_at,profiles(username)').order('created_at',{ascending:false}).limit(30);
   notesEl.innerHTML=notes&&notes.length?notes.map(n=>`<div class="admin-row"><div class="admin-row-info"><strong>${escHtml(n.title)}</strong><div class="admin-sub">by @${n.profiles?.username||'?'} · ${fmtDate(n.created_at)}</div></div><div class="admin-actions"><button class="btn btn-outline btn-sm" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)">查看</button><button class="btn btn-danger btn-sm" onclick="deleteNote(${n.id})">删除</button></div></div>`).join(''):'<div class="empty">暂无题解</div>';
 }
 async function setRole(userId,role){await sb.from('profiles').update({role}).eq('id',userId);showToast(`已更新为 ${role}`,'success');loadAdmin();}
 
-
-// ── Announcements ──────────────────────────────────────────
-async function loadAnnouncements(){
-  const list=document.getElementById('ann-list');
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const{data}=await sb.from('announcements').select('*,profiles(username)').order('is_pinned',{ascending:false}).order('created_at',{ascending:false});
-  if(!data||!data.length){list.innerHTML='<div class="empty">暂无公告</div>';return;}
-  list.innerHTML=data.map(a=>`
-    <div class="ann-card ${a.is_pinned?'pinned':''}">
-      <div class="ann-card-top">
-        <div class="ann-title">${escHtml(a.title)}</div>
-        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
-          ${a.is_pinned?'<span class="ann-pin">📌 置顶</span>':''}
-          ${isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteAnn(${a.id})">删除</button>`:''}
-        </div>
-      </div>
-      <div class="ann-meta">${fmtDate(a.created_at)} · ${a.profiles?.username||'教练'}</div>
-      <div class="ann-content">${escHtml(a.content)}</div>
-    </div>`).join('');
-}
-function openAnnModal(){if(!isCoach())return;openModal('ann-modal');}
-async function submitAnn(){
-  const title=document.getElementById('ann-title').value.trim();
-  const content=document.getElementById('ann-content').value.trim();
-  if(!title||!content){document.getElementById('ann-error').textContent='请填写标题和内容';return;}
-  const is_pinned=document.getElementById('ann-pinned').checked;
-  const{error}=await sb.from('announcements').insert({title,content,is_pinned,created_by:currentUser.id});
-  if(error){document.getElementById('ann-error').textContent=error.message;return;}
-  closeModal('ann-modal');document.getElementById('ann-title').value='';document.getElementById('ann-content').value='';document.getElementById('ann-pinned').checked=false;
-  showToast('公告发布成功 ✓','success');loadAnnouncements();
-}
-async function deleteAnn(id){if(!confirm('确认删除？'))return;await sb.from('announcements').delete().eq('id',id);showToast('已删除','success');loadAnnouncements();}
-
-// ── Search ─────────────────────────────────────────────────
-let allNotes=[];
-let searchFilter='';
-async function initSearch(){
-  if(allNotes.length)return;
-  const{data}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,profiles(username)').order('created_at',{ascending:false});
-  allNotes=data||[];
-}
-function setFilter(f){
-  searchFilter=f;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.textContent===f||(f===''&&b.textContent==='全部')));
-  doSearch();
-}
-async function doSearch(){
-  await initSearch();
-  const q=document.getElementById('search-input').value.trim().toLowerCase();
-  const el=document.getElementById('search-results');
-  let results=allNotes.filter(n=>{
-    const matchFilter=!searchFilter||(n.topic||'').includes(searchFilter);
-    const matchQ=!q||(n.title||'').toLowerCase().includes(q)||(n.problem_id||'').toLowerCase().includes(q)||(n.topic||'').toLowerCase().includes(q)||(n.content||'').toLowerCase().includes(q);
-    return matchFilter&&matchQ;
-  });
-  if(!q&&!searchFilter){el.innerHTML='<div class="empty">输入关键词开始搜索</div>';return;}
-  if(!results.length){el.innerHTML='<div class="empty">没有找到相关题解</div>';return;}
-  el.innerHTML='<div class="blog-grid">'+results.map(n=>`
-    <div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)">
-      <div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div>
-      <div class="blog-meta"><span class="author">${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''}</div>
-      <p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p>
-    </div>`).join('')+'</div>';
-}
-
+// ── Modals ─────────────────────────────────────────────────
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});});
 
+// ── Toast & Helpers ────────────────────────────────────────
 let toastTimer;
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800);}
 function fmtDate(iso){const d=new Date(iso);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function escHtml(str){return(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── Nav highlight ──────────────────────────────────────────
+document.querySelectorAll('.nav-links a').forEach(a=>{
+  const orig=a.onclick;
+  a.addEventListener('mouseenter',()=>a.style.transform='translateY(-1px)');
+  a.addEventListener('mouseleave',()=>a.style.transform='');
+});
 
 loadSession();
 </script>
