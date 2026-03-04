@@ -738,6 +738,15 @@ mark.search-hl{
   background:var(--red);color:#fff;
   font-size:9px;font-family:var(--space);font-weight:700;
   margin-left:4px;vertical-align:middle;line-height:1;}
+
+.theme-btn,.notif-btn{
+  background:rgba(108,142,245,0.08);
+  border:1px solid rgba(108,142,245,0.15);
+  border-radius:8px;width:34px;height:34px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;transition:all 0.2s;color:var(--text);}
+.theme-btn:hover,.notif-btn:hover{
+  background:rgba(108,142,245,0.15);border-color:rgba(108,142,245,0.3);}
 </style>
 </head>
 <body>
@@ -748,7 +757,7 @@ mark.search-hl{
     <div style="display:flex;align-items:center;gap:6px">
       <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
       <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()"><span>🔔</span><div class="notif-dot" id="notif-dot"></div></button>
-      <div id="nav-auth-area"></div>
+      <div id="nav-auth-area"><button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button></div>
     </div>
   </div>
   <div class="nav-bottom">
