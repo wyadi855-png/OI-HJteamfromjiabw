@@ -896,6 +896,23 @@ body.light .rank-table-wrap{background:var(--surface2);}
   <div class="form-group" style="display:flex;align-items:center;gap:10px">
     <input type="checkbox" id="ann-pinned" style="width:auto;accent-color:var(--yellow)">
 <script>
+
+// ── Utilities ──────────────────────────────────────────────
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function fmtDate(s){if(!s)return'';const d=new Date(s);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type==='error'?'toast-error':'toast-success');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function avatarGradient(username){const gs=[['#6c8ef5','#2de8b0'],['#f06292','#ffb347'],['#c792ea','#6c8ef5'],['#2de8b0','#ffb347'],['#ff5370','#c792ea']];const i=(username||'A').charCodeAt(0)%gs.length;return'linear-gradient(135deg,'+gs[i][0]+','+gs[i][1]+')';}
+function avatarEl(username,avatarUrl,size,fontSize){
+  size=size||42;fontSize=fontSize||16;
+  const initial=(username||'?').charAt(0).toUpperCase();
+  const grad=avatarGradient(username);
+  const fallback='<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+grad+';display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:'+fontSize+'px;color:var(--bg);font-weight:700;flex-shrink:0">'+initial+'</div>';
+  if(!avatarUrl)return fallback;
+  return '<img src="'+escHtml(avatarUrl)+'" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.replaceWith(this.nextSibling)">'+fallback;
+}
+
 // ── Flying Words Background ────────────────────────────────
 (function(){
   const canvas=document.getElementById('bg-canvas');
@@ -1399,10 +1416,6 @@ function doSearch(){
   el.appendChild(grid);
 }
 
-function avatarGradient(username){
-  const gs=[['#6c8ef5','#2de8b0'],['#f06292','#ffb347'],['#c792ea','#6c8ef5'],['#2de8b0','#ffb347'],['#ff5370','#c792ea']];
-  const i=username.charCodeAt(0)%gs.length;return`linear-gradient(135deg,${gs[i][0]},${gs[i][1]})`;
-}
 async function showProfile(username){
   if(!username)return;
   show('profile');
