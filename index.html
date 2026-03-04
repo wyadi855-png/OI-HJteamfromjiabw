@@ -8,8 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/atom-one-dark.min.css">
-<script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/common.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <style>
 :root{
   --bg:#080b12;--surface:#0f1320;--surface2:#161c2e;--border:#1e2540;
@@ -1070,7 +1070,7 @@ async function loadAnnouncements(){
   const list=document.getElementById('ann-list');
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('announcements').select('*,profiles(username)').order('is_pinned',{ascending:false}).order('created_at',{ascending:false});
-  if(!data||!data.length){list.innerHTML=`<div class="empty-state"><div class="empty-state-icon">📢</div><h3>暂无公告</h3><p>教练发布的比赛通知和训练安排会出现在这里。</p></div>`;return;}
+  if(!data||!data.length){list.innerHTML='<div class="empty-state"><div class="empty-state-icon">📢</div><h3>暂无公告</h3><p>教练发布的比赛通知和训练安排会出现在这里。</p></div>';return;}
   list.innerHTML=data.map(a=>`<div class="ann-card ${a.is_pinned?'pinned':''}"><div class="ann-card-top"><div class="ann-title">${escHtml(a.title)}</div><div style="display:flex;gap:6px;align-items:center;flex-shrink:0">${a.is_pinned?'<span class="ann-pin">📌 置顶</span>':''}${isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteAnn(${a.id})">删除</button>`:''}</div></div><div class="ann-meta">${fmtDate(a.created_at)} · ${a.profiles?.username||'教练'}</div><div class="ann-content">${escHtml(a.content)}</div></div>`).join('');
 }
 function openAnnModal(){if(!isCoach())return;openModal('ann-modal');}
@@ -1121,7 +1121,9 @@ async function loadNotes(filterTag){
   detail.style.display='none';list.style.display='block';
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,view_count,profiles(username)').order('created_at',{ascending:false});
-  if(!data||!data.length){list.innerHTML=`<div class="empty-state"><div class="empty-state-icon">📝</div><h3>还没有题解</h3><p>成为第一个分享解题思路的人吧！<br>好的题解能帮助队友少走弯路。</p>${currentUser?'<button class="btn btn-primary" onclick="openNoteModal()">写第一篇题解</button>':'<button class="btn btn-outline" onclick="openModal('auth-modal')">登录后发布</button>'}</div>`;return;}
+  if(!data||!data.length){
+    list.innerHTML='<div class="empty-state"><div class="empty-state-icon">📝</div><h3>还没有题解</h3><p>成为第一个分享解题思路的人吧！</p>'+(currentUser?'<button class="btn btn-primary" onclick="openNoteModal()">写第一篇题解</button>':'<button class="btn btn-outline" onclick="openModal(\'auth-modal\')">登录后发布</button>')+'</div>';
+    return;}
   // Build tag list
   const tagSet=new Set();data.forEach(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).forEach(t=>tagSet.add(t)));
   const tags=[...tagSet];
@@ -1129,7 +1131,7 @@ async function loadNotes(filterTag){
   tagBar.innerHTML='<button class="tag-chip'+(activeNoteTag===''?' active':'')+'" onclick="loadNotes(\'\')">全部</button>'+tags.map(t=>`<button class="tag-chip${activeNoteTag===t?' active':''}" onclick="loadNotes('${escHtml(t)}')">${escHtml(t)}</button>`).join('');
   const filtered=activeNoteTag?data.filter(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).includes(activeNoteTag)):data;
   if(!filtered.length){list.innerHTML='<div class="empty">该标签下暂无题解</div>';return;}
-  list.innerHTML='<div class="blog-grid">'+filtered.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<div style="display:flex;gap:4px;flex-wrap:wrap">${(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge" onclick="event.stopPropagation();loadNotes('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?`<span class="view-count">${n.view_count}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
+  list.innerHTML='<div class="blog-grid">'+filtered.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<div style="display:flex;gap:4px;flex-wrap:wrap">${(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge" onclick="event.stopPropagation();loadNotes('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?'<span class="view-count">${n.view_count}</span>':''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
 }
 async function showNote(id){
   document.getElementById('notes-list').style.display='none';
@@ -1151,7 +1153,7 @@ async function showNote(id){
     <div class="post-body md-body" id="note-body-rendered"></div>
     <div class="comments-section"><h3>评论 (${comments?comments.length:0})</h3><div id="cl-${id}">${comments&&comments.length?comments.map(c=>`<div class="comment-item"><div class="comment-meta"><span class="author" onclick="showProfile('${c.profiles?.username||''}')">@${c.profiles?.username||'匿名'}</span><span>${fmtDate(c.created_at)}</span></div><div class="comment-text">${escHtml(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:10px 0">// 暂无评论</div>'}</div>${currentUser?`<div class="comment-form"><input type="text" id="ci-${id}" placeholder="写下你的评论…"><button class="btn btn-primary btn-sm" onclick="submitComment(${id})">发送</button></div>`:'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:10px">登录后参与评论</div>'}</div>`;
 }
-function applyHljs(){document.querySelectorAll('#note-detail pre code').forEach(b=>hljs.highlightElement(b));}
+function applyHljs(){if(typeof hljs==='undefined')return;document.querySelectorAll('#note-detail pre code').forEach(b=>hljs.highlightElement(b));}
 async function toggleLike(noteId,isLiked){if(!currentUser){showToast('请先登录','error');return;}if(isLiked)await sb.from('likes').delete().eq('note_id',noteId).eq('user_id',currentUser.id);else await sb.from('likes').insert({note_id:noteId,user_id:currentUser.id});showNote(noteId);}
 async function submitComment(noteId){const input=document.getElementById(`ci-${noteId}`);const content=input.value.trim();if(!content)return;const{error}=await sb.from('comments').insert({note_id:noteId,author_id:currentUser.id,content});if(error){showToast('评论失败','error');return;}input.value='';showNote(noteId);showToast('评论成功 ✓','success');}
 async function deleteNote(id){if(!confirm('确认删除这篇题解？'))return;await sb.from('notes').delete().eq('id',id);showToast('已删除','success');loadNotes();}
@@ -1326,7 +1328,7 @@ async function doSearch(){
   const results=allNotes.filter(n=>{const mf=!searchFilter||(n.topic||'').includes(searchFilter);const mq=!q||(n.title||'').toLowerCase().includes(q)||(n.problem_id||'').toLowerCase().includes(q)||(n.topic||'').toLowerCase().includes(q)||(n.content||'').toLowerCase().includes(q);return mf&&mq;});
   if(!q&&!searchFilter){el.innerHTML='<div class="empty">输入关键词开始搜索</div>';return;}
   if(!results.length){el.innerHTML='<div class="empty">没有找到相关题解</div>';return;}
-  el.innerHTML='<div class="blog-grid">'+results.map(n=>`<div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?`<span class="view-count">${n.view_count}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
+  el.innerHTML='<div class="blog-grid">'+results.map(n=>`<div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?'<span class="view-count">${n.view_count}</span>':''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
 }
 
 // ── Profile ────────────────────────────────────────────────
@@ -1342,200 +1344,106 @@ async function showProfile(username){
   const{data:profile}=await sb.from('profiles').select('*').eq('username',username).single();
   if(!profile){el.innerHTML='<div class="empty">用户不存在</div>';return;}
   const[{data:notes},{data:posts}]=await Promise.all([
-    sb.from('notes').select('id,title,topic,problem_id,content,created_at').eq('author_id',profile.id).order('created_at',{ascending:false}),
+    sb.from('notes').select('id,title,topic,problem_id,content,created_at,view_count').eq('author_id',profile.id).order('created_at',{ascending:false}),
     sb.from('posts').select('id,content,created_at').eq('author_id',profile.id).order('created_at',{ascending:false}),
   ]);
-  const initial=username.charAt(0).toUpperCase();
   const isSelf=currentUser&&currentProfile&&currentProfile.username===username;
-  el.innerHTML=`
-    <div class="profile-hero">
-      <div>${avatarEl(username,profile.avatar_url||'',80,28)}</div>
-      <div>
-        <div class="profile-name">@${escHtml(username)}</div>
-        <div class="profile-role-tag">${profile.role==='coach'?'🎓 教练':'🧑‍💻 学生'}</div>
-        ${profile.bio?`<div style="font-size:13px;color:var(--text2);margin-top:6px;max-width:400px">${escHtml(profile.bio)}</div>`:''}
-        ${isSelf?`<button class="profile-edit-btn" onclick="openModal('settings-modal');loadSettingsData()">编辑资料</button>`:''}
-        <div class="profile-stats">
-          <div class="profile-stat"><div class="num">${notes?notes.length:0}</div><div class="lbl">题解</div></div>
-          <div class="profile-stat"><div class="num">${posts?posts.length:0}</div><div class="lbl">随笔</div></div>
-          <div class="profile-stat"><div class="num">${fmtDate(profile.created_at).slice(0,7)}</div><div class="lbl">加入</div></div>
-        </div>
-      </div>
-    </div>
-    <div class="profile-section"><div class="profile-section-title">活跃度</div><div id="heatmap-${escHtml(username)}">加载中…</div></div>
-    ${notes&&notes.length?`<div class="profile-section"><div class="profile-section-title">题解笔记</div><div class="blog-grid">${notes.map(n=>`<div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?`<span class="view-count">${n.view_count}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,80))}…</p></div>`).join('')}</div></div>`:''}
-    ${posts&&posts.length?`<div class="profile-section"><div class="profile-section-title">随笔日志</div><div class="emotion-feed">${posts.map(p=>`<div class="emotion-post"><div class="emotion-dot"></div><div class="emotion-date"><span>${fmtDate(p.created_at)}</span></div><div class="emotion-text">${escHtml(p.content).replace(/\n/g,'<br>')}</div></div>`).join('')}</div></div>`:''}
-    ${(!notes||!notes.length)&&(!posts||!posts.length)?'<div class="empty">这位同学还没有发布任何内容</div>':''}
-  `;
-  // Load heatmap async
-  buildHeatmap(profile.id).then(html=>{
-    const hel=document.getElementById('heatmap-'+username);
-    if(hel)hel.innerHTML=html;
-  });
-}
-
-// ── Admin ──────────────────────────────────────────────────
-async function loadAdmin(){
-  if(!isCoach()){show('home');return;}
-  const usersEl=document.getElementById('admin-users'),notesEl=document.getElementById('admin-notes');
-  usersEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';notesEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';
-  const{data:users}=await sb.from('profiles').select('*').order('created_at');
-  usersEl.innerHTML=users&&users.length?users.map(u=>`<div class="admin-row"><div class="admin-row-info"><strong style="cursor:pointer;color:var(--accent2)" onclick="showProfile('${escHtml(u.username)}')">@${escHtml(u.username)}</strong><span class="user-role role-${u.role}" style="margin-left:8px">${u.role}</span><div class="admin-sub">加入 ${fmtDate(u.created_at)}</div></div><div class="admin-actions">${u.id!==currentUser.id?u.role==='student'?`<button class="btn btn-yellow btn-sm" onclick="setRole('${u.id}','coach')">设为教练</button>`:`<button class="btn btn-outline btn-sm" onclick="setRole('${u.id}','student')">降为学生</button>`:'<span style="font-family:var(--mono);font-size:10px;color:var(--text3)">（自己）</span>'}</div></div>`).join(''):'<div class="empty">暂无用户</div>';
-  const{data:notes}=await sb.from('notes').select('id,title,created_at,profiles(username)').order('created_at',{ascending:false}).limit(30);
-  notesEl.innerHTML=notes&&notes.length?notes.map(n=>`<div class="admin-row"><div class="admin-row-info"><strong>${escHtml(n.title)}</strong><div class="admin-sub">by @${n.profiles?.username||'?'} · ${fmtDate(n.created_at)}</div></div><div class="admin-actions"><button class="btn btn-outline btn-sm" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)">查看</button><button class="btn btn-danger btn-sm" onclick="deleteNote(${n.id})">删除</button></div></div>`).join(''):'<div class="empty">暂无题解</div>';
-}
-async function setRole(userId,role){await sb.from('profiles').update({role}).eq('id',userId);showToast(`已更新为 ${role}`,'success');loadAdmin();}
-
-// ── Modals ─────────────────────────────────────────────────
-
-// ── Highlight.js + Marked setup ────────────────────────────
-marked.setOptions({
-  highlight: function(code, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      return hljs.highlight(code, { language: lang }).value;
-    }
-    return hljs.highlightAuto(code).value;
-  },
-  breaks: true,
-  gfm: true
-});
-function renderMdSafe(s){ return s ? marked.parse(s) : ''; }
-function updatePreview(srcId, previewId) {
-  const src = document.getElementById(srcId);
-  const preview = document.getElementById(previewId);
-  if (src && preview) {
-    preview.innerHTML = renderMdSafe(src.value || '');
-    preview.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
+  let html='<div class="profile-hero">';
+  html+=avatarEl(username,profile.avatar_url||'',80,28);
+  html+='<div>';
+  html+='<div class="profile-name">@'+escHtml(username)+'</div>';
+  html+='<div class="profile-role-tag">'+(profile.role==='coach'?'🎓 教练':'🧑‍💻 学生')+'</div>';
+  if(profile.bio)html+='<div style="font-size:13px;color:var(--text2);margin-top:6px;max-width:400px">'+escHtml(profile.bio)+'</div>';
+  if(isSelf)html+='<button class="profile-edit-btn" onclick="openModal(&apos;settings-modal&apos;);loadSettingsData()">编辑资料</button>';
+  html+='<div class="profile-stats">';
+  html+='<div class="profile-stat"><div class="num">'+(notes?notes.length:0)+'</div><div class="lbl">题解</div></div>';
+  html+='<div class="profile-stat"><div class="num">'+(posts?posts.length:0)+'</div><div class="lbl">随笔</div></div>';
+  html+='<div class="profile-stat"><div class="num">'+fmtDate(profile.created_at).slice(0,7)+'</div><div class="lbl">加入</div></div>';
+  html+='</div></div></div>';
+  // Heatmap placeholder
+  html+='<div class="profile-section"><div class="profile-section-title">活跃度</div><div id="heatmap-'+escHtml(username)+'">加载中…</div></div>';
+  // Notes
+  if(notes&&notes.length){
+    html+='<div class="profile-section"><div class="profile-section-title">题解笔记</div><div class="blog-grid">';
+    notes.forEach(n=>{
+      const tags=(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean);
+      html+='<div class="blog-card" onclick="show(&apos;notes&apos;);setTimeout(()=>showNote('+n.id+'),300)">';
+      html+='<div class="blog-card-top"><h3>'+escHtml(n.title)+'</h3>';
+      if(tags.length)html+='<span class="topic-badge">'+escHtml(tags[0])+'</span>';
+      html+='</div><div class="blog-meta"><span>'+fmtDate(n.created_at)+'</span>';
+      if(n.problem_id)html+='<span>'+escHtml(n.problem_id)+'</span>';
+      if(n.view_count)html+='<span class="view-count">'+n.view_count+'</span>';
+      html+='</div><p class="blog-excerpt">'+escHtml((n.content||'').slice(0,80))+'…</p></div>';
+    });
+    html+='</div></div>';
   }
-}
-
-// ── Notifications ──────────────────────────────────────────
-let notifOpen = false;
-let notifData = [];
-let readIds = new Set(JSON.parse(localStorage.getItem('readNotifs') || '[]'));
-
-function toggleNotifPanel() {
-  notifOpen = !notifOpen;
-  document.getElementById('notif-panel').classList.toggle('open', notifOpen);
-  if (notifOpen && currentUser) loadNotifs();
-  // close when clicking outside
-  if (notifOpen) {
-    setTimeout(() => document.addEventListener('click', closeNotifOutside), 50);
+  // Posts
+  if(posts&&posts.length){
+    html+='<div class="profile-section"><div class="profile-section-title">随笔日志</div><div class="emotion-feed">';
+    posts.forEach(p=>{
+      html+='<div class="emotion-post"><div class="emotion-dot"></div>';
+      html+='<div class="emotion-date"><span>'+fmtDate(p.created_at)+'</span></div>';
+      html+='<div class="emotion-text">'+escHtml(p.content).replace(/\n/g,'<br>')+'</div></div>';
+    });
+    html+='</div></div>';
   }
+  if((!notes||!notes.length)&&(!posts||!posts.length)){
+    html+='<div class="empty">这位同学还没有发布任何内容</div>';
+  }
+  el.innerHTML=html;
+  buildHeatmap(profile.id).then(h=>{const hel=document.getElementById('heatmap-'+username);if(hel)hel.innerHTML=h;});
 }
-function closeNotifOutside(e) {
-  if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn')) {
-    notifOpen = false;
+
+// ── Theme ──────────────────────────────────────────────────
+let isLight = localStorage.getItem('theme')==='light';
+function applyTheme(){
+  document.body.classList.toggle('light',isLight);
+  const btn=document.getElementById('theme-btn');
+  if(btn)btn.textContent=isLight?'🌙':'☀️';
+}
+function toggleTheme(){isLight=!isLight;localStorage.setItem('theme',isLight?'light':'dark');applyTheme();}
+applyTheme();
+
+// ── Notifications ───────────────────────────────────────────
+let notifOpen=false,notifData=[];
+let readIds=new Set(JSON.parse(localStorage.getItem('readNotifs')||'[]'));
+function toggleNotifPanel(){
+  notifOpen=!notifOpen;
+  document.getElementById('notif-panel').classList.toggle('open',notifOpen);
+  if(notifOpen&&currentUser)loadNotifs();
+  if(notifOpen)setTimeout(()=>document.addEventListener('click',closeNotifOutside),50);
+}
+function closeNotifOutside(e){
+  if(!e.target.closest('#notif-panel')&&!e.target.closest('#notif-btn')){
+    notifOpen=false;
     document.getElementById('notif-panel').classList.remove('open');
-    document.removeEventListener('click', closeNotifOutside);
+    document.removeEventListener('click',closeNotifOutside);
   }
 }
-async function loadNotifs() {
-  if (!currentUser) return;
-  const list = document.getElementById('notif-list');
-  // Get notes authored by current user
-  const { data: myNotes } = await sb.from('notes').select('id,title').eq('author_id', currentUser.id);
-  if (!myNotes || !myNotes.length) { list.innerHTML = '<div class="notif-empty">// 暂无通知</div>'; return; }
-  const noteIds = myNotes.map(n => n.id);
-  const noteMap = {};
-  myNotes.forEach(n => noteMap[n.id] = n.title);
-  // Get comments on those notes, not by self
-  const { data: comments } = await sb.from('comments')
-    .select('id,note_id,content,created_at,profiles(username)')
-    .in('note_id', noteIds)
-    .neq('author_id', currentUser.id)
-    .order('created_at', { ascending: false })
-    .limit(20);
-  notifData = comments || [];
-  const unread = notifData.filter(c => !readIds.has(c.id));
-  document.getElementById('notif-dot').classList.toggle('show', unread.length > 0);
-  if (!notifData.length) { list.innerHTML = '<div class="notif-empty">// 暂无通知</div>'; return; }
-  list.innerHTML = notifData.map(c => `
-    <div class="notif-item ${readIds.has(c.id) ? '' : 'unread'}" onclick="notifClick(${c.note_id},${c.id})">
-      <div class="notif-text"><strong>@${escHtml(c.profiles?.username || '匿名')}</strong> 评论了你的题解「${escHtml(noteMap[c.note_id] || '')}」：${escHtml(c.content.slice(0, 40))}…</div>
-      <div class="notif-time">${fmtDate(c.created_at)}</div>
-    </div>`).join('');
+async function loadNotifs(){
+  if(!currentUser)return;
+  const list=document.getElementById('notif-list');
+  const{data:myNotes}=await sb.from('notes').select('id,title').eq('author_id',currentUser.id);
+  if(!myNotes||!myNotes.length){list.innerHTML='<div class="notif-empty">// 暂无通知</div>';return;}
+  const noteMap={};myNotes.forEach(n=>noteMap[n.id]=n.title);
+  const{data:comments}=await sb.from('comments').select('id,note_id,content,created_at,profiles(username)').in('note_id',myNotes.map(n=>n.id)).neq('author_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
+  notifData=comments||[];
+  const unread=notifData.filter(c=>!readIds.has(c.id));
+  document.getElementById('notif-dot').classList.toggle('show',unread.length>0);
+  if(!notifData.length){list.innerHTML='<div class="notif-empty">// 暂无通知</div>';return;}
+  list.innerHTML=notifData.map(c=>'<div class="notif-item '+(readIds.has(c.id)?'':'unread')+'" onclick="notifClick('+c.note_id+','+c.id+')">'+'<div class="notif-text"><strong>@'+escHtml(c.profiles?.username||'匿名')+'</strong> 评论了你的题解「'+escHtml(noteMap[c.note_id]||'')+'」：'+escHtml(c.content.slice(0,40))+'…</div>'+'<div class="notif-time">'+fmtDate(c.created_at)+'</div></div>').join('');
 }
-function notifClick(noteId, commentId) {
-  readIds.add(commentId);
-  localStorage.setItem('readNotifs', JSON.stringify([...readIds]));
+function notifClick(noteId,commentId){
+  readIds.add(commentId);localStorage.setItem('readNotifs',JSON.stringify([...readIds]));
   document.getElementById('notif-dot').classList.remove('show');
-  toggleNotifPanel();
-  show('notes');
-  setTimeout(() => showNote(noteId), 300);
+  toggleNotifPanel();show('notes');setTimeout(()=>showNote(noteId),300);
 }
-function markAllRead() {
-  notifData.forEach(c => readIds.add(c.id));
-  localStorage.setItem('readNotifs', JSON.stringify([...readIds]));
+function markAllRead(){
+  notifData.forEach(c=>readIds.add(c.id));
+  localStorage.setItem('readNotifs',JSON.stringify([...readIds]));
   document.getElementById('notif-dot').classList.remove('show');
   loadNotifs();
 }
-async function checkNotifDot() {
-  if (!currentUser) return;
-  const { data: myNotes } = await sb.from('notes').select('id').eq('author_id', currentUser.id);
-  if (!myNotes || !myNotes.length) return;
-  const { data: comments } = await sb.from('comments')
-    .select('id').in('note_id', myNotes.map(n => n.id))
-    .neq('author_id', currentUser.id);
-  const hasUnread = (comments || []).some(c => !readIds.has(c.id));
-  document.getElementById('notif-dot').classList.toggle('show', hasUnread);
-}
-
-// ── Stats ──────────────────────────────────────────────────
-async function loadStats() {
-  const el = document.getElementById('stats-content');
-  el.innerHTML = '<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const [
-    { count: noteCount }, { count: postCount }, { count: userCount },
-    { count: contestCount }, { count: lectureCount }, { count: archiveCount },
-    { data: notes }, { data: members }
-  ] = await Promise.all([
-    sb.from('notes').select('*', { count: 'exact', head: true }),
-    sb.from('posts').select('*', { count: 'exact', head: true }),
-    sb.from('profiles').select('*', { count: 'exact', head: true }),
-    sb.from('contests').select('*', { count: 'exact', head: true }),
-    sb.from('lectures').select('*', { count: 'exact', head: true }),
-    sb.from('problem_archive').select('*', { count: 'exact', head: true }),
-    sb.from('notes').select('author_id,profiles(username)').order('created_at', { ascending: false }),
-    sb.from('profiles').select('id,username,created_at').order('created_at'),
-  ]);
-  // Earliest join date = team founding
-  const firstJoin = members && members.length ? fmtDate(members[0].created_at) : '—';
-  const today = new Date();
-  const start = members && members.length ? new Date(members[0].created_at) : today;
-  const trainDays = Math.floor((today - start) / 86400000);
-  // Notes per author
-  const nc = {};
-  (notes || []).forEach(n => { const u = n.profiles?.username; if (u) nc[u] = (nc[u] || 0) + 1; });
-  const topAuthors = Object.entries(nc).sort((a, b) => b[1] - a[1]).slice(0, 6);
-  const maxNotes = topAuthors[0]?.[1] || 1;
-
-  el.innerHTML = `
-    <div class="stats-grid">
-      <div class="stat-card blue"><div class="stat-num">${noteCount || 0}</div><div class="stat-label">题解总数</div></div>
-      <div class="stat-card green"><div class="stat-num">${postCount || 0}</div><div class="stat-label">随笔总数</div></div>
-      <div class="stat-card pink"><div class="stat-num">${userCount || 0}</div><div class="stat-label">注册成员</div><div class="stat-sub">自 ${firstJoin} 起</div></div>
-      <div class="stat-card yellow"><div class="stat-num">${trainDays}</div><div class="stat-label">训练天数</div></div>
-      <div class="stat-card blue"><div class="stat-num">${contestCount || 0}</div><div class="stat-label">模拟赛场数</div></div>
-      <div class="stat-card purple"><div class="stat-num">${archiveCount || 0}</div><div class="stat-label">题库题目数</div></div>
-    </div>
-    ${topAuthors.length ? `
-    <div class="section-sub-title">题解贡献排行</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:28px">
-      ${topAuthors.map(([name, cnt]) => `
-        <div class="activity-row">
-          <div class="activity-name" style="cursor:pointer;color:var(--accent2)" onclick="showProfile('${escHtml(name)}')">@${escHtml(name)}</div>
-          <div class="activity-bar-bg"><div class="activity-bar-fill" style="width:${Math.round(cnt/maxNotes*100)}%"></div></div>
-          <div class="activity-count">${cnt}</div>
-        </div>`).join('')}
-    </div>` : ''}
-    <div class="section-sub-title">课程记录</div>
-    <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
-      <div class="stat-card green"><div class="stat-num">${lectureCount || 0}</div><div class="stat-label">课程场次</div></div>
-    </div>
-  `;
-}
-
 
 // ── Settings ────────────────────────────────────────────────
 function switchSettingsTab(tab){
@@ -1569,39 +1477,7 @@ async function savePassword(){
   document.getElementById('set-newpw').value='';document.getElementById('set-newpw2').value='';
 }
 
-// ── Bookmarks ───────────────────────────────────────────────
-async function toggleBookmark(noteId,isBookmarked){
-  if(!currentUser){showToast('请先登录','error');return;}
-  if(isBookmarked){await sb.from('bookmarks').delete().eq('note_id',noteId).eq('user_id',currentUser.id);}
-  else{await sb.from('bookmarks').insert({note_id:noteId,user_id:currentUser.id});}
-  showNote(noteId);
-  showToast(isBookmarked?'已取消收藏':'收藏成功 ✓','success');
-}
-async function loadBookmarks(){
-  const el=document.getElementById('bookmarks-list');
-  if(!currentUser){el.innerHTML='<div class="empty">登录后查看收藏</div>';return;}
-  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const{data:bms}=await sb.from('bookmarks').select('note_id').eq('user_id',currentUser.id).order('created_at',{ascending:false});
-  if(!bms||!bms.length){el.innerHTML='<div class="empty">还没有收藏任何题解</div>';return;}
-  const ids=bms.map(b=>b.note_id);
-  const{data:notes}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,profiles(username)').in('id',ids);
-  if(!notes||!notes.length){el.innerHTML='<div class="empty">收藏的题解已被删除</div>';return;}
-  el.innerHTML='<div class="blog-grid">'+notes.map(n=>`<div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span></div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
-}
-
 // ── Edit Note ───────────────────────────────────────────────
-async function openEditNote(id){
-  const{data:n}=await sb.from('notes').select('*').eq('id',id).single();
-  document.getElementById('edit-note-id').value=id;
-  document.getElementById('edit-note-title').value=n.title||'';
-  document.getElementById('edit-note-problem').value=n.problem_id||'';
-  document.getElementById('edit-note-topic').value=n.topic||'';
-  document.getElementById('edit-note-content').value=n.content||'';
-  document.getElementById('edit-note-code').value=n.code||'';
-  document.getElementById('edit-note-reflection').value=n.reflection||'';
-  updatePreview('edit-note-content','edit-preview-content');
-  openModal('edit-note-modal');
-}
 async function submitEditNote(){
   const id=document.getElementById('edit-note-id').value;
   const title=document.getElementById('edit-note-title').value.trim();
@@ -1618,11 +1494,6 @@ async function submitEditNote(){
 }
 
 // ── Edit Post ───────────────────────────────────────────────
-function openEditPost(id,content){
-  document.getElementById('edit-post-id').value=id;
-  document.getElementById('edit-post-content').value=content;
-  openModal('edit-post-modal');
-}
 async function submitEditPost(){
   const id=document.getElementById('edit-post-id').value;
   const content=document.getElementById('edit-post-content').value.trim();
@@ -1632,31 +1503,7 @@ async function submitEditPost(){
   closeModal('edit-post-modal');showToast('随笔已更新 ✓','success');loadPosts();
 }
 
-// ── Avatar helper (updated) ─────────────────────────────────
-function avatarEl(username, avatarUrl, size=42, fontSize=16){
-  if(avatarUrl){
-    return `<img src="${escHtml(avatarUrl)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div style="display:none;width:${size}px;height:${size}px;border-radius:50%;background:${avatarGradient(username)};align-items:center;justify-content:center;font-family:var(--space);font-size:${fontSize}px;color:var(--bg);font-weight:700;flex-shrink:0">${username.charAt(0).toUpperCase()}</div>`;
-  }
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${avatarGradient(username)};display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:${fontSize}px;color:var(--bg);font-weight:700;flex-shrink:0">${username.charAt(0).toUpperCase()}</div>`;
-}
-
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});});
-
-// ── Toast & Helpers ────────────────────────────────────────
-let toastTimer;
-function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800);}
-function fmtDate(iso){const d=new Date(iso);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-function escHtml(str){return(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-// ── Nav highlight ──────────────────────────────────────────
-document.querySelectorAll('.nav-links a').forEach(a=>{
-  const orig=a.onclick;
-  a.addEventListener('mouseenter',()=>a.style.transform='translateY(-1px)');
-  a.addEventListener('mouseleave',()=>a.style.transform='');
-});
-
+// ── Init ────────────────────────────────────────────────────
 loadSession();
 </script>
 </body>
