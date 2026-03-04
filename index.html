@@ -288,6 +288,52 @@ code{font-family:var(--mono);font-size:12.5px;color:var(--accent2);line-height:1
 footer{border-top:1px solid var(--border);padding:20px 28px;font-family:var(--mono);font-size:11px;color:var(--text3);text-align:center;margin-top:60px;position:relative;z-index:1;}
 
 
+
+/* NOTIF */
+.notif-btn{position:relative;background:none;border:1px solid var(--border);border-radius:50%;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all 0.2s;}
+.notif-btn:hover{border-color:var(--accent);}
+.notif-dot{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--bg);display:none;}
+.notif-dot.show{display:block;}
+.notif-panel{position:fixed;top:72px;right:24px;width:320px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,0.5);z-index:150;display:none;max-height:400px;overflow-y:auto;}
+.notif-panel.open{display:block;animation:fadeIn 0.2s ease;}
+.notif-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.notif-header h3{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;}
+.notif-item:hover{background:var(--surface2);}
+.notif-item:last-child{border-bottom:none;}
+.notif-item.unread{border-left:3px solid var(--accent);padding-left:13px;}
+.notif-text{font-size:13px;color:var(--text2);line-height:1.5;}
+.notif-text strong{color:var(--text);}
+.notif-time{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:3px;}
+.notif-empty{padding:28px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3);}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:36px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;position:relative;overflow:hidden;transition:all 0.25s;}
+.stat-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,0.3);}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;}
+.stat-card.blue::after{background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.stat-card.green::after{background:linear-gradient(90deg,var(--accent2),var(--yellow));}
+.stat-card.pink::after{background:linear-gradient(90deg,var(--accent3),var(--purple));}
+.stat-card.yellow::after{background:linear-gradient(90deg,var(--yellow),var(--accent));}
+.stat-card.purple::after{background:linear-gradient(90deg,var(--purple),var(--accent3));}
+.stat-num{font-family:var(--mono);font-size:38px;font-weight:700;line-height:1;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;}
+.stat-sub{font-size:12px;color:var(--text3);margin-top:5px;}
+.activity-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.activity-row:last-child{border-bottom:none;}
+.activity-name{font-family:var(--mono);font-size:12px;color:var(--text2);width:100px;flex-shrink:0;}
+.activity-bar-bg{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.activity-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width 0.8s ease;}
+.activity-count{font-family:var(--mono);font-size:11px;color:var(--accent);width:28px;text-align:right;}
+.section-sub-title{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin:28px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+
+/* MD SPLIT EDITOR */
+.md-editor-wrap{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.md-preview-pane{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;min-height:120px;font-size:13px;overflow-y:auto;}
+.md-pane-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;}
+@media(max-width:680px){.md-editor-wrap{grid-template-columns:1fr;}}
+
 /* LIGHT THEME */
 body.light{
   --bg:#f4f6fb;--surface:#ffffff;--surface2:#eef1f8;--border:#d4d9e8;
@@ -373,6 +419,7 @@ body.light .rank-table-wrap{background:var(--surface2);}
   <div class="nav-top">
     <div class="nav-logo">OI · TEAM</div>
     <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
+    <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()"><span>🔔</span><div class="notif-dot" id="notif-dot"></div></button>
     <div class="nav-right" id="nav-auth-area"></div>
   </div>
   <div class="nav-bottom">
@@ -387,11 +434,13 @@ body.light .rank-table-wrap{background:var(--surface2);}
       <li><a onclick="show('leaderboard')" id="nav-leaderboard">排行榜</a></li>
       <li><a onclick="show('members')" id="nav-members">成员</a></li>
       <li><a onclick="show('search')" id="nav-search">搜索</a></li>
+      <li><a onclick="show('stats')" id="nav-stats">统计</a></li>
       <li><a onclick="show('resources')" id="nav-resources">资料</a></li>
       <li><a onclick="show('admin')" id="nav-admin" style="display:none">后台</a></li>
     </ul>
   </div>
 </nav>
+<div class="notif-panel" id="notif-panel"><div class="notif-header"><h3>通知</h3><button class="btn btn-outline btn-sm" onclick="markAllRead()">全部已读</button></div><div id="notif-list"><div class="notif-empty">// 暂无通知</div></div></div>
 <main class="main">
 
 <!-- HOME -->
@@ -501,6 +550,13 @@ body.light .rank-table-wrap{background:var(--surface2);}
   </div>
 </div></section>
 
+
+
+<!-- STATS -->
+<section id="stats"><div class="container">
+  <div class="page-header"><div class="page-header-left"><div class="label">// team_stats</div><h1>团队数据</h1><p>训练成果与活跃度一览。</p></div></div>
+  <div id="stats-content"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div></section>
 
 <!-- LEADERBOARD -->
 <section id="leaderboard"><div class="container">
@@ -697,7 +753,7 @@ function show(id){
   const navEl=document.getElementById('nav-'+id);
   if(navEl)navEl.classList.add('active');
   window.scrollTo(0,0);
-  const loaders={contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:()=>{},leaderboard:()=>loadLeaderboard('notes'),members:loadMembers};
+  const loaders={contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:()=>{},leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats};
   if(loaders[id])loaders[id]();
 }
 
@@ -720,12 +776,13 @@ function renderAuthArea(){
 async function loadSession(){
   const{data:{session}}=await sb.auth.getSession();
   if(session){currentUser=session.user;const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();currentProfile=data;}
-  renderAuthArea();loadHomeFeed();
+  renderAuthArea();loadHomeFeed();if(currentUser)checkNotifDot();
 }
 sb.auth.onAuthStateChange(async(_,session)=>{
   if(session){currentUser=session.user;const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();currentProfile=data;}
   else{currentUser=null;currentProfile=null;}
   renderAuthArea();
+  if(currentUser)checkNotifDot();
 });
 
 function usernameToEmail(u){return`${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@oiteam.local`;}
@@ -986,6 +1043,141 @@ async function loadAdmin(){
 async function setRole(userId,role){await sb.from('profiles').update({role}).eq('id',userId);showToast(`已更新为 ${role}`,'success');loadAdmin();}
 
 // ── Modals ─────────────────────────────────────────────────
+
+// ── MD Preview ─────────────────────────────────────────────
+function updatePreview(srcId, previewId) {
+  const src = document.getElementById(srcId);
+  const preview = document.getElementById(previewId);
+  if (src && preview) preview.innerHTML = marked.parse(src.value || '');
+}
+
+// ── Notifications ──────────────────────────────────────────
+let notifOpen = false;
+let notifData = [];
+let readIds = new Set(JSON.parse(localStorage.getItem('readNotifs') || '[]'));
+
+function toggleNotifPanel() {
+  notifOpen = !notifOpen;
+  document.getElementById('notif-panel').classList.toggle('open', notifOpen);
+  if (notifOpen && currentUser) loadNotifs();
+  // close when clicking outside
+  if (notifOpen) {
+    setTimeout(() => document.addEventListener('click', closeNotifOutside), 50);
+  }
+}
+function closeNotifOutside(e) {
+  if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn')) {
+    notifOpen = false;
+    document.getElementById('notif-panel').classList.remove('open');
+    document.removeEventListener('click', closeNotifOutside);
+  }
+}
+async function loadNotifs() {
+  if (!currentUser) return;
+  const list = document.getElementById('notif-list');
+  // Get notes authored by current user
+  const { data: myNotes } = await sb.from('notes').select('id,title').eq('author_id', currentUser.id);
+  if (!myNotes || !myNotes.length) { list.innerHTML = '<div class="notif-empty">// 暂无通知</div>'; return; }
+  const noteIds = myNotes.map(n => n.id);
+  const noteMap = {};
+  myNotes.forEach(n => noteMap[n.id] = n.title);
+  // Get comments on those notes, not by self
+  const { data: comments } = await sb.from('comments')
+    .select('id,note_id,content,created_at,profiles(username)')
+    .in('note_id', noteIds)
+    .neq('author_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(20);
+  notifData = comments || [];
+  const unread = notifData.filter(c => !readIds.has(c.id));
+  document.getElementById('notif-dot').classList.toggle('show', unread.length > 0);
+  if (!notifData.length) { list.innerHTML = '<div class="notif-empty">// 暂无通知</div>'; return; }
+  list.innerHTML = notifData.map(c => `
+    <div class="notif-item ${readIds.has(c.id) ? '' : 'unread'}" onclick="notifClick(${c.note_id},${c.id})">
+      <div class="notif-text"><strong>@${escHtml(c.profiles?.username || '匿名')}</strong> 评论了你的题解「${escHtml(noteMap[c.note_id] || '')}」：${escHtml(c.content.slice(0, 40))}…</div>
+      <div class="notif-time">${fmtDate(c.created_at)}</div>
+    </div>`).join('');
+}
+function notifClick(noteId, commentId) {
+  readIds.add(commentId);
+  localStorage.setItem('readNotifs', JSON.stringify([...readIds]));
+  document.getElementById('notif-dot').classList.remove('show');
+  toggleNotifPanel();
+  show('notes');
+  setTimeout(() => showNote(noteId), 300);
+}
+function markAllRead() {
+  notifData.forEach(c => readIds.add(c.id));
+  localStorage.setItem('readNotifs', JSON.stringify([...readIds]));
+  document.getElementById('notif-dot').classList.remove('show');
+  loadNotifs();
+}
+async function checkNotifDot() {
+  if (!currentUser) return;
+  const { data: myNotes } = await sb.from('notes').select('id').eq('author_id', currentUser.id);
+  if (!myNotes || !myNotes.length) return;
+  const { data: comments } = await sb.from('comments')
+    .select('id').in('note_id', myNotes.map(n => n.id))
+    .neq('author_id', currentUser.id);
+  const hasUnread = (comments || []).some(c => !readIds.has(c.id));
+  document.getElementById('notif-dot').classList.toggle('show', hasUnread);
+}
+
+// ── Stats ──────────────────────────────────────────────────
+async function loadStats() {
+  const el = document.getElementById('stats-content');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const [
+    { count: noteCount }, { count: postCount }, { count: userCount },
+    { count: contestCount }, { count: lectureCount }, { count: archiveCount },
+    { data: notes }, { data: members }
+  ] = await Promise.all([
+    sb.from('notes').select('*', { count: 'exact', head: true }),
+    sb.from('posts').select('*', { count: 'exact', head: true }),
+    sb.from('profiles').select('*', { count: 'exact', head: true }),
+    sb.from('contests').select('*', { count: 'exact', head: true }),
+    sb.from('lectures').select('*', { count: 'exact', head: true }),
+    sb.from('problem_archive').select('*', { count: 'exact', head: true }),
+    sb.from('notes').select('author_id,profiles(username)').order('created_at', { ascending: false }),
+    sb.from('profiles').select('id,username,created_at').order('created_at'),
+  ]);
+  // Earliest join date = team founding
+  const firstJoin = members && members.length ? fmtDate(members[0].created_at) : '—';
+  const today = new Date();
+  const start = members && members.length ? new Date(members[0].created_at) : today;
+  const trainDays = Math.floor((today - start) / 86400000);
+  // Notes per author
+  const nc = {};
+  (notes || []).forEach(n => { const u = n.profiles?.username; if (u) nc[u] = (nc[u] || 0) + 1; });
+  const topAuthors = Object.entries(nc).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const maxNotes = topAuthors[0]?.[1] || 1;
+
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card blue"><div class="stat-num">${noteCount || 0}</div><div class="stat-label">题解总数</div></div>
+      <div class="stat-card green"><div class="stat-num">${postCount || 0}</div><div class="stat-label">随笔总数</div></div>
+      <div class="stat-card pink"><div class="stat-num">${userCount || 0}</div><div class="stat-label">注册成员</div><div class="stat-sub">自 ${firstJoin} 起</div></div>
+      <div class="stat-card yellow"><div class="stat-num">${trainDays}</div><div class="stat-label">训练天数</div></div>
+      <div class="stat-card blue"><div class="stat-num">${contestCount || 0}</div><div class="stat-label">模拟赛场数</div></div>
+      <div class="stat-card purple"><div class="stat-num">${archiveCount || 0}</div><div class="stat-label">题库题目数</div></div>
+    </div>
+    ${topAuthors.length ? `
+    <div class="section-sub-title">题解贡献排行</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:28px">
+      ${topAuthors.map(([name, cnt]) => `
+        <div class="activity-row">
+          <div class="activity-name" style="cursor:pointer;color:var(--accent2)" onclick="showProfile('${escHtml(name)}')">@${escHtml(name)}</div>
+          <div class="activity-bar-bg"><div class="activity-bar-fill" style="width:${Math.round(cnt/maxNotes*100)}%"></div></div>
+          <div class="activity-count">${cnt}</div>
+        </div>`).join('')}
+    </div>` : ''}
+    <div class="section-sub-title">课程记录</div>
+    <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+      <div class="stat-card green"><div class="stat-num">${lectureCount || 0}</div><div class="stat-label">课程场次</div></div>
+    </div>
+  `;
+}
+
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});});
