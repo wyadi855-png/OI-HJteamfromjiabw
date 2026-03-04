@@ -500,15 +500,81 @@ body.light .modal{background:rgba(248,250,255,0.98);}
 
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
+  /* Layout */
   .home-grid{grid-template-columns:1fr;}
+  .home-bento{grid-template-columns:1fr;}
   .stats-grid{grid-template-columns:1fr 1fr;}
-  .hero h1{font-size:clamp(28px,8vw,48px);}
-  .hero-stats-bar{flex-direction:column;gap:10px;}
+  .blog-grid,.blog-grid-small{grid-template-columns:1fr;}
   .members-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
-  .modal{padding:20px;}
-  #notif-panel{width:calc(100vw - 24px);right:12px;}
-  .lb-row{padding:12px;}
-  .blog-grid{grid-template-columns:1fr;}
+  .resource-grid{grid-template-columns:1fr 1fr;}
+
+  /* Hero */
+  .hero{padding:56px 0 36px;}
+  .hero h1{font-size:clamp(28px,8vw,42px);}
+  .hero-desc{font-size:14px;}
+  .hero-stats-bar{flex-direction:row;flex-wrap:wrap;gap:8px;}
+  .hero-stat-item{padding:12px 16px;flex:1;min-width:80px;}
+  .hero-stat-num{font-size:22px;}
+
+  /* Nav */
+  nav{position:fixed;}
+  .nav-top{padding:10px 16px;}
+  .nav-bottom{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .nav-bottom::-webkit-scrollbar{display:none;}
+  .nav-links{flex-wrap:nowrap;padding:0 12px 8px;gap:0;}
+  .nav-links a{font-size:13px;padding:5px 10px;white-space:nowrap;}
+  .nav-logo{font-size:15px;}
+
+  /* Sections */
+  section{padding:72px 0 48px;}
+  .container{padding:0 16px;}
+  .page-header{flex-direction:column;gap:12px;}
+  .page-header-left h1{font-size:22px;}
+
+  /* Cards */
+  .blog-card{padding:16px;}
+  .contest-card .contest-header{padding:14px 16px;}
+  .contest-card .contest-body{padding:0 16px 16px;}
+  .lb-row{padding:10px 14px;}
+  .lb-score{font-size:15px;}
+  .lb-div-scores{flex-direction:row;gap:6px;align-items:center;}
+
+  /* Modals */
+  .modal{padding:18px;border-radius:12px;}
+  .modal-overlay{padding:12px;}
+  .drawer{width:100vw;}
+
+  /* Tables */
+  .rank-table-wrap{font-size:12px;}
+  .rank-table th,.rank-table td{padding:8px 10px;}
+  .archive-table{font-size:12px;}
+  .archive-table th,.archive-table td{padding:8px 10px;}
+
+  /* Profile */
+  .profile-hero{flex-direction:column;align-items:center;text-align:center;padding:20px;}
+  .profile-stats{justify-content:center;}
+
+  /* Misc */
+  #notif-panel{width:calc(100vw - 24px);right:12px;top:54px;}
+  .notif-dot{top:3px;right:3px;}
+  .lb-tabs,.lb-tab{font-size:11px;}
+  .form-row{flex-direction:column;gap:0;}
+  .lecture-item{flex-direction:column;gap:8px;}
+  .lecture-date-block{display:flex;gap:8px;align-items:baseline;}
+  .lecture-month{font-size:12px;}
+  .lecture-day{font-size:20px;}
+}
+
+@media(max-width:480px){
+  .hero h1{font-size:28px;}
+  .hero-stats-bar{flex-direction:column;}
+  .hero-stat-item{flex:none;width:100%;}
+  .stats-grid{grid-template-columns:1fr;}
+  .members-grid{grid-template-columns:repeat(2,1fr);}
+  .resource-grid{grid-template-columns:1fr;}
+  .bento-coach-row{flex-direction:column;align-items:flex-start;}
+  .lb-div-scores{flex-direction:column;gap:2px;}
+  .contest-tabs{flex-wrap:wrap;}
 }
 
 /* ── LECTURE UPGRADES ── */
@@ -1202,11 +1268,11 @@ async function loadHomeFeed(){
   }
   feed.innerHTML=items.map(item=>{
     let content='';
-    if(item.type==='note')content=`<span class="clickable-name" onclick="showProfile('${item.profiles?.username||''}')">${item.profiles?.username||'匿名'}</span> 发布了题解：<strong>${escHtml(item.title)}</strong> <span class="update-tag tag-note">题解</span>`;
+    if(item.type==='note')content=`<span class="clickable-name" onclick="showProfile('${item.profiles?.username||''}')">${item.profiles?.username||'匿名'}</span> 发布了题解：<span class="clickable-name" onclick="show('notes');setTimeout(()=>showNote(${item.id}),100)">${escHtml(item.title)}</span> <span class="update-tag tag-note">题解</span>`;
     else if(item.type==='post')content=`<span class="clickable-name" onclick="showProfile('${item.profiles?.username||''}')">${item.profiles?.username||'匿名'}</span> 写了随笔：${escHtml((item.content||'').slice(0,40))}… <span class="update-tag tag-post">随笔</span>`;
-    else if(item.type==='contest')content=`新增模拟赛：<strong>${escHtml(item.title)}</strong> <span class="update-tag tag-contest">模拟赛</span>`;
-    else if(item.type==='lecture')content=`新增课程：<strong>${escHtml(item.topic)}</strong> <span class="update-tag tag-lecture">课程</span>`;
-    else if(item.type==='ann')content=`📢 <strong>${escHtml(item.title)}</strong> <span class="update-tag tag-ann">公告</span>`;
+    else if(item.type==='contest')content=`新增模拟赛：<span class="clickable-name" onclick="show('contests')">${escHtml(item.title)}</span> <span class="update-tag tag-contest">模拟赛</span>`;
+    else if(item.type==='lecture')content=`新增课程：<span class="clickable-name" onclick="show('lectures')">${escHtml(item.topic)}</span> <span class="update-tag tag-lecture">课程</span>`;
+    else if(item.type==='ann')content=`📢 <span class="clickable-name" onclick="show('announcements')">${escHtml(item.title)}</span> <span class="update-tag tag-ann">公告</span>`;
     return`<div class="update-item"><div class="update-date">${fmtDate(item.created_at)}</div><div class="update-content">${content}</div></div>`;
   }).join('');
 }
@@ -1254,7 +1320,7 @@ async function loadContests(){
       if(!rows.length)return'';
       return '<table class="rank-table"><thead><tr><th>排名</th><th>用户名</th><th>总分</th></tr></thead><tbody>'
         +rows.map(r=>'<tr><td class="'+(r.rank<=3?'rank-'+r.rank:'')+'">'+(r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':r.rank)+'</td>'
-          +'<td class="rank-name">'+escHtml(r.student_name)+'</td>'
+          +'<td class="rank-name clickable-name" onclick="showProfile(\''+escHtml(r.student_name)+'\')" style="cursor:pointer">'+escHtml(r.student_name)+'</td>'
           +'<td>'+r.score+'<span class="score-bar"><span class="score-fill" style="width:'+Math.round(r.score/maxScore*100)+'%"></span></span></td></tr>').join('')
         +'</tbody></table>';
     }
