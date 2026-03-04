@@ -354,6 +354,65 @@ footer{border-top:1px solid var(--border);padding:20px 28px;font-family:var(--mo
 .md-preview-pane{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;min-height:120px;font-size:13px;overflow-y:auto;}
 .md-pane-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;}
 
+
+/* NAV MORE DROPDOWN */
+.nav-more-wrap{position:relative;}
+.nav-more-btn{font-family:var(--serif);font-size:14px;color:var(--text2);padding:5px 14px;border-radius:6px;transition:all 0.2s;cursor:pointer;white-space:nowrap;}
+.nav-more-btn:hover{color:var(--text);background:var(--surface2);}
+.nav-more-menu{position:absolute;top:calc(100% + 6px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:120px;z-index:200;display:none;box-shadow:0 16px 40px rgba(0,0,0,0.4);}
+.nav-more-menu.open{display:block;animation:fadeIn 0.15s ease;}
+.nav-more-menu a{display:block;font-family:var(--serif);font-size:13px;color:var(--text2);padding:7px 12px;border-radius:6px;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.nav-more-menu a:hover{color:var(--text);background:var(--surface2);}
+.nav-more-menu a.active{color:var(--accent);}
+
+/* HERO STATS BAR */
+.hero-stats-bar{display:flex;gap:0;margin-top:28px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.hero-stat-item{flex:1;padding:14px 20px;text-align:center;border-right:1px solid var(--border);transition:background 0.2s;}
+.hero-stat-item:last-child{border-right:none;}
+.hero-stat-item:hover{background:var(--surface2);}
+.hero-stat-num{font-family:var(--mono);font-size:24px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;}
+.hero-stat-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.08em;margin-top:3px;}
+
+/* NOTES FEATURED CARD */
+.notes-featured{margin-bottom:20px;}
+.blog-card-featured{background:linear-gradient(135deg,rgba(108,142,245,0.08),rgba(45,232,176,0.04));border:1px solid rgba(108,142,245,0.25);border-radius:12px;padding:28px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;}
+.blog-card-featured::before{content:'HOT';position:absolute;top:14px;right:14px;font-family:var(--mono);font-size:9px;padding:2px 7px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:3px;color:var(--bg);font-weight:700;letter-spacing:0.1em;}
+.blog-card-featured:hover{border-color:rgba(108,142,245,0.5);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.3);}
+.blog-card-featured h3{font-size:18px;font-weight:500;margin-bottom:10px;}
+.blog-card-featured .blog-excerpt{font-size:14px;line-height:1.8;}
+.blog-grid-small{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:680px){.blog-grid-small{grid-template-columns:1fr;}.hero-stats-bar{flex-wrap:wrap;}.hero-stat-item{flex:1 1 45%;border-bottom:1px solid var(--border);}}
+
+/* HEATMAP */
+.heatmap-wrap{margin-top:4px;}
+.heatmap-grid{display:flex;gap:3px;flex-wrap:wrap;}
+.hm-cell{width:12px;height:12px;border-radius:2px;background:var(--border);transition:all 0.15s;cursor:default;flex-shrink:0;}
+.hm-cell:hover{transform:scale(1.3);}
+.hm-cell.l1{background:rgba(108,142,245,0.3);}
+.hm-cell.l2{background:rgba(108,142,245,0.55);}
+.hm-cell.l3{background:rgba(108,142,245,0.8);}
+.hm-cell.l4{background:var(--accent2);box-shadow:0 0 6px rgba(45,232,176,0.4);}
+.heatmap-legend{display:flex;align-items:center;gap:5px;margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--text3);}
+.heatmap-months{display:flex;gap:3px;margin-bottom:4px;font-family:var(--mono);font-size:9px;color:var(--text3);}
+
+/* EMPTY STATES */
+.empty-state{text-align:center;padding:64px 20px;}
+.empty-state-icon{font-size:48px;margin-bottom:16px;opacity:0.6;}
+.empty-state h3{font-size:16px;font-weight:500;margin-bottom:8px;color:var(--text2);}
+.empty-state p{font-size:13px;color:var(--text3);margin-bottom:20px;line-height:1.7;}
+
+/* DRAWER (slide-in panel for writing notes) */
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;backdrop-filter:blur(3px);}
+.drawer-overlay.open{display:block;animation:fadeIn 0.2s ease;}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(600px,100vw);background:var(--surface);border-left:1px solid var(--border);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);}
+.drawer.open{transform:translateX(0);}
+.drawer-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.drawer-header h2{font-size:16px;font-weight:500;}
+.drawer-close{background:none;border:1px solid var(--border);border-radius:6px;width:32px;height:32px;cursor:pointer;color:var(--text2);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.drawer-close:hover{border-color:var(--red);color:var(--red);}
+.drawer-body{flex:1;overflow-y:auto;padding:20px 24px;}
+.drawer-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
+
 /* VIEW COUNT */
 .view-count{font-family:var(--mono);font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px;}
 .view-count::before{content:'👁';}
@@ -544,6 +603,7 @@ body.light .rank-table-wrap{background:var(--surface2);}
     <div class="info-card"><div class="card-label">训练方向</div><h3>核心技能树</h3><p>图论 · 动态规划 · 数据结构 · 数论 · 字符串 · 网络流</p></div>
     <div class="info-card"><div class="card-label">团队目标</div><h3>赛季计划</h3><p>冲刺 CSP-S 提高组，部分成员备战 NOI 联赛。每周训练，月度模拟赛检验成果。</p></div>
   </div>
+  <div id="hero-stats-bar" style="margin-bottom:40px"></div>
   <div class="updates-section"><h2>// recent activity</h2><div id="home-feed"><div class="loading"><div class="spinner"></div>加载中…</div></div></div>
 </div></section>
 
@@ -982,6 +1042,7 @@ async function doLogout(){await sb.auth.signOut();showToast('已退出登录','s
 
 // ── Home ───────────────────────────────────────────────────
 async function loadHomeFeed(){
+  loadHeroStats();
   const feed=document.getElementById('home-feed');
   feed.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const[{data:notes},{data:posts},{data:contests},{data:lectures},{data:anns}]=await Promise.all([
@@ -1009,7 +1070,7 @@ async function loadAnnouncements(){
   const list=document.getElementById('ann-list');
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('announcements').select('*,profiles(username)').order('is_pinned',{ascending:false}).order('created_at',{ascending:false});
-  if(!data||!data.length){list.innerHTML='<div class="empty">暂无公告</div>';return;}
+  if(!data||!data.length){list.innerHTML=`<div class="empty-state"><div class="empty-state-icon">📢</div><h3>暂无公告</h3><p>教练发布的比赛通知和训练安排会出现在这里。</p></div>`;return;}
   list.innerHTML=data.map(a=>`<div class="ann-card ${a.is_pinned?'pinned':''}"><div class="ann-card-top"><div class="ann-title">${escHtml(a.title)}</div><div style="display:flex;gap:6px;align-items:center;flex-shrink:0">${a.is_pinned?'<span class="ann-pin">📌 置顶</span>':''}${isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteAnn(${a.id})">删除</button>`:''}</div></div><div class="ann-meta">${fmtDate(a.created_at)} · ${a.profiles?.username||'教练'}</div><div class="ann-content">${escHtml(a.content)}</div></div>`).join('');
 }
 function openAnnModal(){if(!isCoach())return;openModal('ann-modal');}
@@ -1060,7 +1121,7 @@ async function loadNotes(filterTag){
   detail.style.display='none';list.style.display='block';
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,view_count,profiles(username)').order('created_at',{ascending:false});
-  if(!data||!data.length){list.innerHTML='<div class="empty">暂无题解，登录后发布第一篇</div>';return;}
+  if(!data||!data.length){list.innerHTML=`<div class="empty-state"><div class="empty-state-icon">📝</div><h3>还没有题解</h3><p>成为第一个分享解题思路的人吧！<br>好的题解能帮助队友少走弯路。</p>${currentUser?'<button class="btn btn-primary" onclick="openNoteModal()">写第一篇题解</button>':'<button class="btn btn-outline" onclick="openModal('auth-modal')">登录后发布</button>'}</div>`;return;}
   // Build tag list
   const tagSet=new Set();data.forEach(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).forEach(t=>tagSet.add(t)));
   const tags=[...tagSet];
@@ -1094,13 +1155,109 @@ function applyHljs(){document.querySelectorAll('#note-detail pre code').forEach(
 async function toggleLike(noteId,isLiked){if(!currentUser){showToast('请先登录','error');return;}if(isLiked)await sb.from('likes').delete().eq('note_id',noteId).eq('user_id',currentUser.id);else await sb.from('likes').insert({note_id:noteId,user_id:currentUser.id});showNote(noteId);}
 async function submitComment(noteId){const input=document.getElementById(`ci-${noteId}`);const content=input.value.trim();if(!content)return;const{error}=await sb.from('comments').insert({note_id:noteId,author_id:currentUser.id,content});if(error){showToast('评论失败','error');return;}input.value='';showNote(noteId);showToast('评论成功 ✓','success');}
 async function deleteNote(id){if(!confirm('确认删除这篇题解？'))return;await sb.from('notes').delete().eq('id',id);showToast('已删除','success');loadNotes();}
-function openNoteModal(){if(!currentUser){openModal('auth-modal');return;}openModal('note-modal');}
+
+// ── Nav More Menu ──────────────────────────────────────────
+function toggleMoreMenu(e){
+  e.stopPropagation();
+  const menu=document.getElementById('nav-more-menu');
+  menu.classList.toggle('open');
+  if(menu.classList.contains('open')){
+    setTimeout(()=>document.addEventListener('click',closeMoreMenuOutside),50);
+  }
+}
+function closeMoreMenu(){document.getElementById('nav-more-menu').classList.remove('open');}
+function closeMoreMenuOutside(e){
+  if(!e.target.closest('.nav-more-wrap')){
+    closeMoreMenu();
+    document.removeEventListener('click',closeMoreMenuOutside);
+  }
+}
+
+// ── Hero Stats Bar ─────────────────────────────────────────
+async function loadHeroStats(){
+  const el=document.getElementById('hero-stats-bar');
+  if(!el)return;
+  const[{count:nc},{count:uc},{count:cc}]=await Promise.all([
+    sb.from('notes').select('*',{count:'exact',head:true}),
+    sb.from('profiles').select('*',{count:'exact',head:true}),
+    sb.from('contests').select('*',{count:'exact',head:true}),
+  ]);
+  el.innerHTML=`<div class="hero-stats-bar">
+    <div class="hero-stat-item" onclick="show('notes')" style="cursor:pointer">
+      <div class="hero-stat-num" id="hs-notes">0</div>
+      <div class="hero-stat-label">篇题解</div>
+    </div>
+    <div class="hero-stat-item" onclick="show('members')" style="cursor:pointer">
+      <div class="hero-stat-num" id="hs-members">0</div>
+      <div class="hero-stat-label">位队员</div>
+    </div>
+    <div class="hero-stat-item" onclick="show('contests')" style="cursor:pointer">
+      <div class="hero-stat-num" id="hs-contests">0</div>
+      <div class="hero-stat-label">场模拟赛</div>
+    </div>
+  </div>`;
+  // Animate count up
+  function countUp(id,target){
+    const el=document.getElementById(id);if(!el)return;
+    let cur=0;const step=Math.ceil(target/30);
+    const t=setInterval(()=>{cur=Math.min(cur+step,target);el.textContent=cur;if(cur>=target)clearInterval(t);},40);
+  }
+  countUp('hs-notes',nc||0);
+  countUp('hs-members',uc||0);
+  countUp('hs-contests',cc||0);
+}
+
+// ── Heatmap ────────────────────────────────────────────────
+async function buildHeatmap(userId){
+  // Get notes+posts for user in last 52 weeks
+  const since=new Date();since.setDate(since.getDate()-364);
+  const sinceStr=since.toISOString();
+  const[{data:notes},{data:posts}]=await Promise.all([
+    sb.from('notes').select('created_at').eq('author_id',userId).gte('created_at',sinceStr),
+    sb.from('posts').select('created_at').eq('author_id',userId).gte('created_at',sinceStr),
+  ]);
+  const counts={};
+  [...(notes||[]),...(posts||[])].forEach(r=>{
+    const d=r.created_at.slice(0,10);counts[d]=(counts[d]||0)+1;
+  });
+  const total=Object.values(counts).reduce((a,b)=>a+b,0);
+  // Build 52 weeks × 7 days grid
+  const today=new Date();
+  const cells=[];
+  for(let w=51;w>=0;w--){
+    for(let d=0;d<7;d++){
+      const date=new Date(today);
+      date.setDate(today.getDate()-(w*7+(6-d)));
+      const key=date.toISOString().slice(0,10);
+      const cnt=counts[key]||0;
+      const level=cnt===0?'':cnt===1?'l1':cnt===2?'l2':cnt<=4?'l3':'l4';
+      cells.push(`<div class="hm-cell ${level}" title="${key}: ${cnt} 次活动"></div>`);
+    }
+  }
+  return`<div class="heatmap-wrap">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">过去一年 · 共 ${total} 次活动</div>
+    <div class="heatmap-grid" style="display:grid;grid-template-columns:repeat(52,12px);gap:3px">${cells.join('')}</div>
+    <div class="heatmap-legend">少 <div class="hm-cell"></div><div class="hm-cell l1"></div><div class="hm-cell l2"></div><div class="hm-cell l3"></div><div class="hm-cell l4"></div> 多</div>
+  </div>`;
+}
+
+function openNoteModal(){
+  if(!currentUser){openModal('auth-modal');return;}
+  document.getElementById('note-drawer-overlay').classList.add('open');
+  document.getElementById('note-drawer').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeNoteDrawer(){
+  document.getElementById('note-drawer-overlay').classList.remove('open');
+  document.getElementById('note-drawer').classList.remove('open');
+  document.body.style.overflow='';
+}
 async function submitNote(){
   const title=document.getElementById('note-title').value.trim();
   if(!title){document.getElementById('note-error').textContent='请填写标题';return;}
   const{error}=await sb.from('notes').insert({author_id:currentUser.id,title,problem_id:document.getElementById('note-problem').value.trim(),topic:document.getElementById('note-topic').value.trim(),content:document.getElementById('note-content').value.trim(),code:document.getElementById('note-code').value.trim(),reflection:document.getElementById('note-reflection').value.trim()});
   if(error){document.getElementById('note-error').textContent=error.message;return;}
-  closeModal('note-modal');['note-title','note-problem','note-topic','note-content','note-code','note-reflection'].forEach(id=>document.getElementById(id).value='');
+  closeNoteDrawer();['note-title','note-problem','note-topic','note-content','note-code','note-reflection'].forEach(id=>document.getElementById(id).value='');['preview-content','preview-reflection'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=''});
   showToast('题解发布成功 ✓','success');loadNotes();
 }
 
@@ -1205,10 +1362,16 @@ async function showProfile(username){
         </div>
       </div>
     </div>
+    <div class="profile-section"><div class="profile-section-title">活跃度</div><div id="heatmap-${escHtml(username)}">加载中…</div></div>
     ${notes&&notes.length?`<div class="profile-section"><div class="profile-section-title">题解笔记</div><div class="blog-grid">${notes.map(n=>`<div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?`<span class="view-count">${n.view_count}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,80))}…</p></div>`).join('')}</div></div>`:''}
     ${posts&&posts.length?`<div class="profile-section"><div class="profile-section-title">随笔日志</div><div class="emotion-feed">${posts.map(p=>`<div class="emotion-post"><div class="emotion-dot"></div><div class="emotion-date"><span>${fmtDate(p.created_at)}</span></div><div class="emotion-text">${escHtml(p.content).replace(/\n/g,'<br>')}</div></div>`).join('')}</div></div>`:''}
     ${(!notes||!notes.length)&&(!posts||!posts.length)?'<div class="empty">这位同学还没有发布任何内容</div>':''}
   `;
+  // Load heatmap async
+  buildHeatmap(profile.id).then(html=>{
+    const hel=document.getElementById('heatmap-'+username);
+    if(hel)hel.innerHTML=html;
+  });
 }
 
 // ── Admin ──────────────────────────────────────────────────
