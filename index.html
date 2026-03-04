@@ -1020,6 +1020,18 @@ mark.search-hl{
   <div id="register-form" style="display:none">
     <div class="form-group"><label>用户名</label><input type="text" id="reg-username" placeholder="你的昵称（唯一）"></div>
     <div class="form-group"><label>密码（至少6位）</label><input type="password" id="reg-password" placeholder="••••••••"></div>
+    <div class="form-group"><label>训练组</label>
+      <select id="reg-group">
+        <option value="">暂不选择</option>
+        <option value="1">周六早八</option>
+        <option value="2">周六早十</option>
+        <option value="3">周六午一</option>
+        <option value="4">周六午三</option>
+        <option value="5">周六晚八</option>
+        <option value="6">周天早八</option>
+        <option value="7">抖音</option>
+      </select>
+    </div>
     <div id="reg-error" class="form-error"></div><div id="reg-success" class="form-success"></div>
     <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('auth-modal')">取消</button><button class="btn btn-primary" onclick="doRegister()">注册</button></div>
   </div>
