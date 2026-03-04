@@ -789,19 +789,19 @@ body.light .rank-table-wrap{background:var(--surface2);}
   function spawn(){
     const word=words[Math.floor(Math.random()*words.length)];
     const color=colors[Math.floor(Math.random()*colors.length)];
-    const size=Math.random()*7+10;
+    const size=Math.random()*10+16;
     const y=Math.random()*H;
-    const speed=Math.random()*0.6+0.2;
-    const opacity=Math.random()*0.25+0.08;
+    const speed=Math.random()*0.5+0.3;
+    const opacity=Math.random()*0.35+0.25;
     streams.push({word,color,size,x:W+100,y,speed,opacity,rot:(Math.random()-0.5)*0.08});
   }
   for(let i=0;i<18;i++){
     const word=words[Math.floor(Math.random()*words.length)];
     const color=colors[Math.floor(Math.random()*colors.length)];
-    const size=Math.random()*7+10;
+    const size=Math.random()*10+16;
     const y=Math.random()*900;
-    const speed=Math.random()*0.6+0.2;
-    const opacity=Math.random()*0.25+0.08;
+    const speed=Math.random()*0.5+0.3;
+    const opacity=Math.random()*0.35+0.25;
     streams.push({word,color,size,x:Math.random()*1600,y,speed,opacity,rot:(Math.random()-0.5)*0.08});
   }
   let frame=0;
