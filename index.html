@@ -289,6 +289,25 @@ footer{border-top:1px solid var(--border);padding:20px 28px;font-family:var(--mo
 
 
 
+
+/* BOOKMARKS */
+.bookmark-btn{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px;color:var(--text3);background:none;border:1px solid var(--border);border-radius:4px;padding:3px 9px;cursor:pointer;transition:all 0.15s;}
+.bookmark-btn:hover,.bookmark-btn.saved{border-color:var(--yellow);color:var(--yellow);background:rgba(255,203,107,0.06);}
+/* TAGS */
+.tag-filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.tag-chip{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid var(--border);color:var(--text3);background:none;cursor:pointer;transition:all 0.15s;}
+.tag-chip:hover{border-color:var(--accent);color:var(--accent);}
+.tag-chip.active{border-color:var(--accent);color:var(--accent);background:rgba(108,142,245,0.1);}
+.multi-tag-input{display:flex;flex-wrap:wrap;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;min-height:38px;align-items:center;cursor:text;}
+.multi-tag-input input{background:none;border:none;outline:none;color:var(--text);font-family:var(--serif);font-size:13px;min-width:80px;flex:1;}
+.tag-pill{font-family:var(--mono);font-size:10px;padding:2px 8px;background:rgba(108,142,245,0.15);border:1px solid rgba(108,142,245,0.3);border-radius:10px;color:var(--accent);display:flex;align-items:center;gap:4px;}
+.tag-pill button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;line-height:1;padding:0;}
+/* AVATAR */
+.avatar-img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+/* PROFILE EDIT */
+.profile-edit-btn{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:5px;border:1px solid var(--border);color:var(--text3);background:none;cursor:pointer;transition:all 0.15s;margin-top:8px;}
+.profile-edit-btn:hover{border-color:var(--accent);color:var(--accent);}
+
 /* NOTIF */
 .notif-btn{position:relative;background:none;border:1px solid var(--border);border-radius:50%;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all 0.2s;}
 .notif-btn:hover{border-color:var(--accent);}
@@ -433,6 +452,7 @@ body.light .rank-table-wrap{background:var(--surface2);}
       <li><a onclick="show('archive')" id="nav-archive">题库</a></li>
       <li><a onclick="show('leaderboard')" id="nav-leaderboard">排行榜</a></li>
       <li><a onclick="show('members')" id="nav-members">成员</a></li>
+      <li><a onclick="show('bookmarks')" id="nav-bookmarks">收藏</a></li>
       <li><a onclick="show('search')" id="nav-search">搜索</a></li>
       <li><a onclick="show('stats')" id="nav-stats">统计</a></li>
       <li><a onclick="show('resources')" id="nav-resources">资料</a></li>
@@ -490,6 +510,7 @@ body.light .rank-table-wrap{background:var(--surface2);}
     <div class="page-header-left"><div class="label">// problem_notes</div><h1>题解笔记</h1><p>同学们的解题思路与 C++ 代码分享。</p></div>
     <button class="btn btn-primary btn-sm" id="btn-new-note" onclick="openNoteModal()" style="display:none">+ 写题解</button>
   </div>
+  <div class="tag-filter-bar" id="notes-tag-bar"></div>
   <div id="notes-list"></div>
   <div class="post-detail" id="note-detail"></div>
 </div></section>
@@ -519,6 +540,13 @@ body.light .rank-table-wrap{background:var(--surface2);}
     <button class="btn btn-yellow btn-sm" id="btn-new-problem" onclick="openProblemModal()" style="display:none">+ 添加题目</button>
   </div>
   <div id="archive-list"></div>
+</div></section>
+
+
+<!-- BOOKMARKS -->
+<section id="bookmarks"><div class="container">
+  <div class="page-header"><div class="page-header-left"><div class="label">// bookmarks</div><h1>我的收藏</h1><p>收藏的题解。</p></div></div>
+  <div id="bookmarks-list"><div class="empty">登录后查看收藏</div></div>
 </div></section>
 
 <!-- SEARCH -->
@@ -679,6 +707,59 @@ body.light .rank-table-wrap{background:var(--surface2);}
   <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('problem-modal')">取消</button><button class="btn btn-primary" onclick="submitProblem()">保存</button></div>
 </div></div>
 
+
+<!-- PROFILE SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-modal"><div class="modal" style="width:480px">
+  <h2>⚙️ 个人设置</h2>
+  <div style="display:flex;gap:10px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:14px;">
+    <button class="modal-tab active" onclick="switchSettingsTab('avatar')">头像 & 简介</button>
+    <button class="modal-tab" onclick="switchSettingsTab('password')">修改密码</button>
+  </div>
+  <div id="settings-avatar-tab">
+    <div class="form-group"><label>头像图片链接</label><input type="url" id="set-avatar" placeholder="https://example.com/avatar.jpg"></div>
+    <div class="form-group"><label>个人简介</label><textarea id="set-bio" placeholder="介绍一下自己…" style="min-height:70px"></textarea></div>
+    <div id="settings-avatar-error" class="form-error"></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('settings-modal')">取消</button><button class="btn btn-primary" onclick="saveSettings()">保存</button></div>
+  </div>
+  <div id="settings-password-tab" style="display:none">
+    <div class="form-group"><label>新密码（至少6位）</label><input type="password" id="set-newpw" placeholder="新密码"></div>
+    <div class="form-group"><label>确认新密码</label><input type="password" id="set-newpw2" placeholder="再输一遍"></div>
+    <div id="settings-pw-error" class="form-error"></div>
+    <div id="settings-pw-success" class="form-success"></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('settings-modal')">取消</button><button class="btn btn-primary" onclick="savePassword()">修改密码</button></div>
+  </div>
+</div></div>
+
+<!-- EDIT NOTE MODAL -->
+<div class="modal-overlay" id="edit-note-modal"><div class="modal" style="width:580px">
+  <h2>✏️ 编辑题解</h2>
+  <input type="hidden" id="edit-note-id">
+  <div class="form-group"><label>标题</label><input type="text" id="edit-note-title"></div>
+  <div class="form-row">
+    <div class="form-group"><label>洛谷题号</label><input type="text" id="edit-note-problem"></div>
+    <div class="form-group"><label>标签（逗号分隔）</label><input type="text" id="edit-note-topic" placeholder="网络流,图论"></div>
+  </div>
+  <div class="form-group"><label>解题思路</label>
+    <div class="md-editor-wrap">
+      <div><div class="md-pane-label">编辑</div><textarea id="edit-note-content" oninput="updatePreview('edit-note-content','edit-preview-content')" style="min-height:120px"></textarea></div>
+      <div><div class="md-pane-label">预览</div><div class="md-preview-pane md-body" id="edit-preview-content"></div></div>
+    </div>
+  </div>
+  <div class="form-group"><label>C++ 代码</label><textarea id="edit-note-code" class="code-input"></textarea></div>
+  <div class="form-group"><label>反思与总结</label><textarea id="edit-note-reflection" style="min-height:70px"></textarea></div>
+  <div id="edit-note-error" class="form-error"></div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('edit-note-modal')">取消</button><button class="btn btn-primary" onclick="submitEditNote()">保存</button></div>
+</div></div>
+
+<!-- EDIT POST MODAL -->
+<div class="modal-overlay" id="edit-post-modal"><div class="modal">
+  <h2>✏️ 编辑随笔</h2>
+  <input type="hidden" id="edit-post-id">
+  <div class="form-group"><label>内容</label><textarea id="edit-post-content" style="min-height:130px"></textarea></div>
+  <div id="edit-post-error" class="form-error"></div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('edit-post-modal')">取消</button><button class="btn btn-primary" onclick="submitEditPost()">保存</button></div>
+</div></div>
+
 <!-- ANN MODAL -->
 <div class="modal-overlay" id="ann-modal"><div class="modal" style="width:540px">
   <h2>📢 发布公告</h2>
@@ -695,28 +776,50 @@ body.light .rank-table-wrap{background:var(--surface2);}
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Canvas Background ──────────────────────────────────────
+// ── Flying Words Background ────────────────────────────────
 (function(){
   const canvas=document.getElementById('bg-canvas');
   const ctx=canvas.getContext('2d');
-  let W,H,dots=[];
+  let W,H;
   function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
   resize();window.addEventListener('resize',resize);
-  const colors=['rgba(108,142,245,','rgba(45,232,176,','rgba(200,114,234,','rgba(255,83,112,'];
-  for(let i=0;i<55;i++)dots.push({x:Math.random()*1600,y:Math.random()*900,vx:(Math.random()-0.5)*0.18,vy:(Math.random()-0.5)*0.18,r:Math.random()*1.5+0.5,c:colors[Math.floor(Math.random()*colors.length)]});
+  const words=['DFS','BFS','DP','LCA','树状数组','线段树','Dijkstra','Floyd','KMP','Trie','并查集','最大流','最小割','矩阵乘法','FFT','NTT','欧拉函数','莫比乌斯','线性基','二分图','拓扑排序','强连通分量','Tarjan','Manacher','后缀数组','SAM','主席树','平衡树','Splay','Link-Cut Tree','Min-Max容斥','斯特林数','组合数学','期望DP','概率DP','数位DP','状压DP','区间DP','树形DP','背包','记忆化搜索','双指针','单调栈','单调队列','ST表','倍增','哈希','博弈论','SG函数','多项式','生成函数','容斥原理','Polya','矩阵快速幂','SPFA','Bellman-Ford','Prim','Kruskal','网络流','费用流','二分答案','三分法','凸包','旋转卡壳','扫描线','李超树','ODT','根号分治','莫队','分块','重链剖分','点分治','虚树','K-D Tree'];
+  const colors=['rgba(108,142,245,','rgba(45,232,176,','rgba(200,114,234,','rgba(255,179,71,','rgba(255,83,112,'];
+  const streams=[];
+  function spawn(){
+    const word=words[Math.floor(Math.random()*words.length)];
+    const color=colors[Math.floor(Math.random()*colors.length)];
+    const size=Math.random()*7+10;
+    const y=Math.random()*H;
+    const speed=Math.random()*0.6+0.2;
+    const opacity=Math.random()*0.25+0.08;
+    streams.push({word,color,size,x:W+100,y,speed,opacity,rot:(Math.random()-0.5)*0.08});
+  }
+  for(let i=0;i<18;i++){
+    const word=words[Math.floor(Math.random()*words.length)];
+    const color=colors[Math.floor(Math.random()*colors.length)];
+    const size=Math.random()*7+10;
+    const y=Math.random()*900;
+    const speed=Math.random()*0.6+0.2;
+    const opacity=Math.random()*0.25+0.08;
+    streams.push({word,color,size,x:Math.random()*1600,y,speed,opacity,rot:(Math.random()-0.5)*0.08});
+  }
+  let frame=0;
   function draw(){
     ctx.clearRect(0,0,W,H);
-    dots.forEach(d=>{
-      d.x+=d.vx;d.y+=d.vy;
-      if(d.x<0||d.x>W)d.vx*=-1;
-      if(d.y<0||d.y>H)d.vy*=-1;
-      ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
-      ctx.fillStyle=d.c+'0.7)';ctx.fill();
-    });
-    dots.forEach((a,i)=>dots.slice(i+1).forEach(b=>{
-      const dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist<120){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(108,142,245,${0.06*(1-dist/120)})`;ctx.lineWidth=0.5;ctx.stroke();}
-    }));
+    if(frame++%90===0)spawn();
+    for(let i=streams.length-1;i>=0;i--){
+      const s=streams[i];
+      s.x-=s.speed;
+      ctx.save();
+      ctx.translate(s.x,s.y);
+      ctx.rotate(s.rot);
+      ctx.font=`${s.size}px 'JetBrains Mono',monospace`;
+      ctx.fillStyle=s.color+s.opacity+')';
+      ctx.fillText(s.word,0,0);
+      ctx.restore();
+      if(s.x<-200)streams.splice(i,1);
+    }
     requestAnimationFrame(draw);
   }
   draw();
@@ -753,7 +856,7 @@ function show(id){
   const navEl=document.getElementById('nav-'+id);
   if(navEl)navEl.classList.add('active');
   window.scrollTo(0,0);
-  const loaders={contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:()=>{},leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats};
+  const loaders={contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:()=>{},leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks};
   if(loaders[id])loaders[id]();
 }
 
@@ -762,7 +865,7 @@ function renderAuthArea(){
   const area=document.getElementById('nav-auth-area');
   const coachNav=document.getElementById('nav-admin');
   if(currentUser&&currentProfile){
-    area.innerHTML=`<span class="nav-user" style="cursor:pointer" onclick="showProfile('${currentProfile.username}')">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}<button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
+    area.innerHTML=`<span class="nav-user" style="cursor:pointer" onclick="showProfile('${currentProfile.username}')">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}<button class="btn btn-outline btn-sm" onclick="openModal('settings-modal');loadSettingsData()">设置</button><button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
     if(isCoach())coachNav.style.display='';
     ['btn-new-note','btn-new-post'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
     if(isCoach())['btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
@@ -889,13 +992,22 @@ async function submitContest(){
 async function deleteContest(id){if(!confirm('确认删除这场模拟赛及其所有成绩？'))return;await sb.from('contests').delete().eq('id',id);showToast('已删除','success');loadContests();}
 
 // ── Notes ──────────────────────────────────────────────────
-async function loadNotes(){
+let activeNoteTag='';
+async function loadNotes(filterTag){
+  if(filterTag!==undefined)activeNoteTag=filterTag;
   const list=document.getElementById('notes-list'),detail=document.getElementById('note-detail');
   detail.style.display='none';list.style.display='block';
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,profiles(username)').order('created_at',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty">暂无题解，登录后发布第一篇</div>';return;}
-  list.innerHTML='<div class="blog-grid">'+data.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
+  // Build tag list
+  const tagSet=new Set();data.forEach(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).forEach(t=>tagSet.add(t)));
+  const tags=[...tagSet];
+  const tagBar=document.getElementById('notes-tag-bar');
+  tagBar.innerHTML='<button class="tag-chip'+(activeNoteTag===''?' active':'')+'" onclick="loadNotes(\'\')">全部</button>'+tags.map(t=>`<button class="tag-chip${activeNoteTag===t?' active':''}" onclick="loadNotes('${escHtml(t)}')">${escHtml(t)}</button>`).join('');
+  const filtered=activeNoteTag?data.filter(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).includes(activeNoteTag)):data;
+  if(!filtered.length){list.innerHTML='<div class="empty">该标签下暂无题解</div>';return;}
+  list.innerHTML='<div class="blog-grid">'+filtered.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<div style="display:flex;gap:4px;flex-wrap:wrap">${(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge" onclick="event.stopPropagation();loadNotes('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
 }
 async function showNote(id){
   document.getElementById('notes-list').style.display='none';
@@ -903,13 +1015,13 @@ async function showNote(id){
   detail.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data:n}=await sb.from('notes').select('*,profiles(username,id)').eq('id',id).single();
   const{data:comments}=await sb.from('comments').select('*,profiles(username)').eq('note_id',id).order('created_at');
-  const{data:likes}=await sb.from('likes').select('id,user_id').eq('note_id',id);
+  const[{data:likes},{data:bms}]=await Promise.all([sb.from('likes').select('id,user_id').eq('note_id',id),currentUser?sb.from('bookmarks').select('id').eq('note_id',id).eq('user_id',currentUser?.id||''):Promise.resolve({data:[]})]);const bookmarked=bms&&bms.length>0;
   const likeCount=likes?likes.length:0;const liked=currentUser&&likes&&likes.some(l=>l.user_id===currentUser.id);
   const isOwner=currentUser&&n.profiles?.id===currentUser.id;
   const renderMd=s=>s?marked.parse(s):'';
   detail.innerHTML=`<button class="back-btn" onclick="loadNotes()">← 返回列表</button>
     <div class="post-title">${escHtml(n.title)}</div>
-    <div class="post-meta"><span class="author" onclick="showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span><a href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} ↗</a></span>`:''} ${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}<button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''}</div>
+    <div class="post-meta"><span class="author" onclick="showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span><a href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} ↗</a></span>`:''} ${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}<button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>${isOwner?`<button class="btn btn-outline btn-sm" onclick="openEditNote(${id})">编辑</button>`:''} ${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''} <button class="bookmark-btn ${bookmarked?'saved':''}" onclick="toggleBookmark(${id},${bookmarked})">🔖 ${bookmarked?'已收藏':'收藏'}</button></div>
     <div class="post-body md-body">${n.content?`<h4>解题思路</h4>${renderMd(n.content)}`:''} ${n.code?`<h4>C++ 代码</h4><pre><code>${escHtml(n.code)}</code></pre>`:''} ${n.reflection?`<h4>反思与总结</h4>${renderMd(n.reflection)}`:''}</div>
     <div class="comments-section"><h3>评论 (${comments?comments.length:0})</h3><div id="cl-${id}">${comments&&comments.length?comments.map(c=>`<div class="comment-item"><div class="comment-meta"><span class="author" onclick="showProfile('${c.profiles?.username||''}')">@${c.profiles?.username||'匿名'}</span><span>${fmtDate(c.created_at)}</span></div><div class="comment-text">${escHtml(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:10px 0">// 暂无评论</div>'}</div>${currentUser?`<div class="comment-form"><input type="text" id="ci-${id}" placeholder="写下你的评论…"><button class="btn btn-primary btn-sm" onclick="submitComment(${id})">发送</button></div>`:'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:10px">登录后参与评论</div>'}</div>`;
 }
@@ -932,7 +1044,7 @@ async function loadPosts(){
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('posts').select('*,profiles(username,id)').order('created_at',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty">暂无随笔</div>';return;}
-  list.innerHTML=data.map(p=>`<div class="emotion-post"><div class="emotion-dot"></div><div class="emotion-date"><span>${fmtDate(p.created_at)}</span><span class="emotion-author" onclick="showProfile('${p.profiles?.username||''}')">@${p.profiles?.username||'匿名'}</span>${(currentUser&&p.profiles?.id===currentUser.id)||isCoach()?`<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deletePost(${p.id})">删除</button>`:''}</div><div class="emotion-text">${escHtml(p.content).replace(/\n/g,'<br>')}</div></div>`).join('');
+  list.innerHTML=data.map(p=>`<div class="emotion-post"><div class="emotion-dot"></div><div class="emotion-date"><span>${fmtDate(p.created_at)}</span><span class="emotion-author" onclick="showProfile('${p.profiles?.username||''}')">@${p.profiles?.username||'匿名'}</span>${currentUser&&p.profiles?.id===currentUser.id?`<button class="btn btn-outline btn-sm" style="margin-left:4px" onclick="openEditPost(${p.id},'${escHtml((p.content||'').replace(/'/g,"\\'\\'"))}')">编辑</button>`:''}${(currentUser&&p.profiles?.id===currentUser.id)||isCoach()?`<button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deletePost(${p.id})">删除</button>`:''}</div><div class="emotion-text">${escHtml(p.content).replace(/\n/g,'<br>')}</div></div>`).join('');
 }
 function openPostModal(){if(!currentUser){openModal('auth-modal');return;}openModal('post-modal');}
 async function submitPost(){const content=document.getElementById('post-content').value.trim();if(!content){document.getElementById('post-error').textContent='请填写内容';return;}const{error}=await sb.from('posts').insert({author_id:currentUser.id,content});if(error){document.getElementById('post-error').textContent=error.message;return;}closeModal('post-modal');document.getElementById('post-content').value='';showToast('随笔发布成功 ✓','success');loadPosts();}
@@ -1011,12 +1123,15 @@ async function showProfile(username){
     sb.from('posts').select('id,content,created_at').eq('author_id',profile.id).order('created_at',{ascending:false}),
   ]);
   const initial=username.charAt(0).toUpperCase();
+  const isSelf=currentUser&&currentProfile&&currentProfile.username===username;
   el.innerHTML=`
     <div class="profile-hero">
-      <div class="profile-avatar-lg" style="background:${avatarGradient(username)}">${initial}</div>
+      <div>${avatarEl(username,profile.avatar_url||'',80,28)}</div>
       <div>
         <div class="profile-name">@${escHtml(username)}</div>
         <div class="profile-role-tag">${profile.role==='coach'?'🎓 教练':'🧑‍💻 学生'}</div>
+        ${profile.bio?`<div style="font-size:13px;color:var(--text2);margin-top:6px;max-width:400px">${escHtml(profile.bio)}</div>`:''}
+        ${isSelf?`<button class="profile-edit-btn" onclick="openModal('settings-modal');loadSettingsData()">编辑资料</button>`:''}
         <div class="profile-stats">
           <div class="profile-stat"><div class="num">${notes?notes.length:0}</div><div class="lbl">题解</div></div>
           <div class="profile-stat"><div class="num">${posts?posts.length:0}</div><div class="lbl">随笔</div></div>
@@ -1176,6 +1291,110 @@ async function loadStats() {
       <div class="stat-card green"><div class="stat-num">${lectureCount || 0}</div><div class="stat-label">课程场次</div></div>
     </div>
   `;
+}
+
+
+// ── Settings ────────────────────────────────────────────────
+function switchSettingsTab(tab){
+  document.querySelectorAll('#settings-modal .modal-tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='avatar'?0:1)));
+  document.getElementById('settings-avatar-tab').style.display=tab==='avatar'?'block':'none';
+  document.getElementById('settings-password-tab').style.display=tab==='password'?'block':'none';
+}
+async function loadSettingsData(){
+  if(!currentProfile)return;
+  document.getElementById('set-avatar').value=currentProfile.avatar_url||'';
+  document.getElementById('set-bio').value=currentProfile.bio||'';
+}
+async function saveSettings(){
+  const avatar_url=document.getElementById('set-avatar').value.trim();
+  const bio=document.getElementById('set-bio').value.trim();
+  const{error}=await sb.from('profiles').update({avatar_url,bio}).eq('id',currentUser.id);
+  if(error){document.getElementById('settings-avatar-error').textContent=error.message;return;}
+  currentProfile={...currentProfile,avatar_url,bio};
+  closeModal('settings-modal');showToast('设置已保存 ✓','success');
+}
+async function savePassword(){
+  const pw=document.getElementById('set-newpw').value;
+  const pw2=document.getElementById('set-newpw2').value;
+  document.getElementById('settings-pw-error').textContent='';
+  document.getElementById('settings-pw-success').textContent='';
+  if(pw.length<6){document.getElementById('settings-pw-error').textContent='密码至少6位';return;}
+  if(pw!==pw2){document.getElementById('settings-pw-error').textContent='两次输入不一致';return;}
+  const{error}=await sb.auth.updateUser({password:pw});
+  if(error){document.getElementById('settings-pw-error').textContent=error.message;return;}
+  document.getElementById('settings-pw-success').textContent='密码修改成功 ✓';
+  document.getElementById('set-newpw').value='';document.getElementById('set-newpw2').value='';
+}
+
+// ── Bookmarks ───────────────────────────────────────────────
+async function toggleBookmark(noteId,isBookmarked){
+  if(!currentUser){showToast('请先登录','error');return;}
+  if(isBookmarked){await sb.from('bookmarks').delete().eq('note_id',noteId).eq('user_id',currentUser.id);}
+  else{await sb.from('bookmarks').insert({note_id:noteId,user_id:currentUser.id});}
+  showNote(noteId);
+  showToast(isBookmarked?'已取消收藏':'收藏成功 ✓','success');
+}
+async function loadBookmarks(){
+  const el=document.getElementById('bookmarks-list');
+  if(!currentUser){el.innerHTML='<div class="empty">登录后查看收藏</div>';return;}
+  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const{data:bms}=await sb.from('bookmarks').select('note_id').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  if(!bms||!bms.length){el.innerHTML='<div class="empty">还没有收藏任何题解</div>';return;}
+  const ids=bms.map(b=>b.note_id);
+  const{data:notes}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,profiles(username)').in('id',ids);
+  if(!notes||!notes.length){el.innerHTML='<div class="empty">收藏的题解已被删除</div>';return;}
+  el.innerHTML='<div class="blog-grid">'+notes.map(n=>`<div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span></div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
+}
+
+// ── Edit Note ───────────────────────────────────────────────
+async function openEditNote(id){
+  const{data:n}=await sb.from('notes').select('*').eq('id',id).single();
+  document.getElementById('edit-note-id').value=id;
+  document.getElementById('edit-note-title').value=n.title||'';
+  document.getElementById('edit-note-problem').value=n.problem_id||'';
+  document.getElementById('edit-note-topic').value=n.topic||'';
+  document.getElementById('edit-note-content').value=n.content||'';
+  document.getElementById('edit-note-code').value=n.code||'';
+  document.getElementById('edit-note-reflection').value=n.reflection||'';
+  updatePreview('edit-note-content','edit-preview-content');
+  openModal('edit-note-modal');
+}
+async function submitEditNote(){
+  const id=document.getElementById('edit-note-id').value;
+  const title=document.getElementById('edit-note-title').value.trim();
+  if(!title){document.getElementById('edit-note-error').textContent='请填写标题';return;}
+  const{error}=await sb.from('notes').update({
+    title,problem_id:document.getElementById('edit-note-problem').value.trim(),
+    topic:document.getElementById('edit-note-topic').value.trim(),
+    content:document.getElementById('edit-note-content').value.trim(),
+    code:document.getElementById('edit-note-code').value.trim(),
+    reflection:document.getElementById('edit-note-reflection').value.trim()
+  }).eq('id',id);
+  if(error){document.getElementById('edit-note-error').textContent=error.message;return;}
+  closeModal('edit-note-modal');showToast('题解已更新 ✓','success');showNote(parseInt(id));
+}
+
+// ── Edit Post ───────────────────────────────────────────────
+function openEditPost(id,content){
+  document.getElementById('edit-post-id').value=id;
+  document.getElementById('edit-post-content').value=content;
+  openModal('edit-post-modal');
+}
+async function submitEditPost(){
+  const id=document.getElementById('edit-post-id').value;
+  const content=document.getElementById('edit-post-content').value.trim();
+  if(!content){document.getElementById('edit-post-error').textContent='请填写内容';return;}
+  const{error}=await sb.from('posts').update({content}).eq('id',id);
+  if(error){document.getElementById('edit-post-error').textContent=error.message;return;}
+  closeModal('edit-post-modal');showToast('随笔已更新 ✓','success');loadPosts();
+}
+
+// ── Avatar helper (updated) ─────────────────────────────────
+function avatarEl(username, avatarUrl, size=42, fontSize=16){
+  if(avatarUrl){
+    return `<img src="${escHtml(avatarUrl)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div style="display:none;width:${size}px;height:${size}px;border-radius:50%;background:${avatarGradient(username)};align-items:center;justify-content:center;font-family:var(--space);font-size:${fontSize}px;color:var(--bg);font-weight:700;flex-shrink:0">${username.charAt(0).toUpperCase()}</div>`;
+  }
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${avatarGradient(username)};display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:${fontSize}px;color:var(--bg);font-weight:700;flex-shrink:0">${username.charAt(0).toUpperCase()}</div>`;
 }
 
 function openModal(id){document.getElementById(id).classList.add('open');}
