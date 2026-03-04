@@ -338,7 +338,7 @@ footer { border-top: 1px solid var(--border); padding: 20px 32px; font-family: v
       <button class="modal-tab" onclick="switchAuthTab('register')">注册</button>
     </div>
     <div id="login-form">
-      <div class="form-group"><label>邮箱</label><input type="email" id="login-email" placeholder="your@email.com"></div>
+      <div class="form-group"><label>用户名</label><input type="text" id="login-username" placeholder="你的用户名"></div>
       <div class="form-group"><label>密码</label><input type="password" id="login-password" placeholder="••••••••"></div>
       <div id="login-error" class="form-error"></div>
       <div class="modal-footer">
@@ -347,8 +347,7 @@ footer { border-top: 1px solid var(--border); padding: 20px 32px; font-family: v
       </div>
     </div>
     <div id="register-form" style="display:none">
-      <div class="form-group"><label>用户名</label><input type="text" id="reg-username" placeholder="你的昵称"></div>
-      <div class="form-group"><label>邮箱</label><input type="email" id="reg-email" placeholder="your@email.com"></div>
+      <div class="form-group"><label>用户名</label><input type="text" id="reg-username" placeholder="你的昵称（唯一）"></div>
       <div class="form-group"><label>密码（至少6位）</label><input type="password" id="reg-password" placeholder="••••••••"></div>
       <div id="reg-error" class="form-error"></div>
       <div id="reg-success" class="form-success"></div>
@@ -462,12 +461,22 @@ function switchAuthTab(tab) {
   document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
 }
 
+// 把用户名转成内部用的假邮箱（用户完全感知不到）
+function usernameToEmail(username) {
+  return `${username.toLowerCase().replace(/[^a-z0-9]/g, '_')}@oiteam.local`;
+}
+
 async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
+  const username = document.getElementById('login-username').value.trim();
   const password = document.getElementById('login-password').value;
   document.getElementById('login-error').textContent = '';
+  if (!username) { document.getElementById('login-error').textContent = '请填写用户名'; return; }
+  const email = usernameToEmail(username);
   const { error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) { document.getElementById('login-error').textContent = error.message; return; }
+  if (error) {
+    document.getElementById('login-error').textContent = '用户名或密码错误';
+    return;
+  }
   closeModal('auth-modal');
   showToast('登录成功 ✓', 'success');
   loadHomeFeed();
@@ -475,17 +484,33 @@ async function doLogin() {
 
 async function doRegister() {
   const username = document.getElementById('reg-username').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
   document.getElementById('reg-error').textContent = '';
   document.getElementById('reg-success').textContent = '';
   if (!username) { document.getElementById('reg-error').textContent = '请填写用户名'; return; }
+  if (username.length < 2) { document.getElementById('reg-error').textContent = '用户名至少2个字符'; return; }
+  if (password.length < 6) { document.getElementById('reg-error').textContent = '密码至少6位'; return; }
+
+  // 检查用户名是否已存在
+  const { data: existing } = await sb.from('profiles').select('id').eq('username', username).maybeSingle();
+  if (existing) { document.getElementById('reg-error').textContent = '用户名已被占用，换一个试试'; return; }
+
+  const email = usernameToEmail(username);
   const { data, error } = await sb.auth.signUp({ email, password });
-  if (error) { document.getElementById('reg-error').textContent = error.message; return; }
-  if (data.user) {
-    await sb.from('profiles').insert({ id: data.user.id, username });
+  if (error) {
+    document.getElementById('reg-error').textContent = error.message === 'User already registered' ? '该用户名已注册' : error.message;
+    return;
   }
-  document.getElementById('reg-success').textContent = '注册成功！请检查邮箱验证（或直接登录）';
+  if (data.user) {
+    const { error: profileError } = await sb.from('profiles').insert({ id: data.user.id, username });
+    if (profileError) { document.getElementById('reg-error').textContent = '注册失败：' + profileError.message; return; }
+  }
+  document.getElementById('reg-success').textContent = '注册成功！正在登录…';
+  // 自动登录
+  setTimeout(async () => {
+    const { error: loginErr } = await sb.auth.signInWithPassword({ email, password });
+    if (!loginErr) { closeModal('auth-modal'); showToast('注册并登录成功 ✓', 'success'); loadHomeFeed(); }
+  }, 800);
 }
 
 async function doLogout() {
