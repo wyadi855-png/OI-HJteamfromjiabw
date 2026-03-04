@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
 <style>
 :root{
   --bg:#080b12;--surface:#0f1320;--surface2:#161c2e;--border:#1e2540;
@@ -286,6 +287,73 @@ code{font-family:var(--mono);font-size:12.5px;color:var(--accent2);line-height:1
 .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px;}
 footer{border-top:1px solid var(--border);padding:20px 28px;font-family:var(--mono);font-size:11px;color:var(--text3);text-align:center;margin-top:60px;position:relative;z-index:1;}
 
+
+/* LIGHT THEME */
+body.light{
+  --bg:#f4f6fb;--surface:#ffffff;--surface2:#eef1f8;--border:#d4d9e8;
+  --text:#1a2035;--text2:#4a5578;--text3:#8892b0;
+  --accent:#4a6cf7;--accent2:#0d9e7a;--accent3:#e91e8c;--accent4:#f5a623;
+}
+body.light #bg-canvas{opacity:0.15;}
+body.light nav{background:rgba(244,246,251,0.95);}
+body.light .modal{background:#fff;}
+body.light .form-group input,body.light .form-group textarea,body.light .form-group select{background:#f4f6fb;color:var(--text);}
+body.light pre{background:#f0f3fa;}
+body.light code{color:var(--accent2);}
+body.light .rank-table-wrap{background:var(--surface2);}
+
+/* THEME TOGGLE BTN */
+.theme-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--text2);transition:all 0.2s;display:flex;align-items:center;gap:5px;}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* LEADERBOARD */
+.lb-tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;}
+.lb-tab{font-family:var(--mono);font-size:12px;padding:6px 16px;border-radius:20px;border:1px solid var(--border);color:var(--text3);background:none;cursor:pointer;transition:all 0.2s;}
+.lb-tab.active{border-color:var(--accent);color:var(--accent);background:rgba(108,142,245,0.1);}
+.lb-row{display:flex;align-items:center;gap:16px;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;transition:all 0.2s;cursor:pointer;}
+.lb-row:hover{border-color:rgba(108,142,245,0.35);transform:translateX(4px);box-shadow:0 4px 20px rgba(0,0,0,0.2);}
+.lb-rank{font-family:var(--mono);font-size:18px;font-weight:700;width:40px;text-align:center;flex-shrink:0;}
+.lb-rank-1{color:var(--yellow);}
+.lb-rank-2{color:#b0b8d0;}
+.lb-rank-3{color:#c49a6c;}
+.lb-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:16px;color:var(--bg);font-weight:700;flex-shrink:0;}
+.lb-info{flex:1;}
+.lb-name{font-size:15px;font-weight:500;margin-bottom:2px;}
+.lb-sub{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.lb-score{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--accent);}
+.lb-score-unit{font-family:var(--mono);font-size:11px;color:var(--text3);margin-left:3px;}
+.lb-bar-wrap{width:100px;height:4px;background:var(--border);border-radius:2px;margin-top:6px;}
+.lb-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.6s ease;}
+
+/* MEMBERS */
+.members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+.member-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 18px;text-align:center;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;}
+.member-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.25s;background:linear-gradient(180deg,rgba(108,142,245,0.05),transparent);}
+.member-card:hover{border-color:rgba(108,142,245,0.35);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.3);}
+.member-card:hover::before{opacity:1;}
+.member-avatar{width:60px;height:60px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:22px;color:var(--bg);font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,0.2);}
+.member-name{font-size:15px;font-weight:500;margin-bottom:4px;}
+.member-role{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.member-stats{display:flex;justify-content:center;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.member-stat .n{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent);}
+.member-stat .l{font-family:var(--mono);font-size:9px;color:var(--text3);}
+
+/* MARKDOWN */
+.md-body{color:var(--text2);font-size:14px;line-height:1.95;}
+.md-body h1,.md-body h2,.md-body h3{color:var(--text);font-weight:500;margin:20px 0 10px;}
+.md-body h1{font-size:20px;}.md-body h2{font-size:17px;}.md-body h3{font-size:15px;}
+.md-body p{margin-bottom:12px;}
+.md-body ul,.md-body ol{margin:10px 0 10px 20px;}
+.md-body li{margin-bottom:4px;}
+.md-body blockquote{border-left:3px solid var(--accent);padding:8px 14px;margin:12px 0;background:rgba(108,142,245,0.05);border-radius:0 6px 6px 0;color:var(--text2);}
+.md-body table{width:100%;border-collapse:collapse;margin:12px 0;}
+.md-body th,.md-body td{border:1px solid var(--border);padding:8px 12px;text-align:left;}
+.md-body th{background:var(--surface2);font-family:var(--mono);font-size:11px;}
+.md-body code{background:var(--surface2);padding:2px 5px;border-radius:3px;font-family:var(--mono);font-size:12px;color:var(--accent2);}
+.md-body pre code{background:none;padding:0;}
+.md-body a{color:var(--accent);text-decoration:none;}.md-body a:hover{text-decoration:underline;}
+.md-body hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
+
 @media(max-width:680px){
   .home-grid,.resource-grid,.form-row{grid-template-columns:1fr;}
   .hero h1{font-size:30px;}
@@ -304,6 +372,7 @@ footer{border-top:1px solid var(--border);padding:20px 28px;font-family:var(--mo
 <nav>
   <div class="nav-top">
     <div class="nav-logo">OI · TEAM</div>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
     <div class="nav-right" id="nav-auth-area"></div>
   </div>
   <div class="nav-bottom">
@@ -315,6 +384,8 @@ footer{border-top:1px solid var(--border);padding:20px 28px;font-family:var(--mo
       <li><a onclick="show('emotions')" id="nav-emotions">随笔</a></li>
       <li><a onclick="show('lectures')" id="nav-lectures">课程</a></li>
       <li><a onclick="show('archive')" id="nav-archive">题库</a></li>
+      <li><a onclick="show('leaderboard')" id="nav-leaderboard">排行榜</a></li>
+      <li><a onclick="show('members')" id="nav-members">成员</a></li>
       <li><a onclick="show('search')" id="nav-search">搜索</a></li>
       <li><a onclick="show('resources')" id="nav-resources">资料</a></li>
       <li><a onclick="show('admin')" id="nav-admin" style="display:none">后台</a></li>
@@ -428,6 +499,23 @@ footer{border-top:1px solid var(--border);padding:20px 28px;font-family:var(--mo
     <a class="resource-card" href="https://vjudge.net" target="_blank"><div class="resource-icon">VJ</div><div><h3>Virtual Judge</h3><p>聚合多平台题目，可建私人题单。</p><div class="resource-url">vjudge.net</div></div></a>
     <a class="resource-card" href="https://cppreference.com" target="_blank"><div class="resource-icon">C++</div><div><h3>cppreference</h3><p>C++ 标准库完整文档。</p><div class="resource-url">cppreference.com</div></div></a>
   </div>
+</div></section>
+
+
+<!-- LEADERBOARD -->
+<section id="leaderboard"><div class="container">
+  <div class="page-header"><div class="page-header-left"><div class="label">// leaderboard</div><h1>排行榜</h1><p>按题解数量、模拟赛平均分排名。</p></div></div>
+  <div class="lb-tabs">
+    <button class="lb-tab active" onclick="loadLeaderboard('notes')">题解榜</button>
+    <button class="lb-tab" onclick="loadLeaderboard('score')">模拟赛榜</button>
+  </div>
+  <div id="lb-list"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div></section>
+
+<!-- MEMBERS -->
+<section id="members"><div class="container">
+  <div class="page-header"><div class="page-header-left"><div class="label">// members</div><h1>队员列表</h1><p>认识我们的每一位成员。</p></div></div>
+  <div id="members-list"><div class="loading"><div class="spinner"></div>加载中…</div></div>
 </div></section>
 
 <!-- PROFILE -->
@@ -609,7 +697,7 @@ function show(id){
   const navEl=document.getElementById('nav-'+id);
   if(navEl)navEl.classList.add('active');
   window.scrollTo(0,0);
-  const loaders={contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:()=>{}};
+  const loaders={contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:()=>{},leaderboard:()=>loadLeaderboard('notes'),members:loadMembers};
   if(loaders[id])loaders[id]();
 }
 
@@ -761,10 +849,11 @@ async function showNote(id){
   const{data:likes}=await sb.from('likes').select('id,user_id').eq('note_id',id);
   const likeCount=likes?likes.length:0;const liked=currentUser&&likes&&likes.some(l=>l.user_id===currentUser.id);
   const isOwner=currentUser&&n.profiles?.id===currentUser.id;
+  const renderMd=s=>s?marked.parse(s):'';
   detail.innerHTML=`<button class="back-btn" onclick="loadNotes()">← 返回列表</button>
     <div class="post-title">${escHtml(n.title)}</div>
     <div class="post-meta"><span class="author" onclick="showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span><a href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} ↗</a></span>`:''} ${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}<button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''}</div>
-    <div class="post-body">${n.content?`<h4>解题思路</h4><p>${escHtml(n.content).replace(/\n/g,'<br>')}</p>`:''} ${n.code?`<h4>C++ 代码</h4><pre><code>${escHtml(n.code)}</code></pre>`:''} ${n.reflection?`<h4>反思与总结</h4><p>${escHtml(n.reflection).replace(/\n/g,'<br>')}</p>`:''}</div>
+    <div class="post-body md-body">${n.content?`<h4>解题思路</h4>${renderMd(n.content)}`:''} ${n.code?`<h4>C++ 代码</h4><pre><code>${escHtml(n.code)}</code></pre>`:''} ${n.reflection?`<h4>反思与总结</h4>${renderMd(n.reflection)}`:''}</div>
     <div class="comments-section"><h3>评论 (${comments?comments.length:0})</h3><div id="cl-${id}">${comments&&comments.length?comments.map(c=>`<div class="comment-item"><div class="comment-meta"><span class="author" onclick="showProfile('${c.profiles?.username||''}')">@${c.profiles?.username||'匿名'}</span><span>${fmtDate(c.created_at)}</span></div><div class="comment-text">${escHtml(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:10px 0">// 暂无评论</div>'}</div>${currentUser?`<div class="comment-form"><input type="text" id="ci-${id}" placeholder="写下你的评论…"><button class="btn btn-primary btn-sm" onclick="submitComment(${id})">发送</button></div>`:'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:10px">登录后参与评论</div>'}</div>`;
 }
 async function toggleLike(noteId,isLiked){if(!currentUser){showToast('请先登录','error');return;}if(isLiked)await sb.from('likes').delete().eq('note_id',noteId).eq('user_id',currentUser.id);else await sb.from('likes').insert({note_id:noteId,user_id:currentUser.id});showNote(noteId);}
