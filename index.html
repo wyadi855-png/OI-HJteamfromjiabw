@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/atom-one-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/common.min.js"></script>
 <style>
 :root{
   --bg:#080b12;--surface:#0f1320;--surface2:#161c2e;--border:#1e2540;
@@ -351,6 +353,65 @@ footer{border-top:1px solid var(--border);padding:20px 28px;font-family:var(--mo
 .md-editor-wrap{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .md-preview-pane{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;min-height:120px;font-size:13px;overflow-y:auto;}
 .md-pane-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;}
+
+/* VIEW COUNT */
+.view-count{font-family:var(--mono);font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px;}
+.view-count::before{content:'👁';}
+
+/* PDF EXPORT */
+.export-btn{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:5px;border:1px solid var(--border);color:var(--text3);background:none;cursor:pointer;transition:all 0.15s;}
+.export-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+@media print{
+  nav,footer,#bg-canvas,.back-btn,.like-btn,.bookmark-btn,.export-btn,.btn-danger,.btn-outline,.comments-section,.notif-panel{display:none!important;}
+  body{background:#fff!important;color:#111!important;}
+  .post-title{font-size:22px;color:#111;}
+  .post-meta{color:#555;}
+  .post-body,.md-body{color:#222;}
+  pre{background:#f5f5f5!important;border:1px solid #ddd!important;}
+  code{color:#333!important;}
+  .main{padding-top:0!important;}
+  section{display:block!important;}
+  section:not(.active){display:none!important;}
+}
+
+/* MOBILE OPTIMIZATIONS */
+@media(max-width:480px){
+  .hero h1{font-size:26px;}
+  .blog-card{padding:16px;}
+  .contest-card{padding:16px;}
+  .modal{padding:20px;}
+  .ann-card{padding:16px 18px;}
+  .rank-table{font-size:11px;}
+  .rank-table th,.rank-table td{padding:8px 8px;}
+  .lb-row{padding:12px 14px;gap:10px;}
+  .lb-score{font-size:18px;}
+  .members-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .stat-num{font-size:28px;}
+  .profile-stats{gap:16px;}
+  .profile-stat .num{font-size:18px;}
+  .md-editor-wrap{grid-template-columns:1fr;}
+  .nav-links a{font-size:10px;padding:3px 6px;}
+  .page-header{flex-direction:column;align-items:flex-start;gap:10px;}
+  .page-header-left h1{font-size:20px;}
+  .home-grid{grid-template-columns:1fr;}
+  .resource-grid{grid-template-columns:1fr;}
+  .form-row{grid-template-columns:1fr;}
+  .post-meta{flex-wrap:wrap;gap:6px;}
+}
+/* Smooth scrolling + tap highlight removal on mobile */
+*{-webkit-tap-highlight-color:transparent;}
+.blog-card,.contest-card,.info-card,.member-card,.lb-row,.ann-card{-webkit-user-select:none;user-select:none;}
+.blog-card,.contest-card,.info-card,.member-card,.lb-row,.ann-card{touch-action:manipulation;}
+/* Bigger touch targets on mobile */
+@media(max-width:680px){
+  .btn{padding:8px 16px;}
+  .btn-sm{padding:5px 11px;font-size:11px;}
+  .nav-links a{padding:6px 8px;}
+  .like-btn,.bookmark-btn{padding:5px 11px;}
+  .filter-btn,.tag-chip{padding:6px 14px;}
+}
+
 @media(max-width:680px){.md-editor-wrap{grid-template-columns:1fr;}}
 
 /* LIGHT THEME */
@@ -998,7 +1059,7 @@ async function loadNotes(filterTag){
   const list=document.getElementById('notes-list'),detail=document.getElementById('note-detail');
   detail.style.display='none';list.style.display='block';
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const{data}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,profiles(username)').order('created_at',{ascending:false});
+  const{data}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,view_count,profiles(username)').order('created_at',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty">暂无题解，登录后发布第一篇</div>';return;}
   // Build tag list
   const tagSet=new Set();data.forEach(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).forEach(t=>tagSet.add(t)));
@@ -1007,24 +1068,29 @@ async function loadNotes(filterTag){
   tagBar.innerHTML='<button class="tag-chip'+(activeNoteTag===''?' active':'')+'" onclick="loadNotes(\'\')">全部</button>'+tags.map(t=>`<button class="tag-chip${activeNoteTag===t?' active':''}" onclick="loadNotes('${escHtml(t)}')">${escHtml(t)}</button>`).join('');
   const filtered=activeNoteTag?data.filter(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).includes(activeNoteTag)):data;
   if(!filtered.length){list.innerHTML='<div class="empty">该标签下暂无题解</div>';return;}
-  list.innerHTML='<div class="blog-grid">'+filtered.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<div style="display:flex;gap:4px;flex-wrap:wrap">${(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge" onclick="event.stopPropagation();loadNotes('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
+  list.innerHTML='<div class="blog-grid">'+filtered.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<div style="display:flex;gap:4px;flex-wrap:wrap">${(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge" onclick="event.stopPropagation();loadNotes('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?`<span class="view-count">${n.view_count}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
 }
 async function showNote(id){
   document.getElementById('notes-list').style.display='none';
   const detail=document.getElementById('note-detail');detail.style.display='block';
   detail.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data:n}=await sb.from('notes').select('*,profiles(username,id)').eq('id',id).single();
+  // Increment view count
+  if(n)sb.from('notes').update({view_count:(n.view_count||0)+1}).eq('id',id).then(()=>{});
   const{data:comments}=await sb.from('comments').select('*,profiles(username)').eq('note_id',id).order('created_at');
   const[{data:likes},{data:bms}]=await Promise.all([sb.from('likes').select('id,user_id').eq('note_id',id),currentUser?sb.from('bookmarks').select('id').eq('note_id',id).eq('user_id',currentUser?.id||''):Promise.resolve({data:[]})]);const bookmarked=bms&&bms.length>0;
   const likeCount=likes?likes.length:0;const liked=currentUser&&likes&&likes.some(l=>l.user_id===currentUser.id);
   const isOwner=currentUser&&n.profiles?.id===currentUser.id;
-  const renderMd=s=>s?marked.parse(s):'';
+  const renderMd=s=>{ if(!s)return ''; const html=marked.parse(s); return html; };
+  detail._pendingHljs=true;
   detail.innerHTML=`<button class="back-btn" onclick="loadNotes()">← 返回列表</button>
     <div class="post-title">${escHtml(n.title)}</div>
-    <div class="post-meta"><span class="author" onclick="showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span><a href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} ↗</a></span>`:''} ${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}<button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>${isOwner?`<button class="btn btn-outline btn-sm" onclick="openEditNote(${id})">编辑</button>`:''} ${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''} <button class="bookmark-btn ${bookmarked?'saved':''}" onclick="toggleBookmark(${id},${bookmarked})">🔖 ${bookmarked?'已收藏':'收藏'}</button></div>
+    <div class="post-meta"><span class="author" onclick="showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span><a href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} ↗</a></span>`:''} ${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}<span class="view-count">${n.view_count||0}</span><button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>${isOwner?`<button class="btn btn-outline btn-sm" onclick="openEditNote(${id})">编辑</button>`:''}<button class="export-btn" onclick="window.print()">📄 导出PDF</button> ${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''} <button class="bookmark-btn ${bookmarked?'saved':''}" onclick="toggleBookmark(${id},${bookmarked})">🔖 ${bookmarked?'已收藏':'收藏'}</button></div>
     <div class="post-body md-body">${n.content?`<h4>解题思路</h4>${renderMd(n.content)}`:''} ${n.code?`<h4>C++ 代码</h4><pre><code>${escHtml(n.code)}</code></pre>`:''} ${n.reflection?`<h4>反思与总结</h4>${renderMd(n.reflection)}`:''}</div>
+    <div class="post-body md-body" id="note-body-rendered"></div>
     <div class="comments-section"><h3>评论 (${comments?comments.length:0})</h3><div id="cl-${id}">${comments&&comments.length?comments.map(c=>`<div class="comment-item"><div class="comment-meta"><span class="author" onclick="showProfile('${c.profiles?.username||''}')">@${c.profiles?.username||'匿名'}</span><span>${fmtDate(c.created_at)}</span></div><div class="comment-text">${escHtml(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:10px 0">// 暂无评论</div>'}</div>${currentUser?`<div class="comment-form"><input type="text" id="ci-${id}" placeholder="写下你的评论…"><button class="btn btn-primary btn-sm" onclick="submitComment(${id})">发送</button></div>`:'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:10px">登录后参与评论</div>'}</div>`;
 }
+function applyHljs(){document.querySelectorAll('#note-detail pre code').forEach(b=>hljs.highlightElement(b));}
 async function toggleLike(noteId,isLiked){if(!currentUser){showToast('请先登录','error');return;}if(isLiked)await sb.from('likes').delete().eq('note_id',noteId).eq('user_id',currentUser.id);else await sb.from('likes').insert({note_id:noteId,user_id:currentUser.id});showNote(noteId);}
 async function submitComment(noteId){const input=document.getElementById(`ci-${noteId}`);const content=input.value.trim();if(!content)return;const{error}=await sb.from('comments').insert({note_id:noteId,author_id:currentUser.id,content});if(error){showToast('评论失败','error');return;}input.value='';showNote(noteId);showToast('评论成功 ✓','success');}
 async function deleteNote(id){if(!confirm('确认删除这篇题解？'))return;await sb.from('notes').delete().eq('id',id);showToast('已删除','success');loadNotes();}
@@ -1103,7 +1169,7 @@ async function doSearch(){
   const results=allNotes.filter(n=>{const mf=!searchFilter||(n.topic||'').includes(searchFilter);const mq=!q||(n.title||'').toLowerCase().includes(q)||(n.problem_id||'').toLowerCase().includes(q)||(n.topic||'').toLowerCase().includes(q)||(n.content||'').toLowerCase().includes(q);return mf&&mq;});
   if(!q&&!searchFilter){el.innerHTML='<div class="empty">输入关键词开始搜索</div>';return;}
   if(!results.length){el.innerHTML='<div class="empty">没有找到相关题解</div>';return;}
-  el.innerHTML='<div class="blog-grid">'+results.map(n=>`<div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
+  el.innerHTML='<div class="blog-grid">'+results.map(n=>`<div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?`<span class="view-count">${n.view_count}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
 }
 
 // ── Profile ────────────────────────────────────────────────
@@ -1139,7 +1205,7 @@ async function showProfile(username){
         </div>
       </div>
     </div>
-    ${notes&&notes.length?`<div class="profile-section"><div class="profile-section-title">题解笔记</div><div class="blog-grid">${notes.map(n=>`<div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,80))}…</p></div>`).join('')}</div></div>`:''}
+    ${notes&&notes.length?`<div class="profile-section"><div class="profile-section-title">题解笔记</div><div class="blog-grid">${notes.map(n=>`<div class="blog-card" onclick="show('notes');setTimeout(()=>showNote(${n.id}),300)"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}</div><div class="blog-meta"><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?`<span class="view-count">${n.view_count}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,80))}…</p></div>`).join('')}</div></div>`:''}
     ${posts&&posts.length?`<div class="profile-section"><div class="profile-section-title">随笔日志</div><div class="emotion-feed">${posts.map(p=>`<div class="emotion-post"><div class="emotion-dot"></div><div class="emotion-date"><span>${fmtDate(p.created_at)}</span></div><div class="emotion-text">${escHtml(p.content).replace(/\n/g,'<br>')}</div></div>`).join('')}</div></div>`:''}
     ${(!notes||!notes.length)&&(!posts||!posts.length)?'<div class="empty">这位同学还没有发布任何内容</div>':''}
   `;
@@ -1159,11 +1225,25 @@ async function setRole(userId,role){await sb.from('profiles').update({role}).eq(
 
 // ── Modals ─────────────────────────────────────────────────
 
-// ── MD Preview ─────────────────────────────────────────────
+// ── Highlight.js + Marked setup ────────────────────────────
+marked.setOptions({
+  highlight: function(code, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      return hljs.highlight(code, { language: lang }).value;
+    }
+    return hljs.highlightAuto(code).value;
+  },
+  breaks: true,
+  gfm: true
+});
+function renderMdSafe(s){ return s ? marked.parse(s) : ''; }
 function updatePreview(srcId, previewId) {
   const src = document.getElementById(srcId);
   const preview = document.getElementById(previewId);
-  if (src && preview) preview.innerHTML = marked.parse(src.value || '');
+  if (src && preview) {
+    preview.innerHTML = renderMdSafe(src.value || '');
+    preview.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
+  }
 }
 
 // ── Notifications ──────────────────────────────────────────
