@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>算法竞赛训练队</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161d;
+    --surface2: #1a1e28;
+    --border: #232737;
+    --accent: #5b8af0;
+    --accent2: #3dffc0;
+    --text: #e2e6f0;
+    --text2: #8891a8;
+    --text3: #555e75;
+    --red: #ff6b6b;
+    --yellow: #ffd166;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Noto Serif SC', serif;
+    --space: 'Space Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  /* ---- SCROLLBAR ---- */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ---- NAV ---- */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(13,15,20,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    height: 52px;
+    display: flex; align-items: center;
+    padding: 0 32px;
+    gap: 0;
+  }
+  .nav-logo {
+    font-family: var(--space);
+    font-size: 13px;
+    color: var(--accent2);
+    letter-spacing: 0.08em;
+    margin-right: 40px;
+    white-space: nowrap;
+  }
+  .nav-links {
+    display: flex; gap: 2px;
+    flex-wrap: wrap;
+    list-style: none;
+  }
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text2);
+    text-decoration: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+  }
+  .nav-links a:hover { color: var(--text); background: var(--surface2); }
+  .nav-links a.active { color: var(--accent); background: rgba(91,138,240,0.1); }
+
+  /* ---- LAYOUT ---- */
+  .main { padding-top: 52px; }
+
+  section { display: none; }
+  section.active { display: block; }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 32px;
+  }
+
+  /* ---- PAGE HEADER ---- */
+  .page-header {
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-header .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .page-header p {
+    color: var(--text2);
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  /* ---- HOME ---- */
+  .hero {
+    padding: 64px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 20px; height: 1px;
+    background: var(--accent2);
+  }
+  .hero h1 {
+    font-size: 42px;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-desc {
+    font-size: 15px;
+    color: var(--text2);
+    max-width: 520px;
+    line-height: 1.9;
+  }
+
+  .home-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+  }
+  .info-card .card-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .info-card h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .info-card p {
+    font-size: 13.5px;
+    color: var(--text2);
+    line-height: 1.8;
+  }
+
+  .coach-card {
+    grid-column: 1 / -1;
+    display: flex; gap: 24px;
+    align-items: flex-start;
+  }
+  .coach-avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--space);
+    font-size: 22px;
+    color: var(--bg);
+    font-weight: 700;
+  }
+  .coach-info .coach-name {
+    font-size: 17px; font-weight: 500;
+  }
+  .coach-info .coach-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .updates-section h2 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: var(--text2);
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+  .update-item {
+    display: flex; gap: 16px; align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .update-date {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    white-space: nowrap;
+    padding-top: 3px;
+    width: 80px; flex-shrink: 0;
+  }
+  .update-content { font-size: 14px; color: var(--text2); }
+  .update-content strong { color: var(--text); font-weight: 500; }
+  .update-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .tag-contest { background: rgba(91,138,240,0.15); color: var(--accent); }
+  .tag-note { background: rgba(61,255,192,0.1); color: var(--accent2); }
+  .tag-lecture { background: rgba(255,209,102,0.1); color: var(--yellow); }
+
+  /* ---- MOCK CONTEST ---- */
+  .contest-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+  }
+  .contest-card:hover { border-color: var(--accent); }
+  .contest-meta {
+    display: flex; gap: 16px; align-items: center;
+    margin-bottom: 16px;
+  }
+  .contest-title { font-size: 17px; font-weight: 500; }
+  .contest-date {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    margin-left: auto;
+  }
+  .problem-list {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 16px;
+  }
+  .problem-tag {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    padding: 4px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text2);
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .problem-tag:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(91,138,240,0.06);
+  }
+  .contest-comment {
+    font-size: 13.5px;
+    color: var(--text2);
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: 10px 16px;
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+  }
+
+  /* ---- RANKING TABLE ---- */
+  .rank-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .rank-table th {
+    text-align: left;
+    padding: 10px 16px;
+    color: var(--text3);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+  .rank-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+  }
+  .rank-table tr:hover td { background: var(--surface2); color: var(--text); }
+  .rank-num {
+    color: var(--text3);
+    font-size: 12px;
+  }
+  .rank-1 { color: var(--yellow) !important; font-weight: 600; }
+  .rank-2 { color: #c0c0c0 !important; }
+  .rank-3 { color: #cd7f32 !important; }
+  .rank-name { color: var(--text) !important; font-size: 14px; }
+  .score-bar {
+    display: inline-block;
+    width: 60px; height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-left: 8px;
+    vertical-align: middle;
+    position: relative;
+  }
+  .score-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* ---- BLOG / NOTES ---- */
+  .blog-grid {
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .blog-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .blog-card:hover {
+    border-color: var(--accent2);
+    transform: translateY(-1px);
+  }
+  .blog-card-top {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 10px;
+  }
+  .blog-card h3 { font-size: 16px; font-weight: 500; }
+  .blog-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    display: flex; gap: 12px;
+  }
+  .blog-meta .author { color: var(--accent2); }
+  .blog-excerpt {
+    font-size: 13.5px;
+    color: var(--text2);
+    line-height: 1.75;
+  }
+  .topic-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    background: rgba(91,138,240,0.1);
+    border: 1px solid rgba(91,138,240,0.3);
+    border-radius: 3px;
+    color: var(--accent);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* ---- POST DETAIL ---- */
+  .post-detail { display: none; }
+  .back-btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text3);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 32px;
+    transition: color 0.15s;
+    background: none; border: none;
+  }
+  .back-btn:hover { color: var(--accent); }
+  .post-title {
+    font-size: 26px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+  .post-meta {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text3);
+    display: flex; gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .post-meta .author { color: var(--accent2); }
+  .post-link a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .post-body { color: var(--text2); font-size: 15px; line-height: 1.9; }
+  .post-body h4 {
+    font-size: 14px;
+    font-family: var(--mono);
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 28px 0 12px;
+  }
+  pre {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+  code {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--accent2);
+    line-height: 1.7;
+  }
+  .inline-code {
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    color: var(--accent2);
+    font-family: var(--mono);
+  }
+
+  /* ---- EMOTIONS ---- */
+  .emotion-feed { max-width: 600px; }
+  .emotion-post {
+    border-left: 2px solid var(--border);
+    padding: 0 0 28px 24px;
+    margin-bottom: 0;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .emotion-post:hover { border-color: var(--accent2); }
+  .emotion-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    position: absolute;
+    left: -5px; top: 6px;
+    transition: background 0.2s;
+  }
+  .emotion-post:hover .emotion-dot { background: var(--accent2); }
+  .emotion-date {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    margin-bottom: 8px;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .emotion-author {
+    color: var(--accent2);
+  }
+  .emotion-text {
+    font-size: 14.5px;
+    color: var(--text2);
+    line-height: 1.9;
+  }
+  .emotion-text strong { color: var(--text); font-weight: 500; }
+
+  /* ---- LECTURE ---- */
+  .lecture-item {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 24px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .lecture-date-col {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text3);
+    padding-top: 2px;
+  }
+  .lecture-date-col .month {
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .lecture-date-col .day {
+    font-size: 22px;
+    color: var(--text2);
+    line-height: 1.2;
+  }
+  .lecture-content h3 {
+    font-size: 16px; font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .lecture-problems {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 10px;
+  }
+
+  /* ---- ARCHIVE ---- */
+  .archive-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .archive-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+  .archive-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+    color: var(--text2);
+  }
+  .archive-table tr:hover td { background: var(--surface2); }
+  .archive-table a {
+    color: var(--accent);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 12.5px;
+  }
+  .archive-table a:hover { text-decoration: underline; }
+  .diff-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  .diff-1 { background: rgba(61,255,192,0.1); color: var(--accent2); }
+  .diff-2 { background: rgba(91,138,240,0.1); color: var(--accent); }
+  .diff-3 { background: rgba(255,209,102,0.1); color: var(--yellow); }
+  .diff-4 { background: rgba(255,107,107,0.1); color: var(--red); }
+  .topic-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  /* ---- RESOURCES ---- */
+  .resource-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .resource-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    text-decoration: none;
+    display: flex; align-items: flex-start; gap: 16px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .resource-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .resource-icon {
+    width: 36px; height: 36px;
+    border-radius: 6px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--accent);
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .resource-card h3 {
+    font-size: 15px; font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .resource-card p {
+    font-size: 12.5px;
+    color: var(--text3);
+    line-height: 1.5;
+  }
+  .resource-url {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--accent);
+    margin-top: 6px;
+  }
+
+  /* ---- EMPTY STATE ---- */
+  .empty {
+    text-align: center;
+    padding: 60px 0;
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .empty::before {
+    content: '// ';
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 32px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    text-align: center;
+    margin-top: 60px;
+  }
+
+  @media (max-width: 680px) {
+    .home-grid { grid-template-columns: 1fr; }
+    .resource-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 30px; }
+    nav { padding: 0 16px; }
+    .container { padding: 32px 18px; }
+    .coach-card { flex-direction: column; }
+    .lecture-item { grid-template-columns: 1fr; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">OI · TEAM</div>
+  <ul class="nav-links">
+    <li><a href="#" onclick="show('home')" id="nav-home" class="active">首页</a></li>
+    <li><a href="#" onclick="show('contest')" id="nav-contest">模拟赛</a></li>
+    <li><a href="#" onclick="show('results')" id="nav-results">成绩</a></li>
+    <li><a href="#" onclick="show('notes')" id="nav-notes">题解</a></li>
+    <li><a href="#" onclick="show('emotions')" id="nav-emotions">随笔</a></li>
+    <li><a href="#" onclick="show('lectures')" id="nav-lectures">课程记录</a></li>
+    <li><a href="#" onclick="show('archive')" id="nav-archive">题目存档</a></li>
+    <li><a href="#" onclick="show('resources')" id="nav-resources">资料</a></li>
+  </ul>
+</nav>
+
+<main class="main">
+
+<!-- ===== HOME ===== -->
+<section id="home" class="active">
+<div class="container">
+  <div class="hero">
+    <div class="hero-tag">算法竞赛训练队</div>
+    <h1>在代码里<br>寻找<span>思维的边界</span></h1>
+    <p class="hero-desc">我们是一支专注于信息学竞赛的训练团队。从图论到动态规划，从贪心到数据结构，每一道题都是一次与自己的对话。</p>
+  </div>
+
+  <div class="home-grid">
+    <div class="info-card coach-card">
+      <div class="coach-avatar">李</div>
+      <div class="coach-info">
+        <div class="coach-title">// 指导老师</div>
+        <div class="coach-name">李明远 老师</div>
+        <p class="coach-desc" style="font-size:13.5px;color:var(--text2);margin-top:8px;">从事算法竞赛教学十余年，曾培养多名 NOI 省级选手。训练理念：扎实基础、重视思维、保持对算法之美的好奇心。比赛固然重要，但更希望大家在这里学到的是面对难题时沉下心来的能力。</p>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="card-label">训练方向</div>
+      <h3>核心技能树</h3>
+      <p>图论 · 动态规划 · 数据结构 · 数论 · 计算几何 · 字符串算法 · 网络流</p>
+    </div>
+
+    <div class="info-card">
+      <div class="card-label">团队目标</div>
+      <h3>赛季计划</h3>
+      <p>冲刺 CSP-S 提高组，部分成员备战 NOI 联赛。每周两次训练，月度模拟赛检验成果。</p>
+    </div>
+  </div>
+
+  <div class="updates-section">
+    <h2>// recent updates</h2>
+    <div class="update-item">
+      <div class="update-date">2024-11-18</div>
+      <div class="update-content">
+        <strong>第八次模拟赛</strong>已完成，本次重点考察网络流与最短路。
+        <span class="update-tag tag-contest">模拟赛</span>
+      </div>
+    </div>
+    <div class="update-item">
+      <div class="update-date">2024-11-15</div>
+      <div class="update-content">
+        张同学发布题解：<strong>P3386 【模板】二分图最大匹配</strong>，讲解清晰值得一读。
+        <span class="update-tag tag-note">题解</span>
+      </div>
+    </div>
+    <div class="update-item">
+      <div class="update-date">2024-11-12</div>
+      <div class="update-content">
+        第十二讲：<strong>树形 DP 进阶</strong> — 换根 DP 与树上背包。
+        <span class="update-tag tag-lecture">课程</span>
+      </div>
+    </div>
+    <div class="update-item">
+      <div class="update-date">2024-11-08</div>
+      <div class="update-content">
+        王同学分享随笔：<strong>关于第一次打 CF 的紧张与收获</strong>。
+        <span class="update-tag tag-note">随笔</span>
+      </div>
+    </div>
+    <div class="update-item">
+      <div class="update-date">2024-11-05</div>
+      <div class="update-content">
+        第七次模拟赛排名已更新，陈同学夺得本场第一。
+        <span class="update-tag tag-contest">模拟赛</span>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== MOCK CONTEST ===== -->
+<section id="contest">
+<div class="container">
+  <div class="page-header">
+    <div class="label">// mock_contests</div>
+    <h1>模拟赛记录</h1>
+    <p>每次内部模拟赛的完整记录，包含题目列表与教练点评。</p>
+  </div>
+
+  <div class="contest-card">
+    <div class="contest-meta">
+      <span class="contest-title">第八次模拟赛 · 网络流专题</span>
+      <span class="contest-date">2024-11-18</span>
+    </div>
+    <div class="problem-list">
+      <a href="https://www.luogu.com.cn/problem/P3376" target="_blank" class="problem-tag">P3376 最大流</a>
+      <a href="https://www.luogu.com.cn/problem/P3381" target="_blank" class="problem-tag">P3381 最小费用最大流</a>
+      <a href="https://www.luogu.com.cn/problem/P1983" target="_blank" class="problem-tag">P1983 车站分级</a>
+      <a href="https://www.luogu.com.cn/problem/P2756" target="_blank" class="problem-tag">P2756 飞行员配对方案</a>
+    </div>
+    <div class="contest-comment">整体发挥不错，但 T3 建图思路有些同学还需要多练习。网络流的关键在于建模，建议大家下周专项练习 DAG 拆点模型。</div>
+  </div>
+
+  <div class="contest-card">
+    <div class="contest-meta">
+      <span class="contest-title">第七次模拟赛 · 图论综合</span>
+      <span class="contest-date">2024-11-05</span>
+    </div>
+    <div class="problem-list">
+      <a href="https://www.luogu.com.cn/problem/P3371" target="_blank" class="problem-tag">P3371 单源最短路</a>
+      <a href="https://www.luogu.com.cn/problem/P1119" target="_blank" class="problem-tag">P1119 灾后重建</a>
+      <a href="https://www.luogu.com.cn/problem/P3387" target="_blank" class="problem-tag">P3387 缩点</a>
+      <a href="https://www.luogu.com.cn/problem/P1268" target="_blank" class="problem-tag">P1268 树的重量</a>
+      <a href="https://www.luogu.com.cn/problem/P1073" target="_blank" class="problem-tag">P1073 最优贸易</a>
+    </div>
+    <div class="contest-comment">陈同学本场发挥出色，5 题全 AC。T4 和 T5 难度较高，大部分同学在 T3 后开始遇阻，说明 SCC 缩点的应用还需强化训练。</div>
+  </div>
+
+  <div class="contest-card">
+    <div class="contest-meta">
+      <span class="contest-title">第六次模拟赛 · 树形 DP</span>
+      <span class="contest-date">2024-10-22</span>
+    </div>
+    <div class="problem-list">
+      <a href="https://www.luogu.com.cn/problem/P1352" target="_blank" class="problem-tag">P1352 没有上司的舞会</a>
+      <a href="https://www.luogu.com.cn/problem/P2015" target="_blank" class="problem-tag">P2015 二叉苹果树</a>
+      <a href="https://www.luogu.com.cn/problem/P1122" target="_blank" class="problem-tag">P1122 最大子树和</a>
+    </div>
+    <div class="contest-comment">树形 DP 的基础模型掌握较好，但树上背包的复杂度分析还需加强。请大家认真复习树背包的 O(n²) 做法证明。</div>
+  </div>
+</div>
+</section>
+
+<!-- ===== RESULTS ===== -->
+<section id="results">
+<div class="container">
+  <div class="page-header">
+    <div class="label">// contest_results</div>
+    <h1>成绩排名</h1>
+    <p>各次模拟赛的详细排名与得分记录。</p>
+  </div>
+
+  <div style="margin-bottom:32px;">
+    <h2 style="font-family:var(--mono);font-size:13px;color:var(--text2);margin-bottom:16px;letter-spacing:0.04em;">第八次模拟赛 · 2024-11-18</h2>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <table class="rank-table">
+        <thead>
+          <tr>
+            <th>排名</th>
+            <th>姓名</th>
+            <th>AC 题数</th>
+            <th>总分</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="rank-num rank-1">🥇 1</span></td>
+            <td class="rank-name">张伟</td>
+            <td>4 / 4</td>
+            <td>400 <span class="score-bar"><span class="score-fill" style="width:100%"></span></span></td>
+          </tr>
+          <tr>
+            <td><span class="rank-num rank-2">🥈 2</span></td>
+            <td class="rank-name">陈晓宇</td>
+            <td>3 / 4</td>
+            <td>340 <span class="score-bar"><span class="score-fill" style="width:85%"></span></span></td>
+          </tr>
+          <tr>
+            <td><span class="rank-num rank-3">🥉 3</span></td>
+            <td class="rank-name">林思远</td>
+            <td>3 / 4</td>
+            <td>310 <span class="score-bar"><span class="score-fill" style="width:77.5%"></span></span></td>
+          </tr>
+          <tr>
+            <td><span class="rank-num">4</span></td>
+            <td class="rank-name">王雨欣</td>
+            <td>2 / 4</td>
+            <td>240 <span class="score-bar"><span class="score-fill" style="width:60%"></span></span></td>
+          </tr>
+          <tr>
+            <td><span class="rank-num">5</span></td>
+            <td class="rank-name">刘昊然</td>
+            <td>2 / 4</td>
+            <td>210 <span class="score-bar"><span class="score-fill" style="width:52.5%"></span></span></td>
+          </tr>
+          <tr>
+            <td><span class="rank-num">6</span></td>
+            <td class="rank-name">赵梦琪</td>
+            <td>1 / 4</td>
+            <td>130 <span class="score-bar"><span class="score-fill" style="width:32.5%"></span></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div>
+    <h2 style="font-family:var(--mono);font-size:13px;color:var(--text2);margin-bottom:16px;letter-spacing:0.04em;">第七次模拟赛 · 2024-11-05</h2>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <table class="rank-table">
+        <thead>
+          <tr><th>排名</th><th>姓名</th><th>AC 题数</th><th>总分</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="rank-num rank-1">🥇 1</span></td>
+            <td class="rank-name">陈晓宇</td>
+            <td>5 / 5</td>
+            <td>500 <span class="score-bar"><span class="score-fill" style="width:100%"></span></span></td>
+          </tr>
+          <tr>
+            <td><span class="rank-num rank-2">🥈 2</span></td>
+            <td class="rank-name">张伟</td>
+            <td>4 / 5</td>
+            <td>420 <span class="score-bar"><span class="score-fill" style="width:84%"></span></span></td>
+          </tr>
+          <tr>
+            <td><span class="rank-num rank-3">🥉 3</span></td>
+            <td class="rank-name">林思远</td>
+            <td>3 / 5</td>
+            <td>330 <span class="score-bar"><span class="score-fill" style="width:66%"></span></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== NOTES ===== -->
+<section id="notes">
+<div class="container">
+  <div class="page-header">
+    <div class="label">// problem_notes</div>
+    <h1>题解笔记</h1>
+    <p>同学们的解题思路与经验分享，附完整 C++ 代码。</p>
+  </div>
+
+  <div id="notes-list">
+    <div class="blog-grid">
+      <div class="blog-card" onclick="showPost('post1')">
+        <div class="blog-card-top">
+          <h3>P3376 最大流模板题详解</h3>
+          <span class="topic-badge">网络流</span>
+        </div>
+        <div class="blog-meta">
+          <span class="author">张伟</span>
+          <span>2024-11-19</span>
+          <span>P3376</span>
+        </div>
+        <p class="blog-excerpt" style="margin-top:10px;">Dinic 算法是目前竞赛中最常用的最大流算法，时间复杂度 O(V²E)。本题介绍其核心思想：分层图 + 多路增广，以及实现时需要注意的细节……</p>
+      </div>
+
+      <div class="blog-card" onclick="showPost('post2')">
+        <div class="blog-card-top">
+          <h3>树形 DP 从入门到 P1352</h3>
+          <span class="topic-badge">树形DP</span>
+        </div>
+        <div class="blog-meta">
+          <span class="author">林思远</span>
+          <span>2024-10-25</span>
+          <span>P1352</span>
+        </div>
+        <p class="blog-excerpt" style="margin-top:10px;">树形 DP 的核心是「在树上做 DP」，状态转移时利用树的父子关系。P1352 是经典的没有上司的舞会，每个节点选或不选，子节点的贡献互相独立……</p>
+      </div>
+
+      <div class="blog-card" onclick="showPost('post3')">
+        <div class="blog-card-top">
+          <h3>Tarjan 求强连通分量</h3>
+          <span class="topic-badge">图论</span>
+        </div>
+        <div class="blog-meta">
+          <span class="author">陈晓宇</span>
+          <span>2024-10-18</span>
+          <span>P3387</span>
+        </div>
+        <p class="blog-excerpt" style="margin-top:10px;">Tarjan 算法利用 DFS 树上的时间戳和 low 值来识别 SCC。理解 low 值的含义是关键：low[u] 表示从 u 出发，经过子树中的边，能到达的最小 dfn 值……</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="post-detail" id="post1">
+    <button class="back-btn" onclick="hidePost()">← 返回列表</button>
+    <div class="post-title">P3376 最大流模板题详解</div>
+    <div class="post-meta">
+      <span class="author">张伟</span>
+      <span>2024-11-19</span>
+      <span class="post-link"><a href="https://www.luogu.com.cn/problem/P3376" target="_blank">P3376 → luogu</a></span>
+      <span class="topic-badge" style="margin-left:0">网络流</span>
+    </div>
+    <div class="post-body">
+      <h4>题目思路</h4>
+      <p>本题是最大流的模板题，使用 Dinic 算法。核心分两步：①用 BFS 构造分层图；②在分层图上用 DFS 多路增广。每次 BFS + DFS 为一轮，直到源点无法到达汇点为止。</p>
+      <h4>C++ 代码</h4>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+const int INF = 1e9;
+struct Edge { int to, rev; long long cap; };
+vector&lt;Edge&gt; graph[205];
+int level[205], iter[205];
+
+void add_edge(int from, int to, long long cap) {
+    graph[from].push_back({to, (int)graph[to].size(), cap});
+    graph[to].push_back({from, (int)graph[from].size()-1, 0});
+}
+
+bool bfs(int s, int t, int n) {
+    fill(level, level+n+1, -1);
+    queue&lt;int&gt; q;
+    level[s] = 0; q.push(s);
+    while (!q.empty()) {
+        int v = q.front(); q.pop();
+        for (auto& e : graph[v])
+            if (e.cap &gt; 0 && level[e.to] &lt; 0)
+                level[e.to] = level[v]+1, q.push(e.to);
+    }
+    return level[t] &gt;= 0;
+}
+
+long long dfs(int v, int t, long long f) {
+    if (v == t) return f;
+    for (int& i = iter[v]; i &lt; (int)graph[v].size(); i++) {
+        Edge& e = graph[v][i];
+        if (e.cap &gt; 0 && level[v] &lt; level[e.to]) {
+            long long d = dfs(e.to, t, min(f, e.cap));
+            if (d &gt; 0) { e.cap -= d; graph[e.to][e.rev].cap += d; return d; }
+        }
+    }
+    return 0;
+}
+
+long long max_flow(int s, int t, int n) {
+    long long flow = 0;
+    while (bfs(s, t, n)) {
+        fill(iter, iter+n+1, 0);
+        long long d;
+        while ((d = dfs(s, t, INF)) &gt; 0) flow += d;
+    }
+    return flow;
+}
+
+int main() {
+    int n, m, s, t;
+    cin &gt;&gt; n &gt;&gt; m &gt;&gt; s &gt;&gt; t;
+    for (int i = 0; i &lt; m; i++) {
+        int u, v; long long w;
+        cin &gt;&gt; u &gt;&gt; v &gt;&gt; w;
+        add_edge(u, v, w);
+    }
+    cout &lt;&lt; max_flow(s, t, n) &lt;&lt; endl;
+}</code></pre>
+      <h4>反思与总结</h4>
+      <p>Dinic 最关键的优化是「当前弧优化」，用 <span class="inline-code">iter[]</span> 记录下次搜索的起始边，避免重复搜索已经饱和的边。建议背诵这个模板，在比赛中直接套用，不要浪费时间重写。</p>
+    </div>
+  </div>
+
+  <div class="post-detail" id="post2">
+    <button class="back-btn" onclick="hidePost()">← 返回列表</button>
+    <div class="post-title">树形 DP 从入门到 P1352</div>
+    <div class="post-meta">
+      <span class="author">林思远</span>
+      <span>2024-10-25</span>
+      <span class="post-link"><a href="https://www.luogu.com.cn/problem/P1352" target="_blank">P1352 → luogu</a></span>
+      <span class="topic-badge" style="margin-left:0">树形DP</span>
+    </div>
+    <div class="post-body">
+      <h4>题目思路</h4>
+      <p>经典树形 DP。定义 <span class="inline-code">dp[u][0/1]</span> 表示以 u 为根的子树中，u 不参加/参加舞会时的最大快乐值。转移枚举所有子节点 v，若 u 不参加则 v 可以参加也可以不参加，取最大值；若 u 参加则 v 一定不参加。</p>
+      <h4>C++ 代码</h4>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+const int MAXN = 6005;
+int n, w[MAXN], dp[MAXN][2];
+vector&lt;int&gt; ch[MAXN];
+bool has_parent[MAXN];
+
+void dfs(int u) {
+    dp[u][0] = 0;
+    dp[u][1] = w[u];
+    for (int v : ch[u]) {
+        dfs(v);
+        dp[u][0] += max(dp[v][0], dp[v][1]);
+        dp[u][1] += dp[v][0];
+    }
+}
+
+int main() {
+    cin &gt;&gt; n;
+    for (int i = 1; i &lt;= n; i++) cin &gt;&gt; w[i];
+    for (int i = 1; i &lt; n; i++) {
+        int l, k; cin &gt;&gt; l &gt;&gt; k;
+        ch[k].push_back(l);
+        has_parent[l] = true;
+    }
+    int root = 1;
+    while (has_parent[root]) root++;
+    dfs(root);
+    cout &lt;&lt; max(dp[root][0], dp[root][1]) &lt;&lt; endl;
+}</code></pre>
+      <h4>反思与总结</h4>
+      <p>树形 DP 一定要先想清楚状态定义再写代码。这道题状态很简单，但稍微复杂一点的题（如树背包）就需要更小心地考虑复杂度。</p>
+    </div>
+  </div>
+
+  <div class="post-detail" id="post3">
+    <button class="back-btn" onclick="hidePost()">← 返回列表</button>
+    <div class="post-title">Tarjan 求强连通分量</div>
+    <div class="post-meta">
+      <span class="author">陈晓宇</span>
+      <span>2024-10-18</span>
+      <span class="post-link"><a href="https://www.luogu.com.cn/problem/P3387" target="_blank">P3387 → luogu</a></span>
+      <span class="topic-badge" style="margin-left:0">图论</span>
+    </div>
+    <div class="post-body">
+      <h4>题目思路</h4>
+      <p>P3387 是缩点模板题：先用 Tarjan 求所有 SCC，将每个 SCC 缩成一个点，建新的 DAG，然后在 DAG 上跑 DP 求最大权路径。</p>
+      <h4>C++ 代码</h4>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int n, m, dfn[1e4+5], low[1e4+5], scc_id[1e4+5];
+int timer_=0, scc_cnt=0;
+long long scc_val[1e4+5], dp[1e4+5];
+bool in_stack[1e4+5];
+stack&lt;int&gt; st;
+vector&lt;int&gt; G[1e4+5], dag[1e4+5];
+int val[1e4+5], in_deg[1e4+5];
+
+void tarjan(int u) {
+    dfn[u] = low[u] = ++timer_;
+    st.push(u); in_stack[u] = true;
+    for (int v : G[u]) {
+        if (!dfn[v]) { tarjan(v); low[u] = min(low[u], low[v]); }
+        else if (in_stack[v]) low[u] = min(low[u], dfn[v]);
+    }
+    if (low[u] == dfn[u]) {
+        scc_cnt++;
+        while (true) {
+            int v = st.top(); st.pop();
+            in_stack[v] = false;
+            scc_id[v] = scc_cnt;
+            scc_val[scc_cnt] += val[v];
+            if (v == u) break;
+        }
+    }
+}
+// ... (DAG DP 省略)</code></pre>
+      <h4>反思与总结</h4>
+      <p>Tarjan 的细节很多，尤其是 <span class="inline-code">low</span> 值的更新：只有在栈中的节点才能用 <span class="inline-code">dfn[v]</span> 更新，已经出栈的（属于其他 SCC 的）不能更新。这一点一定要牢记。</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== EMOTIONS ===== -->
+<section id="emotions">
+<div class="container">
+  <div class="page-header">
+    <div class="label">// learning_log</div>
+    <h1>随笔 · 学习日志</h1>
+    <p>记录训练中的心情、感悟与小小的成长。</p>
+  </div>
+
+  <div class="emotion-feed">
+    <div class="emotion-post">
+      <div class="emotion-dot"></div>
+      <div class="emotion-date">
+        <span>2024-11-18</span>
+        <span class="emotion-author">王雨欣</span>
+      </div>
+      <div class="emotion-text">今天模拟赛 T2 卡了好久，最后发现是建图时反向边没加对。调了一个小时，感觉整个人都不好了。不过最后找到 bug 的那一刻真的有点开心……<strong>也许这就是竞赛的魅力？</strong></div>
+    </div>
+
+    <div class="emotion-post">
+      <div class="emotion-dot"></div>
+      <div class="emotion-date">
+        <span>2024-11-12</span>
+        <span class="emotion-author">林思远</span>
+      </div>
+      <div class="emotion-text">今天第一次真正理解了换根 DP 的思路，老师说「把任意一个节点当根，然后把根从一个节点换到另一个节点时更新答案」。感觉脑子里有什么东西通了，以前死记硬背的东西突然有了意义。</div>
+    </div>
+
+    <div class="emotion-post">
+      <div class="emotion-dot"></div>
+      <div class="emotion-date">
+        <span>2024-11-08</span>
+        <span class="emotion-author">陈晓宇</span>
+      </div>
+      <div class="emotion-text">第一次参加 Codeforces 比赛，Rating 掉了好多。但我发现 CF 的题目质量真的高，以后要多练。<strong>以后每周打一场，先把 Div.2 的 ACD 稳了再说。</strong>虽然现在还很弱，但相信坚持下去会进步的。</div>
+    </div>
+
+    <div class="emotion-post">
+      <div class="emotion-dot"></div>
+      <div class="emotion-date">
+        <span>2024-11-01</span>
+        <span class="emotion-author">张伟</span>
+      </div>
+      <div class="emotion-text">今天花了两个小时研究 Dinic 的当前弧优化，终于搞懂了为什么可以这样做。一个小小的 iter 数组，让复杂度从 O(VE²) 变成了 O(V²E)。算法的设计真的很精妙，每次理解一个新技巧都有一种「哦原来如此」的感觉。</div>
+    </div>
+
+    <div class="emotion-post">
+      <div class="emotion-dot"></div>
+      <div class="emotion-date">
+        <span>2024-10-28</span>
+        <span class="emotion-author">赵梦琪</span>
+      </div>
+      <div class="emotion-text">模拟赛又挂了。感觉自己太粗心了，明明会的题因为少判断了一个边界就 WA。老师说「赛场上要慢一点想，快一点敲，而不是快一点想然后慢慢调」。这句话记下来，下次一定要做到。</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== LECTURES ===== -->
+<section id="lectures">
+<div class="container">
+  <div class="page-header">
+    <div class="label">// lecture_records</div>
+    <h1>课程记录</h1>
+    <p>每次课堂的主题与例题，所有题目均链接至洛谷。</p>
+  </div>
+
+  <div class="lecture-item">
+    <div class="lecture-date-col">
+      <div class="month">NOV</div>
+      <div class="day">12</div>
+      <div class="month">2024</div>
+    </div>
+    <div class="lecture-content">
+      <h3>第十二讲：树形 DP 进阶 — 换根 DP 与树上背包</h3>
+      <p style="font-size:13.5px;color:var(--text2);">换根 DP 的核心思路：先以任意节点为根做一遍 DP，再通过「重新换根」的转移推出所有节点作为根时的答案。树上背包讨论了 O(n²) 的正确做法与复杂度证明。</p>
+      <div class="lecture-problems">
+        <a href="https://www.luogu.com.cn/problem/P3478" target="_blank" class="problem-tag">P3478 SUM</a>
+        <a href="https://www.luogu.com.cn/problem/P2986" target="_blank" class="problem-tag">P2986 Great Cow Gathering</a>
+        <a href="https://www.luogu.com.cn/problem/P2014" target="_blank" class="problem-tag">P2014 选课</a>
+        <a href="https://www.luogu.com.cn/problem/P1270" target="_blank" class="problem-tag">P1270 雨中的树</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="lecture-item">
+    <div class="lecture-date-col">
+      <div class="month">NOV</div>
+      <div class="day">05</div>
+      <div class="month">2024</div>
+    </div>
+    <div class="lecture-content">
+      <h3>第十一讲：网络流建模专题</h3>
+      <p style="font-size:13.5px;color:var(--text2);">重点讨论「拆点」「二分图转网络流」「上下界可行流」三类模型。建模是网络流的核心难点，建议反复练习直到能快速识别模型。</p>
+      <div class="lecture-problems">
+        <a href="https://www.luogu.com.cn/problem/P3376" target="_blank" class="problem-tag">P3376 最大流</a>
+        <a href="https://www.luogu.com.cn/problem/P2756" target="_blank" class="problem-tag">P2756 飞行员配对</a>
+        <a href="https://www.luogu.com.cn/problem/P1361" target="_blank" class="problem-tag">P1361 小M的作物</a>
+        <a href="https://www.luogu.com.cn/problem/P2765" target="_blank" class="problem-tag">P2765 魔术球</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="lecture-item">
+    <div class="lecture-date-col">
+      <div class="month">OCT</div>
+      <div class="day">29</div>
+      <div class="month">2024</div>
+    </div>
+    <div class="lecture-content">
+      <h3>第十讲：强连通分量与缩点</h3>
+      <p style="font-size:13.5px;color:var(--text2);">Tarjan 算法求 SCC，缩点建 DAG，在 DAG 上做 DP。重点讲解了 low 值的正确定义，以及缩点后如何正确地统计 SCC 权值。</p>
+      <div class="lecture-problems">
+        <a href="https://www.luogu.com.cn/problem/P3387" target="_blank" class="problem-tag">P3387 缩点模板</a>
+        <a href="https://www.luogu.com.cn/problem/P1073" target="_blank" class="problem-tag">P1073 最优贸易</a>
+        <a href="https://www.luogu.com.cn/problem/P2341" target="_blank" class="problem-tag">P2341 受欢迎的牛</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="lecture-item">
+    <div class="lecture-date-col">
+      <div class="month">OCT</div>
+      <div class="day">22</div>
+      <div class="month">2024</div>
+    </div>
+    <div class="lecture-content">
+      <h3>第九讲：线段树进阶 — 区间修改与懒标记</h3>
+      <p style="font-size:13.5px;color:var(--text2);">lazy 标记的正确传递方式，以及多种操作同时存在时标记的合并顺序问题。讨论了线段树上二分的技巧。</p>
+      <div class="lecture-problems">
+        <a href="https://www.luogu.com.cn/problem/P3372" target="_blank" class="problem-tag">P3372 线段树模板1</a>
+        <a href="https://www.luogu.com.cn/problem/P3373" target="_blank" class="problem-tag">P3373 线段树模板2</a>
+        <a href="https://www.luogu.com.cn/problem/P1253" target="_blank" class="problem-tag">P1253 扶苏的问题</a>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== ARCHIVE ===== -->
+<section id="archive">
+<div class="container">
+  <div class="page-header">
+    <div class="label">// problem_archive</div>
+    <h1>题目存档</h1>
+    <p>训练中使用过的所有题目，按难度与知识点分类。</p>
+  </div>
+
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+    <table class="archive-table">
+      <thead>
+        <tr>
+          <th>题目</th>
+          <th>链接</th>
+          <th>难度</th>
+          <th>知识点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>最大流</td>
+          <td><a href="https://www.luogu.com.cn/problem/P3376" target="_blank">P3376</a></td>
+          <td><span class="diff-badge diff-2">提高</span></td>
+          <td class="topic-label">网络流</td>
+        </tr>
+        <tr>
+          <td>最小费用最大流</td>
+          <td><a href="https://www.luogu.com.cn/problem/P3381" target="_blank">P3381</a></td>
+          <td><span class="diff-badge diff-3">省选</span></td>
+          <td class="topic-label">网络流</td>
+        </tr>
+        <tr>
+          <td>缩点</td>
+          <td><a href="https://www.luogu.com.cn/problem/P3387" target="_blank">P3387</a></td>
+          <td><span class="diff-badge diff-2">提高</span></td>
+          <td class="topic-label">图论 · SCC</td>
+        </tr>
+        <tr>
+          <td>没有上司的舞会</td>
+          <td><a href="https://www.luogu.com.cn/problem/P1352" target="_blank">P1352</a></td>
+          <td><span class="diff-badge diff-2">提高</span></td>
+          <td class="topic-label">树形DP</td>
+        </tr>
+        <tr>
+          <td>选课</td>
+          <td><a href="https://www.luogu.com.cn/problem/P2014" target="_blank">P2014</a></td>
+          <td><span class="diff-badge diff-3">省选</span></td>
+          <td class="topic-label">树形DP · 背包</td>
+        </tr>
+        <tr>
+          <td>线段树模板2</td>
+          <td><a href="https://www.luogu.com.cn/problem/P3373" target="_blank">P3373</a></td>
+          <td><span class="diff-badge diff-2">提高</span></td>
+          <td class="topic-label">数据结构 · 线段树</td>
+        </tr>
+        <tr>
+          <td>受欢迎的牛</td>
+          <td><a href="https://www.luogu.com.cn/problem/P2341" target="_blank">P2341</a></td>
+          <td><span class="diff-badge diff-2">提高</span></td>
+          <td class="topic-label">图论 · SCC</td>
+        </tr>
+        <tr>
+          <td>最优贸易</td>
+          <td><a href="https://www.luogu.com.cn/problem/P1073" target="_blank">P1073</a></td>
+          <td><span class="diff-badge diff-3">省选</span></td>
+          <td class="topic-label">图论 · DP</td>
+        </tr>
+        <tr>
+          <td>单源最短路</td>
+          <td><a href="https://www.luogu.com.cn/problem/P3371" target="_blank">P3371</a></td>
+          <td><span class="diff-badge diff-1">普及</span></td>
+          <td class="topic-label">图论 · 最短路</td>
+        </tr>
+        <tr>
+          <td>SUM（换根DP）</td>
+          <td><a href="https://www.luogu.com.cn/problem/P3478" target="_blank">P3478</a></td>
+          <td><span class="diff-badge diff-3">省选</span></td>
+          <td class="topic-label">树形DP · 换根</td>
+        </tr>
+        <tr>
+          <td>小M的作物</td>
+          <td><a href="https://www.luogu.com.cn/problem/P1361" target="_blank">P1361</a></td>
+          <td><span class="diff-badge diff-4">NOI</span></td>
+          <td class="topic-label">网络流 · 最小割</td>
+        </tr>
+        <tr>
+          <td>飞行员配对方案</td>
+          <td><a href="https://www.luogu.com.cn/problem/P2756" target="_blank">P2756</a></td>
+          <td><span class="diff-badge diff-2">提高</span></td>
+          <td class="topic-label">网络流 · 二分图</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<!-- ===== RESOURCES ===== -->
+<section id="resources">
+<div class="container">
+  <div class="page-header">
+    <div class="label">// resources</div>
+    <h1>学习资源</h1>
+    <p>竞赛常用平台与文档，收藏备用。</p>
+  </div>
+
+  <div class="resource-grid">
+    <a class="resource-card" href="https://www.luogu.com.cn" target="_blank">
+      <div class="resource-icon">洛</div>
+      <div>
+        <h3>洛谷</h3>
+        <p>国内最大的 OI 题库与评测系统，题目质量高，社区活跃。</p>
+        <div class="resource-url">luogu.com.cn</div>
+      </div>
+    </a>
+    <a class="resource-card" href="https://codeforces.com" target="_blank">
+      <div class="resource-icon">CF</div>
+      <div>
+        <h3>Codeforces</h3>
+        <p>国际顶级竞赛平台，定期举办 Div.1/2 比赛，提升思维必备。</p>
+        <div class="resource-url">codeforces.com</div>
+      </div>
+    </a>
+    <a class="resource-card" href="https://oi-wiki.org" target="_blank">
+      <div class="resource-icon">W</div>
+      <div>
+        <h3>OI Wiki</h3>
+        <p>中文 OI 知识体系文档，涵盖算法、数据结构、数学等所有竞赛知识点。</p>
+        <div class="resource-url">oi-wiki.org</div>
+      </div>
+    </a>
+    <a class="resource-card" href="https://atcoder.jp" target="_blank">
+      <div class="resource-icon">AT</div>
+      <div>
+        <h3>AtCoder</h3>
+        <p>日本顶级竞赛平台，题目风格独特，尤其适合练习数学与构造题。</p>
+        <div class="resource-url">atcoder.jp</div>
+      </div>
+    </a>
+    <a class="resource-card" href="https://vjudge.net" target="_blank">
+      <div class="resource-icon">VJ</div>
+      <div>
+        <h3>Virtual Judge</h3>
+        <p>聚合多平台题目，可建立私人题单与比赛，适合组队训练。</p>
+        <div class="resource-url">vjudge.net</div>
+      </div>
+    </a>
+    <a class="resource-card" href="https://cppreference.com" target="_blank">
+      <div class="resource-icon">C++</div>
+      <div>
+        <h3>cppreference</h3>
+        <p>C++ 标准库完整文档，STL 容器与算法查询必备。</p>
+        <div class="resource-url">cppreference.com</div>
+      </div>
+    </a>
+  </div>
+</div>
+</section>
+
+</main>
+
+<footer>
+  // OI Training Team · Built with ❤️ and countless WA submissions
+</footer>
+
+<script>
+function show(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+  // hide post detail if switching sections
+  document.querySelectorAll('.post-detail').forEach(d => d.style.display = 'none');
+  const list = document.getElementById('notes-list');
+  if (list) list.style.display = 'block';
+  return false;
+}
+
+function showPost(postId) {
+  document.getElementById('notes-list').style.display = 'none';
+  document.querySelectorAll('.post-detail').forEach(d => d.style.display = 'none');
+  document.getElementById(postId).style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function hidePost() {
+  document.querySelectorAll('.post-detail').forEach(d => d.style.display = 'none');
+  document.getElementById('notes-list').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+// prevent default on nav links
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', e => e.preventDefault());
+});
+</script>
+</body>
+</html>
