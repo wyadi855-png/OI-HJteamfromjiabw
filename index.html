@@ -777,6 +777,41 @@ mark.search-hl{
 .member-bio{
   font-size:11px;color:var(--text3);margin-top:3px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+
+/* ── PROFILE SOCIAL ── */
+.profile-social{margin-bottom:8px;}
+.label-wall{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.label-chip{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(108,142,245,0.07);border:1px solid rgba(108,142,245,0.15);
+  border-radius:20px;padding:5px 12px;}
+.label-from{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.label-text{font-size:13px;font-weight:600;color:var(--accent2);}
+.label-give-section{margin-top:0;}
+.label-action-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.give-label-btn{
+  font-family:var(--mono);font-size:11px;padding:5px 14px;
+  border-radius:8px;border:1px solid rgba(45,232,176,0.2);
+  background:rgba(45,232,176,0.06);color:var(--accent2);
+  cursor:pointer;transition:all 0.2s;}
+.give-label-btn:hover{background:rgba(45,232,176,0.12);}
+.label-edit-btn{
+  font-family:var(--mono);font-size:10px;padding:3px 10px;
+  border-radius:6px;border:1px solid rgba(108,142,245,0.15);
+  background:none;color:var(--text3);cursor:pointer;transition:all 0.2s;}
+.label-edit-btn:hover{color:var(--accent);border-color:var(--accent);}
+.label-input-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.label-input-row input{
+  font-family:var(--mono);font-size:13px;padding:6px 10px;
+  border-radius:6px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);}
+.follow-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+.follow-chip{
+  font-family:var(--mono);font-size:12px;padding:4px 12px;
+  border-radius:20px;background:rgba(108,142,245,0.07);
+  border:1px solid rgba(108,142,245,0.12);color:var(--text2);
+  cursor:pointer;transition:all 0.2s;}
+.follow-chip:hover{color:var(--accent);border-color:rgba(108,142,245,0.3);}
 </style>
 </head>
 <body>
@@ -2019,6 +2054,103 @@ async function showProfile(username){
   }
   el.innerHTML=html;
   buildHeatmap(profile.id).then(h=>{const hel=document.getElementById('heatmap-'+username);if(hel)hel.innerHTML=h;});
+  loadProfileSocial(profile,username);
+}
+
+async function loadProfileSocial(profile,username){
+  const[{data:followingRows},{data:followerRows},{data:labelsReceived}]=await Promise.all([
+    sb.from('follows').select('following_id,profiles!follows_following_id_fkey(username)').eq('follower_id',profile.id),
+    sb.from('follows').select('follower_id,profiles!follows_follower_id_fkey(username)').eq('following_id',profile.id),
+    sb.from('relationships').select('from_id,label,profiles!relationships_from_id_fkey(username)').eq('to_id',profile.id),
+  ]);
+  const isSelf=currentUser&&currentUser.id===profile.id;
+  const theyFollowMe=!!(followerRows||[]).find(r=>r.follower_id===currentUser?.id);
+  const myFollowCheck=currentUser?await sb.from('follows').select('id').eq('follower_id',currentUser.id).eq('following_id',profile.id).maybeSingle():{data:null};
+  const isMutual=!isSelf&&myFollowCheck.data&&theyFollowMe;
+  const el=document.getElementById('profile-content');
+  if(!el)return;
+  const div=document.createElement('div');div.className='profile-social';
+
+  // Label wall
+  if(labelsReceived&&labelsReceived.length){
+    const sec=document.createElement('div');sec.className='profile-section';
+    sec.innerHTML='<div class="profile-section-title">大家眼中的 @'+escHtml(username)+'</div><div class="label-wall"></div>';
+    const wall=sec.querySelector('.label-wall');
+    labelsReceived.forEach(r=>{
+      const chip=document.createElement('div');chip.className='label-chip';
+      chip.innerHTML='<span class="label-from">@'+escHtml(r.profiles?.username||'?')+'</span><span class="label-text">'+escHtml(r.label)+'</span>';
+      wall.appendChild(chip);
+    });
+    div.appendChild(sec);
+  }
+
+  // Give/edit label
+  if(!isSelf&&currentUser){
+    const myLabelRow=currentUser?(await sb.from('relationships').select('label').eq('from_id',currentUser.id).eq('to_id',profile.id).maybeSingle()).data:null;
+    const sec=document.createElement('div');sec.className='profile-section label-give-section';
+    sec.innerHTML='<div class="profile-section-title">你给 @'+escHtml(username)+' 的标签</div>';
+    if(isMutual){
+      const row=document.createElement('div');row.className='label-action-row';
+      if(myLabelRow){
+        row.innerHTML='<span class="label-text">'+escHtml(myLabelRow.label)+'</span>';
+        const editBtn=document.createElement('button');editBtn.className='label-edit-btn';editBtn.textContent='修改';
+        editBtn.addEventListener('click',()=>showLabelInput(row,profile.id,username,myLabelRow.label));
+        row.appendChild(editBtn);
+      } else {
+        const addBtn=document.createElement('button');addBtn.className='give-label-btn';addBtn.textContent='+ 贴标签';
+        addBtn.addEventListener('click',()=>showLabelInput(row,profile.id,username,''));
+        row.appendChild(addBtn);
+      }
+      sec.appendChild(row);
+    } else {
+      sec.innerHTML+='<div style="font-family:var(--mono);font-size:11px;color:var(--text3)">互相关注后可以贴标签</div>';
+    }
+    div.appendChild(sec);
+  }
+
+  // Following list
+  const following=(followingRows||[]).map(r=>r.profiles?.username).filter(Boolean);
+  const followers=(followerRows||[]).map(r=>r.profiles?.username).filter(Boolean);
+  if(following.length){
+    const sec=document.createElement('div');sec.className='profile-section';
+    sec.innerHTML='<div class="profile-section-title">关注了 ('+following.length+')</div><div class="follow-list"></div>';
+    const list=sec.querySelector('.follow-list');
+    following.forEach(u=>{const c=document.createElement('span');c.className='follow-chip';c.textContent='@'+u;c.addEventListener('click',()=>showProfile(u));list.appendChild(c);});
+    div.appendChild(sec);
+  }
+  if(followers.length){
+    const sec=document.createElement('div');sec.className='profile-section';
+    sec.innerHTML='<div class="profile-section-title">粉丝 ('+followers.length+')</div><div class="follow-list"></div>';
+    const list=sec.querySelector('.follow-list');
+    followers.forEach(u=>{const c=document.createElement('span');c.className='follow-chip';c.textContent='@'+u;c.addEventListener('click',()=>showProfile(u));list.appendChild(c);});
+    div.appendChild(sec);
+  }
+
+  const notesSection=el.querySelector('.profile-section');
+  if(notesSection)notesSection.insertAdjacentElement('beforebegin',div);
+  else el.appendChild(div);
+}
+
+function showLabelInput(container,toId,toUsername,current){
+  const old=container.querySelector('.label-input-row');
+  if(old)old.remove();
+  const row=document.createElement('div');row.className='label-input-row';
+  const inp=document.createElement('input');
+  inp.type='text';inp.maxLength=4;inp.placeholder='最多4字';inp.value=current;inp.style.width='80px';
+  const ok=document.createElement('button');ok.className='btn btn-primary btn-sm';ok.textContent='确定';
+  const cancel=document.createElement('button');cancel.className='btn btn-outline btn-sm';cancel.textContent='取消';
+  ok.addEventListener('click',async()=>{
+    const label=inp.value.trim();
+    if(!label){showToast('标签不能为空','error');return;}
+    if([...label].length>4){showToast('最多4个字','error');return;}
+    const{error}=await sb.from('relationships').upsert({from_id:currentUser.id,to_id:toId,label},{onConflict:'from_id,to_id'});
+    if(error){showToast('保存失败','error');return;}
+    showToast('标签已保存 ✓','success');showProfile(toUsername);
+  });
+  cancel.addEventListener('click',()=>row.remove());
+  row.appendChild(inp);row.appendChild(ok);row.appendChild(cancel);
+  container.appendChild(row);
+  setTimeout(()=>inp.focus(),50);
 }
 
 // ── Theme ──────────────────────────────────────────────────
