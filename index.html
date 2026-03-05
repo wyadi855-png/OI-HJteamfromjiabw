@@ -4715,10 +4715,21 @@ async function loadDaily(){
     {data:recs},
     {data:pastProblems}
   ]=await Promise.all([
-    sb.from('daily_problems').select('*,profiles(username)').eq('date',today).maybeSingle(),
-    sb.from('daily_recommendations').select('*,profiles(username)').eq('status','pending').order('created_at',{ascending:false}),
-    sb.from('daily_problems').select('*,profiles(username)').lt('date',today).order('date',{ascending:false}).limit(14),
+    sb.from('daily_problems').select('*').eq('date',today).maybeSingle(),
+    sb.from('daily_recommendations').select('*').eq('status','pending').order('created_at',{ascending:false}),
+    sb.from('daily_problems').select('*').lt('date',today).order('date',{ascending:false}).limit(14),
   ]);
+
+  // 收集所有 user_id 批量查用户名
+  const allUids=new Set();
+  if(daily?.created_by) allUids.add(daily.created_by);
+  (recs||[]).forEach(r=>r.recommended_by&&allUids.add(r.recommended_by));
+  (pastProblems||[]).forEach(p=>p.created_by&&allUids.add(p.created_by));
+  let usernameMap={};
+  if(allUids.size){
+    const{data:profiles}=await sb.from('profiles').select('id,username').in('id',[...allUids]);
+    (profiles||[]).forEach(p=>usernameMap[p.id]=p.username);
+  }
 
   let html='';
 
@@ -4784,7 +4795,7 @@ async function loadDaily(){
       html+='<span style="font-size:14px;color:var(--text)">'+escHtml(r.title)+'</span>';
       html+='</div>';
       if(r.reason)html+='<div style="font-size:12px;color:var(--text3);margin-top:4px">「'+escHtml(r.reason)+'」</div>';
-      html+='<div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono)">by @'+escHtml(r.profiles?.username||'?')+' · '+fmtDate(r.created_at)+'</div>';
+      html+='<div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono)">by @'+escHtml(usernameMap[r.recommended_by]||'?')+' · '+fmtDate(r.created_at)+'</div>';
       if(isCoach()){
         html+='<div style="display:flex;gap:6px;margin-top:8px">';
         html+='<button class="btn btn-primary btn-sm" onclick="approveRec('+r.id+',\''+escHtml(r.problem_id||'')+'\',\''+escHtml(r.title)+'\')">✓ 采用为今日题目</button>';
@@ -4818,7 +4829,7 @@ async function loadDaily(){
       if(luoguUrl)html+='<a href="'+luoguUrl+'" target="_blank" class="daily-past-link">'+escHtml(p.title)+'</a>';
       else html+=escHtml(p.title);
       html+='</span>';
-      html+='<span class="daily-history-by">'+(p.profiles?.username?'@'+escHtml(p.profiles.username):'-')+'</span>';
+      html+='<span class="daily-history-by">'+(p.created_by&&usernameMap[p.created_by]?'@'+escHtml(usernameMap[p.created_by]):'-')+'</span>';
       html+='<span class="daily-history-cnt"><span class="checkin-count-badge">'+cnt+'</span></span>';
       html+='</div>';
     });
