@@ -625,6 +625,16 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .reply-input-row textarea{flex:1;background:rgba(10,14,26,0.8);border:1px solid rgba(30,37,64,0.5);border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;resize:none;min-height:34px;font-family:inherit;}
 .reply-input-row textarea:focus{outline:none;border-color:rgba(108,142,245,0.4);}
 
+
+/* ── EMOJI PICKER ── */
+.emoji-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:4px 6px;border-radius:6px;color:var(--text3);transition:background 0.15s,color 0.15s;line-height:1;}
+.emoji-btn:hover{background:rgba(108,142,245,0.1);color:var(--text);}
+.emoji-picker-wrap{position:relative;display:inline-block;}
+.emoji-panel{position:absolute;bottom:110%;left:0;background:rgba(12,16,28,0.97);border:1px solid rgba(108,142,245,0.25);border-radius:10px;padding:8px;width:220px;display:none;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
+.emoji-panel.open{display:block;}
+.emoji-grid{display:flex;flex-wrap:wrap;gap:2px;}
+.emoji-grid span{width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;border-radius:6px;transition:background 0.1s;}
+.emoji-grid span:hover{background:rgba(108,142,245,0.15);}
 /* ── LECTURES ── */
 .lecture-item{display:flex;gap:20px;padding:18px 0;border-bottom:1px solid rgba(30,37,64,0.4);}
 .lecture-item:last-child{border-bottom:none;}
@@ -4082,9 +4092,17 @@ async function togglePostComments(postId,btn){
 
 async function renderPostComments(postId){
   const box=document.getElementById(`post-cmt-${postId}`);
-  const{data:comments}=await sb.from('post_comments')
-    .select('*,profiles(username,id),reply_to_profile:profiles!post_comments_reply_to_fkey(username)')
+  const{data:comments,error}=await sb.from('post_comments')
+    .select('*,profiles(username,id)')
     .eq('post_id',postId).order('created_at');
+  if(error){box.innerHTML='<div style="font-family:var(--mono);font-size:12px;color:var(--red);padding:8px">评论加载失败：请先在Supabase建post_comments表</div>';return;}
+  // 批量查 reply_to 用户名
+  const replyToIds=[...new Set((comments||[]).filter(c=>c.reply_to).map(c=>c.reply_to))];
+  const replyToMap={};
+  if(replyToIds.length){
+    const{data:rp}=await sb.from('profiles').select('id,username').in('id',replyToIds);
+    (rp||[]).forEach(p=>replyToMap[p.id]=p.username);
+  }
   // 更新计数
   const countEl=document.querySelector(`[data-post-id="${postId}"] .cmt-count`);
   if(countEl)countEl.textContent=comments?.length||0;
@@ -4110,7 +4128,7 @@ async function renderPostComments(postId){
         return `<div class="reply-bubble" id="cmt-${r.id}">
           <div class="reply-bubble-meta">
             <span class="comment-bubble-author" onclick="showProfile('${escHtml(r.profiles?.username||'')}')")>@${escHtml(r.profiles?.username||'?')}</span>
-            ${r.reply_to_profile?.username?`<span class="reply-to">→ @${escHtml(r.reply_to_profile.username)}</span>`:''}
+            ${replyToMap[r.reply_to]?`<span class="reply-to">→ @${escHtml(r.reply_to_profile.username)}</span>`:''}
             <span class="comment-bubble-date">${fmtDate(r.created_at)}</span>
             ${canDelR?`<button class="btn btn-danger btn-sm" style="margin-left:auto;padding:1px 7px;font-size:11px" onclick="deletePostComment(${r.id},${postId})">删除</button>`:''}
           </div>
@@ -4121,6 +4139,7 @@ async function renderPostComments(postId){
       <div id="reply-input-${c.id}" style="display:none">
         <div class="reply-input-row">
           <textarea placeholder="写回复…" rows="1" id="reply-ta-${c.id}"></textarea>
+          <button class="emoji-btn" onclick="event.stopPropagation();toggleEmojiPicker('reply-ta-${c.id}',this)" title="表情">😊</button>
           <button class="btn btn-primary btn-sm" onclick="submitReply(${c.id},${postId})">发送</button>
           <button class="btn btn-outline btn-sm" onclick="document.getElementById('reply-input-${c.id}').style.display='none'">取消</button>
         </div>
@@ -4130,11 +4149,12 @@ async function renderPostComments(postId){
   // 评论输入框
   html+=currentUser?`<div class="post-comment-input-row">
     <textarea placeholder="写评论…" rows="1" id="cmt-ta-${postId}"></textarea>
+    <button class="emoji-btn" onclick="event.stopPropagation();toggleEmojiPicker('cmt-ta-${postId}',this)" title="表情">😊</button>
     <button class="btn btn-primary btn-sm" onclick="submitPostComment(${postId})">发送</button>
   </div>`:`<div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:8px">登录后参与评论</div>`;
 
   box.innerHTML=html||(`<div style="font-family:var(--mono);font-size:12px;color:var(--text3);padding:4px 0">// 暂无评论</div>`+
-    (currentUser?`<div class="post-comment-input-row"><textarea placeholder="写评论…" rows="1" id="cmt-ta-${postId}"></textarea><button class="btn btn-primary btn-sm" onclick="submitPostComment(${postId})">发送</button></div>`:
+    (currentUser?`<div class="post-comment-input-row"><textarea placeholder="写评论…" rows="1" id="cmt-ta-${postId}"></textarea><button class="emoji-btn" onclick="event.stopPropagation();toggleEmojiPicker('cmt-ta-${postId}',this)" title="表情">😊</button><button class="btn btn-primary btn-sm" onclick="submitPostComment(${postId})">发送</button></div>`:
     `<div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:8px">登录后参与评论</div>`));
 }
 
@@ -4980,7 +5000,45 @@ function markAllRead(){
 }
 
 
-// ── Settings ────────────────────────────────────────────────
+// ── Emoji Picker ────────────────────────────────────────────
+const EMOJIS=['😀','😂','🥹','😊','😎','🤔','😅','😭','🥰','😍','🤩','😤','😡','😱','🤯','😴','🥳','🤣','👍','👎','👏','🙌','🔥','✨','💯','❤️','💙','💚','💛','💜','🎉','🎊','🚀','⭐','💡','📝','🏆','🎯','💪','🧠','👀','🙏','😈','👻','🤖','🐛','💀','🌈','⚡','🎮'];
+let emojiTarget=null;
+function initEmojiGrid(){
+  const grid=document.getElementById('emoji-grid');
+  if(!grid||grid.children.length)return;
+  grid.innerHTML=EMOJIS.map(e=>`<span onclick="insertEmoji('${e}')">${e}</span>`).join('');
+}
+function toggleEmojiPicker(targetId,anchorEl){
+  initEmojiGrid();
+  const panel=document.getElementById('emoji-panel');
+  if(emojiTarget===targetId&&panel.classList.contains('open')){
+    panel.classList.remove('open'); emojiTarget=null; return;
+  }
+  emojiTarget=targetId;
+  // position near anchor
+  const rect=anchorEl.getBoundingClientRect();
+  panel.style.position='fixed';
+  panel.style.left=Math.min(rect.left,window.innerWidth-230)+'px';
+  panel.style.bottom=(window.innerHeight-rect.top+6)+'px';
+  panel.style.top='auto';
+  document.body.appendChild(panel);
+  panel.classList.add('open');
+  setTimeout(()=>document.addEventListener('click',closeEmojiOutside),50);
+}
+function closeEmojiOutside(){
+  document.getElementById('emoji-panel').classList.remove('open');
+  emojiTarget=null;
+  document.removeEventListener('click',closeEmojiOutside);
+}
+function insertEmoji(emoji){
+  if(!emojiTarget)return;
+  const ta=document.getElementById(emojiTarget);
+  if(!ta)return;
+  const s=ta.selectionStart,e=ta.selectionEnd;
+  ta.value=ta.value.slice(0,s)+emoji+ta.value.slice(e);
+  ta.selectionStart=ta.selectionEnd=s+emoji.length;
+  ta.focus();
+}
 function switchSettingsTab(tab){
   document.querySelectorAll('#settings-modal .modal-tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='avatar'?0:1)));
   document.getElementById('settings-avatar-tab').style.display=tab==='avatar'?'block':'none';
@@ -6761,5 +6819,10 @@ async function showContestChart(contestId, preloaded, title){
   </div>
 </div>
 
+
+<!-- Global emoji panel (shared) -->
+<div class="emoji-panel" id="emoji-panel" onclick="event.stopPropagation()">
+  <div class="emoji-grid" id="emoji-grid"></div>
+</div>
 </body>
 </html>
