@@ -1449,6 +1449,150 @@ footer span{color:var(--accent2);}
 .chip-blue{background:rgba(108,142,245,0.08);border-color:rgba(108,142,245,0.18);color:var(--accent);}
 .chip-green{background:rgba(45,232,176,0.07);border-color:rgba(45,232,176,0.18);color:var(--accent2);}
 
+/* ── PRIVATE MESSAGES ── */
+.profile-dm-btn{
+  font-family:var(--mono);font-size:12px;padding:6px 14px;
+  border-radius:6px;border:1px solid rgba(45,232,176,0.2);
+  background:rgba(45,232,176,0.07);color:var(--accent2);
+  cursor:pointer;margin-top:8px;margin-left:8px;
+  display:inline-block;transition:all 0.2s;
+}
+.profile-dm-btn:hover{background:rgba(45,232,176,0.15);}
+
+#dm-panel{
+  position:fixed;top:60px;right:20px;
+  width:360px;max-height:560px;
+  background:rgba(8,12,24,0.97);
+  backdrop-filter:blur(24px);
+  border:1px solid rgba(108,142,245,0.15);
+  border-radius:14px;
+  box-shadow:0 16px 48px rgba(0,0,0,0.6);
+  z-index:300;display:none;
+  flex-direction:column;overflow:hidden;
+}
+#dm-panel.open{display:flex;animation:fadeIn 0.2s ease;}
+.dm-panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px 12px;
+  border-bottom:1px solid rgba(108,142,245,0.1);
+  font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);
+  flex-shrink:0;
+}
+.dm-close-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 2px;line-height:1;}
+.dm-close-btn:hover{color:var(--text);}
+
+/* 对话列表 */
+#dm-conv-list{overflow-y:auto;flex:1;}
+.dm-conv-item{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  transition:background 0.15s;
+}
+.dm-conv-item:hover{background:rgba(108,142,245,0.07);}
+.dm-conv-avatar{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--space);font-size:14px;font-weight:700;color:var(--bg);
+  overflow:hidden;
+}
+.dm-conv-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.dm-conv-info{flex:1;min-width:0;}
+.dm-conv-name{font-family:var(--mono);font-size:12px;color:var(--accent2);margin-bottom:2px;}
+.dm-conv-preview{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dm-conv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.dm-conv-time{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.dm-unread-dot{width:8px;height:8px;border-radius:50%;background:var(--accent2);}
+.dm-empty{padding:32px 16px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3);}
+
+/* 聊天界面 */
+.dm-chat-header{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border-bottom:1px solid rgba(108,142,245,0.1);
+  flex-shrink:0;
+}
+.dm-back-btn{
+  background:none;border:none;color:var(--accent);
+  font-family:var(--mono);font-size:12px;cursor:pointer;padding:0;
+}
+.dm-back-btn:hover{color:var(--accent2);}
+#dm-chat-name{font-family:var(--mono);font-size:13px;color:var(--text);}
+#dm-messages{
+  flex:1;overflow-y:auto;padding:14px 14px 8px;
+  display:flex;flex-direction:column;gap:8px;
+  min-height:200px;max-height:380px;
+}
+.dm-msg{
+  max-width:76%;padding:8px 12px;border-radius:12px;
+  font-size:13px;line-height:1.5;word-break:break-word;
+  position:relative;
+}
+.dm-msg.sent{
+  align-self:flex-end;
+  background:linear-gradient(135deg,rgba(108,142,245,0.3),rgba(45,232,176,0.2));
+  border:1px solid rgba(108,142,245,0.2);
+  border-bottom-right-radius:3px;
+  color:var(--text);
+}
+.dm-msg.recv{
+  align-self:flex-start;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+  border-bottom-left-radius:3px;
+  color:var(--text);
+}
+.dm-msg-time{
+  font-size:10px;color:var(--text3);font-family:var(--mono);
+  margin-top:3px;text-align:right;
+}
+.dm-msg.recv .dm-msg-time{text-align:left;}
+.dm-date-divider{
+  text-align:center;font-family:var(--mono);font-size:10px;
+  color:var(--text3);margin:4px 0;
+}
+.dm-input-wrap{
+  display:flex;gap:8px;padding:10px 12px;
+  border-top:1px solid rgba(108,142,245,0.1);
+  flex-shrink:0;
+}
+#dm-input{
+  flex:1;background:rgba(255,255,255,0.05);
+  border:1px solid rgba(108,142,245,0.15);
+  border-radius:8px;padding:8px 10px;
+  font-family:var(--mono);font-size:13px;color:var(--text);
+  outline:none;resize:none;line-height:1.5;
+  max-height:80px;transition:border-color 0.2s;
+}
+#dm-input:focus{border-color:rgba(108,142,245,0.4);}
+#dm-input::placeholder{color:var(--text3);}
+.dm-send-btn{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;border-radius:8px;padding:8px 14px;
+  font-family:var(--mono);font-size:12px;font-weight:600;
+  color:var(--bg);cursor:pointer;flex-shrink:0;
+  transition:opacity 0.2s;
+}
+.dm-send-btn:hover{opacity:0.85;}
+.dm-loading{padding:20px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3);}
+
+@media(max-width:480px){
+  #dm-panel{width:calc(100vw - 20px);right:10px;max-height:70vh;}
+}
+
+/* DM toast */
+.dm-toast{
+  position:fixed;bottom:24px;left:24px;z-index:9999;
+  background:rgba(8,12,24,0.97);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(45,232,176,0.25);
+  border-radius:12px;padding:12px 16px;
+  max-width:260px;cursor:pointer;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  transform:translateY(20px);opacity:0;
+  transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s;
+}
+.dm-toast.show{transform:translateY(0);opacity:1;}
+
 /* ── COPY PROBLEMS ── */
 .problems-row{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin:8px 0;}
 .copy-problems-btn{font-family:var(--mono);font-size:12px;padding:4px 10px;border-radius:5px;border:1px solid rgba(108,142,245,0.2);background:rgba(108,142,245,0.06);color:var(--text2);cursor:pointer;white-space:nowrap;transition:all 0.2s;flex-shrink:0;margin-top:2px;}
@@ -2843,6 +2987,13 @@ section:not(.active) {
       </svg>
     </div>
     <div style="display:flex;align-items:center;gap:6px">
+      <button class="notif-btn dm-nav-btn" id="dm-nav-btn" onclick="toggleDMPanel()" title="私信" style="display:none">
+        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
+          <rect x="1" y="2" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M1 4l7 5 7-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <div class="notif-badge" id="dm-badge"></div>
+      </button>
             <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()">
   <svg class="notif-bell-svg" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
     <!-- 像素铃铛：用rect堆砌 -->
@@ -2909,6 +3060,28 @@ section:not(.active) {
   </div>
 </nav>
 <div class="notif-panel" id="notif-panel"><div class="notif-header"><h3>通知</h3><button class="btn btn-outline btn-sm" onclick="markAllRead()">全部已读</button></div><div id="notif-list"><div class="notif-empty">// 暂无通知</div></div></div>
+
+<!-- DM PANEL -->
+<div id="dm-panel">
+  <div class="dm-panel-header">
+    <span id="dm-panel-title">私信</span>
+    <button class="dm-close-btn" onclick="closeDMPanel()">✕</button>
+  </div>
+  <!-- 对话列表 -->
+  <div id="dm-conv-list"></div>
+  <!-- 聊天界面 -->
+  <div id="dm-chat" style="display:none">
+    <div class="dm-chat-header">
+      <button class="dm-back-btn" onclick="showDMConvList()">← 返回</button>
+      <span id="dm-chat-name"></span>
+    </div>
+    <div id="dm-messages"></div>
+    <div class="dm-input-wrap">
+      <textarea id="dm-input" placeholder="输入消息…" rows="1" maxlength="2000" onkeydown="dmInputKey(event)" oninput="dmAutoResize(this)"></textarea>
+      <button class="dm-send-btn" onclick="sendDM()">发送</button>
+    </div>
+  </div>
+</div>
 <main class="main">
 
 <!-- HOME -->
@@ -3899,6 +4072,7 @@ async function loadSession(){
   loadHomeFeed();
   checkNotifDot(); initCheckinState();
   initRealtime();
+  initDM();
 }
 
 // onAuthStateChange 仅处理登录/登出事件，不与 loadSession 竞争
@@ -5752,6 +5926,7 @@ async function showProfile(username){
   if(profile.motto)html+='<div class="profile-motto">「'+escHtml(profile.motto)+'」</div>';
   if(profile.bio)html+='<div class="profile-bio">'+escHtml(profile.bio)+'</div>';
   if(isSelf)html+='<button class="profile-edit-btn" onclick="openModal(&apos;settings-modal&apos;);loadSettingsData()">编辑资料</button>';
+  if(!isSelf&&currentUser)html+='<button class="profile-dm-btn" onclick="openDMWith(&apos;'+escHtml(profile.id)+'&apos;,&apos;'+escHtml(username)+'&apos;)">💬 发私信</button>';
   html+='<div class="profile-stats">';
   html+='<div class="profile-stat"><div class="num">'+(notes?notes.length:0)+'</div><div class="lbl">题解</div></div>';
   html+='<div class="profile-stat"><div class="num">'+(posts?posts.length:0)+'</div><div class="lbl">随笔</div></div>';
@@ -7698,6 +7873,284 @@ async function deleteSyllabus(id){
 
 
 loadSession();
+
+// ══════════════════════════════════════════════════════
+// 私信系统 (DM)
+// ══════════════════════════════════════════════════════
+let _dmOpen = false;
+let _dmChatWith = null; // {id, username, avatar_url}
+let _dmRealtimeChannel = null;
+let _dmUnreadCount = 0;
+
+// 初始化：登录后调用
+async function initDM(){
+  const btn = document.getElementById('dm-nav-btn');
+  if(btn) btn.style.display = '';
+  await refreshDMUnread();
+  subscribeDMRealtime();
+}
+
+// 订阅实时新消息
+function subscribeDMRealtime(){
+  if(_dmRealtimeChannel) _dmRealtimeChannel.unsubscribe();
+  if(!currentUser) return;
+  _dmRealtimeChannel = sb.channel('dm-'+currentUser.id)
+    .on('postgres_changes',{
+      event:'INSERT', schema:'public', table:'messages',
+      filter:`to_id=eq.${currentUser.id}`
+    }, payload=>{
+      _dmUnreadCount++;
+      updateDMBadge();
+      // 如果聊天窗口正在和发消息的人对话，直接追加
+      if(_dmOpen && _dmChatWith && _dmChatWith.id === payload.new.from_id){
+        appendDMMessage(payload.new, false);
+        markDMRead(_dmChatWith.id);
+      } else {
+        showDMToast(payload.new);
+      }
+    })
+    .subscribe();
+}
+
+function updateDMBadge(){
+  const badge = document.getElementById('dm-badge');
+  if(!badge) return;
+  if(_dmUnreadCount > 0){
+    badge.textContent = _dmUnreadCount > 99 ? '99+' : _dmUnreadCount;
+    badge.classList.add('show');
+  } else {
+    badge.classList.remove('show');
+  }
+}
+
+async function refreshDMUnread(){
+  if(!currentUser) return;
+  const{data}=await sb.from('messages').select('id',{count:'exact',head:true})
+    .eq('to_id',currentUser.id).eq('read',false);
+  _dmUnreadCount = data?.length ?? 0;
+  // count query returns count differently
+  const{count}=await sb.from('messages').select('*',{count:'exact',head:true})
+    .eq('to_id',currentUser.id).eq('read',false);
+  _dmUnreadCount = count || 0;
+  updateDMBadge();
+}
+
+function showDMToast(msg){
+  // 显示新消息小 toast（左下角）
+  const t = document.createElement('div');
+  t.className = 'dm-toast';
+  t.innerHTML = `<span style="color:var(--accent2);font-family:var(--mono);font-size:12px">💬 新私信</span><div style="font-size:12px;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px">${escHtml((msg.content||'').slice(0,40))}</div>`;
+  t.onclick = ()=>{ t.remove(); openDMWith(msg.from_id); };
+  document.body.appendChild(t);
+  setTimeout(()=>t.classList.add('show'),10);
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); },4000);
+}
+
+// 切换 DM 面板
+function toggleDMPanel(){
+  const panel = document.getElementById('dm-panel');
+  _dmOpen = !_dmOpen;
+  if(_dmOpen){
+    panel.classList.add('open');
+    // 关闭通知面板
+    document.getElementById('notif-panel')?.classList.remove('open');
+    showDMConvList();
+  } else {
+    panel.classList.remove('open');
+  }
+}
+
+function closeDMPanel(){
+  _dmOpen = false;
+  document.getElementById('dm-panel').classList.remove('open');
+}
+
+// 对话列表
+async function showDMConvList(){
+  document.getElementById('dm-conv-list').style.display = '';
+  document.getElementById('dm-chat').style.display = 'none';
+  document.getElementById('dm-panel-title').textContent = '私信';
+  _dmChatWith = null;
+
+  const convList = document.getElementById('dm-conv-list');
+  convList.innerHTML = '<div class="dm-loading">加载中…</div>';
+
+  // 拿所有和自己相关的消息，按对方分组
+  const{data:msgs}=await sb.from('messages')
+    .select('*')
+    .or(`from_id.eq.${currentUser.id},to_id.eq.${currentUser.id}`)
+    .order('created_at',{ascending:false});
+
+  if(!msgs||!msgs.length){
+    convList.innerHTML='<div class="dm-empty">// 暂无私信<br><span style="opacity:0.5">去别人的主页发一条吧</span></div>';
+    return;
+  }
+
+  // 提取对方 ID 列表（去重）
+  const peerIds=[...new Set(msgs.map(m=>m.from_id===currentUser.id?m.to_id:m.from_id))];
+  const{data:peers}=await sb.from('profiles').select('id,username,avatar_url').in('id',peerIds);
+  const peerMap={};(peers||[]).forEach(p=>peerMap[p.id]=p);
+
+  // 每个对方的最新一条消息
+  const latest={};
+  msgs.forEach(m=>{
+    const pid=m.from_id===currentUser.id?m.to_id:m.from_id;
+    if(!latest[pid]) latest[pid]=m;
+  });
+
+  // 未读数
+  const unread={};
+  msgs.filter(m=>m.to_id===currentUser.id&&!m.read).forEach(m=>{
+    unread[m.from_id]=(unread[m.from_id]||0)+1;
+  });
+
+  convList.innerHTML='';
+  peerIds.forEach(pid=>{
+    const peer=peerMap[pid];
+    if(!peer) return;
+    const msg=latest[pid];
+    const unreadCnt=unread[pid]||0;
+    const item=document.createElement('div');
+    item.className='dm-conv-item';
+    const avatarBg=avatarGradient(peer.username);
+    const avatarInner=peer.avatar_url
+      ?`<img src="${escHtml(peer.avatar_url)}">`
+      :`<span>${peer.username.charAt(0).toUpperCase()}</span>`;
+    item.innerHTML=`
+      <div class="dm-conv-avatar" style="background:${avatarBg}">${avatarInner}</div>
+      <div class="dm-conv-info">
+        <div class="dm-conv-name">@${escHtml(peer.username)}</div>
+        <div class="dm-conv-preview">${msg.from_id===currentUser.id?'你：':''}${escHtml((msg.content||'').slice(0,40))}</div>
+      </div>
+      <div class="dm-conv-meta">
+        <div class="dm-conv-time">${fmtDate(msg.created_at)}</div>
+        ${unreadCnt?`<div class="dm-unread-dot"></div>`:''}
+      </div>`;
+    item.onclick=()=>openDMChat(peer);
+    convList.appendChild(item);
+  });
+}
+
+// 从外部打开私信（个人主页按钮）
+async function openDMWith(userId, username){
+  // 确保面板打开
+  _dmOpen = true;
+  document.getElementById('dm-panel').classList.add('open');
+  document.getElementById('notif-panel')?.classList.remove('open');
+
+  // 如果只传了 userId，查 profile
+  let peer;
+  if(username){
+    const{data}=await sb.from('profiles').select('id,username,avatar_url').eq('id',userId).single();
+    peer=data;
+  } else {
+    const{data}=await sb.from('profiles').select('id,username,avatar_url').eq('id',userId).single();
+    peer=data;
+  }
+  if(!peer) return;
+  openDMChat(peer);
+}
+
+// 打开具体聊天
+async function openDMChat(peer){
+  _dmChatWith = peer;
+  document.getElementById('dm-conv-list').style.display = 'none';
+  document.getElementById('dm-chat').style.display = 'flex';
+  document.getElementById('dm-chat').style.flexDirection = 'column';
+  document.getElementById('dm-panel-title').textContent = '私信';
+  document.getElementById('dm-chat-name').textContent = '@'+peer.username;
+
+  const msgsEl = document.getElementById('dm-messages');
+  msgsEl.innerHTML = '<div class="dm-loading">加载中…</div>';
+
+  // 拉历史消息
+  const{data:msgs}=await sb.from('messages')
+    .select('*')
+    .or(`and(from_id.eq.${currentUser.id},to_id.eq.${peer.id}),and(from_id.eq.${peer.id},to_id.eq.${currentUser.id})`)
+    .order('created_at',{ascending:true});
+
+  msgsEl.innerHTML='';
+  if(!msgs||!msgs.length){
+    msgsEl.innerHTML='<div class="dm-empty">// 发条消息打个招呼吧</div>';
+  } else {
+    let lastDate='';
+    msgs.forEach(m=>{
+      const d=m.created_at.slice(0,10);
+      if(d!==lastDate){
+        const div=document.createElement('div');
+        div.className='dm-date-divider';
+        div.textContent=d;
+        msgsEl.appendChild(div);
+        lastDate=d;
+      }
+      appendDMMessage(m, m.from_id===currentUser.id);
+    });
+  }
+  msgsEl.scrollTop=msgsEl.scrollHeight;
+
+  // 标已读
+  await markDMRead(peer.id);
+
+  // 聚焦输入框
+  setTimeout(()=>document.getElementById('dm-input')?.focus(),100);
+}
+
+function appendDMMessage(msg, isSent){
+  const msgsEl=document.getElementById('dm-messages');
+  const empty=msgsEl.querySelector('.dm-empty');
+  if(empty) empty.remove();
+
+  const wrap=document.createElement('div');
+  const time=new Date(msg.created_at).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+  wrap.className='dm-msg '+(isSent?'sent':'recv');
+  wrap.innerHTML=`<div>${escHtml(msg.content)}</div><div class="dm-msg-time">${time}</div>`;
+  msgsEl.appendChild(wrap);
+  msgsEl.scrollTop=msgsEl.scrollHeight;
+}
+
+async function sendDM(){
+  if(!_dmChatWith||!currentUser) return;
+  const input=document.getElementById('dm-input');
+  const content=input.value.trim();
+  if(!content) return;
+
+  input.value='';
+  dmAutoResize(input);
+
+  const{data,error}=await sb.from('messages').insert({
+    from_id:currentUser.id,
+    to_id:_dmChatWith.id,
+    content
+  }).select().single();
+
+  if(error){showToast('发送失败: '+error.message,'error');input.value=content;return;}
+  appendDMMessage(data, true);
+}
+
+function dmInputKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendDM();}
+}
+function dmAutoResize(ta){
+  ta.style.height='auto';
+  ta.style.height=Math.min(ta.scrollHeight,80)+'px';
+}
+
+async function markDMRead(fromId){
+  if(!currentUser) return;
+  await sb.from('messages').update({read:true})
+    .eq('to_id',currentUser.id).eq('from_id',fromId).eq('read',false);
+  // 刷新未读
+  await refreshDMUnread();
+}
+
+// 点外部关闭
+document.addEventListener('click',e=>{
+  const panel=document.getElementById('dm-panel');
+  const btn=document.getElementById('dm-nav-btn');
+  if(_dmOpen&&panel&&!panel.contains(e.target)&&!btn?.contains(e.target)){
+    closeDMPanel();
+  }
+});
 
 // ── Nav scroll shrink ────────────────────────────────────
 window.addEventListener('scroll',()=>{
