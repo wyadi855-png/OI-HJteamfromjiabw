@@ -6026,7 +6026,7 @@ async function submitSyllabus(){
   if (syllabusEditId){
     ({ error } = await sb.from('syllabus').update(payload).eq('id', syllabusEditId));
   } else {
-    ({ error } = await sb.from('syllabus').insert(payload));
+    ({ error } = await sb.from('syllabus').upsert(payload, {onConflict:'class_id,week'}));
   }
 
   btn.disabled = false; btn.textContent = '保存';
