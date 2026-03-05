@@ -4805,6 +4805,7 @@ async function showProfile(username){
   html+='<div class="profile-stat"><div class="num">'+fmtDate(profile.created_at).slice(0,7)+'</div><div class="lbl">加入</div></div>';
   html+='</div></div></div>';
   // Heatmap placeholder
+  html+='<div class="profile-section"><div class="profile-section-title">能力雷达</div><canvas id="radar-'+escHtml(username)+'" width="340" height="280" style="display:block;margin:0 auto"></canvas></div>';
   html+='<div class="profile-section"><div class="profile-section-title">活跃度</div><div id="heatmap-'+escHtml(username)+'">加载中…</div></div>';
   // Notes
   if(notes&&notes.length){
@@ -4836,6 +4837,7 @@ async function showProfile(username){
   }
   el.innerHTML=html;
   buildHeatmap(profile.id).then(h=>{const hel=document.getElementById('heatmap-'+username);if(hel)hel.innerHTML=h;});
+  buildRadar(notes||[], username);
   loadProfileSocial(profile,username);
 }
 
@@ -5157,6 +5159,134 @@ function markAllRead(){
   loadNotifs();
 }
 
+
+// ── Ability Radar ─────────────────────────────────────────
+function buildRadar(notes, username){
+  const canvas = document.getElementById('radar-'+username);
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  // 知识点 → 维度映射
+  const DIMS = [
+    { label:'数据结构', keys:['树状数组','线段树','并查集','trie','堆','栈','队列','链表','哈希','平衡树','splay','lct','主席树','莫队','分块','ST表','稀疏表','单调栈','单调队列'] },
+    { label:'图论',     keys:['dijkstra','spfa','bellman','floyd','最短路','bfs','dfs','拓扑','tarjan','lca','最小生成树','prim','kruskal','网络流','二分图','强连通','缩点','欧拉路'] },
+    { label:'动态规划', keys:['dp','动态规划','背包','最长公共子序列','lcs','lis','区间dp','树形dp','数位dp','状压dp','记忆化','递推'] },
+    { label:'数学',     keys:['数学','数论','质数','筛法','欧拉','费马','模逆元','中国剩余','组合数','容斥','快速幂','矩阵快速幂','莫比乌斯','gcd','lcm','exgcd','fft','ntt','多项式'] },
+    { label:'字符串',   keys:['kmp','字符串','后缀数组','sa','sam','后缀自动机','ac自动机','trie','manacher','z算法','哈希','回文'] },
+    { label:'搜索',     keys:['搜索','回溯','剪枝','bfs','dfs','双向bfs','迭代加深','a*','启发式','二分','三分','枚举'] },
+    { label:'模拟',     keys:['模拟','暴力','构造','实现','枚举','brute'] },
+    { label:'常规算法', keys:['二分查找','二分答案','前缀和','差分','枚举','滑动窗口','双指针','离散化','排序','归并'] },
+    { label:'贪心',     keys:['贪心','greedy','交换论证','区间贪心','哈夫曼'] },
+  ];
+
+  // 统计每个维度的题目数
+  const scores = DIMS.map(dim => {
+    let cnt = 0;
+    notes.forEach(n => {
+      const t = (n.topic||'').toLowerCase();
+      if(dim.keys.some(k => t.includes(k.toLowerCase()))) cnt++;
+    });
+    return cnt;
+  });
+
+  // 归一化：最多不超过10分，至少显示一点底色
+  const maxScore = Math.max(...scores, 1);
+  const norm = scores.map(s => Math.min(s / Math.max(maxScore, 3), 1));
+
+  // ── 绘制 ──
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2 + 10;
+  const R = Math.min(W, H) * 0.36;
+  const N = DIMS.length;
+  ctx.clearRect(0,0,W,H);
+
+  // 背景网格（5层）
+  for(let layer=1; layer<=5; layer++){
+    const r = R * layer/5;
+    ctx.beginPath();
+    for(let i=0;i<N;i++){
+      const a = Math.PI*2*i/N - Math.PI/2;
+      const x = cx + r*Math.cos(a), y = cy + r*Math.sin(a);
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = layer===5 ? 'rgba(108,142,245,0.25)' : 'rgba(108,142,245,0.1)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    if(layer===5){
+      ctx.fillStyle='rgba(108,142,245,0.03)';
+      ctx.fill();
+    }
+  }
+
+  // 轴线
+  for(let i=0;i<N;i++){
+    const a = Math.PI*2*i/N - Math.PI/2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + R*Math.cos(a), cy + R*Math.sin(a));
+    ctx.strokeStyle='rgba(108,142,245,0.15)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+  }
+
+  // 数据区域
+  ctx.beginPath();
+  norm.forEach((v,i)=>{
+    const a = Math.PI*2*i/N - Math.PI/2;
+    const r = R*(0.08 + v*0.92);
+    const x = cx + r*Math.cos(a), y = cy + r*Math.sin(a);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  ctx.fillStyle='rgba(45,232,176,0.12)';
+  ctx.fill();
+  ctx.strokeStyle='rgba(45,232,176,0.7)';
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  // 数据点
+  norm.forEach((v,i)=>{
+    const a = Math.PI*2*i/N - Math.PI/2;
+    const r = R*(0.08 + v*0.92);
+    const x = cx + r*Math.cos(a), y = cy + r*Math.sin(a);
+    ctx.beginPath();
+    ctx.arc(x,y,3.5,0,Math.PI*2);
+    ctx.fillStyle= v > 0.6 ? '#2de8b0' : v > 0.3 ? '#6c8ef5' : 'rgba(108,142,245,0.5)';
+    ctx.fill();
+  });
+
+  // 标签
+  ctx.font = '12px monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  DIMS.forEach((dim,i)=>{
+    const a = Math.PI*2*i/N - Math.PI/2;
+    const labelR = R + 26;
+    const x = cx + labelR*Math.cos(a);
+    const y = cy + labelR*Math.sin(a);
+    const s = scores[i];
+    // 强项高亮
+    ctx.fillStyle = s >= 3 ? '#2de8b0' : s >= 1 ? 'rgba(180,195,255,0.8)' : 'rgba(120,130,160,0.5)';
+    ctx.fillText(dim.label, x, y);
+    // 题目数
+    ctx.font='10px monospace';
+    ctx.fillStyle='rgba(120,130,160,0.6)';
+    ctx.fillText('×'+s, x, y+14);
+    ctx.font='12px monospace';
+  });
+
+  // 中心标注
+  const total = scores.reduce((a,b)=>a+b,0);
+  ctx.font='bold 18px monospace';
+  ctx.fillStyle='rgba(45,232,176,0.9)';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText(total, cx, cy-6);
+  ctx.font='10px monospace';
+  ctx.fillStyle='rgba(120,130,160,0.6)';
+  ctx.fillText('题解总数', cx, cy+10);
+}
 
 // ── Post Likes (orz) ─────────────────────────────────────
 async function loadPostLikeCount(postId){
