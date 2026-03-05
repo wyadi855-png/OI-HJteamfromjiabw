@@ -712,8 +712,10 @@ textarea{resize:vertical;min-height:100px;line-height:1.6;}
 
 /* ── NOTIF ── */
 #notif-btn{position:relative;}
-.notif-dot{width:7px;height:7px;background:var(--red);border-radius:50%;position:absolute;top:4px;right:4px;display:none;animation:pulse 2s infinite;}
-.notif-dot.show{display:block;}
+.notif-bell-svg{width:16px;height:16px;display:block;color:var(--text2);}
+.notif-btn:hover .notif-bell-svg{color:var(--accent2);}
+.notif-badge{min-width:16px;height:16px;background:var(--red);border-radius:3px;position:absolute;top:-5px;right:-6px;display:none;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700;color:#fff;padding:0 3px;line-height:16px;text-align:center;image-rendering:pixelated;}
+.notif-badge.show{display:flex;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 #notif-panel{position:fixed;top:60px;right:20px;width:360px;background:rgba(10,14,26,0.97);backdrop-filter:blur(24px);border:1px solid rgba(108,142,245,0.15);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,0.5);z-index:300;display:none;overflow:hidden;}
 #notif-panel.open{display:block;animation:fadeIn 0.2s ease;}
@@ -873,7 +875,7 @@ footer span{color:var(--accent2);}
 
   /* Misc */
   #notif-panel{width:calc(100vw - 24px);right:12px;top:54px;}
-  .notif-dot{top:3px;right:3px;}
+  .notif-badge{top:-4px;right:-5px;}
   .lb-tabs,.lb-tab{font-size:12px;}
   .form-row{flex-direction:column;gap:0;}
   .lecture-item{flex-direction:column;gap:8px;}
@@ -2173,7 +2175,32 @@ section:not(.active) {
       </svg>
     </div>
     <div style="display:flex;align-items:center;gap:6px">
-            <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()"><span>🔔</span><div class="notif-dot" id="notif-dot"></div></button>
+            <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()">
+  <svg class="notif-bell-svg" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <!-- 像素铃铛：用rect堆砌 -->
+    <!-- 顶部小圆 -->
+    <rect x="7" y="0" width="2" height="1" fill="currentColor"/>
+    <!-- 钟帽 -->
+    <rect x="6" y="1" width="4" height="1" fill="currentColor"/>
+    <!-- 左肩 -->
+    <rect x="4" y="2" width="2" height="1" fill="currentColor"/>
+    <rect x="10" y="2" width="2" height="1" fill="currentColor"/>
+    <!-- 钟身左右 -->
+    <rect x="3" y="3" width="1" height="1" fill="currentColor"/>
+    <rect x="12" y="3" width="1" height="1" fill="currentColor"/>
+    <rect x="3" y="4" width="1" height="4" fill="currentColor"/>
+    <rect x="12" y="4" width="1" height="4" fill="currentColor"/>
+    <!-- 钟身内部 -->
+    <rect x="4" y="3" width="8" height="5" fill="currentColor"/>
+    <!-- 底部展开 -->
+    <rect x="2" y="8" width="12" height="1" fill="currentColor"/>
+    <rect x="3" y="9" width="10" height="1" fill="currentColor"/>
+    <!-- 铃舌 -->
+    <rect x="6" y="10" width="4" height="1" fill="currentColor"/>
+    <rect x="7" y="11" width="2" height="1" fill="currentColor"/>
+  </svg>
+  <div class="notif-badge" id="notif-dot"></div>
+</button>
       <div id="nav-auth-area"><button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button></div>
     </div>
   </div>
@@ -4861,25 +4888,94 @@ function closeNotifOutside(e){
 async function loadNotifs(){
   if(!currentUser)return;
   const list=document.getElementById('notif-list');
+  list.innerHTML='<div class="notif-empty">// 加载中…</div>';
+
+  // 1. 题解评论通知
   const{data:myNotes}=await sb.from('notes').select('id,title').eq('author_id',currentUser.id);
-  if(!myNotes||!myNotes.length){list.innerHTML='<div class="notif-empty">// 暂无通知</div>';return;}
-  const noteMap={};myNotes.forEach(n=>noteMap[n.id]=n.title);
-  const{data:comments}=await sb.from('comments').select('id,note_id,content,created_at,profiles(username)').in('note_id',myNotes.map(n=>n.id)).neq('author_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
-  notifData=comments||[];
-  const unread=notifData.filter(c=>!readIds.has(c.id));
-  document.getElementById('notif-dot').classList.toggle('show',unread.length>0);
-  if(!notifData.length){list.innerHTML='<div class="notif-empty">// 暂无通知</div>';return;}
-  list.innerHTML=notifData.map(c=>'<div class="notif-item '+(readIds.has(c.id)?'':'unread')+'" onclick="notifClick('+c.note_id+','+c.id+')">'+'<div class="notif-text"><strong>@'+escHtml(c.profiles?.username||'匿名')+'</strong> 评论了你的题解「'+escHtml(noteMap[c.note_id]||'')+'」：'+escHtml(c.content.slice(0,40))+'…</div>'+'<div class="notif-time">'+fmtDate(c.created_at)+'</div></div>').join('');
+  const noteMap={};(myNotes||[]).forEach(n=>noteMap[n.id]=n.title);
+  const noteIds=(myNotes||[]).map(n=>n.id);
+  let noteComments=[];
+  if(noteIds.length){
+    const{data}=await sb.from('comments').select('id,note_id,content,created_at,profiles(username)')
+      .in('note_id',noteIds).neq('author_id',currentUser.id).order('created_at',{ascending:false}).limit(30);
+    noteComments=data||[];
+  }
+
+  // 2. 随笔评论通知（别人评论了我的随笔）
+  const{data:myPosts}=await sb.from('posts').select('id,content').eq('author_id',currentUser.id);
+  const postMap={};(myPosts||[]).forEach(p=>postMap[p.id]=p.content?.slice(0,20)||'随笔');
+  const postIds=(myPosts||[]).map(p=>p.id);
+  let postComments=[];
+  if(postIds.length){
+    const{data}=await sb.from('post_comments').select('id,post_id,content,created_at,profiles(username)')
+      .in('post_id',postIds).neq('author_id',currentUser.id).order('created_at',{ascending:false}).limit(30);
+    postComments=data||[];
+  }
+
+  // 3. 随笔回复通知（别人回复了我的评论）
+  const{data:myPostCmts}=await sb.from('post_comments').select('id').eq('author_id',currentUser.id);
+  const myPostCmtIds=(myPostCmts||[]).map(c=>c.id);
+  let postReplies=[];
+  if(myPostCmtIds.length){
+    const{data}=await sb.from('post_comments').select('id,post_id,content,created_at,profiles(username)')
+      .in('parent_id',myPostCmtIds).neq('author_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
+    postReplies=data||[];
+  }
+
+  // 合并、去重、排序
+  const all=[
+    ...noteComments.map(c=>({...c,_type:'note'})),
+    ...postComments.map(c=>({...c,_type:'post'})),
+    ...postReplies.map(c=>({...c,_type:'reply'})),
+  ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
+   .filter((c,i,arr)=>arr.findIndex(x=>x.id===c.id&&x._type===c._type)===i)
+   .slice(0,40);
+
+  notifData=all;
+  const unreadCount=all.filter(c=>!readIds.has(c._type+':'+c.id)).length;
+  updateNotifBadge(unreadCount);
+
+  if(!all.length){list.innerHTML='<div class="notif-empty">// 暂无通知</div>';return;}
+
+  list.innerHTML=all.map(c=>{
+    const key=c._type+':'+c.id;
+    const isRead=readIds.has(key);
+    let text='';
+    if(c._type==='note')
+      text=`<strong>@${escHtml(c.profiles?.username||'匿名')}</strong> 评论了你的题解「${escHtml(noteMap[c.note_id]||'')}」：${escHtml((c.content||'').slice(0,40))}…`;
+    else if(c._type==='post')
+      text=`<strong>@${escHtml(c.profiles?.username||'匿名')}</strong> 评论了你的随笔「${escHtml(postMap[c.post_id]||'')}…」：${escHtml((c.content||'').slice(0,40))}…`;
+    else
+      text=`<strong>@${escHtml(c.profiles?.username||'匿名')}</strong> 回复了你在随笔中的评论：${escHtml((c.content||'').slice(0,40))}…`;
+    return `<div class="notif-item ${isRead?'':'unread'}" onclick="notifClick('${c._type}',${c.note_id||c.post_id||0},${c.id},'${c._type}:${c.id}')">
+      <div class="notif-text">${text}</div>
+      <div class="notif-time">${fmtDate(c.created_at)}</div>
+    </div>`;
+  }).join('');
 }
-function notifClick(noteId,commentId){
-  readIds.add(commentId);localStorage.setItem('readNotifs',JSON.stringify([...readIds]));
-  document.getElementById('notif-dot').classList.remove('show');
-  toggleNotifPanel();show('notes');setTimeout(()=>showNote(noteId),300);
+
+function updateNotifBadge(count){
+  const badge=document.getElementById('notif-dot');
+  if(!badge)return;
+  if(count>0){
+    badge.textContent=count>99?'99+':count;
+    badge.classList.add('show');
+  } else {
+    badge.classList.remove('show');
+  }
+}
+function notifClick(type,targetId,commentId,key){
+  readIds.add(key);localStorage.setItem('readNotifs',JSON.stringify([...readIds]));
+  const unread=notifData.filter(c=>!readIds.has(c._type+':'+c.id)).length;
+  updateNotifBadge(unread);
+  toggleNotifPanel();
+  if(type==='note'){show('notes');setTimeout(()=>showNote(targetId),300);}
+  else{show('emotions');}
 }
 function markAllRead(){
-  notifData.forEach(c=>readIds.add(c.id));
+  notifData.forEach(c=>readIds.add(c._type+':'+c.id));
   localStorage.setItem('readNotifs',JSON.stringify([...readIds]));
-  document.getElementById('notif-dot').classList.remove('show');
+  updateNotifBadge(0);
   loadNotifs();
 }
 
@@ -6201,11 +6297,26 @@ function openEditPost(id,postContent){
 // ── checkNotifDot ──────────────────────────────────────────
 async function checkNotifDot(){
   if(!currentUser)return;
+  let count=0;
+  // 题解评论
   const{data:myNotes}=await sb.from('notes').select('id').eq('author_id',currentUser.id);
-  if(!myNotes||!myNotes.length)return;
-  const{data:comments}=await sb.from('comments').select('id').in('note_id',myNotes.map(n=>n.id)).neq('author_id',currentUser.id);
-  const hasUnread=(comments||[]).some(c=>!readIds.has(c.id));
-  document.getElementById('notif-dot').classList.toggle('show',hasUnread);
+  if(myNotes&&myNotes.length){
+    const{data:nc}=await sb.from('comments').select('id').in('note_id',myNotes.map(n=>n.id)).neq('author_id',currentUser.id);
+    count+=(nc||[]).filter(c=>!readIds.has('note:'+c.id)).length;
+  }
+  // 随笔评论
+  const{data:myPosts}=await sb.from('posts').select('id').eq('author_id',currentUser.id);
+  if(myPosts&&myPosts.length){
+    const{data:pc}=await sb.from('post_comments').select('id').in('post_id',myPosts.map(p=>p.id)).neq('author_id',currentUser.id);
+    count+=(pc||[]).filter(c=>!readIds.has('post:'+c.id)).length;
+  }
+  // 随笔回复
+  const{data:myCmts}=await sb.from('post_comments').select('id').eq('author_id',currentUser.id);
+  if(myCmts&&myCmts.length){
+    const{data:rc}=await sb.from('post_comments').select('id').in('parent_id',myCmts.map(c=>c.id)).neq('author_id',currentUser.id);
+    count+=(rc||[]).filter(c=>!readIds.has('reply:'+c.id)).length;
+  }
+  updateNotifBadge(count);
 }
 
 
