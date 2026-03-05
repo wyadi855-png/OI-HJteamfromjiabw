@@ -921,6 +921,252 @@ mark.search-hl{
 #bg-canvas{opacity:0.55;}
 
 .hero{padding:80px 0 56px;position:relative;}
+
+/* ══════════════════════════════════════════════
+   QUALITY LAYER — Grain · Depth · Glow · Glass
+   ══════════════════════════════════════════════ */
+
+/* 1. Deep space background mesh — replace flat black */
+body {
+  background:
+    radial-gradient(ellipse 90% 55% at 15% 8%,  rgba(108,142,245,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 45% at 85% 85%, rgba(45,232,176,0.05)  0%, transparent 50%),
+    radial-gradient(ellipse 55% 65% at 55% 45%, rgba(200,114,234,0.03) 0%, transparent 60%),
+    #06080f;
+}
+
+/* 2. Subtle film grain across whole page */
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  pointer-events:none; z-index:9998;
+  opacity:0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+  mix-blend-mode:screen;
+  animation: grainShift 0.8s steps(1) infinite;
+}
+@keyframes grainShift {
+  0%   { background-position:   0px   0px; }
+  25%  { background-position: -40px  20px; }
+  50%  { background-position:  30px -15px; }
+  75%  { background-position: -20px  35px; }
+  100% { background-position:  10px -25px; }
+}
+
+/* 3. Cards — true layered glass */
+.bento-card,
+.blog-card, .contest-card, .lecture-item,
+.ann-card, .member-card, .lb-row,
+.daily-card, .daily-past-item, .daily-rec-item,
+.emotion-post, .archive-table-wrap {
+  background:
+    linear-gradient(145deg,
+      rgba(255,255,255,0.045) 0%,
+      rgba(255,255,255,0.010) 40%,
+      rgba(255,255,255,0.022) 100%),
+    rgba(12,16,28,0.75);
+  border: 1px solid rgba(108,142,245,0.16);
+  box-shadow:
+    inset 0  1px 0   rgba(255,255,255,0.07),
+    inset 0  0   1px rgba(255,255,255,0.03),
+          0  2px 4px  rgba(0,0,0,0.35),
+          0  8px 24px rgba(0,0,0,0.40),
+          0 24px 48px rgba(0,0,0,0.30);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.22s;
+  position: relative; overflow: hidden;
+}
+
+/* shimmer sweep on hover */
+.bento-card::after,
+.blog-card::after,
+.member-card::after {
+  content:'';
+  position:absolute; top:0; left:-110%; width:55%; height:100%;
+  background: linear-gradient(
+    108deg,
+    transparent 35%,
+    rgba(255,255,255,0.055) 50%,
+    transparent 65%
+  );
+  transition: left 0.65s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.bento-card:hover::after,
+.blog-card:hover::after,
+.member-card:hover::after { left: 150%; }
+
+.bento-card:hover,
+.blog-card:hover { 
+  border-color: rgba(108,142,245,0.30);
+  box-shadow:
+    inset 0  1px 0   rgba(255,255,255,0.09),
+          0  4px 8px  rgba(0,0,0,0.4),
+          0 12px 40px rgba(0,0,0,0.5),
+          0  0  32px  rgba(108,142,245,0.10);
+  transform: translateY(-2px);
+}
+.member-card:hover {
+  border-color: rgba(108,142,245,0.28);
+  transform: translateY(-3px) scale(1.015);
+  box-shadow:
+    inset 0  1px 0  rgba(255,255,255,0.09),
+          0 12px 36px rgba(0,0,0,0.5),
+          0  0  24px  rgba(108,142,245,0.12);
+}
+
+/* top edge glow line */
+.bento-card::before,
+.daily-card::before {
+  content:''; position:absolute;
+  top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(108,142,245,0.30) 30%,
+    rgba(45,232,176,0.22)  70%,
+    transparent 100%);
+  z-index: 2;
+}
+
+/* 4. Hero title depth */
+.hero h1 {
+  text-shadow:
+    0 0  60px rgba(108,142,245,0.22),
+    0 0 120px rgba(45,232,176,0.10),
+    0  2px 4px rgba(0,0,0,0.80);
+}
+#typewriter-text {
+  background: linear-gradient(135deg, #2de8b0 0%, #6c8ef5 55%, #c792ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 18px rgba(45,232,176,0.40));
+}
+.typewriter-cursor {
+  color: var(--accent2);
+  text-shadow: 0 0 10px rgba(45,232,176,0.7);
+}
+
+/* 5. Nav — deeper frost + glow border */
+nav {
+  background: rgba(6,8,15,0.65);
+  border-bottom: 1px solid rgba(108,142,245,0.10);
+  box-shadow:
+    0  1px 0   rgba(108,142,245,0.06),
+    0  8px 32px rgba(0,0,0,0.45),
+    0  0  80px  rgba(0,0,0,0.25);
+}
+.nav-links a.active {
+  color: var(--accent2) !important;
+  text-shadow: 0 0 14px rgba(45,232,176,0.45);
+}
+
+/* 6. Buttons — tactile, lit from top */
+.btn-primary {
+  background: linear-gradient(160deg, #7da0fc 0%, #5b7ef0 45%, #4568d8 100%);
+  box-shadow:
+    inset 0  1px 0 rgba(255,255,255,0.20),
+    inset 0 -1px 0 rgba(0,0,0,0.25),
+          0  4px 16px rgba(108,142,245,0.40),
+          0  1px 3px  rgba(0,0,0,0.50);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  transition: all 0.18s ease;
+}
+.btn-primary:hover {
+  background: linear-gradient(160deg, #90b0ff 0%, #6b8ef5 45%, #5578e8 100%);
+  box-shadow:
+    inset 0  1px 0 rgba(255,255,255,0.25),
+    inset 0 -1px 0 rgba(0,0,0,0.20),
+          0  6px 24px rgba(108,142,245,0.55),
+          0  2px 6px  rgba(0,0,0,0.40);
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(0px);
+  box-shadow: 0 2px 8px rgba(108,142,245,0.30);
+}
+
+/* 7. Modals — premium glass */
+.modal {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%),
+    rgba(10,14,24,0.93);
+  box-shadow:
+    inset 0  2px 0 rgba(255,255,255,0.07),
+    inset 0  0  1px rgba(255,255,255,0.04),
+          0 48px 96px rgba(0,0,0,0.75),
+          0  0  0   1px rgba(108,142,245,0.18);
+  backdrop-filter: blur(36px) saturate(180%);
+}
+
+/* 8. Inputs — dark wells */
+input, textarea, select {
+  background: rgba(4,6,12,0.65) !important;
+  border: 1px solid rgba(108,142,245,0.18) !important;
+  box-shadow:
+    inset 0  1px 3px rgba(0,0,0,0.40),
+    inset 0  0  1px rgba(0,0,0,0.30) !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: rgba(108,142,245,0.50) !important;
+  box-shadow:
+    inset 0  1px 3px rgba(0,0,0,0.35),
+          0  0  0   3px rgba(108,142,245,0.12) !important;
+  outline: none !important;
+}
+
+/* 9. Rank medals glow */
+.rank-1 { text-shadow: 0 0 14px rgba(255,203,107,0.9); }
+.rank-2 { text-shadow: 0 0 12px rgba(200,200,210,0.7); }
+.rank-3 { text-shadow: 0 0 12px rgba(210,140,80,0.7);  }
+
+/* 10. Page header labels */
+.label {
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 10px rgba(45,232,176,0.35);
+}
+.page-header h1 {
+  text-shadow: 0 0 40px rgba(108,142,245,0.18), 0 2px 4px rgba(0,0,0,0.7);
+}
+
+/* 11. Scrollbar — gradient thumb */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 100%);
+  border-radius: 3px;
+  box-shadow: 0 0 6px rgba(108,142,245,0.4);
+}
+
+/* 12. Text selection */
+::selection {
+  background: rgba(108,142,245,0.28);
+  color: #fff;
+}
+
+/* 13. Stats bar numbers — lit up */
+.hero-stat-num {
+  text-shadow: 0 0 20px rgba(45,232,176,0.5), 0 0 40px rgba(108,142,245,0.3);
+}
+
+/* 14. Section entry animation */
+section { opacity:0; transform:translateY(18px); transition: opacity 0.4s ease, transform 0.4s ease; }
+section.visible { opacity:1; transform:translateY(0); }
+
+/* 15. Daily card top border — iridescent */
+.daily-card {
+  border-top: 2px solid transparent;
+  background-clip: padding-box;
+}
+.daily-card::before {
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 50%, var(--purple) 100%);
+  box-shadow: 0 0 12px rgba(45,232,176,0.4);
+}
 </style>
 </head>
 <body>
