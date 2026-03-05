@@ -5,306 +5,132 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>HJOI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-
 :root{
-  --ink:       #0a0a0f;
-  --ink2:      #12121a;
-  --surface:   rgba(255,255,255,0.055);
-  --surface2:  rgba(255,255,255,0.035);
-  --border:    rgba(255,255,255,0.1);
-  --border2:   rgba(255,255,255,0.06);
-  --text:      rgba(255,255,255,0.92);
-  --text2:     rgba(255,255,255,0.5);
-  --text3:     rgba(255,255,255,0.28);
-  --blue:      #4f8ef7;
-  --teal:      #2de8b0;
-  --red:       #ff453a;
-  --mono:      'JetBrains Mono', monospace;
-  --sans:      'Outfit', sans-serif;
+  --ink:#07070d;--surface:rgba(255,255,255,0.055);--border:rgba(255,255,255,0.09);
+  --border2:rgba(255,255,255,0.05);--text:rgba(255,255,255,0.92);--text2:rgba(255,255,255,0.48);
+  --text3:rgba(255,255,255,0.26);--blue:#4f8ef7;--teal:#2de8b0;--red:#ff453a;
+  --mono:'JetBrains Mono',monospace;--sans:'Outfit',sans-serif;
+  --spring:cubic-bezier(0.34,1.56,0.64,1);--smooth:cubic-bezier(0.4,0,0.2,1);
 }
+html,body{width:100%;height:100%;background:var(--ink);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden;}
 
-html,body{
-  width:100%;height:100%;
-  background:var(--ink);
-  color:var(--text);
-  font-family:var(--sans);
-  -webkit-font-smoothing:antialiased;
-  overflow:hidden;
-}
-
-/* ── Background mesh ── */
-.bg{
-  position:fixed;inset:0;z-index:0;
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(79,142,247,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 80% 90%, rgba(45,232,176,0.08) 0%, transparent 55%),
-    radial-gradient(ellipse 40% 40% at 60% 40%, rgba(120,80,255,0.06) 0%, transparent 50%);
-}
-
-/* subtle noise */
-.bg::after{
-  content:'';position:absolute;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  opacity:.4;pointer-events:none;
-}
-
-/* ── Canvas orbs ── */
+.bg{position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 70% 55% at 15% 8%,rgba(79,142,247,.11) 0%,transparent 60%),
+    radial-gradient(ellipse 55% 50% at 85% 88%,rgba(45,232,176,.08) 0%,transparent 55%),
+    radial-gradient(ellipse 45% 40% at 55% 45%,rgba(110,70,240,.05) 0%,transparent 50%);}
 #orb-canvas{position:fixed;inset:0;z-index:1;pointer-events:none;}
 
-/* ── Layout ── */
-.page{
-  position:relative;z-index:10;
-  width:100vw;height:100vh;
-  display:flex;align-items:center;justify-content:center;
-  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
+.page{position:relative;z-index:10;width:100vw;height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(24px,4vh,40px);padding:env(safe-area-inset-top,20px) 20px env(safe-area-inset-bottom,20px);}
 
-/* ── Logo ── */
-.logo-wrap{
-  position:fixed;top:32px;left:50%;transform:translateX(-50%);
-  z-index:20;text-align:center;
-  opacity:0;animation:riseIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.1s forwards;
+/* ── HJOI HERO LOGO ── */
+.logo-block{text-align:center;opacity:0;animation:logoIn .9s cubic-bezier(0.22,1,.36,1) .05s forwards;}
+@keyframes logoIn{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+.logo-wrap{position:relative;display:inline-block;}
+
+.hjoi-glow{
+  position:absolute;top:50%;left:50%;
+  width:300px;height:90px;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse,rgba(79,142,247,.22) 0%,rgba(45,232,176,.12) 40%,transparent 70%);
+  filter:blur(36px);pointer-events:none;
+  animation:glowPulse 4.5s ease-in-out infinite;z-index:0;
 }
-.logo-text{
+@keyframes glowPulse{0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}}
+
+.hjoi-text{
+  position:relative;z-index:1;
   font-family:var(--sans);
-  font-size:22px;font-weight:800;
-  letter-spacing:0.18em;
-  background:linear-gradient(135deg,#fff 30%,rgba(79,142,247,0.9) 70%,rgba(45,232,176,0.9) 100%);
+  font-size:clamp(48px,9vw,72px);
+  font-weight:900;letter-spacing:-.03em;line-height:1;
+  background:linear-gradient(155deg,rgba(255,255,255,.96) 0%,rgba(200,218,255,.9) 30%,rgba(79,142,247,.88) 62%,rgba(45,232,176,.85) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:logoFloat 4.8s ease-in-out infinite;
+  filter:drop-shadow(0 0 24px rgba(79,142,247,.32)) drop-shadow(0 0 52px rgba(45,232,176,.16)) drop-shadow(0 2px 6px rgba(0,0,0,.5));
 }
-.logo-sub{
-  font-family:var(--mono);font-size:9px;font-weight:300;
-  letter-spacing:0.3em;color:var(--text3);text-transform:uppercase;
-  margin-top:4px;
-}
+@keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
 
-/* ── Card ── */
-.card{
-  width:min(400px, calc(100vw - 40px));
-  border-radius:28px;
-  background:rgba(18,18,28,0.72);
-  backdrop-filter:blur(60px) saturate(180%);
-  -webkit-backdrop-filter:blur(60px) saturate(180%);
+/* ── CARD ── */
+.card{width:min(400px,calc(100vw - 32px));border-radius:28px;
+  background:rgba(13,13,21,.76);backdrop-filter:blur(56px) saturate(160%);-webkit-backdrop-filter:blur(56px) saturate(160%);
   border:1px solid var(--border);
-  box-shadow:
-    0 0 0 0.5px rgba(255,255,255,0.06) inset,
-    0 1px 0 rgba(255,255,255,0.12) inset,
-    0 40px 100px -20px rgba(0,0,0,0.7),
-    0 8px 32px rgba(0,0,0,0.4);
-  overflow:hidden;
-  position:relative;
-  opacity:0;
-  transform:translateY(30px) scale(0.96);
-  animation:cardRise 0.8s cubic-bezier(0.22,1,0.36,1) 0.25s forwards;
-}
+  box-shadow:0 0 0 .5px rgba(255,255,255,.05) inset,0 1px 0 rgba(255,255,255,.11) inset,0 28px 72px -14px rgba(0,0,0,.65),0 6px 22px rgba(0,0,0,.32);
+  overflow:hidden;position:relative;opacity:0;transform:translateY(22px) scale(.97);
+  animation:cardIn .85s cubic-bezier(0.22,1,.36,1) .2s forwards;}
+.card::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);pointer-events:none;z-index:1;}
+@keyframes cardIn{to{opacity:1;transform:translateY(0) scale(1);}}
 
-/* top specular */
-.card::before{
-  content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent);
-  pointer-events:none;
-}
+.tabs{display:flex;padding:5px 5px 0;gap:3px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border2);}
+.tab-btn{flex:1;padding:11px 8px;border:none;background:none;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-radius:12px 12px 0 0;transition:color .2s var(--smooth),background .2s var(--smooth);letter-spacing:.015em;position:relative;}
+.tab-btn.active{color:var(--text);background:rgba(255,255,255,.06);}
+.tab-btn.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(79,142,247,.55),rgba(45,232,176,.38),transparent);}
 
-@keyframes cardRise{to{opacity:1;transform:translateY(0) scale(1);}}
-@keyframes riseIn{to{opacity:1;}}
-
-/* ── Tabs ── */
-.tabs{
-  display:flex;padding:6px;gap:4px;
-  background:rgba(255,255,255,0.04);
-  border-bottom:1px solid var(--border2);
-}
-.tab-btn{
-  flex:1;padding:10px;border:none;background:none;
-  font-family:var(--sans);font-size:13px;font-weight:500;
-  color:var(--text3);cursor:pointer;border-radius:14px;
-  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
-  position:relative;letter-spacing:0.02em;
-}
-.tab-btn.active{
-  background:rgba(255,255,255,0.08);
-  color:var(--text);
-  box-shadow:0 1px 0 rgba(255,255,255,0.1) inset, 0 2px 8px rgba(0,0,0,0.2);
-}
-
-/* ── Form body ── */
-.form-body{
-  padding:28px 28px 24px;
-}
-
-/* field */
-.field{margin-bottom:14px;}
-.field-label{
-  font-family:var(--mono);font-size:10px;font-weight:400;
-  letter-spacing:0.12em;text-transform:uppercase;
-  color:var(--text3);margin-bottom:7px;display:flex;
-  align-items:center;justify-content:space-between;
-}
-.field-label .req{color:var(--red);font-size:9px;letter-spacing:0;}
-
-.input-wrap{position:relative;}
-.field input,
-.field select{
-  width:100%;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:14px;
-  padding:13px 16px;
-  font-family:var(--sans);font-size:15px;font-weight:400;
-  color:var(--text);
-  outline:none;
-  transition:border-color 0.2s, background 0.2s, box-shadow 0.2s;
-  -webkit-appearance:none;
-}
-.field select{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 14px center;
-  padding-right:36px;cursor:pointer;
-}
-.field select option{background:#141420;color:var(--text);}
-.field input::placeholder{color:var(--text3);}
-.field input:focus,
-.field select:focus{
-  border-color:rgba(79,142,247,0.5);
-  background:rgba(79,142,247,0.07);
-  box-shadow:0 0 0 3px rgba(79,142,247,0.12), 0 1px 0 rgba(255,255,255,0.08) inset;
-}
-/* autofill fix */
-.field input:-webkit-autofill,
-.field input:-webkit-autofill:focus{
-  -webkit-text-fill-color:var(--text) !important;
-  -webkit-box-shadow:0 0 0 1000px #1a1a2e inset !important;
-  transition:background-color 9999s;caret-color:var(--text);
-}
-
-/* ── Error ── */
-.form-err{
-  font-family:var(--mono);font-size:11px;color:var(--red);
-  min-height:16px;margin-top:-6px;margin-bottom:10px;
-  opacity:0;transform:translateY(-4px);
-  transition:opacity 0.2s,transform 0.2s;
-}
-.form-err.show{opacity:1;transform:translateY(0);}
-
-/* ── Submit button ── */
-.btn-submit{
-  width:100%;margin-top:6px;
-  padding:15px;border:none;border-radius:16px;
-  background:linear-gradient(135deg, #4f8ef7 0%, #2de8b0 100%);
-  font-family:var(--sans);font-size:15px;font-weight:600;
-  color:#08080f;letter-spacing:0.01em;
-  cursor:pointer;position:relative;overflow:hidden;
-  transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, opacity 0.2s;
-  box-shadow:0 4px 24px rgba(79,142,247,0.3), 0 1px 0 rgba(255,255,255,0.25) inset;
-}
-.btn-submit::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:50%;
-  background:linear-gradient(180deg,rgba(255,255,255,0.18) 0%,transparent 100%);
-  border-radius:inherit;pointer-events:none;
-}
-.btn-submit:hover:not(:disabled){
-  transform:translateY(-1px) scale(1.01);
-  box-shadow:0 8px 32px rgba(79,142,247,0.4), 0 1px 0 rgba(255,255,255,0.25) inset;
-}
-.btn-submit:active:not(:disabled){transform:scale(0.98);}
-.btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
-.btn-submit .btn-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:8px;}
-
-/* loading spinner */
-.spinner-ring{
-  width:16px;height:16px;border-radius:50%;
-  border:2px solid rgba(8,8,15,0.3);
-  border-top-color:#08080f;
-  animation:spin 0.7s linear infinite;display:none;
-}
-.btn-submit.loading .spinner-ring{display:block;}
-.btn-submit.loading .btn-label{opacity:0.7;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-/* ripple */
-.ripple{
-  position:absolute;border-radius:50%;
-  background:rgba(255,255,255,0.25);
-  transform:scale(0);animation:ripple 0.5s ease-out;pointer-events:none;
-}
-@keyframes ripple{to{transform:scale(4);opacity:0;}}
-
-/* ── Success overlay ── */
-.success-overlay{
-  position:absolute;inset:0;border-radius:28px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:14px;
-  background:rgba(10,10,18,0.96);
-  backdrop-filter:blur(20px);
-  opacity:0;pointer-events:none;
-  transition:opacity 0.4s;z-index:50;
-}
-.success-overlay.show{opacity:1;pointer-events:all;}
-.success-check{
-  width:56px;height:56px;border-radius:50%;
-  background:linear-gradient(135deg,#4f8ef7,#2de8b0);
-  display:flex;align-items:center;justify-content:center;
-  font-size:24px;
-  animation:checkPop 0.5s cubic-bezier(0.34,1.56,0.64,1);
-  box-shadow:0 8px 32px rgba(45,232,176,0.3);
-}
-@keyframes checkPop{from{transform:scale(0);opacity:0;}}
-.success-name{
-  font-family:var(--sans);font-size:18px;font-weight:600;color:var(--text);
-}
-.success-hint{
-  font-family:var(--mono);font-size:11px;color:var(--text3);
-  letter-spacing:0.08em;
-}
-
-/* ── Bottom link ── */
-.page-foot{
-  position:fixed;bottom:max(24px, env(safe-area-inset-bottom));
-  left:0;right:0;text-align:center;
-  font-family:var(--mono);font-size:11px;color:var(--text3);
-  z-index:20;
-  opacity:0;animation:riseIn 0.6s ease 1.2s forwards;
-}
-.page-foot a{color:rgba(79,142,247,0.8);text-decoration:none;}
-.page-foot a:hover{color:var(--blue);}
-
-/* ── Scroll container for register ── */
-.form-body{max-height:calc(100vh - 220px);overflow-y:auto;scrollbar-width:none;}
+.form-body{padding:24px 24px 22px;max-height:calc(100svh - 300px);overflow-y:auto;scrollbar-width:none;}
 .form-body::-webkit-scrollbar{display:none;}
 
-/* ── Divider ── */
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.field{margin-bottom:12px;}
+.field-label{font-family:var(--mono);font-size:10px;font-weight:300;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.req{color:var(--red);font-size:9px;letter-spacing:0;}
+.field input,.field select{width:100%;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:12px 14px;font-family:var(--sans);font-size:15px;font-weight:400;color:var(--text);outline:none;transition:border-color .18s,background .18s,box-shadow .18s;-webkit-appearance:none;}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.28)' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px;cursor:pointer;}
+.field select option{background:#10101a;color:var(--text);}
+.field input::placeholder{color:var(--text3);}
+.field input:focus,.field select:focus{border-color:rgba(79,142,247,.45);background:rgba(79,142,247,.06);box-shadow:0 0 0 3px rgba(79,142,247,.1),0 1px 0 rgba(255,255,255,.07) inset;}
+.field input:-webkit-autofill,.field input:-webkit-autofill:focus{-webkit-text-fill-color:rgba(255,255,255,.92)!important;-webkit-box-shadow:0 0 0 1000px #131320 inset!important;caret-color:white;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 
-/* ── Mobile ── */
-@media(max-width:420px){
-  .form-body{padding:22px 20px 20px;}
-  .field-row{grid-template-columns:1fr;}
-}
+.form-err{font-family:var(--mono);font-size:10.5px;color:var(--red);min-height:14px;margin:0 0 10px;opacity:0;transform:translateY(-3px);transition:opacity .18s,transform .18s;}
+.form-err.show{opacity:1;transform:none;}
+
+.btn-submit{width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(130deg,#4f8ef7 0%,#3ad9c5 55%,#2de8b0 100%);font-family:var(--sans);font-size:15px;font-weight:600;color:#060610;letter-spacing:.01em;cursor:pointer;position:relative;overflow:hidden;transition:transform .18s var(--spring),box-shadow .2s,opacity .15s;box-shadow:0 3px 20px rgba(79,142,247,.28),0 1px 0 rgba(255,255,255,.22) inset;margin-top:4px;}
+.btn-submit::before{content:'';position:absolute;top:0;left:0;right:0;height:48%;background:linear-gradient(180deg,rgba(255,255,255,.16) 0%,transparent 100%);pointer-events:none;}
+.btn-submit:hover:not(:disabled){transform:translateY(-1.5px) scale(1.008);box-shadow:0 6px 28px rgba(79,142,247,.38),0 1px 0 rgba(255,255,255,.22) inset;}
+.btn-submit:active:not(:disabled){transform:scale(.975);}
+.btn-submit:disabled{opacity:.55;cursor:not-allowed;transform:none!important;}
+.btn-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:8px;}
+.spinner-ring{width:15px;height:15px;border-radius:50%;border:2px solid rgba(6,6,16,.25);border-top-color:#060610;animation:spin .65s linear infinite;display:none;flex-shrink:0;}
+.btn-submit.loading .spinner-ring{display:block;}
+.btn-submit.loading .btn-label{opacity:.7;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.22);transform:scale(0);animation:rpl .5s ease-out forwards;pointer-events:none;}
+@keyframes rpl{to{transform:scale(4);opacity:0;}}
+
+.success-overlay{position:absolute;inset:0;border-radius:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(7,7,13,.95);backdrop-filter:blur(20px);opacity:0;pointer-events:none;transition:opacity .35s;z-index:50;}
+.success-overlay.show{opacity:1;pointer-events:all;}
+.success-check{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#2de8b0);display:flex;align-items:center;justify-content:center;font-size:22px;color:#07070d;animation:checkPop .5s var(--spring);box-shadow:0 6px 28px rgba(45,232,176,.28);}
+@keyframes checkPop{from{transform:scale(0);opacity:0;}}
+.success-name{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--text);}
+.success-hint{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.1em;}
+
+.page-foot{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));left:0;right:0;text-align:center;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.06em;z-index:20;opacity:0;animation:fadeIn .5s ease 1.3s forwards;}
+.page-foot a{color:rgba(79,142,247,.7);text-decoration:none;}
+.page-foot a:hover{color:var(--blue);}
+@keyframes fadeIn{to{opacity:1;}}
+
+@media(max-width:420px){.form-body{padding:20px 18px 18px;}.field-row{grid-template-columns:1fr;}.hjoi-text{font-size:clamp(44px,12vw,64px);}}
 </style>
 </head>
 <body>
-
 <div class="bg"></div>
 <canvas id="orb-canvas"></canvas>
 
-<div class="logo-wrap">
-  <div class="logo-text">HJOI</div>
-  <div class="logo-sub">Harbin Junior OI</div>
-</div>
-
 <div class="page">
-  <div class="card" id="card">
+  <div class="logo-block">
+    <div class="logo-wrap">
+      <div class="hjoi-glow"></div>
+      <div class="hjoi-text">HJOI</div>
+    </div>
+  </div>
 
-    <!-- Tabs -->
+  <div class="card" id="card">
     <div class="tabs">
       <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">登录</button>
       <button class="tab-btn" id="tab-register" onclick="switchTab('register')">注册</button>
     </div>
 
-    <!-- Login -->
     <div class="form-body" id="form-login">
       <div class="field">
         <div class="field-label">用户名</div>
@@ -316,18 +142,14 @@ html,body{
       </div>
       <div class="form-err" id="login-err"></div>
       <button class="btn-submit" id="btn-login" onclick="doLogin()">
-        <div class="btn-inner">
-          <div class="spinner-ring"></div>
-          <span class="btn-label">进入系统</span>
-        </div>
+        <div class="btn-inner"><div class="spinner-ring"></div><span class="btn-label">进入系统</span></div>
       </button>
     </div>
 
-    <!-- Register -->
     <div class="form-body" id="form-register" style="display:none">
       <div class="field">
         <div class="field-label">用户名</div>
-        <input id="r-user" type="text" placeholder="只含字母、数字、下划线" autocomplete="username" spellcheck="false">
+        <input id="r-user" type="text" placeholder="字母、数字、下划线" autocomplete="username" spellcheck="false">
       </div>
       <div class="field-row">
         <div class="field">
@@ -342,213 +164,57 @@ html,body{
       <div class="field">
         <div class="field-label">训练组 <span class="req">必填</span></div>
         <select id="r-group">
-          <option value="">选择你的班级…</option>
-          <option value="1">L1</option>
-          <option value="2">L2</option>
-          <option value="3">L3</option>
-          <option value="4">L4</option>
-          <option value="5">L5</option>
-          <option value="6">L6</option>
+          <option value="">选择分组…</option>
+          <option value="1">L1</option><option value="2">L2</option><option value="3">L3</option>
+          <option value="4">L4</option><option value="5">L5</option><option value="6">L6</option>
           <option value="7">Oth</option>
         </select>
       </div>
       <div class="field">
-        <div class="field-label">洛谷 UID <span style="color:var(--text3);font-size:9px;font-family:var(--mono)">选填</span></div>
+        <div class="field-label">洛谷 UID <span style="color:var(--text3);font-size:9px">选填</span></div>
         <input id="r-luogu" type="text" placeholder="如：123456" autocomplete="off" inputmode="numeric">
       </div>
       <div class="form-err" id="register-err"></div>
       <button class="btn-submit" id="btn-register" onclick="doRegister()">
-        <div class="btn-inner">
-          <div class="spinner-ring"></div>
-          <span class="btn-label">创建账号</span>
-        </div>
+        <div class="btn-inner"><div class="spinner-ring"></div><span class="btn-label">创建账号</span></div>
       </button>
     </div>
 
-    <!-- Success -->
     <div class="success-overlay" id="success-overlay">
       <div class="success-check">✓</div>
       <div class="success-name" id="success-name">欢迎</div>
       <div class="success-hint">正在跳转…</div>
     </div>
-
   </div>
 </div>
 
-<div class="page-foot">
-  <a href="index.html">← 返回首页</a>
-  &nbsp;·&nbsp; HJOI © 2025
-</div>
+<div class="page-foot"><a href="index.html">← 返回首页</a> &nbsp;·&nbsp; HJOI</div>
 
 <script>
-// ══════════════════════════════════════════
-// AMBIENT ORBS
-// ══════════════════════════════════════════
-const cv = document.getElementById('orb-canvas');
-const cx2 = cv.getContext('2d');
-let W2, H2, mouse2 = {x:-999, y:-999};
+const cv=document.getElementById('orb-canvas'),cx=cv.getContext('2d');
+let W,H,mx=-999,my=-999;
+function rsz(){W=cv.width=innerWidth;H=cv.height=innerHeight;}rsz();
+window.addEventListener('resize',rsz);
+window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+window.addEventListener('touchmove',e=>{mx=e.touches[0].clientX;my=e.touches[0].clientY;},{passive:true});
+const ORBS=[{bx:.18,by:.12,r:300,c:'79,142,247',ph:0,sp:.00075},{bx:.82,by:.82,r:240,c:'45,232,176',ph:2.09,sp:.001},{bx:.58,by:.35,r:200,c:'120,70,250',ph:4.19,sp:.00065},{bx:.12,by:.72,r:170,c:'240,130,60',ph:1.05,sp:.0012}];
+let t=0;
+(function frame(){cx.clearRect(0,0,W,H);t++;ORBS.forEach(o=>{const fx=(o.bx+Math.sin(t*o.sp+o.ph)*.09)*W,fy=(o.by+Math.cos(t*o.sp+o.ph*1.4)*.07)*H,dx=mx-fx,dy=my-fy,dist=Math.hypot(dx,dy),pull=Math.max(0,(500-dist)/500)*.05,px=fx+dx*pull,py=fy+dy*pull,g=cx.createRadialGradient(px,py,0,px,py,o.r);g.addColorStop(0,`rgba(${o.c},.12)`);g.addColorStop(.5,`rgba(${o.c},.04)`);g.addColorStop(1,`rgba(${o.c},0)`);cx.fillStyle=g;cx.beginPath();cx.arc(px,py,o.r,0,Math.PI*2);cx.fill();});requestAnimationFrame(frame);})();
 
-function rsz(){ W2=cv.width=innerWidth; H2=cv.height=innerHeight; }
-rsz(); window.addEventListener('resize', rsz);
-window.addEventListener('mousemove', e=>{mouse2.x=e.clientX;mouse2.y=e.clientY;});
-window.addEventListener('touchmove', e=>{mouse2.x=e.touches[0].clientX;mouse2.y=e.touches[0].clientY;},{passive:true});
+function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('form-login').style.display=tab==='login'?'':'none';document.getElementById('form-register').style.display=tab==='register'?'':'none';clearErrors();}
+function clearErrors(){['login-err','register-err'].forEach(id=>{const el=document.getElementById(id);el.textContent='';el.classList.remove('show');});}
+function showError(id,msg){const el=document.getElementById(id);el.textContent=msg;el.classList.add('show');}
+document.querySelectorAll('.btn-submit').forEach(btn=>{btn.addEventListener('pointerdown',e=>{const r=btn.getBoundingClientRect(),s=Math.max(r.width,r.height),rip=document.createElement('span');rip.className='ripple';rip.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;btn.appendChild(rip);setTimeout(()=>rip.remove(),500);});});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;document.getElementById('form-login').style.display!=='none'?doLogin():doRegister();});
 
-const ORBS = [
-  {x:0.2, y:0.15, r:280, c:[79,142,247], phase:0,    speed:0.0008},
-  {x:0.8, y:0.8,  r:220, c:[45,232,176], phase:2.1,  speed:0.0011},
-  {x:0.6, y:0.3,  r:180, c:[140,80,255], phase:4.2,  speed:0.0007},
-  {x:0.15,y:0.75, r:160, c:[247,140,79], phase:1.05, speed:0.0013},
-];
-let t2=0;
-function drawOrbs(){
-  cx2.clearRect(0,0,W2,H2);
-  t2+=1;
-  ORBS.forEach(o=>{
-    const fx = (o.x + Math.sin(t2*o.speed + o.phase)*0.08) * W2;
-    const fy = (o.y + Math.cos(t2*o.speed + o.phase*1.3)*0.06) * H2;
-    // mouse pull
-    const dx=mouse2.x-fx, dy=mouse2.y-fy;
-    const dist=Math.sqrt(dx*dx+dy*dy);
-    const pull=Math.max(0, (400-dist)/400)*0.04;
-    const px=fx+dx*pull, py=fy+dy*pull;
-    const grad=cx2.createRadialGradient(px,py,0,px,py,o.r);
-    grad.addColorStop(0,`rgba(${o.c},0.13)`);
-    grad.addColorStop(0.5,`rgba(${o.c},0.05)`);
-    grad.addColorStop(1,`rgba(${o.c},0)`);
-    cx2.fillStyle=grad;
-    cx2.beginPath();cx2.arc(px,py,o.r,0,Math.PI*2);cx2.fill();
-  });
-  requestAnimationFrame(drawOrbs);
-}
-drawOrbs();
-
-// ══════════════════════════════════════════
-// TABS
-// ══════════════════════════════════════════
-function switchTab(tab){
-  document.getElementById('tab-login').classList.toggle('active', tab==='login');
-  document.getElementById('tab-register').classList.toggle('active', tab==='register');
-  document.getElementById('form-login').style.display = tab==='login' ? '' : 'none';
-  document.getElementById('form-register').style.display = tab==='register' ? '' : 'none';
-  clearErrors();
-}
-
-function clearErrors(){
-  ['login-err','register-err'].forEach(id=>{
-    const el=document.getElementById(id);
-    el.textContent=''; el.classList.remove('show');
-  });
-}
-function showError(id, msg){
-  const el=document.getElementById(id);
-  el.textContent=msg; el.classList.add('show');
-}
-
-// ripple
-document.querySelectorAll('.btn-submit').forEach(btn=>{
-  btn.addEventListener('pointerdown', e=>{
-    const r=btn.getBoundingClientRect();
-    const rip=document.createElement('span');
-    rip.className='ripple';
-    const s=Math.max(r.width,r.height);
-    rip.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;
-    btn.appendChild(rip);
-    setTimeout(()=>rip.remove(),500);
-  });
-});
-
-// enter key
-document.addEventListener('keydown',e=>{
-  if(e.key!=='Enter') return;
-  const isLogin = document.getElementById('form-login').style.display !== 'none';
-  if(isLogin) doLogin(); else doRegister();
-});
-
-// ══════════════════════════════════════════
-// SUPABASE AUTH
-// ══════════════════════════════════════════
-const SUPABASE_URL = 'https://dgsugcvedimcecudstkq.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDA2MDYsImV4cCI6MjA4ODIxNjYwNn0.0AnkF5MMrtiqwbau9q6pLD6pDrzXRkyPIoNsx4au8xI';
-
-(async()=>{
-  const{createClient}=supabase;
-  const _sb=createClient(SUPABASE_URL,SUPABASE_KEY);
-  const{data:{session}}=await _sb.auth.getSession();
-  if(session) window.location.href='index.html';
-})();
-
-function usernameToEmail(u){
-  return `${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@oiteam.local`;
-}
-
-function showSuccess(username){
-  document.getElementById('success-name').textContent=`欢迎，${username}`;
-  document.getElementById('success-overlay').classList.add('show');
-  setTimeout(()=>{ window.location.href='index.html'; }, 1600);
-}
-
-function setLoading(id, on){
-  const btn=document.getElementById(id);
-  btn.disabled=on; btn.classList.toggle('loading',on);
-  btn.querySelector('.btn-label').textContent = on ? '验证中…' : (id==='btn-login' ? '进入系统' : '创建账号');
-}
-
-async function doLogin(){
-  clearErrors();
-  const username=document.getElementById('l-user').value.trim();
-  const password=document.getElementById('l-pass').value;
-  if(!username){showError('login-err','请输入用户名');return;}
-  if(!password){showError('login-err','请输入密码');return;}
-  setLoading('btn-login',true);
-  try{
-    const{createClient}=supabase;
-    const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
-    const{error}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});
-    if(error){showError('login-err','用户名或密码错误');setLoading('btn-login',false);return;}
-    showSuccess(username);
-  }catch(e){
-    showError('login-err','网络错误，请重试');
-    setLoading('btn-login',false);
-  }
-}
-
-async function doRegister(){
-  clearErrors();
-  const username=document.getElementById('r-user').value.trim();
-  const password=document.getElementById('r-pass').value;
-  const password2=document.getElementById('r-pass2').value;
-  const group_val=document.getElementById('r-group').value;
-  const group_id=group_val?parseInt(group_val):null;
-  const luogu_uid=document.getElementById('r-luogu').value.trim();
-  if(!username||username.length<2){showError('register-err','用户名至少2位');return;}
-  if(!/^[a-zA-Z0-9_]+$/.test(username)){showError('register-err','只能含字母、数字、下划线');return;}
-  if(password.length<6){showError('register-err','密码至少6位');return;}
-  if(password!==password2){showError('register-err','两次密码不一致');return;}
-  if(!group_id){showError('register-err','请选择训练组');return;}
-  setLoading('btn-register',true);
-  try{
-    const{createClient}=supabase;
-    const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
-    const{error:signUpError}=await sb.auth.signUp({email:usernameToEmail(username),password});
-    if(signUpError){showError('register-err',signUpError.message);setLoading('btn-register',false);return;}
-    await new Promise(r=>setTimeout(r,1200));
-    const{error:loginError}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});
-    if(loginError){showError('register-err','注册成功，请手动登录');setLoading('btn-register',false);switchTab('login');return;}
-    const{data:{user}}=await sb.auth.getUser();
-    if(user){
-      const{data:existing}=await sb.from('profiles').select('id').eq('id',user.id).maybeSingle();
-      if(existing){
-        await sb.from('profiles').update({username,group_id,luogu_uid:luogu_uid||''}).eq('id',user.id);
-      }else{
-        await sb.from('profiles').insert({id:user.id,username,group_id,luogu_uid:luogu_uid||''});
-      }
-    }
-    showSuccess(username);
-  }catch(e){
-    showError('register-err','网络错误，请重试');
-    setLoading('btn-register',false);
-  }
-}
+const SB_URL='https://dgsugcvedimcecudstkq.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDA2MDYsImV4cCI6MjA4ODIxNjYwNn0.0AnkF5MMrtiqwbau9q6pLD6pDrzXRkyPIoNsx4au8xI';
+(async()=>{const{createClient}=supabase;const _sb=createClient(SB_URL,SB_KEY);const{data:{session}}=await _sb.auth.getSession();if(session)window.location.href='index.html';})();
+function toEmail(u){return`${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@oiteam.local`;}
+function showSuccess(username){document.getElementById('success-name').textContent=`欢迎，${username}`;document.getElementById('success-overlay').classList.add('show');setTimeout(()=>{window.location.href='index.html';},1600);}
+function setLoading(id,on){const btn=document.getElementById(id);btn.disabled=on;btn.classList.toggle('loading',on);btn.querySelector('.btn-label').textContent=on?'验证中…':(id==='btn-login'?'进入系统':'创建账号');}
+async function doLogin(){clearErrors();const username=document.getElementById('l-user').value.trim(),password=document.getElementById('l-pass').value;if(!username){showError('login-err','请输入用户名');return;}if(!password){showError('login-err','请输入密码');return;}setLoading('btn-login',true);try{const{createClient}=supabase,sb=createClient(SB_URL,SB_KEY),{error}=await sb.auth.signInWithPassword({email:toEmail(username),password});if(error){showError('login-err','用户名或密码错误');setLoading('btn-login',false);return;}showSuccess(username);}catch(e){showError('login-err','网络错误，请重试');setLoading('btn-login',false);}}
+async function doRegister(){clearErrors();const username=document.getElementById('r-user').value.trim(),password=document.getElementById('r-pass').value,password2=document.getElementById('r-pass2').value,group_val=document.getElementById('r-group').value,group_id=group_val?parseInt(group_val):null,luogu_uid=document.getElementById('r-luogu').value.trim();if(!username||username.length<2){showError('register-err','用户名至少2位');return;}if(!/^[a-zA-Z0-9_]+$/.test(username)){showError('register-err','只能含字母、数字、下划线');return;}if(password.length<6){showError('register-err','密码至少6位');return;}if(password!==password2){showError('register-err','两次密码不一致');return;}if(!group_id){showError('register-err','请选择训练组');return;}setLoading('btn-register',true);try{const{createClient}=supabase,sb=createClient(SB_URL,SB_KEY),{error:signUpError}=await sb.auth.signUp({email:toEmail(username),password});if(signUpError){showError('register-err',signUpError.message);setLoading('btn-register',false);return;}await new Promise(r=>setTimeout(r,1200));const{error:loginError}=await sb.auth.signInWithPassword({email:toEmail(username),password});if(loginError){showError('register-err','注册成功，请手动登录');setLoading('btn-register',false);switchTab('login');return;}const{data:{user}}=await sb.auth.getUser();if(user){const{data:ex}=await sb.from('profiles').select('id').eq('id',user.id).maybeSingle();if(ex){await sb.from('profiles').update({username,group_id,luogu_uid:luogu_uid||''}).eq('id',user.id);}else{await sb.from('profiles').insert({id:user.id,username,group_id,luogu_uid:luogu_uid||''});}}showSuccess(username);}catch(e){showError('register-err','网络错误，请重试');setLoading('btn-register',false);}}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
