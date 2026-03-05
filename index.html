@@ -3449,7 +3449,7 @@ async function loadSession(){
   }
   renderAuthArea();
   loadHomeFeed();
-  if(currentUser)checkNotifDot();
+  if(currentUser){ checkNotifDot(); initCheckinState(); }
 }
 
 // onAuthStateChange 仅处理登录/登出事件，不与 loadSession 竞争
@@ -3469,7 +3469,7 @@ sb.auth.onAuthStateChange(async(event, session)=>{
     currentProfile=null;
   }
   renderAuthArea();
-  if(currentUser){ checkNotifDot(); loadHomeFeed(); }
+  if(currentUser){ checkNotifDot(); loadHomeFeed(); initCheckinState(); }
 });
 
 function usernameToEmail(u){return`${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@oiteam.local`;}
@@ -5480,11 +5480,21 @@ function spawnOrzParticles(anchor){
 // ── Checkin ──────────────────────────────────────────────
 const CODE_SNIPPETS=['AC','O(1)','O(n)','O(log n)','++i','i++','int','long long','void','for','while','if','else','return','true','false','dfs()','bfs()','dp[]','ans++','inf','mod','n--','ok','#define','scanf','printf','sort()','swap()','min()','max()','0x3f','1e9','n<<1','>>1','&1','|=','n-1','n+1'];
 const CODE_COLORS=['#2de8b0','#6c8ef5','#c792ea','#ffb347','#7dd3fc','#86efac'];
-function doCheckin(e){
+async function doCheckin(e){
+  if(!currentUser){showToast('请先登录','error');return;}
   const btn=document.getElementById('checkin-btn');
   if(btn.classList.contains('checked'))return;
+
+  const today=new Date().toISOString().slice(0,10);
+  const{error}=await sb.from('hero_checkins').insert({user_id:currentUser.id,date:today});
+  if(error&&error.code!=='23505'){// 23505 = unique violation (already checked in)
+    showToast('打卡失败','error');return;
+  }
+
   btn.classList.add('checked');
   btn.querySelector('.checkin-label').textContent='已打卡';
+
+  // 粒子特效
   const bx=e.clientX,by=e.clientY;
   for(let i=0;i<28;i++){
     setTimeout(()=>{
@@ -5502,6 +5512,17 @@ function doCheckin(e){
     },i*30);
   }
   showToast('今日打卡成功 ✓','success');
+}
+
+async function initCheckinState(){
+  const btn=document.getElementById('checkin-btn');
+  if(!btn||!currentUser)return;
+  const today=new Date().toISOString().slice(0,10);
+  const{data}=await sb.from('hero_checkins').select('id').eq('user_id',currentUser.id).eq('date',today).maybeSingle();
+  if(data){
+    btn.classList.add('checked');
+    btn.querySelector('.checkin-label').textContent='已打卡';
+  }
 }
 
 // ── Emoji Picker ────────────────────────────────────────────
