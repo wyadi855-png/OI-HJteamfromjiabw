@@ -784,6 +784,14 @@ document.addEventListener('keydown', e => {
 const SUPABASE_URL = 'https://dgsugcvedimcecudstkq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDA2MDYsImV4cCI6MjA4ODIxNjYwNn0.0AnkF5MMrtiqwbau9q6pLD6pDrzXRkyPIoNsx4au8xI';
 
+// 已登录则直接跳首页
+(async()=>{
+  const{createClient}=supabase;
+  const _sb=createClient(SUPABASE_URL,SUPABASE_KEY);
+  const{data:{session}}=await _sb.auth.getSession();
+  if(session) window.location.href='index.html';
+})();
+
 function usernameToEmail(u) {
   return `${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@oiteam.local`;
 }
