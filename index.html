@@ -3,10 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HJOI · 算法竞赛训练队</title>
-<meta name="description" content="hjoi.com.cn — 算法竞赛训练队内部平台，涵盖题解、模拟赛、课程记录与在线评测。">
-<meta name="theme-color" content="#080b12">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<title>算法竞赛训练队</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -16,7 +13,7 @@
 <!-- highlight.js loaded on demand -->
 <style>
 /* ── Variables ── */
-/* 字体已通过 <link> 预连接加载，无需重复 @import */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Noto+Serif+SC:wght@400;700&display=swap');
 :root{
   --bg:#080b12;--surface:#0f1320;--surface2:#161c2e;--border:#1e2540;
   --accent:#6c8ef5;--accent2:#2de8b0;--accent3:#f06292;--accent4:#ffb347;
@@ -54,14 +51,14 @@ nav.scrolled{
 .nav-logo{font-family:var(--space);font-size:18px;font-weight:700;color:var(--accent2);letter-spacing:0.05em;cursor:pointer;display:flex;align-items:center;gap:8px;}
 .nav-logo span{color:var(--text3);}
 .nav-actions{display:flex;align-items:center;gap:10px;}
-.nav-links{display:flex;flex-wrap:wrap;gap:2px;padding:0 16px 10px;border-top:1px solid rgba(255,255,255,0.04);}
+.nav-links{display:flex;flex-wrap:wrap;gap:2px;padding:0 16px 10px;border-top:1px solid rgba(255,255,255,0.04);list-style:none;margin:0;}
 .nav-links a{font-size:15px;color:var(--text2);text-decoration:none;padding:6px 14px;border-radius:6px;cursor:pointer;transition:all 0.2s;font-family:var(--mono);letter-spacing:0.02em;}
 .nav-links a:hover,.nav-links a.active{color:var(--accent);background:rgba(108,142,245,0.1);}
 .nav-links a.active{color:var(--accent2);}
 .nav-more-wrap{position:relative;display:inline-block;}
 .nav-more-menu{position:absolute;top:calc(100% + 6px);left:0;background:rgba(10,13,24,0.95);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:10px;padding:6px;min-width:120px;display:none;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
 .nav-more-menu.open{display:block;animation:fadeIn 0.15s ease;}
-.nav-more-menu a{display:block;padding:7px 12px;border-radius:6px;font-size:13px;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.15s;}
+/* .nav-more-menu a — see definition below at line ~611 */
 .nav-more-menu a:hover{background:rgba(108,142,245,0.12);color:var(--accent);}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
 
@@ -498,8 +495,9 @@ footer span{color:var(--accent2);}
 body.light nav{background:rgba(240,242,248,0.8);border-bottom-color:rgba(0,0,0,0.08);}
 body.light nav.scrolled{background:rgba(240,242,248,0.95);}
 body.light .blog-card,body.light .home-card,body.light .stat-card,body.light .member-card,body.light .lb-row,body.light .contest-card{background:rgba(255,255,255,0.85);border-color:rgba(0,0,0,0.07);}
-body.light input,body.light textarea,body.light select{background:rgba(255,255,255,0.8);border-color:rgba(0,0,0,0.12);color:var(--text);}
-body.light .modal{background:rgba(248,250,255,0.98);}
+body.light input,body.light textarea,body.light select{background:rgba(255,255,255,0.9)!important;border-color:rgba(0,0,0,0.12)!important;color:var(--text)!important;box-shadow:inset 0 1px 2px rgba(0,0,0,0.06)!important;}
+body.light input:focus,body.light textarea:focus,body.light select:focus{border-color:rgba(108,142,245,0.5)!important;box-shadow:0 0 0 3px rgba(108,142,245,0.1)!important;}
+body.light .modal{background:rgba(248,250,255,0.98)!important;}
 
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
@@ -611,19 +609,19 @@ body.light .modal{background:rgba(248,250,255,0.98);}
 /* ── NAV MORE MENU GROUPS ── */
 .nav-more-group-label{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;padding:6px 12px 3px;pointer-events:none;margin-top:2px;}
 .nav-more-divider{height:1px;background:rgba(108,142,245,0.08);margin:4px 8px;}
-/* .nav-more-menu a 已在上方统一定义 */
+.nav-more-menu a{display:block;padding:7px 12px;border-radius:6px;font-size:13px;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.15s;}
+.nav-more-menu a:hover{background:rgba(108,142,245,0.1);color:var(--accent);}
 
 /* ── TYPEWRITER ── */
 .typewriter-cursor{
   display:inline-block;
-  color: var(--accent2);
-  text-shadow: 0 0 10px rgba(45,232,176,0.7);
+  background:linear-gradient(135deg,#6c8ef5,#2de8b0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
   animation:cursorBlink 0.75s step-end infinite;
   font-weight:300;margin-left:2px;}
 @keyframes cursorBlink{0%,100%{opacity:1;}50%{opacity:0;}}
 
-.nav-links{list-style:none;padding:0;margin:0;}
-.nav-links li{list-style:none;}
+/* nav-links list styles merged above */
 
 /* ── HOME BENTO LAYOUT ── */
 .home-bento{display:grid;grid-template-columns:340px 1fr;gap:16px;margin-bottom:48px;}
@@ -1047,7 +1045,10 @@ body::after {
   background-clip: text;
   filter: drop-shadow(0 0 18px rgba(45,232,176,0.40));
 }
-/* .typewriter-cursor 已在上方统一定义（含发光效果）*/
+.typewriter-cursor {
+  color: var(--accent2);
+  text-shadow: 0 0 10px rgba(45,232,176,0.7);
+}
 
 /* 5. Nav — deeper frost + glow border */
 nav {
@@ -1978,810 +1979,7 @@ section:not(.active) {
 </div></section>
 
 </main>
-<footer>// OI Training Team · 万家宝 老师 · Powered by Supabase</footer>
-
-<!-- AUTH MODAL -->
-<div class="modal-overlay" id="auth-modal"><div class="modal" style="max-width:400px;width:100%">
-  <div class="modal-tabs">
-    <button class="modal-tab active" onclick="switchAuthTab('login')">登录</button>
-    <button class="modal-tab" onclick="switchAuthTab('register')">注册</button>
-  </div>
-  <div id="login-form">
-    <div class="form-group"><label>用户名</label><input type="text" id="login-username" placeholder="你的用户名"></div>
-    <div class="form-group"><label>密码</label><input type="password" id="login-password" placeholder="••••••••"></div>
-    <div id="login-error" class="form-error"></div>
-    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('auth-modal')">取消</button><button class="btn btn-primary" onclick="doLogin()">登录</button></div>
-  </div>
-  <div id="register-form" style="display:none">
-    <div class="form-group"><label>用户名</label><input type="text" id="reg-username" placeholder="你的昵称（唯一）"></div>
-    <div class="form-group"><label>密码（至少6位）</label><input type="password" id="reg-password" placeholder="••••••••"></div>
-    <div class="form-group"><label>训练组</label>
-      <select id="reg-group">
-        <option value="">暂不选择</option>
-        <option value="1">周六早八</option>
-        <option value="2">周六早十</option>
-        <option value="3">周六午一</option>
-        <option value="4">周六午三</option>
-        <option value="5">周六晚八</option>
-        <option value="6">周天早八</option>
-        <option value="7">NOIP班</option>
-        <option value="8">抖音</option>
-      </select>
-    </div>
-    <div id="reg-error" class="form-error"></div><div id="reg-success" class="form-success"></div>
-    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('auth-modal')">取消</button><button class="btn btn-primary" onclick="doRegister()">注册</button></div>
-  </div>
-</div></div>
-
-<!-- SET DAILY MODAL (coach) -->
-<div class="modal-overlay" id="set-daily-modal"><div class="modal" style="max-width:500px;width:100%">
-  <h2>📅 发布今日一题</h2>
-  <div class="form-group"><label>来源</label>
-    <select id="daily-source" onchange="toggleDailySource()">
-      <option value="manual">直接输入题号</option>
-      <option value="archive">从题库选择</option>
-    </select>
-  </div>
-  <div id="daily-manual-fields">
-    <div class="form-group"><label>洛谷题号</label><input type="text" id="daily-problem-id" placeholder="如 P3376"></div>
-    <div class="form-group"><label>题目名称</label><input type="text" id="daily-title" placeholder="如 网络最大流"></div>
-    <div class="form-group"><label>难度</label>
-      <select id="daily-difficulty">
-        <option value="">不标注</option>
-        <option value="入门">入门</option>
-        <option value="普及-">普及-</option>
-        <option value="普及">普及</option>
-        <option value="普及+提高-">普及+提高-</option>
-        <option value="提高">提高</option>
-        <option value="省选NOI">省选/NOI</option>
-      </select>
-    </div>
-  </div>
-  <div id="daily-archive-fields" style="display:none">
-    <div class="form-group"><label>从题库选题</label>
-      <select id="daily-archive-select"><option value="">加载中…</option></select>
-    </div>
-  </div>
-  <div class="form-group"><label>教练备注（可选）</label><textarea id="daily-note" placeholder="提示思路或考察知识点…" style="min-height:60px"></textarea></div>
-  <div class="form-group"><label>日期</label><input type="date" id="daily-date"></div>
-  <div class="modal-footer">
-    <button class="btn btn-outline" onclick="closeModal('set-daily-modal')">取消</button>
-    <button class="btn btn-primary" onclick="submitDaily()">发布</button>
-  </div>
-</div></div>
-
-<!-- RECOMMEND MODAL (all users) -->
-<div class="modal-overlay" id="rec-modal"><div class="modal" style="max-width:460px;width:100%">
-  <h2>💡 推荐题目</h2>
-  <div class="form-group"><label>洛谷题号</label><input type="text" id="rec-problem-id" placeholder="如 P1001"></div>
-  <div class="form-group"><label>题目名称</label><input type="text" id="rec-title" placeholder="题目名称"></div>
-  <div class="form-group"><label>推荐理由（可选）</label><textarea id="rec-reason" placeholder="为什么推荐这道题？" style="min-height:60px"></textarea></div>
-  <div class="modal-footer">
-    <button class="btn btn-outline" onclick="closeModal('rec-modal')">取消</button>
-    <button class="btn btn-primary" onclick="submitRec()">提交推荐</button>
-  </div>
-</div></div>
-
-<!-- NOTE MODAL -->
-<div class="modal-overlay" id="note-modal"><div class="modal" style="width:580px">
-  <h2>✍️ 写题解</h2>
-  <div class="form-group"><label>标题</label><input type="text" id="note-title" placeholder="例：P3376 最大流 Dinic 详解"></div>
-  <div class="form-row">
-    <div class="form-group"><label>洛谷题号</label><input type="text" id="note-problem" placeholder="P????"></div>
-    <div class="form-group"><label>知识点标签</label><input type="text" id="note-topic" placeholder="例：网络流"></div>
-  </div>
-  <div class="form-group"><label>解题思路</label><textarea id="note-content" placeholder="分析题意，描述算法思路…"></textarea></div>
-  <div class="form-group"><label>C++ 代码</label><textarea id="note-code" class="code-input" placeholder="#include &lt;bits/stdc++.h&gt;&#10;using namespace std;"></textarea></div>
-  <div class="form-group"><label>反思与总结</label><textarea id="note-reflection" placeholder="收获、易错点…"></textarea></div>
-  <div id="note-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('note-modal')">取消</button><button class="btn btn-primary" onclick="submitNote()">发布</button></div>
-</div></div>
-
-<!-- POST MODAL -->
-<div class="modal-overlay" id="post-modal"><div class="modal">
-  <h2>📝 写随笔</h2>
-  <div class="form-group"><label>内容</label><textarea id="post-content" placeholder="记录今天的训练感受…" style="min-height:130px"></textarea></div>
-  <div id="post-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('post-modal')">取消</button><button class="btn btn-primary" onclick="submitPost()">发布</button></div>
-</div></div>
-
-<!-- CONTEST MODAL -->
-<div class="modal-overlay" id="contest-modal"><div class="modal" style="width:580px">
-  <h2>🏆 录入模拟赛</h2>
-  <div class="form-row">
-    <div class="form-group"><label>赛名</label><input type="text" id="c-title" placeholder="第X次模拟赛 · 主题"></div>
-    <div class="form-group"><label>日期</label><input type="date" id="c-date"></div>
-  </div>
-  <div class="form-group"><label>题目列表（空格或逗号分隔）</label><input type="text" id="c-problems" placeholder="P3376 P3381 P1983"></div>
-  <div class="form-group"><label>教练点评</label><textarea id="c-comment" placeholder="本次比赛总结…"></textarea></div>
-  <h3 style="font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 10px;">成绩录入</h3>
-  <div class="results-editor">
-    <table><thead><tr><th>姓名</th><th>AC数</th><th>总分</th><th>排名</th><th></th></tr></thead><tbody id="results-rows"></tbody></table>
-    <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="addResultRow()">+ 添加选手</button>
-  </div>
-  <div id="contest-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('contest-modal')">取消</button><button class="btn btn-primary" onclick="submitContest()">保存</button></div>
-</div></div>
-
-<!-- LECTURE MODAL -->
-<div class="modal-overlay" id="lecture-modal"><div class="modal" style="width:620px">
-  <h2>📖 添加课程记录</h2>
-  <div class="form-row">
-    <div class="form-group"><label>日期</label><input type="date" id="l-date"></div>
-    <div class="form-group"><label>难度方向</label>
-      <select id="l-level"><option value="">不限</option><option value="入门">入门</option><option value="普及-">普及-</option><option value="普及">普及</option><option value="普及+/提高-">普及+/提高-</option><option value="提高">提高</option><option value="省选/NOI">省选/NOI</option></select>
-    </div>
-  </div>
-  <div class="form-group"><label>主题</label><input type="text" id="l-topic" placeholder="例：线段树区间修改 · 懒标记"></div>
-  <div class="form-group"><label>课程内容 / 讲解要点</label><textarea id="l-content" placeholder="本节课讲了什么，重点难点…" style="min-height:70px"></textarea></div>
-  <div class="form-group"><label>关键结论（每行一条，建议3~5条）</label><textarea id="l-conclusions" style="min-height:90px" placeholder="1. 懒标记下推时机&#10;2. pushdown 在修改和查询前都需调用&#10;3. 区间加与区间乘合并时先乘后加"></textarea></div>
-  <div class="form-row">
-    <div class="form-group"><label>讲解题（洛谷题号，空格分隔）</label><input type="text" id="l-problems" placeholder="P3372 P3373"></div>
-    <div class="form-group"><label>作业题（洛谷题号，空格分隔）</label><input type="text" id="l-homework" placeholder="P3374 P3953"></div>
-  </div>
-  <div id="lecture-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('lecture-modal')">取消</button><button class="btn btn-primary" onclick="submitLecture()">保存</button>
-  </div>
-</div></div>
-
-<!-- COPY PROBLEMS HELPER (inline script removed, now pure JS) -->
-
-
-<!-- CodeMirror -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/ruby/ruby.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/go/go.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/php/php.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
-</head>
-<body>
-<canvas id="bg-canvas"></canvas>
-<nav>
-  <div class="nav-top">
-    <div class="nav-logo" onclick="show('home')" style="cursor:pointer">OI <span>·</span> TEAM</div>
-    <div style="display:flex;align-items:center;gap:6px">
-      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
-      <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()"><span>🔔</span><div class="notif-dot" id="notif-dot"></div></button>
-      <div id="nav-auth-area"><button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button></div>
-    </div>
-  </div>
-  <div class="nav-bottom">
-    <ul class="nav-links">
-      <li><a onclick="show('home')" id="nav-home" class="active">首页</a></li>
-      <li><a onclick="show('announcements')" id="nav-announcements">公告</a></li>
-      <li><a onclick="show('contests')" id="nav-contests">模拟赛</a></li>
-      <li><a onclick="show('notes')" id="nav-notes">题解</a></li>
-      <li><a onclick="show('emotions')" id="nav-emotions">随笔</a></li>
-      <li><a onclick="show('lectures')" id="nav-lectures">课程</a></li>
-      <li><a onclick="show('archive')" id="nav-archive">题库</a></li>
-      <li><a onclick="show('leaderboard')" id="nav-leaderboard">排行榜</a></li>
-      <li class="nav-more-wrap">
-        <a onclick="toggleMoreMenu(event)" class="nav-more-trigger">更多 ▾</a>
-        <div class="nav-more-menu" id="nav-more-menu">
-          <div class="nav-more-group-label">社区</div>
-          <a onclick="closeMoreMenu();show('members')" id="nav-members">👥 成员</a>
-          <a onclick="closeMoreMenu();show('emotions')" id="nav-emotions-m">✍️ 随笔</a>
-          <div class="nav-more-divider"></div>
-          <div class="nav-more-group-label">教学</div>
-          <a onclick="closeMoreMenu();show('syllabus')" id="nav-syllabus">📅 教学计划</a>
-          <div class="nav-more-divider"></div>
-          <div class="nav-more-group-label">工具</div>
-          <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
-          <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
-          <a onclick="closeMoreMenu();show('judge')" id="nav-judge">⚡ 在线评测</a>
-          <div class="nav-more-divider"></div>
-          <div class="nav-more-group-label">数据</div>
-          <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
-          <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">🏆 排行榜</a>
-          <div class="nav-more-divider"></div>
-          <a onclick="closeMoreMenu();show('daily')" id="nav-daily">📅 每日一题</a>
-          <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
-          <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
-        </div>
-      </li>
-    </ul>
-  </div>
-</nav>
-<div class="notif-panel" id="notif-panel"><div class="notif-header"><h3>通知</h3><button class="btn btn-outline btn-sm" onclick="markAllRead()">全部已读</button></div><div id="notif-list"><div class="notif-empty">// 暂无通知</div></div></div>
-<main class="main">
-
-<!-- HOME -->
-<section id="home" class="active"><div class="container">
-  <div class="hero">
-    <div class="hero-tag">算法竞赛训练队</div>
-    <h1>在代码里<br>寻找<span id="typewriter-text">思维的边界</span><span class="typewriter-cursor">_</span></h1>
-    <p class="hero-desc">我们是一支专注于信息学竞赛的训练团队。从图论到动态规划，每一道题都是一次与自己的对话。</p>
-  </div>
-  <div id="hero-stats-bar" style="margin-bottom:48px"></div>
-
-  <div id="home-daily-card" style="margin-bottom:32px"></div>
-  <div class="home-bento">
-    <!-- Left column: coach + skills -->
-    <div class="home-bento-left">
-      <div class="bento-card bento-coach">
-        <div class="bento-label">// 指导教练</div>
-        <div class="bento-coach-row">
-          <div class="bento-coach-avatar">万</div>
-          <div>
-            <div class="bento-coach-name">万家宝 老师</div>
-            <div class="bento-coach-quote">「面对难题时沉下心来的能力，比比赛名次更重要。」</div>
-          </div>
-        </div>
-      </div>
-      <div class="bento-card bento-skills">
-        <div class="bento-label">// 核心技能树</div>
-        <div class="skill-tags">
-          <span class="skill-tag">图论</span><span class="skill-tag">动态规划</span><span class="skill-tag">数据结构</span><span class="skill-tag">数论</span><span class="skill-tag">字符串</span><span class="skill-tag">网络流</span><span class="skill-tag">计算几何</span><span class="skill-tag">博弈论</span>
-        </div>
-      </div>
-      <div class="bento-card bento-goal">
-        <div class="bento-label">// 赛季目标</div>
-        <div class="bento-goal-items">
-          <div class="bento-goal-item"><span class="goal-dot dot-green"></span>冲刺 CSP-S 提高组</div>
-          <div class="bento-goal-item"><span class="goal-dot dot-blue"></span>部分成员备战 NOI 联赛</div>
-          <div class="bento-goal-item"><span class="goal-dot dot-yellow"></span>每周训练 · 月度模拟赛</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right column: activity feed -->
-    <div class="bento-card bento-feed">
-      <div class="bento-label">// recent activity</div>
-      <div id="home-feed"><div class="loading"><div class="spinner"></div>加载中…</div></div>
-      <button class="bento-more-btn" onclick="show('notes')">查看全部动态 →</button>
-    </div>
-  </div>
-</div></section>
-
-<!-- ANNOUNCEMENTS -->
-<section id="announcements"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// announcements</div><h1>通知公告</h1><p>万家宝 老师发布的比赛通知与训练安排。</p></div>
-    <button class="btn btn-yellow btn-sm" id="btn-new-ann" onclick="openAnnModal()" style="display:none">+ 发布公告</button>
-  </div>
-  <div id="ann-list"></div>
-</div></section>
-
-<!-- CONTESTS -->
-<section id="contests"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// mock_contests</div><h1>模拟赛记录</h1><p>内部模拟赛成绩与教练点评。</p></div>
-    <button class="btn btn-yellow btn-sm" id="btn-new-contest" onclick="openContestModal()" style="display:none">+ 录入模拟赛</button>
-  </div>
-  <div id="contests-list"></div>
-</div></section>
-
-<!-- NOTES -->
-<section id="notes"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// problem_notes</div><h1>题解笔记</h1><p>同学们的解题思路与 C++ 代码分享。</p></div>
-    <button class="btn btn-primary btn-sm" id="btn-new-note" onclick="openNoteModal()" style="display:none">+ 写题解</button>
-  </div>
-  <div class="tag-filter-bar" id="notes-tag-bar"></div>
-  <div id="notes-list"></div>
-  <div class="post-detail" id="note-detail"></div>
-</div></section>
-
-<!-- EMOTIONS -->
-<section id="emotions"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// learning_log</div><h1>随笔 · 学习日志</h1><p>记录训练中的心情、感悟与小小的成长。</p></div>
-    <button class="btn btn-primary btn-sm" id="btn-new-post" onclick="openPostModal()" style="display:none">+ 写随笔</button>
-  </div>
-  <div class="emotion-feed" id="emotions-list"></div>
-</div></section>
-
-<!-- LECTURES -->
-<section id="lectures"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// lecture_records</div><h1>课程记录</h1><p>每次课的主题与练习题，题目均链接至洛谷。</p></div>
-    <button class="btn btn-yellow btn-sm" id="btn-new-lecture" onclick="openLectureModal()" style="display:none">+ 添加课程</button>
-  </div>
-  <div id="lectures-list"></div>
-</div></section>
-
-<!-- ARCHIVE -->
-<section id="archive"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// problem_archive</div><h1>题目存档</h1><p>训练题库，按难度与知识点分类。</p></div>
-    <button class="btn btn-yellow btn-sm" id="btn-new-problem" onclick="openProblemModal()" style="display:none">+ 添加题目</button>
-  </div>
-  <div id="archive-list"></div>
-</div></section>
-
-
-<!-- DAILY PROBLEM -->
-<section id="daily"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// daily_challenge</div><h1>每日一题</h1><p>每天一道题，持续进步。</p></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-outline btn-sm" onclick="openModal('rec-modal')">💡 推荐题目</button>
-      <button class="btn btn-yellow btn-sm" id="btn-set-daily" onclick="openModal('set-daily-modal')" style="display:none">+ 发布今日题</button>
-    </div>
-  </div>
-  <div id="daily-content"></div>
-</div></section>
-
-<!-- BOOKMARKS -->
-<section id="bookmarks"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// bookmarks</div><h1>我的收藏</h1><p>收藏的题解。</p></div></div>
-  <div id="bookmarks-list"><div class="empty">登录后查看收藏</div></div>
-</div></section>
-
-<!-- SEARCH -->
-<section id="search"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// search</div><h1>搜索题解</h1><p>按题号、知识点或关键词搜索。</p></div></div>
-  <div class="search-bar"><input type="text" id="search-input" placeholder="输入题号（如 P3376）、知识点（如 网络流）或关键词…" oninput="doSearch()"></div>
-  <div class="search-filters" id="search-filter-bar">
-    <button class="filter-btn active" data-f="" onclick="setFilter('')">全部</button>
-    <button class="filter-btn" onclick="setFilter('图论')">图论</button>
-    <button class="filter-btn" onclick="setFilter('动态规划')">动态规划</button>
-    <button class="filter-btn" onclick="setFilter('数据结构')">数据结构</button>
-    <button class="filter-btn" onclick="setFilter('数论')">数论</button>
-    <button class="filter-btn" onclick="setFilter('字符串')">字符串</button>
-    <button class="filter-btn" onclick="setFilter('网络流')">网络流</button>
-  </div>
-  <div id="search-results"><div class="empty">输入关键词开始搜索</div></div>
-</div></section>
-
-<!-- RESOURCES -->
-<section id="resources"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// resources</div><h1>学习资源</h1><p>竞赛常用平台与文档。</p></div></div>
-  <div class="resource-grid">
-    <a class="resource-card" href="https://www.luogu.com.cn" target="_blank"><div class="resource-icon">洛</div><div><h3>洛谷</h3><p>国内最大 OI 题库与评测系统。</p><div class="resource-url">luogu.com.cn</div></div></a>
-    <a class="resource-card" href="https://codeforces.com" target="_blank"><div class="resource-icon">CF</div><div><h3>Codeforces</h3><p>国际顶级竞赛平台，Div.1/2 比赛。</p><div class="resource-url">codeforces.com</div></div></a>
-    <a class="resource-card" href="https://oi-wiki.org" target="_blank"><div class="resource-icon">W</div><div><h3>OI Wiki</h3><p>中文 OI 完整知识体系文档。</p><div class="resource-url">oi-wiki.org</div></div></a>
-    <a class="resource-card" href="https://atcoder.jp" target="_blank"><div class="resource-icon">AT</div><div><h3>AtCoder</h3><p>日本顶级平台，数学与构造题为主。</p><div class="resource-url">atcoder.jp</div></div></a>
-    <a class="resource-card" href="https://vjudge.net" target="_blank"><div class="resource-icon">VJ</div><div><h3>Virtual Judge</h3><p>聚合多平台题目，可建私人题单。</p><div class="resource-url">vjudge.net</div></div></a>
-    <a class="resource-card" href="https://cppreference.com" target="_blank"><div class="resource-icon">C++</div><div><h3>cppreference</h3><p>C++ 标准库完整文档。</p><div class="resource-url">cppreference.com</div></div></a>
-  </div>
-</div></section>
-
-
-
-<!-- STATS -->
-<section id="stats"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// team_stats</div><h1>团队数据</h1><p>训练成果与活跃度一览。</p></div></div>
-  <div id="stats-content"><div class="loading"><div class="spinner"></div>加载中…</div></div>
-</div></section>
-
-<!-- LEADERBOARD -->
-<section id="leaderboard"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// leaderboard</div><h1>排行榜</h1><p>按题解数量、模拟赛平均分排名。</p></div></div>
-  <div class="lb-tabs">
-    <button class="lb-tab active" onclick="loadLeaderboard('notes')">题解榜</button>
-    <button class="lb-tab" onclick="loadLeaderboard('score')">模拟赛榜</button>
-  </div>
-  <div id="lb-list"><div class="loading"><div class="spinner"></div>加载中…</div></div>
-</div></section>
-
-<!-- MEMBERS -->
-<section id="members"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// members</div><h1>队员列表</h1><p>认识我们的每一位成员。</p></div></div>
-  <div id="members-list"><div class="loading"><div class="spinner"></div>加载中…</div></div>
-</div></section>
-
-<!-- PROFILE -->
-<section id="profile"><div class="container">
-  <button class="back-btn" onclick="history.back();show('notes')">← 返回</button>
-  <div id="profile-content"><div class="loading"><div class="spinner"></div>加载中…</div></div>
-</div></section>
-
-<!-- ADMIN -->
-<section id="admin"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// coach_admin</div><h1>教练后台</h1><p>管理用户权限与内容。</p></div></div>
-  <div class="admin-section"><h2>用户管理</h2><div id="admin-users"></div></div>
-  <div class="admin-section"><h2>题解管理</h2><div id="admin-notes"></div></div>
-</div></section>
-
-</main>
-<footer>// OI Training Team · 万家宝 老师 · Powered by Supabase</footer>
-
-<!-- AUTH MODAL -->
-<div class="modal-overlay" id="auth-modal"><div class="modal" style="max-width:400px;width:100%">
-  <div class="modal-tabs">
-    <button class="modal-tab active" onclick="switchAuthTab('login')">登录</button>
-    <button class="modal-tab" onclick="switchAuthTab('register')">注册</button>
-  </div>
-  <div id="login-form">
-    <div class="form-group"><label>用户名</label><input type="text" id="login-username" placeholder="你的用户名"></div>
-    <div class="form-group"><label>密码</label><input type="password" id="login-password" placeholder="••••••••"></div>
-    <div id="login-error" class="form-error"></div>
-    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('auth-modal')">取消</button><button class="btn btn-primary" onclick="doLogin()">登录</button></div>
-  </div>
-  <div id="register-form" style="display:none">
-    <div class="form-group"><label>用户名</label><input type="text" id="reg-username" placeholder="你的昵称（唯一）"></div>
-    <div class="form-group"><label>密码（至少6位）</label><input type="password" id="reg-password" placeholder="••••••••"></div>
-    <div class="form-group"><label>训练组</label>
-      <select id="reg-group">
-        <option value="">暂不选择</option>
-        <option value="1">周六早八</option>
-        <option value="2">周六早十</option>
-        <option value="3">周六午一</option>
-        <option value="4">周六午三</option>
-        <option value="5">周六晚八</option>
-        <option value="6">周天早八</option>
-        <option value="7">NOIP班</option>
-        <option value="8">抖音</option>
-      </select>
-    </div>
-    <div id="reg-error" class="form-error"></div><div id="reg-success" class="form-success"></div>
-    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('auth-modal')">取消</button><button class="btn btn-primary" onclick="doRegister()">注册</button></div>
-  </div>
-</div></div>
-
-<!-- SET DAILY MODAL (coach) -->
-<div class="modal-overlay" id="set-daily-modal"><div class="modal" style="max-width:500px;width:100%">
-  <h2>📅 发布今日一题</h2>
-  <div class="form-group"><label>来源</label>
-    <select id="daily-source" onchange="toggleDailySource()">
-      <option value="manual">直接输入题号</option>
-      <option value="archive">从题库选择</option>
-    </select>
-  </div>
-  <div id="daily-manual-fields">
-    <div class="form-group"><label>洛谷题号</label><input type="text" id="daily-problem-id" placeholder="如 P3376"></div>
-    <div class="form-group"><label>题目名称</label><input type="text" id="daily-title" placeholder="如 网络最大流"></div>
-    <div class="form-group"><label>难度</label>
-      <select id="daily-difficulty">
-        <option value="">不标注</option>
-        <option value="入门">入门</option>
-        <option value="普及-">普及-</option>
-        <option value="普及">普及</option>
-        <option value="普及+提高-">普及+提高-</option>
-        <option value="提高">提高</option>
-        <option value="省选NOI">省选/NOI</option>
-      </select>
-    </div>
-  </div>
-  <div id="daily-archive-fields" style="display:none">
-    <div class="form-group"><label>从题库选题</label>
-      <select id="daily-archive-select"><option value="">加载中…</option></select>
-    </div>
-  </div>
-  <div class="form-group"><label>教练备注（可选）</label><textarea id="daily-note" placeholder="提示思路或考察知识点…" style="min-height:60px"></textarea></div>
-  <div class="form-group"><label>日期</label><input type="date" id="daily-date"></div>
-  <div class="modal-footer">
-    <button class="btn btn-outline" onclick="closeModal('set-daily-modal')">取消</button>
-    <button class="btn btn-primary" onclick="submitDaily()">发布</button>
-  </div>
-</div></div>
-
-<!-- RECOMMEND MODAL (all users) -->
-<div class="modal-overlay" id="rec-modal"><div class="modal" style="max-width:460px;width:100%">
-  <h2>💡 推荐题目</h2>
-  <div class="form-group"><label>洛谷题号</label><input type="text" id="rec-problem-id" placeholder="如 P1001"></div>
-  <div class="form-group"><label>题目名称</label><input type="text" id="rec-title" placeholder="题目名称"></div>
-  <div class="form-group"><label>推荐理由（可选）</label><textarea id="rec-reason" placeholder="为什么推荐这道题？" style="min-height:60px"></textarea></div>
-  <div class="modal-footer">
-    <button class="btn btn-outline" onclick="closeModal('rec-modal')">取消</button>
-    <button class="btn btn-primary" onclick="submitRec()">提交推荐</button>
-  </div>
-</div></div>
-
-<!-- NOTE MODAL -->
-<div class="modal-overlay" id="note-modal"><div class="modal" style="width:580px">
-  <h2>✍️ 写题解</h2>
-  <div class="form-group"><label>标题</label><input type="text" id="note-title" placeholder="例：P3376 最大流 Dinic 详解"></div>
-  <div class="form-row">
-    <div class="form-group"><label>洛谷题号</label><input type="text" id="note-problem" placeholder="P????"></div>
-    <div class="form-group"><label>知识点标签</label><input type="text" id="note-topic" placeholder="例：网络流"></div>
-  </div>
-  <div class="form-group"><label>解题思路</label><textarea id="note-content" placeholder="分析题意，描述算法思路…"></textarea></div>
-  <div class="form-group"><label>C++ 代码</label><textarea id="note-code" class="code-input" placeholder="#include &lt;bits/stdc++.h&gt;&#10;using namespace std;"></textarea></div>
-  <div class="form-group"><label>反思与总结</label><textarea id="note-reflection" placeholder="收获、易错点…"></textarea></div>
-  <div id="note-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('note-modal')">取消</button><button class="btn btn-primary" onclick="submitNote()">发布</button></div>
-</div></div>
-
-<!-- POST MODAL -->
-<div class="modal-overlay" id="post-modal"><div class="modal">
-  <h2>📝 写随笔</h2>
-  <div class="form-group"><label>内容</label><textarea id="post-content" placeholder="记录今天的训练感受…" style="min-height:130px"></textarea></div>
-  <div id="post-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('post-modal')">取消</button><button class="btn btn-primary" onclick="submitPost()">发布</button></div>
-</div></div>
-
-<!-- CONTEST MODAL -->
-<div class="modal-overlay" id="contest-modal"><div class="modal" style="width:580px">
-  <h2>🏆 录入模拟赛</h2>
-  <div class="form-row">
-    <div class="form-group"><label>赛名</label><input type="text" id="c-title" placeholder="第X次模拟赛 · 主题"></div>
-    <div class="form-group"><label>日期</label><input type="date" id="c-date"></div>
-  </div>
-  <div class="form-group"><label>题目列表（空格或逗号分隔）</label><input type="text" id="c-problems" placeholder="P3376 P3381 P1983"></div>
-  <div class="form-group"><label>教练点评</label><textarea id="c-comment" placeholder="本次比赛总结…"></textarea></div>
-  <h3 style="font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 10px;">成绩录入</h3>
-  <div class="results-editor">
-    <table><thead><tr><th>姓名</th><th>AC数</th><th>总分</th><th>排名</th><th></th></tr></thead><tbody id="results-rows"></tbody></table>
-    <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="addResultRow()">+ 添加选手</button>
-  </div>
-  <div id="contest-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('contest-modal')">取消</button><button class="btn btn-primary" onclick="submitContest()">保存</button></div>
-</div></div>
-
-<!-- LECTURE MODAL -->
-<div class="modal-overlay" id="lecture-modal"><div class="modal" style="width:620px">
-  <h2>📖 添加课程记录</h2>
-  <div class="form-row">
-    <div class="form-group"><label>日期</label><input type="date" id="l-date"></div>
-    <div class="form-group"><label>难度方向</label>
-      <select id="l-level"><option value="">不限</option><option value="入门">入门</option><option value="普及-">普及-</option><option value="普及">普及</option><option value="普及+/提高-">普及+/提高-</option><option value="提高">提高</option><option value="省选/NOI">省选/NOI</option></select>
-    </div>
-  </div>
-  <div class="form-group"><label>主题</label><input type="text" id="l-topic" placeholder="例：线段树区间修改 · 懒标记"></div>
-  <div class="form-group"><label>课程内容 / 讲解要点</label><textarea id="l-content" placeholder="本节课讲了什么，重点难点…" style="min-height:70px"></textarea></div>
-  <div class="form-group"><label>关键结论（每行一条，建议3~5条）</label><textarea id="l-conclusions" style="min-height:90px" placeholder="1. 懒标记下推时机&#10;2. pushdown 在修改和查询前都需调用&#10;3. 区间加与区间乘合并时先乘后加"></textarea></div>
-  <div class="form-row">
-    <div class="form-group"><label>讲解题（洛谷题号，空格分隔）</label><input type="text" id="l-problems" placeholder="P3372 P3373"></div>
-    <div class="form-group"><label>作业题（洛谷题号，空格分隔）</label><input type="text" id="l-homework" placeholder="P3374 P3953"></div>
-  </div>
-  <div id="lecture-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('lecture-modal')">取消</button><button class="btn btn-primary" onclick="submitLecture()">保存</button>
-  </div>
-</div></div>
-
-<!-- COPY PROBLEMS HELPER (inline script removed, now pure JS) -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/ruby/ruby.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/go/go.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/php/php.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
-</head>
-<body>
-<canvas id="bg-canvas"></canvas>
-<nav>
-  <div class="nav-top">
-    <div class="nav-logo" onclick="show('home')" style="cursor:pointer">OI <span>·</span> TEAM</div>
-    <div style="display:flex;align-items:center;gap:6px">
-      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
-      <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()"><span>🔔</span><div class="notif-dot" id="notif-dot"></div></button>
-      <div id="nav-auth-area"><button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button></div>
-    </div>
-  </div>
-  <div class="nav-bottom">
-    <ul class="nav-links">
-      <li><a onclick="show('home')" id="nav-home" class="active">首页</a></li>
-      <li><a onclick="show('announcements')" id="nav-announcements">公告</a></li>
-      <li><a onclick="show('contests')" id="nav-contests">模拟赛</a></li>
-      <li><a onclick="show('notes')" id="nav-notes">题解</a></li>
-      <li><a onclick="show('emotions')" id="nav-emotions">随笔</a></li>
-      <li><a onclick="show('lectures')" id="nav-lectures">课程</a></li>
-      <li><a onclick="show('archive')" id="nav-archive">题库</a></li>
-      <li><a onclick="show('leaderboard')" id="nav-leaderboard">排行榜</a></li>
-      <li class="nav-more-wrap">
-        <a onclick="toggleMoreMenu(event)" class="nav-more-trigger">更多 ▾</a>
-        <div class="nav-more-menu" id="nav-more-menu">
-          <div class="nav-more-group-label">社区</div>
-          <a onclick="closeMoreMenu();show('members')" id="nav-members">👥 成员</a>
-          <a onclick="closeMoreMenu();show('emotions')" id="nav-emotions-m">✍️ 随笔</a>
-          <div class="nav-more-divider"></div>
-          <div class="nav-more-group-label">教学</div>
-          <a onclick="closeMoreMenu();show('syllabus')" id="nav-syllabus">📅 教学计划</a>
-          <div class="nav-more-divider"></div>
-          <div class="nav-more-group-label">工具</div>
-          <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
-          <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
-          <a onclick="closeMoreMenu();show('judge')" id="nav-judge">⚡ 在线评测</a>
-          <div class="nav-more-divider"></div>
-          <div class="nav-more-group-label">数据</div>
-          <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
-          <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">🏆 排行榜</a>
-          <div class="nav-more-divider"></div>
-          <a onclick="closeMoreMenu();show('daily')" id="nav-daily">📅 每日一题</a>
-          <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
-          <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
-        </div>
-      </li>
-    </ul>
-  </div>
-</nav>
-<div class="notif-panel" id="notif-panel"><div class="notif-header"><h3>通知</h3><button class="btn btn-outline btn-sm" onclick="markAllRead()">全部已读</button></div><div id="notif-list"><div class="notif-empty">// 暂无通知</div></div></div>
-<main class="main">
-
-<!-- HOME -->
-<section id="home" class="active"><div class="container">
-  <div class="hero">
-    <div class="hero-tag">算法竞赛训练队</div>
-    <h1>在代码里<br>寻找<span id="typewriter-text">思维的边界</span><span class="typewriter-cursor">_</span></h1>
-    <p class="hero-desc">我们是一支专注于信息学竞赛的训练团队。从图论到动态规划，每一道题都是一次与自己的对话。</p>
-  </div>
-  <div id="hero-stats-bar" style="margin-bottom:48px"></div>
-
-  <div id="home-daily-card" style="margin-bottom:32px"></div>
-  <div class="home-bento">
-    <!-- Left column: coach + skills -->
-    <div class="home-bento-left">
-      <div class="bento-card bento-coach">
-        <div class="bento-label">// 指导教练</div>
-        <div class="bento-coach-row">
-          <div class="bento-coach-avatar">万</div>
-          <div>
-            <div class="bento-coach-name">万家宝 老师</div>
-            <div class="bento-coach-quote">「面对难题时沉下心来的能力，比比赛名次更重要。」</div>
-          </div>
-        </div>
-      </div>
-      <div class="bento-card bento-skills">
-        <div class="bento-label">// 核心技能树</div>
-        <div class="skill-tags">
-          <span class="skill-tag">图论</span><span class="skill-tag">动态规划</span><span class="skill-tag">数据结构</span><span class="skill-tag">数论</span><span class="skill-tag">字符串</span><span class="skill-tag">网络流</span><span class="skill-tag">计算几何</span><span class="skill-tag">博弈论</span>
-        </div>
-      </div>
-      <div class="bento-card bento-goal">
-        <div class="bento-label">// 赛季目标</div>
-        <div class="bento-goal-items">
-          <div class="bento-goal-item"><span class="goal-dot dot-green"></span>冲刺 CSP-S 提高组</div>
-          <div class="bento-goal-item"><span class="goal-dot dot-blue"></span>部分成员备战 NOI 联赛</div>
-          <div class="bento-goal-item"><span class="goal-dot dot-yellow"></span>每周训练 · 月度模拟赛</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right column: activity feed -->
-    <div class="bento-card bento-feed">
-      <div class="bento-label">// recent activity</div>
-      <div id="home-feed"><div class="loading"><div class="spinner"></div>加载中…</div></div>
-      <button class="bento-more-btn" onclick="show('notes')">查看全部动态 →</button>
-    </div>
-  </div>
-</div></section>
-
-<!-- ANNOUNCEMENTS -->
-<section id="announcements"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// announcements</div><h1>通知公告</h1><p>万家宝 老师发布的比赛通知与训练安排。</p></div>
-    <button class="btn btn-yellow btn-sm" id="btn-new-ann" onclick="openAnnModal()" style="display:none">+ 发布公告</button>
-  </div>
-  <div id="ann-list"></div>
-</div></section>
-
-<!-- CONTESTS -->
-<section id="contests"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// mock_contests</div><h1>模拟赛记录</h1><p>内部模拟赛成绩与教练点评。</p></div>
-    <button class="btn btn-yellow btn-sm" id="btn-new-contest" onclick="openContestModal()" style="display:none">+ 录入模拟赛</button>
-  </div>
-  <div id="contests-list"></div>
-</div></section>
-
-<!-- NOTES -->
-<section id="notes"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// problem_notes</div><h1>题解笔记</h1><p>同学们的解题思路与 C++ 代码分享。</p></div>
-    <button class="btn btn-primary btn-sm" id="btn-new-note" onclick="openNoteModal()" style="display:none">+ 写题解</button>
-  </div>
-  <div class="tag-filter-bar" id="notes-tag-bar"></div>
-  <div id="notes-list"></div>
-  <div class="post-detail" id="note-detail"></div>
-</div></section>
-
-<!-- EMOTIONS -->
-<section id="emotions"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// learning_log</div><h1>随笔 · 学习日志</h1><p>记录训练中的心情、感悟与小小的成长。</p></div>
-    <button class="btn btn-primary btn-sm" id="btn-new-post" onclick="openPostModal()" style="display:none">+ 写随笔</button>
-  </div>
-  <div class="emotion-feed" id="emotions-list"></div>
-</div></section>
-
-<!-- LECTURES -->
-<section id="lectures"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// lecture_records</div><h1>课程记录</h1><p>每次课的主题与练习题，题目均链接至洛谷。</p></div>
-    <button class="btn btn-yellow btn-sm" id="btn-new-lecture" onclick="openLectureModal()" style="display:none">+ 添加课程</button>
-  </div>
-  <div id="lectures-list"></div>
-</div></section>
-
-<!-- ARCHIVE -->
-<section id="archive"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// problem_archive</div><h1>题目存档</h1><p>训练题库，按难度与知识点分类。</p></div>
-    <button class="btn btn-yellow btn-sm" id="btn-new-problem" onclick="openProblemModal()" style="display:none">+ 添加题目</button>
-  </div>
-  <div id="archive-list"></div>
-</div></section>
-
-
-<!-- DAILY PROBLEM -->
-<section id="daily"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left"><div class="label">// daily_challenge</div><h1>每日一题</h1><p>每天一道题，持续进步。</p></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-outline btn-sm" onclick="openModal('rec-modal')">💡 推荐题目</button>
-      <button class="btn btn-yellow btn-sm" id="btn-set-daily" onclick="openModal('set-daily-modal')" style="display:none">+ 发布今日题</button>
-    </div>
-  </div>
-  <div id="daily-content"></div>
-</div></section>
-
-<!-- BOOKMARKS -->
-<section id="bookmarks"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// bookmarks</div><h1>我的收藏</h1><p>收藏的题解。</p></div></div>
-  <div id="bookmarks-list"><div class="empty">登录后查看收藏</div></div>
-</div></section>
-
-<!-- SEARCH -->
-<section id="search"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// search</div><h1>搜索题解</h1><p>按题号、知识点或关键词搜索。</p></div></div>
-  <div class="search-bar"><input type="text" id="search-input" placeholder="输入题号（如 P3376）、知识点（如 网络流）或关键词…" oninput="doSearch()"></div>
-  <div class="search-filters" id="search-filter-bar">
-    <button class="filter-btn active" data-f="" onclick="setFilter('')">全部</button>
-    <button class="filter-btn" onclick="setFilter('图论')">图论</button>
-    <button class="filter-btn" onclick="setFilter('动态规划')">动态规划</button>
-    <button class="filter-btn" onclick="setFilter('数据结构')">数据结构</button>
-    <button class="filter-btn" onclick="setFilter('数论')">数论</button>
-    <button class="filter-btn" onclick="setFilter('字符串')">字符串</button>
-    <button class="filter-btn" onclick="setFilter('网络流')">网络流</button>
-  </div>
-  <div id="search-results"><div class="empty">输入关键词开始搜索</div></div>
-</div></section>
-
-<!-- RESOURCES -->
-<section id="resources"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// resources</div><h1>学习资源</h1><p>竞赛常用平台与文档。</p></div></div>
-  <div class="resource-grid">
-    <a class="resource-card" href="https://www.luogu.com.cn" target="_blank"><div class="resource-icon">洛</div><div><h3>洛谷</h3><p>国内最大 OI 题库与评测系统。</p><div class="resource-url">luogu.com.cn</div></div></a>
-    <a class="resource-card" href="https://codeforces.com" target="_blank"><div class="resource-icon">CF</div><div><h3>Codeforces</h3><p>国际顶级竞赛平台，Div.1/2 比赛。</p><div class="resource-url">codeforces.com</div></div></a>
-    <a class="resource-card" href="https://oi-wiki.org" target="_blank"><div class="resource-icon">W</div><div><h3>OI Wiki</h3><p>中文 OI 完整知识体系文档。</p><div class="resource-url">oi-wiki.org</div></div></a>
-    <a class="resource-card" href="https://atcoder.jp" target="_blank"><div class="resource-icon">AT</div><div><h3>AtCoder</h3><p>日本顶级平台，数学与构造题为主。</p><div class="resource-url">atcoder.jp</div></div></a>
-    <a class="resource-card" href="https://vjudge.net" target="_blank"><div class="resource-icon">VJ</div><div><h3>Virtual Judge</h3><p>聚合多平台题目，可建私人题单。</p><div class="resource-url">vjudge.net</div></div></a>
-    <a class="resource-card" href="https://cppreference.com" target="_blank"><div class="resource-icon">C++</div><div><h3>cppreference</h3><p>C++ 标准库完整文档。</p><div class="resource-url">cppreference.com</div></div></a>
-  </div>
-</div></section>
-
-
-
-<!-- STATS -->
-<section id="stats"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// team_stats</div><h1>团队数据</h1><p>训练成果与活跃度一览。</p></div></div>
-  <div id="stats-content"><div class="loading"><div class="spinner"></div>加载中…</div></div>
-</div></section>
-
-<!-- LEADERBOARD -->
-<section id="leaderboard"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// leaderboard</div><h1>排行榜</h1><p>按题解数量、模拟赛平均分排名。</p></div></div>
-  <div class="lb-tabs">
-    <button class="lb-tab active" onclick="loadLeaderboard('notes')">题解榜</button>
-    <button class="lb-tab" onclick="loadLeaderboard('score')">模拟赛榜</button>
-  </div>
-  <div id="lb-list"><div class="loading"><div class="spinner"></div>加载中…</div></div>
-</div></section>
-
-<!-- MEMBERS -->
-<section id="members"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// members</div><h1>队员列表</h1><p>认识我们的每一位成员。</p></div></div>
-  <div id="members-list"><div class="loading"><div class="spinner"></div>加载中…</div></div>
-</div></section>
-
-<!-- PROFILE -->
-<section id="profile"><div class="container">
-  <button class="back-btn" onclick="history.back();show('notes')">← 返回</button>
-  <div id="profile-content"><div class="loading"><div class="spinner"></div>加载中…</div></div>
-</div></section>
-
-<!-- ADMIN -->
-<section id="admin"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// coach_admin</div><h1>教练后台</h1><p>管理用户权限与内容。</p></div></div>
-  <div class="admin-section"><h2>用户管理</h2><div id="admin-users"></div></div>
-  <div class="admin-section"><h2>题解管理</h2><div id="admin-notes"></div></div>
-</div></section>
-
-</main>
-<footer>// OI Training Team · 万家宝 老师 · Powered by Supabase</footer>
+<footer>// OI Training Team · 万家宝 老师 · <span>hjoi.com.cn</span> · Powered by Supabase</footer>
 
 <!-- AUTH MODAL -->
 <div class="modal-overlay" id="auth-modal"><div class="modal" style="max-width:400px;width:100%">
@@ -3227,11 +2425,7 @@ function avatarEl(username,avatarUrl,size,fontSize){
   }
 
   let frame = 0;
-  let rafId = null;
-  let paused = false;
-
   function draw() {
-    if(paused){ rafId = null; return; }
     ctx.clearRect(0, 0, W, H);
 
     // Spawn new words from right
@@ -3256,20 +2450,13 @@ function avatarEl(username,avatarUrl,size,fontSize){
     }
 
     frame++;
-    rafId = requestAnimationFrame(draw);
+    if(!document.hidden) requestAnimationFrame(draw);
   }
-
-  // 页面隐藏时暂停动画，恢复时重启，节省 CPU
+  draw();
+  // 页面隐藏时暂停动画，恢复时继续，节省 CPU/电量
   document.addEventListener('visibilitychange', () => {
-    if(document.hidden){
-      paused = true;
-    } else {
-      paused = false;
-      if(!rafId) rafId = requestAnimationFrame(draw);
-    }
+    if(!document.hidden) draw();
   });
-
-  rafId = requestAnimationFrame(draw);
 })();
 
 // ── Click Particles ────────────────────────────────────────
@@ -3297,28 +2484,16 @@ document.addEventListener('click',function(e){
   }
 });
 
-// ══════════════════════════════════════════════
-//  ⚠️  配置区 — 部署前请检查以下所有 Key
-//  生产环境建议通过后端代理转发，避免 Key 暴露
-// ══════════════════════════════════════════════
-
-// Supabase: anon key 为只读公开 key，但必须在 Supabase Dashboard
-// 中为所有表启用 Row Level Security (RLS)，否则任何人可读写数据。
-// 教练写权限必须通过 RLS policy 校验 role='coach'，不能只靠前端判断。
-const SUPABASE_URL='https://dgsugcvedimcecudstkq.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDA2MDYsImV4cCI6MjA4ODIxNjYwNn0.0AnkF5MMrtiqwbau9q6pLD6pDrzXRkyPIoNsx4au8xI';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+// ── Supabase 配置 ──────────────────────────────────────────
+// ⚠️  安全提示：以下为 anon key（公开只读密钥），属于 Supabase 设计允许的前端使用方式。
+// ⚠️  但必须在 Supabase 后台启用 RLS（行级安全策略），否则任何人可直接读写数据库！
+// ⚠️  检查路径：Supabase Dashboard → Table Editor → 每张表 → Enable RLS
+// ⚠️  绝对不能将 service_role key 放到前端代码中。
+const SUPABASE_URL = 'https://dgsugcvedimcecudstkq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDA2MDYsImV4cCI6MjA4ODIxNjYwNn0.0AnkF5MMrtiqwbau9q6pLD6pDrzXRkyPIoNsx4au8xI';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser=null,currentProfile=null;
 const isCoach=()=>currentProfile?.role==='coach';
-
-// ── 权限守卫工具函数 ──────────────────────────
-// 所有写操作调用此函数做前端二次校验
-// 注意：真正的权限控制必须依赖 Supabase RLS，此处仅为 UI 层防护
-function guardCoach(action='此操作'){
-  if(!currentUser){showToast('请先登录','error');return false;}
-  if(!isCoach()){showToast(`${action}仅限教练操作`,'error');return false;}
-  return true;
-}
 
 // ── Navigation ─────────────────────────────────────────────
 function show(id){
@@ -3351,15 +2526,36 @@ function renderAuthArea(){
 }
 
 async function loadSession(){
+  // 页面初始化：直接从 getSession 获取，避免与 onAuthStateChange 竞争
   const{data:{session}}=await sb.auth.getSession();
-  if(session){currentUser=session.user;const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();currentProfile=data;}
-  renderAuthArea();loadHomeFeed();if(currentUser)checkNotifDot();
-}
-sb.auth.onAuthStateChange(async(_,session)=>{
-  if(session){currentUser=session.user;const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();currentProfile=data;}
-  else{currentUser=null;currentProfile=null;}
+  if(session){
+    currentUser=session.user;
+    const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+    currentProfile=data;
+  }
   renderAuthArea();
+  loadHomeFeed();
   if(currentUser)checkNotifDot();
+}
+
+// onAuthStateChange 仅处理登录/登出事件，不与 loadSession 竞争
+let _authInitDone = false;
+sb.auth.onAuthStateChange(async(event, session)=>{
+  // 忽略页面加载时 Supabase 自动触发的第一次 INITIAL_SESSION 事件
+  // 由 loadSession() 统一处理，避免竞争条件
+  if(!_authInitDone){ _authInitDone=true; return; }
+
+  if(session){
+    currentUser=session.user;
+    // 必须等 profile 加载完再渲染，否则右上角仍显示"登录/注册"
+    const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+    currentProfile=data;
+  } else {
+    currentUser=null;
+    currentProfile=null;
+  }
+  renderAuthArea();
+  if(currentUser){ checkNotifDot(); loadHomeFeed(); }
 });
 
 function usernameToEmail(u){return`${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@oiteam.local`;}
@@ -3373,9 +2569,17 @@ async function doLogin(){
   const password=document.getElementById('login-password').value;
   document.getElementById('login-error').textContent='';
   if(!username){document.getElementById('login-error').textContent='请填写用户名';return;}
-  const{error}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});
+  const{data:signInData,error}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});
   if(error){document.getElementById('login-error').textContent='用户名或密码错误';return;}
-  closeModal('auth-modal');showToast('登录成功 ✓','success');loadHomeFeed();
+  // 登录成功后立即加载 profile，确保右上角立即更新
+  currentUser=signInData.user;
+  const{data:profile}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  currentProfile=profile;
+  closeModal('auth-modal');
+  renderAuthArea();
+  showToast('登录成功 ✓','success');
+  loadHomeFeed();
+  checkNotifDot();
 }
 async function doRegister(){
   const username=document.getElementById('reg-username').value.trim();
@@ -3391,13 +2595,7 @@ async function doRegister(){
   document.getElementById('reg-success').textContent='注册成功，正在登录…';
   setTimeout(async()=>{const{error:le}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});if(!le){closeModal('auth-modal');showToast('注册并登录成功 ✓','success');loadHomeFeed();}},800);
 }
-async function doLogout(){
-  try{
-    await sb.auth.signOut();
-    showToast('已退出登录','success');
-    loadHomeFeed();
-  }catch(e){showToast('退出失败: '+e.message,'error');}
-}
+async function doLogout(){await sb.auth.signOut();showToast('已退出登录','success');loadHomeFeed();}
 
 // ── Home ───────────────────────────────────────────────────
 async function loadHomeFeed(){
@@ -3645,21 +2843,14 @@ async function doCheckin(dailyId){
 }
 
 async function undoCheckin(dailyId){
-  try{
-    const{error}=await sb.from('daily_checkins').delete().eq('daily_id',dailyId).eq('user_id',currentUser.id);
-    if(error)throw error;
-    loadDaily();
-  }catch(e){showToast('取消打卡失败: '+e.message,'error');}
+  await sb.from('daily_checkins').delete().eq('daily_id',dailyId).eq('user_id',currentUser.id);
+  loadDaily();
 }
 
 async function deleteDaily(id){
-  if(!guardCoach('删除今日题目'))return;
   if(!confirm('确认删除今日题目？'))return;
-  try{
-    const{error}=await sb.from('daily_problems').delete().eq('id',id);
-    if(error)throw error;
-    showToast('已删除','success');loadDaily();
-  }catch(e){showToast('删除失败: '+e.message,'error');}
+  await sb.from('daily_problems').delete().eq('id',id);
+  showToast('已删除','success');loadDaily();
 }
 
 function triggerCheckinEffect(){
@@ -3768,7 +2959,7 @@ async function rejectRec(recId){
   showToast('已拒绝','success');loadDaily();
 }
 
-function openAnnModal(){if(!guardCoach('发布公告'))return;openModal('ann-modal');}
+function openAnnModal(){if(!isCoach())return;openModal('ann-modal');}
 async function submitAnn(){
   const title=document.getElementById('ann-title').value.trim(),content=document.getElementById('ann-content').value.trim();
   if(!title||!content){document.getElementById('ann-error').textContent='请填写标题和内容';return;}
@@ -3777,15 +2968,7 @@ async function submitAnn(){
   closeModal('ann-modal');['ann-title','ann-content'].forEach(id=>document.getElementById(id).value='');document.getElementById('ann-pinned').checked=false;
   showToast('公告发布成功 ✓','success');loadAnnouncements();
 }
-async function deleteAnn(id){
-  if(!guardCoach('删除公告'))return;
-  if(!confirm('确认删除？'))return;
-  try{
-    const{error}=await sb.from('announcements').delete().eq('id',id);
-    if(error)throw error;
-    showToast('已删除','success');loadAnnouncements();
-  }catch(e){showToast('删除失败: '+e.message,'error');}
-}
+async function deleteAnn(id){if(!confirm('确认删除？'))return;await sb.from('announcements').delete().eq('id',id);showToast('已删除','success');loadAnnouncements();}
 
 // ── Contests ───────────────────────────────────────────────
 async function loadContests(){
@@ -3801,15 +2984,15 @@ async function loadContests(){
     const cr=rm[c.id]||[];
     let div2Problems=[],div1Problems=[];
     try{const p=typeof c.problems==='string'?JSON.parse(c.problems):c.problems;if(p&&p.div2)div2Problems=p.div2;if(p&&p.div1)div1Problems=p.div1;}catch(e){}
-    // ── Div 分组 ──────────────────────────────────────────
-    // 优先使用 contest_results 表中的 division 字段（'div1'/'div2'）
-    // 如无该字段则回退到旧逻辑（通过同名第二次出现判断），但建议迁移数据库加 division 列
-    const hasDivField = cr.length > 0 && cr[0].division !== undefined;
-    const seen={};const div2=[],div1=[];
+    // Split into div1/div2:
+    // 优先使用 division 字段（新数据），兜底用"同名第二次出现"旧逻辑（兼容历史数据）
+    const div2=[], div1=[];
+    const hasDivField = cr.some(r => r.division === 1 || r.division === 2);
     if(hasDivField){
-      cr.forEach(r=>{ if(r.division==='div1') div1.push(r); else div2.push(r); });
+      cr.forEach(r => { if(r.division===1) div1.push(r); else div2.push(r); });
     } else {
-      // 旧逻辑回退：同名第二次出现视为 Div.1（依赖录入顺序，建议废弃）
+      // 旧兼容逻辑（按录入顺序，同名第二条视为 Div.1）
+      const seen={};
       cr.forEach(r=>{if(seen[r.student_name])div1.push(r);else{seen[r.student_name]=true;div2.push(r);}});
     }
     div2.sort((a,b)=>b.score-a.score);div1.sort((a,b)=>b.score-a.score);
@@ -3964,7 +3147,7 @@ async function loadNotes(filterTag){
   tagBar.innerHTML='<button class="tag-chip'+(activeNoteTag===''?' active':'')+'" onclick="loadNotes(\'\')">全部</button>'+tags.map(t=>`<button class="tag-chip${activeNoteTag===t?' active':''}" onclick="loadNotes('${escHtml(t)}')">${escHtml(t)}</button>`).join('');
   const filtered=activeNoteTag?data.filter(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).includes(activeNoteTag)):data;
   if(!filtered.length){list.innerHTML='<div class="empty">该标签下暂无题解</div>';return;}
-  list.innerHTML='<div class="blog-grid">'+filtered.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<div style="display:flex;gap:4px;flex-wrap:wrap">${(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge" onclick="event.stopPropagation();loadNotes('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?'<span class="view-count">${n.view_count}</span>':''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
+  list.innerHTML='<div class="blog-grid">'+filtered.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<div style="display:flex;gap:4px;flex-wrap:wrap">${(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge" onclick="event.stopPropagation();loadNotes('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?`<span class="view-count">${n.view_count}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
   } catch(e){ console.error("loadNotes:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 function restoreNotesList(){
@@ -4715,10 +3898,12 @@ function initStagger(container) {
   });
 }
 
-// Re-run stagger whenever new content loads
+// Re-run stagger whenever new content loads (合并了多处 window.show 覆盖，避免调用链混乱)
 const _origShow = window.show;
 window.show = function(id) {
+  // 1. 执行原始 show 逻辑（切换 section + 加载数据）
   _origShow && _origShow(id);
+  // 2. stagger 入场动画
   setTimeout(() => initStagger(), 120);
 };
 setTimeout(() => initStagger(), 300);
@@ -4836,22 +4021,7 @@ window.loadHeroStats = async function() {
   }, 200);
 };
 
-// ── 5. Section transition ──
-const _origShowFn = window.show;
-window.show = function(id) {
-  // Remove active from all
-  document.querySelectorAll('section').forEach(s => {
-    if (s.id !== id) s.classList.remove('active');
-  });
-  const target = document.getElementById(id);
-  if (target) {
-    target.style.display = '';
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => target.classList.add('active'));
-    });
-  }
-  _origShowFn && _origShowFn(id);
-};
+// ── 5. Section transition（已合并至上方 window.show 覆盖中）──
 
 // ── 6. Keyboard shortcut: Esc closes modals ──
 document.addEventListener('keydown', e => {
@@ -4869,9 +4039,10 @@ if (isMobile) {
 }
 
 
-// ── JUDGE ────────────────────────────────────────────────
-// ⚠️  Judge0 RapidAPI Key — 生产环境请替换为自己的 Key
-// 免费额度有限，建议自建 Judge0 实例或通过后端代理
+// ── Judge0 配置 ─────────────────────────────────────────────
+// ⚠️  安全提示：RapidAPI Key 暴露在前端代码中，任何人可查看源码获取并消耗你的配额。
+// ⚠️  建议：在 RapidAPI 控制台设置「Referrer Restriction」，仅允许 hjoi.com.cn 调用。
+// ⚠️  路径：RapidAPI → My Apps → Security → Restrict by domain
 const JUDGE0_KEY = '6e74464ed0msh3d3da024a0c8009p172b3fjsndfe1c71a7283';
 const JUDGE0_HOST = 'judge0-ce.p.rapidapi.com';
 
@@ -5114,31 +4285,7 @@ function copyCode(){
 
 
 // ── Judge0 helpers ───────────────────────────────────────
-async function judgeSubmit(code, langId, stdin=''){
-  const submitResp = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=false',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','X-RapidAPI-Key':JUDGE0_KEY,'X-RapidAPI-Host':JUDGE0_HOST},
-    body:JSON.stringify({
-      source_code: btoa(unescape(encodeURIComponent(code))),
-      language_id: parseInt(langId),
-      stdin: stdin ? btoa(unescape(encodeURIComponent(stdin))) : null,
-      cpu_time_limit:5, memory_limit:262144,
-    })
-  });
-  const {token} = await submitResp.json();
-  if(!token) throw new Error('提交失败，请检查 API Key');
-
-  // Poll for result
-  for(let i=0;i<20;i++){
-    await new Promise(r=>setTimeout(r,800));
-    const r = await fetch(`https://judge0-ce.p.rapidapi.com/submissions/${token}?base64_encoded=true`,{
-      headers:{'X-RapidAPI-Key':JUDGE0_KEY,'X-RapidAPI-Host':JUDGE0_HOST}
-    });
-    const data = await r.json();
-    if(data.status && data.status.id >= 3) return data;
-  }
-  throw new Error('运行超时');
-}
+// judgeSubmit() 已废弃，逻辑已内联至 runCode() — 移除以减少死代码
 
 function decodeB64(s){ try{ return s ? decodeURIComponent(escape(atob(s))) : ''; }catch(e){ return s||''; } }
 
@@ -5156,7 +4303,7 @@ function renderJudgeResult(data, outputId, verdictId, statsId){
   const isTLE = statusId === 5;
   const isMLE = statusId === 6;
   const isRE  = [7,8,9,10,11].includes(statusId);
-  const isCE  = statusId === 6 || compile;
+  const isCE  = statusId === 6 && !!compile; // MLE(6) 且有编译输出才算 CE，否则是 MLE
 
   output.className = 'judge-output' + (isAC?' judge-ac': statusId>=4?' judge-err':'');
   output.textContent = stdout || compile || stderr || '（无输出）';
@@ -5630,11 +4777,8 @@ async function loadAdmin(){
 function adminViewNote(id){show('notes');setTimeout(()=>showNote(id),300);}
 async function setRoleBtn(el){
   const userId=el.dataset.id,role=el.dataset.role;
-  await sb.from('profiles').update({role}).eq('id',userId);
-  showToast('已更新为 '+role,'success');loadAdmin();
-}
-async function setRole(userId,role){
-  await sb.from('profiles').update({role}).eq('id',userId);
+  const{error}=await sb.from('profiles').update({role}).eq('id',userId);
+  if(error){showToast('操作失败: '+error.message,'error');return;}
   showToast('已更新为 '+role,'success');loadAdmin();
 }
 
