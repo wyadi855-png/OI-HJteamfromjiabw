@@ -8969,32 +8969,22 @@ async function processPDFFile(file){
   preview.innerHTML='';
   footer.style.display='none';
 
-  // 更新上传区显示
   const zone=document.getElementById('qpdf-drop-zone');
   zone.innerHTML=`<div class="qpdf-upload-icon">📄</div><div class="qpdf-upload-text">${escHtml(file.name)}</div><div class="qpdf-upload-hint">${(file.size/1024).toFixed(0)} KB</div>`;
 
-  status.innerHTML='<div class="qpdf-loading"><div class="spinner" style="width:18px;height:18px;border-width:2px"></div> AI 正在解析 PDF，请稍候…</div>';
+  status.innerHTML='<div class="qpdf-loading"><div class="spinner" style="width:18px;height:18px;border-width:2px"></div> 正在读取 PDF 文字…</div>';
 
   try{
-    // 读取文件为 base64
-    const base64=await new Promise((res,rej)=>{
-      const r=new FileReader();
-      r.onload=()=>res(r.result.split(',')[1]);
-      r.onerror=()=>rej(new Error('读取失败'));
-      r.readAsDataURL(file);
-    });
+    // 1. 用 PDF.js 提取全文
+    const pdfText = await extractPDFText(file);
+    if(!pdfText || pdfText.trim().length < 20){
+      throw new Error('PDF 文字提取失败或内容为空，请确认 PDF 不是纯图片扫描件');
+    }
 
-    // 调用 Claude API
-    const resp=await fetch('https://dgsugcvedimcecudstkq.supabase.co/functions/v1/claude-proxy',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDA2MDYsImV4cCI6MjA4ODIxNjYwNn0.0AnkF5MMrtiqwbau9q6pLD6pDrzXRkyPIoNsx4au8xI'
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:4000,
-        system:`你是一个题目提取助手。从用户提供的 PDF 中提取所有单选题和判断题。
+    status.innerHTML='<div class="qpdf-loading"><div class="spinner" style="width:18px;height:18px;border-width:2px"></div> AI 正在识别题目，请稍候…</div>';
+
+    // 2. 发纯文本给 AI
+    const SYSTEM=`你是一个题目提取助手。从用户提供的文字中提取所有单选题和判断题。
 严格只返回 JSON，不要有任何其他文字、不要有 markdown 代码块：
 {"problems":[{"type":"judge或choice","title":"题目描述","option_a":"选项A","option_b":"选项B","option_c":"选项C或null","option_d":"选项D或null","answer":"A或B或C或D","explanation":"解析（若有）","difficulty":"easy或medium或hard","tags":["标签1"]}]}
 
@@ -9003,67 +8993,95 @@ async function processPDFFile(file){
 2. title: 题目题干，保留完整原文（含代码）
 3. 单选题: option_a~d 填写对应选项内容（去掉A.B.C.D前缀），只有2个选项时option_c/option_d填null
 4. 判断题: option_a固定"正确"，option_b固定"错误"，option_c/option_d为null
-5. answer: 对照 PDF 中的答案表或题目标注，填写正确选项字母（大写A/B/C/D）
+5. answer: 对照文字中的答案表或题目标注，填写正确选项字母（大写A/B/C/D）
    - 判断题：答案是"√/对/T/正确"→A，"×/错/F/错误"→B
 6. explanation: 若题目带解析则提取，否则留空字符串
 7. difficulty: 根据题目复杂程度判断，默认 medium
 8. tags: 从题目内容推断知识点标签，如["排列组合","DP","图论"]，没有则空数组
-9. 若 PDF 中没有题目，返回 {"problems":[]}`,
+9. 若没有题目，返回 {"problems":[]}`;
+
+    const resp=await fetch('https://dgsugcvedimcecudstkq.supabase.co/functions/v1/claude-proxy',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDA2MDYsImV4cCI6MjA4ODIxNjYwNn0.0AnkF5MMrtiqwbau9q6pLD6pDrzXRkyPIoNsx4au8xI'
+      },
+      body:JSON.stringify({
+        system: SYSTEM,
+        max_tokens:4000,
         messages:[{
           role:'user',
-          content:[
-            {type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},
-            {type:'text',text:'请从这份 PDF 中提取所有单选题和判断题，严格按照 JSON 格式返回，不要有任何其他文字。'}
-          ]
+          content: '请从以下文字中提取所有单选题和判断题，严格按照 JSON 格式返回：\n\n' + pdfText.slice(0, 30000)
         }]
       })
     });
 
     if(!resp.ok){
-      const err=await resp.json();
-      throw new Error(err.error?.message||`API 错误 ${resp.status}`);
+      const err=await resp.json().catch(()=>({}));
+      throw new Error(err.error?.message||`请求失败 ${resp.status}`);
     }
 
     const data=await resp.json();
-    const raw=data.content?.find(b=>b.type==='text')?.text||'';
+    const raw=data.content?.find(b=>b.type==='text')?.text || data.choices?.[0]?.message?.content || '';
+
+    if(!raw){
+      console.error('AI raw response:', data);
+      throw new Error('AI 无响应，请检查 Edge Function 日志');
+    }
+
     let parsed;
     try{
-      // 多重尝试：去掉 markdown 代码块、提取第一个 { 到最后一个 } 之间的内容
-      let clean = raw.trim();
-      // 去掉 ```json ... ``` 或 ``` ... ```
-      clean = clean.replace(/^```(?:json)?\s*/,'').replace(/\s*```\s*$/,'');
-      // 尝试提取 JSON 对象部分（从第一个 { 到最后一个 }）
-      const start = clean.indexOf('{');
-      const end = clean.lastIndexOf('}');
-      if(start !== -1 && end !== -1 && end > start){
-        clean = clean.slice(start, end + 1);
-      }
-      parsed = JSON.parse(clean);
+      let clean=raw.trim().replace(/^```(?:json)?\s*/,'').replace(/\s*```\s*$/,'');
+      const s=clean.indexOf('{'), e=clean.lastIndexOf('}');
+      if(s!==-1&&e>s) clean=clean.slice(s,e+1);
+      parsed=JSON.parse(clean);
     }catch(e){
-      // 最后尝试：用正则找出 problems 数组
       try{
-        const m = raw.match(/"problems"\s*:\s*(\[[\s\S]*?\])/);
-        if(m) parsed = {problems: JSON.parse(m[1])};
-        else throw new Error('无法提取 JSON');
+        const m=raw.match(/"problems"\s*:\s*(\[[\s\S]*?\])/);
+        if(m) parsed={problems:JSON.parse(m[1])};
+        else throw new Error('no problems key');
       }catch(e2){
         console.error('AI raw response:', raw);
-        throw new Error('AI 返回格式解析失败，请重试（已记录到控制台）');
+        throw new Error('AI 返回格式解析失败，已记录到控制台');
       }
     }
 
     const problems=parsed.problems||[];
     if(!problems.length){
-      status.innerHTML='<div class="qpdf-status-text qpdf-warn">⚠️ 未在 PDF 中识别到判断题</div>';
+      status.innerHTML='<div class="qpdf-status-text qpdf-warn">⚠️ 未识别到单选题或判断题</div>';
       return;
     }
 
-    status.innerHTML=`<div class="qpdf-status-text qpdf-ok">✓ 识别到 <strong>${problems.length}</strong> 道判断题，请确认后导入</div>`;
+    status.innerHTML=`<div class="qpdf-status-text qpdf-ok">✓ 识别到 <strong>${problems.length}</strong> 道题目，请确认后导入</div>`;
     renderPDFPreview(problems);
     footer.style.display='';
 
   }catch(e){
     status.innerHTML=`<div class="qpdf-status-text qpdf-err">❌ ${escHtml(e.message)}</div>`;
   }
+}
+
+// 用 PDF.js 提取 PDF 全文
+async function extractPDFText(file){
+  // 动态加载 PDF.js
+  if(!window.pdfjsLib){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload=res; s.onerror=rej;
+      document.head.appendChild(s);
+    });
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+  const arrayBuffer=await file.arrayBuffer();
+  const pdf=await window.pdfjsLib.getDocument({data:arrayBuffer}).promise;
+  let text='';
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    const content=await page.getTextContent();
+    text+=content.items.map(item=>item.str).join(' ')+'\n';
+  }
+  return text;
 }
 
 let _pdfProblems=[];
