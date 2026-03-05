@@ -6498,6 +6498,8 @@ async function loadSettingsData(){
   }
   document.getElementById('set-bio').value=currentProfile.bio||'';
   document.getElementById('set-luogu-uid').value=currentProfile.luogu_uid||'';
+  const grpEl=document.getElementById('set-group');
+  if(grpEl) grpEl.value=currentProfile.group_id||'';
 }
 
 function previewAvatar(input){
@@ -8413,8 +8415,8 @@ async function showContestChart(contestId, preloaded, title){
         <label>洛谷 UID <span style="font-size:11px;color:var(--text3);font-weight:400">（填写后雷达图将使用洛谷通过题目）</span></label>
         <input type="text" id="set-luogu-uid" placeholder="如：123456">
       </div>
-      <div class="form-group" id="set-group-wrap" style="display:none">
-        <label>班级</label>
+      <div class="form-group" id="set-group-wrap">
+        <label>训练组</label>
         <select id="set-group">
           <option value="">不设置</option>
           <option value="1">周六早八</option>
