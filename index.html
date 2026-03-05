@@ -717,6 +717,29 @@ section.active.visible{opacity:1;transform:translateY(0);}
   80% {opacity:1;}
   100%{opacity:0;transform:translateY(220px) rotate(var(--rot));}
 }
+/* orz like button */
+.orz-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  background:none;border:1px solid rgba(108,142,245,0.2);
+  border-radius:4px;padding:3px 10px;cursor:pointer;
+  font-family:var(--mono);font-size:12px;color:rgba(180,195,255,0.5);
+  transition:all 0.15s;
+}
+.orz-btn:hover{border-color:rgba(108,142,245,0.5);color:rgba(180,195,255,0.9);}
+.orz-btn.liked{border-color:rgba(108,142,245,0.6);background:rgba(108,142,245,0.1);color:#6c8ef5;}
+.orz-text{font-weight:600;letter-spacing:0.05em;}
+.orz-count{font-size:11px;opacity:0.8;}
+/* orz particle */
+.orz-particle{
+  position:fixed;pointer-events:none;
+  font-family:var(--mono);font-size:13px;font-weight:700;
+  color:#6c8ef5;z-index:9999;
+  animation:orzFly 0.9s ease-out forwards;
+}
+@keyframes orzFly{
+  0%  {opacity:1;transform:translate(0,0) scale(1);}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0.6);}
+}
 /* ── LECTURES ── */
 .lecture-item{display:flex;gap:20px;padding:18px 0;border-bottom:1px solid rgba(30,37,64,0.4);}
 .lecture-item:last-child{border-bottom:none;}
@@ -4196,6 +4219,7 @@ async function loadPosts(){
       <div class="post-card-body">${escHtml(p.content).replace(/\n/g,'<br>')}</div>
       <div class="post-card-footer">
         <span class="post-comment-toggle" onclick="event.stopPropagation();togglePostComments(${p.id},this)">💬 <span class="cmt-count">...</span> 条评论</span>
+        <button class="orz-btn" id="orz-btn-${p.id}" onclick="event.stopPropagation();togglePostLike(${p.id},this)"><span class="orz-text">orz</span><span class="orz-count" id="orz-count-${p.id}">0</span></button>
         <div class="post-card-actions">
           ${isMine?`<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openEditPost(${p.id},'${escHtml((p.content||'').replace(/'/g,"\\'"))}')">编辑</button>`:''}
           ${canDel?`<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deletePost(${p.id})">删除</button>`:''}
@@ -4205,6 +4229,7 @@ async function loadPosts(){
     list.appendChild(card);
     // 预加载评论数
     loadPostCommentCount(p.id);
+    loadPostLikeCount(p.id);
   }
 }
 
@@ -5132,6 +5157,57 @@ function markAllRead(){
   loadNotifs();
 }
 
+
+// ── Post Likes (orz) ─────────────────────────────────────
+async function loadPostLikeCount(postId){
+  const btn=document.getElementById(`orz-btn-${postId}`);
+  const countEl=document.getElementById(`orz-count-${postId}`);
+  if(!countEl)return;
+  const{count}=await sb.from('post_likes').select('id',{count:'exact',head:true}).eq('post_id',postId);
+  countEl.textContent=count||0;
+  if(currentUser){
+    const{data}=await sb.from('post_likes').select('id').eq('post_id',postId).eq('user_id',currentUser.id).maybeSingle();
+    if(data&&btn)btn.classList.add('liked');
+  }
+}
+async function togglePostLike(postId,btn){
+  if(!currentUser){showToast('请先登录','error');return;}
+  const isLiked=btn.classList.contains('liked');
+  if(isLiked){
+    await sb.from('post_likes').delete().eq('post_id',postId).eq('user_id',currentUser.id);
+    btn.classList.remove('liked');
+  } else {
+    await sb.from('post_likes').insert({post_id:postId,user_id:currentUser.id});
+    btn.classList.add('liked');
+    spawnOrzParticles(btn);
+  }
+  const{count}=await sb.from('post_likes').select('id',{count:'exact',head:true}).eq('post_id',postId);
+  const countEl=document.getElementById(`orz-count-${postId}`);
+  if(countEl)countEl.textContent=count||0;
+}
+function spawnOrzParticles(anchor){
+  const rect=anchor.getBoundingClientRect();
+  const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+  const texts=['orz','orz','ORZ','(＿＿)ﾉ','膜','拜'];
+  const colors=['#6c8ef5','#2de8b0','#c792ea','#ffb347','#7dd3fc'];
+  for(let i=0;i<8;i++){
+    setTimeout(()=>{
+      const el=document.createElement('span');
+      el.className='orz-particle';
+      el.textContent=texts[Math.floor(Math.random()*texts.length)];
+      el.style.color=colors[Math.floor(Math.random()*colors.length)];
+      el.style.left=cx+'px'; el.style.top=cy+'px';
+      const angle=Math.random()*Math.PI*2;
+      const dist=50+Math.random()*80;
+      el.style.setProperty('--dx',Math.cos(angle)*dist+'px');
+      el.style.setProperty('--dy',Math.sin(angle)*dist-40+'px');
+      el.style.fontSize=(11+Math.floor(Math.random()*6))+'px';
+      el.style.animationDuration=(0.7+Math.random()*0.4)+'s';
+      document.body.appendChild(el);
+      el.addEventListener('animationend',()=>el.remove());
+    },i*50);
+  }
+}
 
 // ── Checkin ──────────────────────────────────────────────
 const CODE_SNIPPETS=['AC','O(1)','O(n)','O(log n)','++i','i++','int','long long','void','for','while','if','else','return','true','false','dfs()','bfs()','dp[]','ans++','inf','mod','n--','ok','#define','scanf','printf','sort()','swap()','min()','max()','0x3f','1e9','n<<1','>>1','&1','|=','n-1','n+1'];
