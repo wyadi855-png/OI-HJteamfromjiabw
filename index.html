@@ -1262,7 +1262,12 @@ mark.search-hl{
     <div class="form-group"><label>作业题（洛谷题号，空格分隔）</label><input type="text" id="l-homework" placeholder="P3374 P3953"></div>
   </div>
   <div id="lecture-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('lecture-modal')">取消</button><button class="btn btn-primary" on
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('lecture-modal')">取消</button><button class="btn btn-primary" onclick="submitLecture()">保存</button>
+  </div>
+</div></div>
+
+<!-- COPY PROBLEMS HELPER (inline script removed, now pure JS) -->
+<script>
 function copyProblems(ids,btnId){
   navigator.clipboard.writeText(ids).then(()=>{
     const btn=document.getElementById(btnId);
@@ -3045,51 +3050,6 @@ async function showContestChart(contestId, preloaded, title){
     }
   });
 }
-
-// ── Edit Note ──────────────────────────────────────────────
-async function openEditNote(id){
-  const{data:n}=await sb.from('notes').select('*').eq('id',id).single();
-  document.getElementById('edit-note-id').value=id;
-  document.getElementById('edit-note-title').value=n.title||'';
-  document.getElementById('edit-note-problem').value=n.problem_id||'';
-  document.getElementById('edit-note-topic').value=n.topic||'';
-  document.getElementById('edit-note-content').value=n.content||'';
-  document.getElementById('edit-note-code').value=n.code||'';
-  document.getElementById('edit-note-reflection').value=n.reflection||'';
-  updatePreview('edit-note-content','edit-preview-content');
-  openModal('edit-note-modal');
-  setTimeout(()=>initTopicAutocomplete('edit-note-topic'),100);
-}
-
-// ── Edit Post ──────────────────────────────────────────────
-function openEditPost(id,postContent){
-  document.getElementById('edit-post-id').value=id;
-  document.getElementById('edit-post-content').value=postContent;
-  openModal('edit-post-modal');
-}
-
-// ── checkNotifDot ──────────────────────────────────────────
-async function checkNotifDot(){
-  if(!currentUser)return;
-  const{data:myNotes}=await sb.from('notes').select('id').eq('author_id',currentUser.id);
-  if(!myNotes||!myNotes.length)return;
-  const{data:comments}=await sb.from('comments').select('id').in('note_id',myNotes.map(n=>n.id)).neq('author_id',currentUser.id);
-  const hasUnread=(comments||[]).some(c=>!readIds.has(c.id));
-  document.getElementById('notif-dot').classList.toggle('show',hasUnread);
-}
-
-
-// ── Session persistence ────────────────────────────────────
-document.addEventListener('visibilitychange',async()=>{
-  if(document.visibilityState==='visible'){
-    const{data:{session}}=await sb.auth.getSession();
-    if(session&&!currentUser){
-      currentUser=session.user;
-      const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
-      currentProfile=data;
-      renderAuthArea();
-    }
-  }
-});</script>
+</script>
 </body>
 </html>
