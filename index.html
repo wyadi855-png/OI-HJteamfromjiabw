@@ -9,6 +9,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="window._katexReady=true;document.dispatchEvent(new Event('katex-ready'))"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <!-- highlight.js loaded on demand -->
 <style>
@@ -782,6 +786,23 @@ section.active.visible{opacity:1;transform:translateY(0);}
   padding-top:8px;
 }
 
+/* note images */
+.note-images{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;}
+.note-img{max-width:100%;max-height:360px;border-radius:8px;border:1px solid rgba(108,142,245,0.2);cursor:zoom-in;transition:transform 0.2s;object-fit:contain;background:#050810;}
+.note-img:hover{transform:scale(1.02);}
+/* code block enhancements */
+.code-block-wrap{position:relative;margin:12px 0;}
+.code-lang-tag{position:absolute;top:10px;left:16px;font-family:var(--mono);font-size:10px;color:rgba(45,232,176,0.6);letter-spacing:0.1em;z-index:1;}
+.code-copy-btn{position:absolute;top:8px;right:12px;background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.2);border-radius:4px;color:rgba(180,195,255,0.7);font-family:var(--mono);font-size:11px;padding:3px 10px;cursor:pointer;z-index:1;transition:all 0.15s;}
+.code-copy-btn:hover{background:rgba(108,142,245,0.2);color:#fff;}
+.note-section-title{font-family:var(--mono);font-size:11px;color:rgba(45,232,176,0.6);letter-spacing:0.15em;text-transform:uppercase;margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(45,232,176,0.1);}
+/* image upload in editor */
+.note-img-upload-area{border:1px dashed rgba(108,142,245,0.3);border-radius:8px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;margin-top:8px;}
+.note-img-upload-area:hover{border-color:rgba(108,142,245,0.6);background:rgba(108,142,245,0.05);}
+.note-img-preview-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.note-img-preview{position:relative;width:80px;height:80px;}
+.note-img-preview img{width:100%;height:100%;object-fit:cover;border-radius:6px;border:1px solid rgba(108,142,245,0.2);}
+.note-img-preview-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#e53e3e;border:none;border-radius:50%;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 /* ── LECTURES ── */
 .lecture-item{display:flex;gap:20px;padding:18px 0;border-bottom:1px solid rgba(30,37,64,0.4);}
 .lecture-item:last-child{border-bottom:none;}
@@ -4080,35 +4101,102 @@ async function showNote(id){
   const detail=document.getElementById('note-detail');detail.style.display='block';
   detail.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data:n}=await sb.from('notes').select('*,profiles(username,id)').eq('id',id).single();
-  // Increment view count
   if(n)sb.from('notes').update({view_count:(n.view_count||0)+1}).eq('id',id).then(()=>{});
   const{data:comments}=await sb.from('comments').select('*,profiles(username)').eq('note_id',id).order('created_at');
-  const[{data:likes},{data:bms}]=await Promise.all([sb.from('likes').select('id,user_id').eq('note_id',id),currentUser?sb.from('bookmarks').select('id').eq('note_id',id).eq('user_id',currentUser?.id||''):Promise.resolve({data:[]})]);const bookmarked=bms&&bms.length>0;
-  const likeCount=likes?likes.length:0;const liked=currentUser&&likes&&likes.some(l=>l.user_id===currentUser.id);
+  const[{data:likes},{data:bms}]=await Promise.all([sb.from('likes').select('id,user_id').eq('note_id',id),currentUser?sb.from('bookmarks').select('id').eq('note_id',id).eq('user_id',currentUser?.id||''):Promise.resolve({data:[]})]);
+  const bookmarked=bms&&bms.length>0;
+  const likeCount=likes?likes.length:0;
+  const liked=currentUser&&likes&&likes.some(l=>l.user_id===currentUser.id);
   const isOwner=currentUser&&n.profiles?.id===currentUser.id;
-  const renderMd=s=>{ if(!s)return ''; const html=DOMPurify.sanitize(marked.parse(s)); return html; };
-  detail._pendingHljs=true;
+
+  // 渲染Markdown（支持LaTeX）
+  const renderMd=s=>{
+    if(!s)return '';
+    return DOMPurify.sanitize(marked.parse(s),{ADD_TAGS:['math'],ADD_ATTR:['class']});
+  };
+
+  // 图片列表
+  const images = (n.images||[]);
+  const imagesHtml = images.length
+    ? `<div class="note-images">${images.map(url=>`<img src="${escHtml(url)}" class="note-img" onclick="window.open('${escHtml(url)}','_blank')">`).join('')}</div>`
+    : '';
+
+  // 代码块带语言标签和复制按钮
+  const codeHtml = n.code
+    ? `<div class="note-section-title">C++ 代码</div>
+       <div class="code-block-wrap">
+         <div class="code-lang-tag">C++</div>
+         <button class="code-copy-btn" onclick="copyCode(this)">复制</button>
+         <pre><code class="language-cpp">${escHtml(n.code)}</code></pre>
+       </div>`
+    : '';
+
   detail.innerHTML=`<button class="back-btn" onclick="restoreNotesList()">返回列表</button>
     <div class="post-title">${escHtml(n.title)}</div>
-    <div class="post-meta"><span class="author" onclick="showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span><a href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} ↗</a></span>`:''} ${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}<span class="view-count">${n.view_count||0}</span><button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>${isOwner?`<button class="btn btn-outline btn-sm" onclick="openEditNote(${id})">编辑</button>`:''}<button class="export-btn" onclick="window.print()">📄 导出PDF</button> ${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''} <button class="bookmark-btn ${bookmarked?'saved':''}" onclick="toggleBookmark(${id},${bookmarked})">🔖 ${bookmarked?'已收藏':'收藏'}</button></div>
-    <div class="post-body md-body">${n.content?`<h4>解题思路</h4>${renderMd(n.content)}`:''} ${n.code?`<h4>C++ 代码</h4><pre><code>${escHtml(n.code)}</code></pre>`:''} ${n.reflection?`<h4>反思与总结</h4>${renderMd(n.reflection)}`:''}</div>
-    <div class="post-body md-body" id="note-body-rendered"></div>
-    <div class="comments-section"><h3>评论 (${comments?comments.length:0})</h3><div id="cl-${id}">${comments&&comments.length?comments.map(c=>`<div class="comment-item"><div class="comment-meta"><span class="author" onclick="showProfile('${c.profiles?.username||''}')">@${c.profiles?.username||'匿名'}</span><span>${fmtDate(c.created_at)}</span></div><div class="comment-text">${escHtml(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:10px 0">// 暂无评论</div>'}</div>${currentUser?`<div class="comment-form"><input type="text" id="ci-${id}" placeholder="写下你的评论…"><button class="btn btn-primary btn-sm" onclick="submitComment(${id})">发送</button></div>`:'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:10px">登录后参与评论</div>'}</div>`;
+    <div class="post-meta">
+      <span class="author" onclick="showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span>
+      <span>${fmtDate(n.created_at)}</span>
+      ${n.problem_id?`<span><a href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} ↗</a></span>`:''}
+      ${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}
+      <span class="view-count">${n.view_count||0}</span>
+      <button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>
+      ${isOwner?`<button class="btn btn-outline btn-sm" onclick="openEditNote(${id})">编辑</button>`:''}
+      <button class="export-btn" onclick="window.print()">📄 导出PDF</button>
+      ${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''}
+      <button class="bookmark-btn ${bookmarked?'saved':''}" onclick="toggleBookmark(${id},${bookmarked})">🔖 ${bookmarked?'已收藏':'收藏'}</button>
+    </div>
+    <div class="post-body md-body" id="note-body-md">
+      ${n.content?`<div class="note-section-title">解题思路</div>${renderMd(n.content)}`:''}
+      ${imagesHtml}
+      ${codeHtml}
+      ${n.reflection?`<div class="note-section-title">反思与总结</div>${renderMd(n.reflection)}`:''}
+    </div>
+    <div class="comments-section">
+      <h3>评论 (${comments?comments.length:0})</h3>
+      <div id="cl-${id}">${comments&&comments.length?comments.map(c=>`<div class="comment-item"><div class="comment-meta"><span class="author" onclick="showProfile('${c.profiles?.username||''}')">@${c.profiles?.username||'匿名'}</span><span>${fmtDate(c.created_at)}</span></div><div class="comment-text">${escHtml(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:10px 0">// 暂无评论</div>'}</div>
+      ${currentUser?`<div class="comment-form"><input type="text" id="ci-${id}" placeholder="写下你的评论…"><button class="btn btn-primary btn-sm" onclick="submitComment(${id})">发送</button></div>`:'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:10px">登录后参与评论</div>'}
+    </div>`;
+
+  // 代码高亮
+  applyHljs();
+  // LaTeX渲染
+  applyKatex(document.getElementById('note-body-md'));
 }
 async function applyHljs(){
   if(typeof hljs==='undefined'){
     await new Promise((res,rej)=>{
-      const s=document.createElement('script');
-      s.src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js';
-      // Load core first, then cpp
       const core=document.createElement('script');
-      core.src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/core.min.js';
-      core.onload=()=>{document.head.appendChild(s);};
-      core.onerror=rej;s.onload=res;s.onerror=rej;
+      core.src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+      core.onload=res; core.onerror=rej;
       document.head.appendChild(core);
     });
   }
-  document.querySelectorAll('#note-detail pre code').forEach(b=>hljs.highlightElement(b));
+  document.querySelectorAll('#note-detail pre code').forEach(b=>{
+    hljs.highlightElement(b);
+  });
+}
+function applyKatex(el){
+  if(!el)return;
+  const run=()=>{
+    if(typeof renderMathInElement==='undefined')return;
+    renderMathInElement(el,{
+      delimiters:[
+        {left:'$$',right:'$$',display:true},
+        {left:'$',right:'$',display:false},
+        {left:'\\[',right:'\\]',display:true},
+        {left:'\\(',right:'\\)',display:false},
+      ],
+      throwOnError:false,
+    });
+  };
+  if(window._katexReady) run();
+  else document.addEventListener('katex-ready',run,{once:true});
+}
+function copyCode(btn){
+  const code=btn.closest('.code-block-wrap').querySelector('code').textContent;
+  navigator.clipboard.writeText(code).then(()=>{
+    btn.textContent='已复制';setTimeout(()=>btn.textContent='复制',2000);
+  });
 }
 async function toggleLike(noteId,isLiked){if(!currentUser){showToast('请先登录','error');return;}if(isLiked)await sb.from('likes').delete().eq('note_id',noteId).eq('user_id',currentUser.id);else await sb.from('likes').insert({note_id:noteId,user_id:currentUser.id});showNote(noteId);}
 async function submitComment(noteId){const input=document.getElementById(`ci-${noteId}`);const content=input.value.trim();if(!content)return;const{error}=await sb.from('comments').insert({note_id:noteId,author_id:currentUser.id,content});if(error){showToast('评论失败','error');return;}input.value='';showNote(noteId);showToast('评论成功 ✓','success');}
@@ -4231,12 +4319,79 @@ function closeNoteDrawer(){
   document.getElementById('note-drawer').classList.remove('open');
   document.body.style.overflow='';
 }
+// 待上传图片列表（File对象）
+let _noteImgFiles=[];
+
+function handleNoteImgSelect(input){
+  const files=Array.from(input.files);
+  files.forEach(f=>{
+    if(f.size>2*1024*1024){showToast(`${f.name} 超过2MB，已跳过`,'error');return;}
+    _noteImgFiles.push(f);
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const list=document.getElementById('note-img-preview-list');
+      const wrap=document.createElement('div');wrap.className='note-img-preview';
+      const idx=_noteImgFiles.length-1;
+      wrap.innerHTML=`<img src="${e.target.result}"><button class="note-img-preview-del" onclick="removeNoteImg(${idx})">✕</button>`;
+      list.appendChild(wrap);
+    };
+    reader.readAsDataURL(f);
+  });
+  input.value='';
+}
+function removeNoteImg(idx){
+  _noteImgFiles.splice(idx,1);
+  // 重建预览
+  const list=document.getElementById('note-img-preview-list');
+  list.innerHTML='';
+  _noteImgFiles.forEach((f,i)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const wrap=document.createElement('div');wrap.className='note-img-preview';
+      wrap.innerHTML=`<img src="${e.target.result}"><button class="note-img-preview-del" onclick="removeNoteImg(${i})">✕</button>`;
+      list.appendChild(wrap);
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+async function uploadNoteImages(){
+  if(!_noteImgFiles.length)return[];
+  const urls=[];
+  for(const f of _noteImgFiles){
+    const path=`notes/${currentUser.id}/${Date.now()}_${f.name.replace(/[^a-zA-Z0-9._]/g,'_')}`;
+    const{error}=await sb.storage.from('note-images').upload(path,f,{upsert:true});
+    if(error){showToast(`图片上传失败: ${f.name}`,'error');continue;}
+    const{data}=sb.storage.from('note-images').getPublicUrl(path);
+    urls.push(data.publicUrl);
+  }
+  return urls;
+}
+
 async function submitNote(){
   const title=document.getElementById('note-title').value.trim();
   if(!title){document.getElementById('note-error').textContent='请填写标题';return;}
-  const{error}=await sb.from('notes').insert({author_id:currentUser.id,title,problem_id:document.getElementById('note-problem').value.trim(),topic:document.getElementById('note-topic').value.trim(),content:document.getElementById('note-content').value.trim(),code:document.getElementById('note-code').value.trim(),reflection:document.getElementById('note-reflection').value.trim()});
+  const btn=document.querySelector('.note-drawer .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='发布中…';}
+  // 上传图片
+  const images=await uploadNoteImages();
+  const{error}=await sb.from('notes').insert({
+    author_id:currentUser.id,
+    title,
+    problem_id:document.getElementById('note-problem').value.trim(),
+    topic:document.getElementById('note-topic').value.trim(),
+    content:document.getElementById('note-content').value.trim(),
+    code:document.getElementById('note-code').value.trim(),
+    reflection:document.getElementById('note-reflection').value.trim(),
+    images,
+  });
+  if(btn){btn.disabled=false;btn.textContent='发布题解';}
   if(error){document.getElementById('note-error').textContent=error.message;return;}
-  closeNoteDrawer();['note-title','note-problem','note-topic','note-content','note-code','note-reflection'].forEach(id=>document.getElementById(id).value='');['preview-content','preview-reflection'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=''});
+  _noteImgFiles=[];
+  document.getElementById('note-img-preview-list').innerHTML='';
+  closeNoteDrawer();
+  ['note-title','note-problem','note-topic','note-content','note-code','note-reflection'].forEach(id=>document.getElementById(id).value='');
+  ['preview-content','preview-reflection'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=''});
   showToast('题解发布成功 ✓','success');loadNotes();
 }
 
@@ -7310,6 +7465,14 @@ async function showContestChart(contestId, preloaded, title){
   <div class="form-group">
     <label>反思与总结</label>
     <textarea id="note-reflection" rows="3" placeholder="收获、易错点…"></textarea>
+  </div>
+  <div class="form-group">
+    <label>配图 <span style="font-size:11px;color:var(--text3);font-weight:400">（可上传多张，支持PNG/JPG，每张≤2MB）</span></label>
+    <div class="note-img-upload-area" onclick="document.getElementById('note-img-input').click()">
+      <input type="file" id="note-img-input" accept="image/*" multiple style="display:none" onchange="handleNoteImgSelect(this)">
+      <span style="font-family:var(--mono);font-size:12px;color:var(--text3)">📎 点击选择图片</span>
+    </div>
+    <div class="note-img-preview-list" id="note-img-preview-list"></div>
   </div>
   <div id="note-error" class="form-error"></div>
   <div class="modal-footer" style="justify-content:flex-end;padding-top:12px">
