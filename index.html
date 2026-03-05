@@ -5263,5 +5263,142 @@ async function showContestChart(contestId, preloaded, title){
   </div>
 </div>
 
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal" style="width:480px;max-width:98vw">
+    <div class="modal-tabs" style="margin-bottom:18px">
+      <button class="modal-tab active" onclick="switchSettingsTab('avatar')">个人资料</button>
+      <button class="modal-tab" onclick="switchSettingsTab('password')">修改密码</button>
+    </div>
+    <button class="modal-close" onclick="closeModal('settings-modal')" style="position:absolute;top:16px;right:16px">✕</button>
+
+    <div id="settings-avatar-tab">
+      <div class="form-group">
+        <label>头像 URL</label>
+        <input type="text" id="set-avatar" placeholder="https://example.com/avatar.jpg">
+      </div>
+      <div class="form-group">
+        <label>个人简介</label>
+        <textarea id="set-bio" rows="3" placeholder="介绍一下自己…"></textarea>
+      </div>
+      <div class="form-group" id="set-group-wrap" style="display:none">
+        <label>班级</label>
+        <select id="set-group">
+          <option value="">不设置</option>
+          <option value="1">周六早八</option>
+          <option value="2">周六早十</option>
+          <option value="3">周六午一</option>
+          <option value="4">周六午三</option>
+          <option value="5">周六晚八</option>
+          <option value="6">周天早八</option>
+          <option value="7">NOIP班</option>
+        </select>
+      </div>
+      <div id="settings-avatar-error" class="form-error"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('settings-modal')">取消</button>
+        <button class="btn btn-primary" onclick="saveSettings()">保存</button>
+      </div>
+    </div>
+
+    <div id="settings-password-tab" style="display:none">
+      <div class="form-group">
+        <label>新密码</label>
+        <input type="password" id="set-newpw" placeholder="至少6位">
+      </div>
+      <div class="form-group">
+        <label>确认新密码</label>
+        <input type="password" id="set-newpw2" placeholder="再输一次">
+      </div>
+      <div id="settings-pw-error" class="form-error"></div>
+      <div id="settings-pw-success" style="color:var(--accent2);font-size:13px;margin-top:8px"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('settings-modal')">取消</button>
+        <button class="btn btn-primary" onclick="savePassword()">修改密码</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANNOUNCEMENT MODAL -->
+<div class="modal-overlay" id="ann-modal">
+  <div class="modal" style="width:540px;max-width:98vw">
+    <h2>📢 发布公告</h2>
+    <div class="form-group">
+      <label>标题</label>
+      <input type="text" id="ann-title" placeholder="公告标题">
+    </div>
+    <div class="form-group">
+      <label>内容</label>
+      <textarea id="ann-content" rows="5" placeholder="公告内容，支持 Markdown…"></textarea>
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="ann-pinned" style="width:auto">
+      <label for="ann-pinned" style="margin:0;cursor:pointer">📌 置顶公告</label>
+    </div>
+    <div id="ann-error" class="form-error"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('ann-modal')">取消</button>
+      <button class="btn btn-primary" onclick="submitAnn()">发布</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT NOTE MODAL -->
+<div class="modal-overlay" id="edit-note-modal">
+  <div class="modal" style="width:580px;max-width:98vw">
+    <h2>✏️ 编辑题解</h2>
+    <input type="hidden" id="edit-note-id">
+    <div class="form-group">
+      <label>标题</label>
+      <input type="text" id="edit-note-title" placeholder="题解标题">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>洛谷题号</label>
+        <input type="text" id="edit-note-problem" placeholder="P????">
+      </div>
+      <div class="form-group">
+        <label>知识点标签</label>
+        <input type="text" id="edit-note-topic" placeholder="例：网络流">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>解题思路</label>
+      <textarea id="edit-note-content" rows="5" placeholder="分析题意，描述算法思路…"></textarea>
+    </div>
+    <div class="form-group">
+      <label>C++ 代码</label>
+      <textarea id="edit-note-code" class="code-input" rows="6" placeholder="#include &lt;bits/stdc++.h&gt;&#10;using namespace std;"></textarea>
+    </div>
+    <div class="form-group">
+      <label>反思与总结</label>
+      <textarea id="edit-note-reflection" rows="3" placeholder="收获、易错点…"></textarea>
+    </div>
+    <div id="edit-note-error" class="form-error"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('edit-note-modal')">取消</button>
+      <button class="btn btn-primary" onclick="submitEditNote()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT POST MODAL -->
+<div class="modal-overlay" id="edit-post-modal">
+  <div class="modal" style="max-width:480px;width:100%">
+    <h2>✏️ 编辑随笔</h2>
+    <input type="hidden" id="edit-post-id">
+    <div class="form-group">
+      <label>内容</label>
+      <textarea id="edit-post-content" rows="5" placeholder="记录今天的训练感受…"></textarea>
+    </div>
+    <div id="edit-post-error" class="form-error"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('edit-post-modal')">取消</button>
+      <button class="btn btn-primary" onclick="submitEditPost()">保存</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
