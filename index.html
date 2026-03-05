@@ -4092,16 +4092,17 @@ async function togglePostComments(postId,btn){
 
 async function renderPostComments(postId){
   const box=document.getElementById(`post-cmt-${postId}`);
+  // 先查评论（不join，避免外键名问题）
   const{data:comments,error}=await sb.from('post_comments')
-    .select('*,profiles(username,id)')
+    .select('id,post_id,content,created_at,author_id,parent_id,reply_to')
     .eq('post_id',postId).order('created_at');
-  if(error){box.innerHTML='<div style="font-family:var(--mono);font-size:12px;color:var(--red);padding:8px">评论加载失败：请先在Supabase建post_comments表</div>';return;}
-  // 批量查 reply_to 用户名
-  const replyToIds=[...new Set((comments||[]).filter(c=>c.reply_to).map(c=>c.reply_to))];
-  const replyToMap={};
-  if(replyToIds.length){
-    const{data:rp}=await sb.from('profiles').select('id,username').in('id',replyToIds);
-    (rp||[]).forEach(p=>replyToMap[p.id]=p.username);
+  if(error){console.error('post_comments error:',error);box.innerHTML='<div style="color:var(--red);font-size:12px;padding:8px">Error: '+error.message+'</div>';return;}
+  // 批量查作者和reply_to用户名
+  const allUids=[...new Set([...(comments||[]).map(c=>c.author_id),...(comments||[]).filter(c=>c.reply_to).map(c=>c.reply_to)].filter(Boolean))];
+  const profileMap={};
+  if(allUids.length){
+    const{data:profiles}=await sb.from('profiles').select('id,username').in('id',allUids);
+    (profiles||[]).forEach(p=>profileMap[p.id]=p.username);
   }
   // 更新计数
   const countEl=document.querySelector(`[data-post-id="${postId}"] .cmt-count`);
@@ -4112,11 +4113,11 @@ async function renderPostComments(postId){
   const topLevel=(comments||[]).filter(c=>!c.parent_id);
   for(const c of topLevel){
     const replies=(comments||[]).filter(r=>r.parent_id===c.id);
-    const canDelC=(currentUser&&c.profiles?.id===currentUser.id)||isCoach();
+    const canDelC=(currentUser&&c.author_id===currentUser.id)||isCoach();
     html+=`<div class="comment-thread" id="cmt-${c.id}">
       <div class="comment-bubble">
         <div class="comment-bubble-meta">
-          <span class="comment-bubble-author" onclick="showProfile('${escHtml(c.profiles?.username||'')}')")>@${escHtml(c.profiles?.username||'?')}</span>
+          <span class="comment-bubble-author" onclick="showProfile('${escHtml(profileMap[c.author_id]||'')}')")>@${escHtml(profileMap[c.author_id]||'?')}</span>
           <span class="comment-bubble-date">${fmtDate(c.created_at)}</span>
           ${canDelC?`<button class="btn btn-danger btn-sm" style="margin-left:auto;padding:1px 7px;font-size:11px" onclick="deletePostComment(${c.id},${postId})">删除</button>`:''}
         </div>
@@ -4124,16 +4125,16 @@ async function renderPostComments(postId){
         ${currentUser?`<span class="comment-reply-btn" onclick="toggleReplyInput(${c.id},${postId})">↩ 回复</span>`:''}
       </div>
       ${replies.length?`<div class="comment-replies">${replies.map(r=>{
-        const canDelR=(currentUser&&r.profiles?.id===currentUser.id)||isCoach();
+        const canDelR=(currentUser&&r.author_id===currentUser.id)||isCoach();
         return `<div class="reply-bubble" id="cmt-${r.id}">
           <div class="reply-bubble-meta">
-            <span class="comment-bubble-author" onclick="showProfile('${escHtml(r.profiles?.username||'')}')")>@${escHtml(r.profiles?.username||'?')}</span>
+            <span class="comment-bubble-author" onclick="showProfile('${escHtml(profileMap[r.author_id]||'')}')")>@${escHtml(profileMap[r.author_id]||'?')}</span>
             ${replyToMap[r.reply_to]?`<span class="reply-to">→ @${escHtml(r.reply_to_profile.username)}</span>`:''}
             <span class="comment-bubble-date">${fmtDate(r.created_at)}</span>
             ${canDelR?`<button class="btn btn-danger btn-sm" style="margin-left:auto;padding:1px 7px;font-size:11px" onclick="deletePostComment(${r.id},${postId})">删除</button>`:''}
           </div>
           <div class="comment-bubble-text">${escHtml(r.content).replace(/\n/g,'<br>')}</div>
-          ${currentUser?`<span class="comment-reply-btn" onclick="toggleReplyInput(${c.id},${postId},'${escHtml(r.profiles?.username||'')}',${r.profiles?.id||'null'})">↩ 回复</span>`:''}
+          ${currentUser?`<span class="comment-reply-btn" onclick="toggleReplyInput(${c.id},${postId},'${escHtml(profileMap[r.author_id]||'')}','${r.author_id||''}')">↩ 回复</span>`:''}
         </div>`;
       }).join('')}</div>`:''}
       <div id="reply-input-${c.id}" style="display:none">
