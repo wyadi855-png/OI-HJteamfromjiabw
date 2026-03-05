@@ -966,6 +966,52 @@ textarea{resize:vertical;min-height:100px;line-height:1.6;}
 .empty-state h3{font-size:16px;margin-bottom:8px;color:var(--text2);}
 .empty-state p{font-size:13px;color:var(--text3);margin-bottom:20px;}
 .loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--text3);font-size:13px;}
+
+/* ── 骨架屏 ── */
+@keyframes shimmer{
+  0%{background-position:-600px 0}
+  100%{background-position:600px 0}
+}
+.skel{
+  background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.09) 50%,rgba(255,255,255,0.04) 75%);
+  background-size:600px 100%;
+  animation:shimmer 1.4s infinite linear;
+  border-radius:6px;
+}
+.skel-card{
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:16px;padding:22px;
+  position:relative;overflow:hidden;
+}
+.skel-card::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.04) 50%,transparent 100%);
+  background-size:600px 100%;
+  animation:shimmer 1.4s infinite linear;
+}
+.skel-line{height:14px;border-radius:4px;margin-bottom:10px;}
+.skel-line.w-80{width:80%;}
+.skel-line.w-60{width:60%;}
+.skel-line.w-40{width:40%;}
+.skel-line.w-30{width:30%;}
+.skel-line.h-sm{height:11px;}
+.skel-line.h-lg{height:18px;margin-bottom:14px;}
+.skel-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;}
+.skel-tag{height:22px;width:56px;border-radius:100px;display:inline-block;}
+.skel-feed-item{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.skel-feed-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.skel-lb-row{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;border-radius:12px;
+  background:rgba(255,255,255,0.03);margin-bottom:10px;
+}
+.skel-lb-rank{width:28px;height:28px;border-radius:6px;flex-shrink:0;}
+.skel-lb-info{flex:1;display:flex;flex-direction:column;gap:7px;}
+.skel-lb-score{width:48px;height:28px;border-radius:8px;flex-shrink:0;}
 .spinner{width:18px;height:18px;border:2px solid rgba(108,142,245,0.2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
@@ -3808,7 +3854,14 @@ async function loadHomeFeed(){
   loadHeroStats();
   loadHomeDailyCard();
   const feed=document.getElementById('home-feed');
-  feed.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  feed.innerHTML=`<div style="padding:4px 0">`+Array(6).fill(0).map(()=>`
+    <div class="skel-feed-item">
+      <div class="skel skel-feed-dot"></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+        <div class="skel skel-line w-80"></div>
+        <div class="skel skel-line w-40 h-sm"></div>
+      </div>
+    </div>`).join('')+'</div>';
   const[{data:notes},{data:posts},{data:contests},{data:lectures},{data:anns}]=await Promise.all([
     sb.from('notes').select('id,title,created_at,profiles(username)').order('created_at',{ascending:false}).limit(4),
     sb.from('posts').select('id,content,created_at,profiles(username)').order('created_at',{ascending:false}).limit(4),
@@ -3841,7 +3894,17 @@ async function loadHomeFeed(){
 async function loadAnnouncements(){
   try{
   const list=document.getElementById('ann-list');
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  list.innerHTML='<div class="blog-grid">'+Array(6).fill(0).map(()=>`
+    <div class="skel-card">
+      <div class="skel skel-line h-lg w-80"></div>
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <div class="skel skel-tag"></div>
+        <div class="skel skel-tag"></div>
+      </div>
+      <div class="skel skel-line w-60 h-sm"></div>
+      <div class="skel skel-line w-80 h-sm"></div>
+      <div class="skel skel-line w-40 h-sm"></div>
+    </div>`).join('')+'</div>';
   const{data}=await sb.from('announcements').select('*,profiles(username)').order('is_pinned',{ascending:false}).order('created_at',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty-state"><div class="empty-state-icon">📢</div><h3>暂无公告</h3><p>教练发布的比赛通知和训练安排会出现在这里。</p></div>';return;}
   const readIds=new Set(JSON.parse(localStorage.getItem('read_anns')||'[]'));
@@ -3894,7 +3957,11 @@ function updateUnreadAnnBadge(anns){
 async function loadDaily(){
   try{
   const el=document.getElementById('daily-content');
-  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  el.innerHTML=Array(5).fill(0).map(()=>`
+    <div class="skel-card" style="margin-bottom:10px;padding:14px 18px">
+      <div class="skel skel-line w-60" style="height:13px;margin-bottom:8px"></div>
+      <div class="skel skel-line w-40 h-sm"></div>
+    </div>`).join('');
   const today=new Date().toISOString().slice(0,10);
   const[{data:daily},{data:recs}]=await Promise.all([
     sb.from('daily_problems').select('*,profiles(username)').eq('date',today).maybeSingle(),
@@ -4199,7 +4266,17 @@ async function deleteAnn(id){if(!confirm('确认删除？'))return;await sb.from
 async function loadContests(){
   try{
   const list=document.getElementById('contests-list');
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  list.innerHTML='<div class="blog-grid">'+Array(6).fill(0).map(()=>`
+    <div class="skel-card">
+      <div class="skel skel-line h-lg w-80"></div>
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <div class="skel skel-tag"></div>
+        <div class="skel skel-tag"></div>
+      </div>
+      <div class="skel skel-line w-60 h-sm"></div>
+      <div class="skel skel-line w-80 h-sm"></div>
+      <div class="skel skel-line w-40 h-sm"></div>
+    </div>`).join('')+'</div>';
   const{data:contests}=await sb.from('contests').select('*').order('contest_date',{ascending:false});
   if(!contests||!contests.length){list.innerHTML='<div class="empty">暂无模拟赛记录</div>';return;}
   const{data:results}=await sb.from('contest_results').select('*').in('contest_id',contests.map(c=>c.id)).order('score',{ascending:false});
@@ -4360,7 +4437,17 @@ async function loadNotes(filterTag){
   if(filterTag!==undefined)activeNoteTag=filterTag;
   const list=document.getElementById('notes-list'),detail=document.getElementById('note-detail');
   detail.style.display='none';list.style.display='block';
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  list.innerHTML='<div class="blog-grid">'+Array(6).fill(0).map(()=>`
+    <div class="skel-card">
+      <div class="skel skel-line h-lg w-80"></div>
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <div class="skel skel-tag"></div>
+        <div class="skel skel-tag"></div>
+      </div>
+      <div class="skel skel-line w-60 h-sm"></div>
+      <div class="skel skel-line w-80 h-sm"></div>
+      <div class="skel skel-line w-40 h-sm"></div>
+    </div>`).join('')+'</div>';
   const{data}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,view_count,profiles(username)').order('created_at',{ascending:false});
   if(!data||!data.length){
     list.innerHTML='<div class="empty-state"><div class="empty-state-icon">📝</div><h3>还没有题解</h3><p>成为第一个分享解题思路的人吧！</p>'+(currentUser?'<button class="btn btn-primary" onclick="openNoteModal()">写第一篇题解</button>':'<button class="btn btn-outline" onclick="openModal(\'auth-modal\')">登录后发布</button>')+'</div>';
@@ -4389,7 +4476,27 @@ async function showNote(id){
   sessionStorage.setItem('notes_filter', activeNoteTag||'');
   document.getElementById('notes-list').style.display='none';
   const detail=document.getElementById('note-detail');detail.style.display='block';
-  detail.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  detail.innerHTML=`
+    <div class="skel-card" style="margin-bottom:20px">
+      <div class="skel skel-line h-lg w-80"></div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <div class="skel skel-tag"></div><div class="skel skel-tag"></div>
+      </div>
+      <div class="skel skel-line w-60 h-sm"></div>
+      <div class="skel skel-line w-80 h-sm"></div>
+      <div class="skel skel-line w-50 h-sm"></div>
+    </div>
+    <div class="skel-card" style="margin-bottom:20px">
+      <div class="skel skel-line w-30 h-sm" style="margin-bottom:12px"></div>
+      <div class="skel skel-line w-80 h-sm"></div>
+      <div class="skel skel-line w-90 h-sm"></div>
+      <div class="skel skel-line w-70 h-sm"></div>
+    </div>
+    <div class="skel-card">
+      <div class="skel skel-line w-30 h-sm" style="margin-bottom:12px"></div>
+      <div class="skel skel-line w-60 h-sm"></div>
+      <div class="skel skel-line w-80 h-sm"></div>
+    </div>`;
   const{data:n}=await sb.from('notes').select('*,profiles(username,id)').eq('id',id).single();
   if(n)sb.from('notes').update({view_count:(n.view_count||0)+1}).eq('id',id).then(()=>{});
   const{data:comments}=await sb.from('comments').select('*,profiles(username)').eq('note_id',id).order('created_at');
@@ -4692,7 +4799,17 @@ async function submitNote(){
 // ── Posts ──────────────────────────────────────────────────
 async function loadPosts(){
   const list=document.getElementById('emotions-list');
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  list.innerHTML='<div class="blog-grid">'+Array(6).fill(0).map(()=>`
+    <div class="skel-card">
+      <div class="skel skel-line h-lg w-80"></div>
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <div class="skel skel-tag"></div>
+        <div class="skel skel-tag"></div>
+      </div>
+      <div class="skel skel-line w-60 h-sm"></div>
+      <div class="skel skel-line w-80 h-sm"></div>
+      <div class="skel skel-line w-40 h-sm"></div>
+    </div>`).join('')+'</div>';
   const{data}=await sb.from('posts').select('*,profiles(username,id)').order('created_at',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty">暂无随笔</div>';return;}
   list.innerHTML='';
@@ -4862,7 +4979,17 @@ async function deletePost(id){if(!confirm('确认删除？'))return;await sb.fro
 async function loadLectures(){
   try{
   const list=document.getElementById('lectures-list');
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  list.innerHTML='<div class="blog-grid">'+Array(6).fill(0).map(()=>`
+    <div class="skel-card">
+      <div class="skel skel-line h-lg w-80"></div>
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <div class="skel skel-tag"></div>
+        <div class="skel skel-tag"></div>
+      </div>
+      <div class="skel skel-line w-60 h-sm"></div>
+      <div class="skel skel-line w-80 h-sm"></div>
+      <div class="skel skel-line w-40 h-sm"></div>
+    </div>`).join('')+'</div>';
   const{data}=await sb.from('lectures').select('*').order('lecture_date',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty">暂无课程记录</div>';return;}
   const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
@@ -4945,7 +5072,17 @@ function renderArchiveTable(data){
 async function loadArchive(){
   try{
   const list=document.getElementById('archive-list');
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  list.innerHTML='<div class="blog-grid">'+Array(6).fill(0).map(()=>`
+    <div class="skel-card">
+      <div class="skel skel-line h-lg w-80"></div>
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <div class="skel skel-tag"></div>
+        <div class="skel skel-tag"></div>
+      </div>
+      <div class="skel skel-line w-60 h-sm"></div>
+      <div class="skel skel-line w-80 h-sm"></div>
+      <div class="skel skel-line w-40 h-sm"></div>
+    </div>`).join('')+'</div>';
   const{data}=await sb.from('problem_archive').select('*').order('created_at',{ascending:false});
   _archiveData = data || [];
   renderArchiveTable(_archiveData);
@@ -5275,7 +5412,22 @@ async function showProfile(username){
   if(active && active.id !== 'profile') _profileFromSection = active.id;
   show('profile');
   const el=document.getElementById('profile-content');
-  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  el.innerHTML=`
+    <div class="skel-card" style="margin-bottom:20px">
+      <div style="display:flex;gap:16px;align-items:center">
+        <div class="skel skel-avatar" style="width:64px;height:64px;border-radius:50%"></div>
+        <div style="flex:1">
+          <div class="skel skel-line w-40 h-lg"></div>
+          <div class="skel skel-line w-60 h-sm"></div>
+        </div>
+      </div>
+    </div>
+    <div class="blog-grid">`+Array(4).fill(0).map(()=>`
+      <div class="skel-card">
+        <div class="skel skel-line h-lg w-80"></div>
+        <div class="skel skel-line w-60 h-sm"></div>
+        <div class="skel skel-line w-40 h-sm"></div>
+      </div>`).join('')+'</div>';
   const{data:profile}=await sb.from('profiles').select('*').eq('username',username).single();
   if(!profile){el.innerHTML='<div class="empty">用户不存在</div>';return;}
   const[{data:notes},{data:posts}]=await Promise.all([
@@ -7235,7 +7387,15 @@ async function loadLeaderboard(mode){
   lbMode=mode||lbMode;
   document.querySelectorAll('.lb-tab').forEach((t,i)=>t.classList.toggle('active',i===(lbMode==='notes'?0:1)));
   const el=document.getElementById('lb-list');
-  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  el.innerHTML=Array(8).fill(0).map(()=>`
+    <div class="skel-lb-row">
+      <div class="skel skel-lb-rank"></div>
+      <div class="skel-lb-info">
+        <div class="skel skel-line w-40" style="height:13px;margin:0"></div>
+        <div class="skel skel-line w-60 h-sm" style="margin-top:6px;margin-bottom:0"></div>
+      </div>
+      <div class="skel skel-lb-score"></div>
+    </div>`).join('');
   const{data:profiles}=await sb.from('profiles').select('*').order('created_at');
   if(!profiles||!profiles.length){el.innerHTML='<div class="empty">暂无数据</div>';return;}
   let rows=[];
@@ -7316,7 +7476,15 @@ async function loadLeaderboard(mode){
 async function loadMembers(){
   try{
   const el=document.getElementById('members-list');
-  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  el.innerHTML=Array(8).fill(0).map(()=>`
+    <div class="skel-lb-row">
+      <div class="skel skel-lb-rank"></div>
+      <div class="skel-lb-info">
+        <div class="skel skel-line w-40" style="height:13px;margin:0"></div>
+        <div class="skel skel-line w-60 h-sm" style="margin-top:6px;margin-bottom:0"></div>
+      </div>
+      <div class="skel skel-lb-score"></div>
+    </div>`).join('');
   const[{data:profiles},{data:grps},{data:follows}]=await Promise.all([
     sb.from('profiles').select('id,username,role,created_at,avatar_url,bio,group_id').order('role').order('created_at'),
     sb.from('groups').select('*').order('id'),
@@ -7390,7 +7558,12 @@ async function loadStats(){
     });
   }
   const el=document.getElementById('stats-content');
-  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px">'+Array(12).fill(0).map(()=>`
+    <div class="skel-card" style="padding:16px;text-align:center">
+      <div class="skel skel-avatar" style="width:52px;height:52px;border-radius:50%;margin:0 auto 10px"></div>
+      <div class="skel skel-line w-60 h-sm" style="margin:0 auto 6px"></div>
+      <div class="skel skel-line w-40 h-sm" style="margin:0 auto"></div>
+    </div>`).join('')+'</div>';
   const[{count:noteCount},{count:postCount},{count:userCount},{count:contestCount},{count:lectureCount},{count:archiveCount},{data:notes},{data:members}]=await Promise.all([
     sb.from('notes').select('*',{count:'exact',head:true}),
     sb.from('posts').select('*',{count:'exact',head:true}),
@@ -7447,7 +7620,11 @@ async function loadBookmarks(){
   try{
   const el=document.getElementById('bookmarks-list');
   if(!currentUser){el.innerHTML='<div class="empty">登录后查看收藏</div>';return;}
-  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">'+Array(6).fill(0).map(()=>`
+    <div class="skel-card" style="padding:20px">
+      <div class="skel skel-line w-40 h-sm" style="margin-bottom:12px"></div>
+      <div class="skel skel-line h-lg w-30"></div>
+    </div>`).join('')+'</div>';
   const{data:bms}=await sb.from('bookmarks').select('note_id').eq('user_id',currentUser.id).order('created_at',{ascending:false});
   if(!bms||!bms.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🔖</div><h3>还没有收藏</h3><p>在题解详情页点击收藏按钮保存感兴趣的题解。</p></div>';return;}
   const ids=bms.map(b=>b.note_id);
