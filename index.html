@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1737,6 +1739,396 @@ section:not(.active) {
   .syllabus-tab { font-size: 11px; padding: 5px 10px; }
 }
 </style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<nav>
+  <div class="nav-top">
+    <div class="nav-logo" onclick="show('home')" style="cursor:pointer">OI <span>·</span> TEAM</div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
+      <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()"><span>🔔</span><div class="notif-dot" id="notif-dot"></div></button>
+      <div id="nav-auth-area"><button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button></div>
+    </div>
+  </div>
+  <div class="nav-bottom">
+    <ul class="nav-links">
+      <li><a onclick="show('home')" id="nav-home" class="active">首页</a></li>
+      <li><a onclick="show('announcements')" id="nav-announcements">公告</a></li>
+      <li><a onclick="show('contests')" id="nav-contests">模拟赛</a></li>
+      <li><a onclick="show('notes')" id="nav-notes">题解</a></li>
+      <li><a onclick="show('emotions')" id="nav-emotions">随笔</a></li>
+      <li><a onclick="show('lectures')" id="nav-lectures">课程</a></li>
+      <li><a onclick="show('archive')" id="nav-archive">题库</a></li>
+      <li><a onclick="show('leaderboard')" id="nav-leaderboard">排行榜</a></li>
+      <li class="nav-more-wrap">
+        <a onclick="toggleMoreMenu(event)" class="nav-more-trigger">更多 ▾</a>
+        <div class="nav-more-menu" id="nav-more-menu">
+          <div class="nav-more-group-label">社区</div>
+          <a onclick="closeMoreMenu();show('members')" id="nav-members">👥 成员</a>
+          <a onclick="closeMoreMenu();show('emotions')" id="nav-emotions-m">✍️ 随笔</a>
+          <div class="nav-more-divider"></div>
+          <div class="nav-more-group-label">教学</div>
+          <a onclick="closeMoreMenu();show('syllabus')" id="nav-syllabus">📅 教学计划</a>
+          <div class="nav-more-divider"></div>
+          <div class="nav-more-group-label">工具</div>
+          <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
+          <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
+          <a onclick="closeMoreMenu();show('judge')" id="nav-judge">⚡ 在线评测</a>
+          <div class="nav-more-divider"></div>
+          <div class="nav-more-group-label">数据</div>
+          <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
+          <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">🏆 排行榜</a>
+          <div class="nav-more-divider"></div>
+          <a onclick="closeMoreMenu();show('daily')" id="nav-daily">📅 每日一题</a>
+          <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
+          <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+<div class="notif-panel" id="notif-panel"><div class="notif-header"><h3>通知</h3><button class="btn btn-outline btn-sm" onclick="markAllRead()">全部已读</button></div><div id="notif-list"><div class="notif-empty">// 暂无通知</div></div></div>
+<main class="main">
+
+<!-- HOME -->
+<section id="home" class="active"><div class="container">
+  <div class="hero">
+    <div class="hero-tag">算法竞赛训练队</div>
+    <h1>在代码里<br>寻找<span id="typewriter-text">思维的边界</span><span class="typewriter-cursor">_</span></h1>
+    <p class="hero-desc">我们是一支专注于信息学竞赛的训练团队。从图论到动态规划，每一道题都是一次与自己的对话。</p>
+  </div>
+  <div id="hero-stats-bar" style="margin-bottom:48px"></div>
+
+  <div id="home-daily-card" style="margin-bottom:32px"></div>
+  <div class="home-bento">
+    <!-- Left column: coach + skills -->
+    <div class="home-bento-left">
+      <div class="bento-card bento-coach">
+        <div class="bento-label">// 指导教练</div>
+        <div class="bento-coach-row">
+          <div class="bento-coach-avatar">万</div>
+          <div>
+            <div class="bento-coach-name">万家宝 老师</div>
+            <div class="bento-coach-quote">「面对难题时沉下心来的能力，比比赛名次更重要。」</div>
+          </div>
+        </div>
+      </div>
+      <div class="bento-card bento-skills">
+        <div class="bento-label">// 核心技能树</div>
+        <div class="skill-tags">
+          <span class="skill-tag">图论</span><span class="skill-tag">动态规划</span><span class="skill-tag">数据结构</span><span class="skill-tag">数论</span><span class="skill-tag">字符串</span><span class="skill-tag">网络流</span><span class="skill-tag">计算几何</span><span class="skill-tag">博弈论</span>
+        </div>
+      </div>
+      <div class="bento-card bento-goal">
+        <div class="bento-label">// 赛季目标</div>
+        <div class="bento-goal-items">
+          <div class="bento-goal-item"><span class="goal-dot dot-green"></span>冲刺 CSP-S 提高组</div>
+          <div class="bento-goal-item"><span class="goal-dot dot-blue"></span>部分成员备战 NOI 联赛</div>
+          <div class="bento-goal-item"><span class="goal-dot dot-yellow"></span>每周训练 · 月度模拟赛</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: activity feed -->
+    <div class="bento-card bento-feed">
+      <div class="bento-label">// recent activity</div>
+      <div id="home-feed"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+      <button class="bento-more-btn" onclick="show('notes')">查看全部动态 →</button>
+    </div>
+  </div>
+</div></section>
+
+<!-- ANNOUNCEMENTS -->
+<section id="announcements"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// announcements</div><h1>通知公告</h1><p>万家宝 老师发布的比赛通知与训练安排。</p></div>
+    <button class="btn btn-yellow btn-sm" id="btn-new-ann" onclick="openAnnModal()" style="display:none">+ 发布公告</button>
+  </div>
+  <div id="ann-list"></div>
+</div></section>
+
+<!-- CONTESTS -->
+<section id="contests"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// mock_contests</div><h1>模拟赛记录</h1><p>内部模拟赛成绩与教练点评。</p></div>
+    <button class="btn btn-yellow btn-sm" id="btn-new-contest" onclick="openContestModal()" style="display:none">+ 录入模拟赛</button>
+  </div>
+  <div id="contests-list"></div>
+</div></section>
+
+<!-- NOTES -->
+<section id="notes"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// problem_notes</div><h1>题解笔记</h1><p>同学们的解题思路与 C++ 代码分享。</p></div>
+    <button class="btn btn-primary btn-sm" id="btn-new-note" onclick="openNoteModal()" style="display:none">+ 写题解</button>
+  </div>
+  <div class="tag-filter-bar" id="notes-tag-bar"></div>
+  <div id="notes-list"></div>
+  <div class="post-detail" id="note-detail"></div>
+</div></section>
+
+<!-- EMOTIONS -->
+<section id="emotions"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// learning_log</div><h1>随笔 · 学习日志</h1><p>记录训练中的心情、感悟与小小的成长。</p></div>
+    <button class="btn btn-primary btn-sm" id="btn-new-post" onclick="openPostModal()" style="display:none">+ 写随笔</button>
+  </div>
+  <div class="emotion-feed" id="emotions-list"></div>
+</div></section>
+
+<!-- LECTURES -->
+<section id="lectures"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// lecture_records</div><h1>课程记录</h1><p>每次课的主题与练习题，题目均链接至洛谷。</p></div>
+    <button class="btn btn-yellow btn-sm" id="btn-new-lecture" onclick="openLectureModal()" style="display:none">+ 添加课程</button>
+  </div>
+  <div id="lectures-list"></div>
+</div></section>
+
+<!-- ARCHIVE -->
+<section id="archive"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// problem_archive</div><h1>题目存档</h1><p>训练题库，按难度与知识点分类。</p></div>
+    <button class="btn btn-yellow btn-sm" id="btn-new-problem" onclick="openProblemModal()" style="display:none">+ 添加题目</button>
+  </div>
+  <div id="archive-list"></div>
+</div></section>
+
+
+<!-- DAILY PROBLEM -->
+<section id="daily"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// daily_challenge</div><h1>每日一题</h1><p>每天一道题，持续进步。</p></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline btn-sm" onclick="openModal('rec-modal')">💡 推荐题目</button>
+      <button class="btn btn-yellow btn-sm" id="btn-set-daily" onclick="openModal('set-daily-modal')" style="display:none">+ 发布今日题</button>
+    </div>
+  </div>
+  <div id="daily-content"></div>
+</div></section>
+
+<!-- BOOKMARKS -->
+<section id="bookmarks"><div class="container">
+  <div class="page-header"><div class="page-header-left"><div class="label">// bookmarks</div><h1>我的收藏</h1><p>收藏的题解。</p></div></div>
+  <div id="bookmarks-list"><div class="empty">登录后查看收藏</div></div>
+</div></section>
+
+<!-- SEARCH -->
+<section id="search"><div class="container">
+  <div class="page-header"><div class="page-header-left"><div class="label">// search</div><h1>搜索题解</h1><p>按题号、知识点或关键词搜索。</p></div></div>
+  <div class="search-bar"><input type="text" id="search-input" placeholder="输入题号（如 P3376）、知识点（如 网络流）或关键词…" oninput="doSearch()"></div>
+  <div class="search-filters" id="search-filter-bar">
+    <button class="filter-btn active" data-f="" onclick="setFilter('')">全部</button>
+    <button class="filter-btn" onclick="setFilter('图论')">图论</button>
+    <button class="filter-btn" onclick="setFilter('动态规划')">动态规划</button>
+    <button class="filter-btn" onclick="setFilter('数据结构')">数据结构</button>
+    <button class="filter-btn" onclick="setFilter('数论')">数论</button>
+    <button class="filter-btn" onclick="setFilter('字符串')">字符串</button>
+    <button class="filter-btn" onclick="setFilter('网络流')">网络流</button>
+  </div>
+  <div id="search-results"><div class="empty">输入关键词开始搜索</div></div>
+</div></section>
+
+<!-- RESOURCES -->
+<section id="resources"><div class="container">
+  <div class="page-header"><div class="page-header-left"><div class="label">// resources</div><h1>学习资源</h1><p>竞赛常用平台与文档。</p></div></div>
+  <div class="resource-grid">
+    <a class="resource-card" href="https://www.luogu.com.cn" target="_blank"><div class="resource-icon">洛</div><div><h3>洛谷</h3><p>国内最大 OI 题库与评测系统。</p><div class="resource-url">luogu.com.cn</div></div></a>
+    <a class="resource-card" href="https://codeforces.com" target="_blank"><div class="resource-icon">CF</div><div><h3>Codeforces</h3><p>国际顶级竞赛平台，Div.1/2 比赛。</p><div class="resource-url">codeforces.com</div></div></a>
+    <a class="resource-card" href="https://oi-wiki.org" target="_blank"><div class="resource-icon">W</div><div><h3>OI Wiki</h3><p>中文 OI 完整知识体系文档。</p><div class="resource-url">oi-wiki.org</div></div></a>
+    <a class="resource-card" href="https://atcoder.jp" target="_blank"><div class="resource-icon">AT</div><div><h3>AtCoder</h3><p>日本顶级平台，数学与构造题为主。</p><div class="resource-url">atcoder.jp</div></div></a>
+    <a class="resource-card" href="https://vjudge.net" target="_blank"><div class="resource-icon">VJ</div><div><h3>Virtual Judge</h3><p>聚合多平台题目，可建私人题单。</p><div class="resource-url">vjudge.net</div></div></a>
+    <a class="resource-card" href="https://cppreference.com" target="_blank"><div class="resource-icon">C++</div><div><h3>cppreference</h3><p>C++ 标准库完整文档。</p><div class="resource-url">cppreference.com</div></div></a>
+  </div>
+</div></section>
+
+
+
+<!-- STATS -->
+<section id="stats"><div class="container">
+  <div class="page-header"><div class="page-header-left"><div class="label">// team_stats</div><h1>团队数据</h1><p>训练成果与活跃度一览。</p></div></div>
+  <div id="stats-content"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div></section>
+
+<!-- LEADERBOARD -->
+<section id="leaderboard"><div class="container">
+  <div class="page-header"><div class="page-header-left"><div class="label">// leaderboard</div><h1>排行榜</h1><p>按题解数量、模拟赛平均分排名。</p></div></div>
+  <div class="lb-tabs">
+    <button class="lb-tab active" onclick="loadLeaderboard('notes')">题解榜</button>
+    <button class="lb-tab" onclick="loadLeaderboard('score')">模拟赛榜</button>
+  </div>
+  <div id="lb-list"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div></section>
+
+<!-- MEMBERS -->
+<section id="members"><div class="container">
+  <div class="page-header"><div class="page-header-left"><div class="label">// members</div><h1>队员列表</h1><p>认识我们的每一位成员。</p></div></div>
+  <div id="members-list"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div></section>
+
+<!-- PROFILE -->
+<section id="profile"><div class="container">
+  <button class="back-btn" onclick="history.back();show('notes')">← 返回</button>
+  <div id="profile-content"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div></section>
+
+<!-- ADMIN -->
+<section id="admin"><div class="container">
+  <div class="page-header"><div class="page-header-left"><div class="label">// coach_admin</div><h1>教练后台</h1><p>管理用户权限与内容。</p></div></div>
+  <div class="admin-section"><h2>用户管理</h2><div id="admin-users"></div></div>
+  <div class="admin-section"><h2>题解管理</h2><div id="admin-notes"></div></div>
+</div></section>
+
+</main>
+<footer>// OI Training Team · 万家宝 老师 · Powered by Supabase</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal"><div class="modal" style="max-width:400px;width:100%">
+  <div class="modal-tabs">
+    <button class="modal-tab active" onclick="switchAuthTab('login')">登录</button>
+    <button class="modal-tab" onclick="switchAuthTab('register')">注册</button>
+  </div>
+  <div id="login-form">
+    <div class="form-group"><label>用户名</label><input type="text" id="login-username" placeholder="你的用户名"></div>
+    <div class="form-group"><label>密码</label><input type="password" id="login-password" placeholder="••••••••"></div>
+    <div id="login-error" class="form-error"></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('auth-modal')">取消</button><button class="btn btn-primary" onclick="doLogin()">登录</button></div>
+  </div>
+  <div id="register-form" style="display:none">
+    <div class="form-group"><label>用户名</label><input type="text" id="reg-username" placeholder="你的昵称（唯一）"></div>
+    <div class="form-group"><label>密码（至少6位）</label><input type="password" id="reg-password" placeholder="••••••••"></div>
+    <div class="form-group"><label>训练组</label>
+      <select id="reg-group">
+        <option value="">暂不选择</option>
+        <option value="1">周六早八</option>
+        <option value="2">周六早十</option>
+        <option value="3">周六午一</option>
+        <option value="4">周六午三</option>
+        <option value="5">周六晚八</option>
+        <option value="6">周天早八</option>
+        <option value="7">NOIP班</option>
+        <option value="8">抖音</option>
+      </select>
+    </div>
+    <div id="reg-error" class="form-error"></div><div id="reg-success" class="form-success"></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('auth-modal')">取消</button><button class="btn btn-primary" onclick="doRegister()">注册</button></div>
+  </div>
+</div></div>
+
+<!-- SET DAILY MODAL (coach) -->
+<div class="modal-overlay" id="set-daily-modal"><div class="modal" style="max-width:500px;width:100%">
+  <h2>📅 发布今日一题</h2>
+  <div class="form-group"><label>来源</label>
+    <select id="daily-source" onchange="toggleDailySource()">
+      <option value="manual">直接输入题号</option>
+      <option value="archive">从题库选择</option>
+    </select>
+  </div>
+  <div id="daily-manual-fields">
+    <div class="form-group"><label>洛谷题号</label><input type="text" id="daily-problem-id" placeholder="如 P3376"></div>
+    <div class="form-group"><label>题目名称</label><input type="text" id="daily-title" placeholder="如 网络最大流"></div>
+    <div class="form-group"><label>难度</label>
+      <select id="daily-difficulty">
+        <option value="">不标注</option>
+        <option value="入门">入门</option>
+        <option value="普及-">普及-</option>
+        <option value="普及">普及</option>
+        <option value="普及+提高-">普及+提高-</option>
+        <option value="提高">提高</option>
+        <option value="省选NOI">省选/NOI</option>
+      </select>
+    </div>
+  </div>
+  <div id="daily-archive-fields" style="display:none">
+    <div class="form-group"><label>从题库选题</label>
+      <select id="daily-archive-select"><option value="">加载中…</option></select>
+    </div>
+  </div>
+  <div class="form-group"><label>教练备注（可选）</label><textarea id="daily-note" placeholder="提示思路或考察知识点…" style="min-height:60px"></textarea></div>
+  <div class="form-group"><label>日期</label><input type="date" id="daily-date"></div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('set-daily-modal')">取消</button>
+    <button class="btn btn-primary" onclick="submitDaily()">发布</button>
+  </div>
+</div></div>
+
+<!-- RECOMMEND MODAL (all users) -->
+<div class="modal-overlay" id="rec-modal"><div class="modal" style="max-width:460px;width:100%">
+  <h2>💡 推荐题目</h2>
+  <div class="form-group"><label>洛谷题号</label><input type="text" id="rec-problem-id" placeholder="如 P1001"></div>
+  <div class="form-group"><label>题目名称</label><input type="text" id="rec-title" placeholder="题目名称"></div>
+  <div class="form-group"><label>推荐理由（可选）</label><textarea id="rec-reason" placeholder="为什么推荐这道题？" style="min-height:60px"></textarea></div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('rec-modal')">取消</button>
+    <button class="btn btn-primary" onclick="submitRec()">提交推荐</button>
+  </div>
+</div></div>
+
+<!-- NOTE MODAL -->
+<div class="modal-overlay" id="note-modal"><div class="modal" style="width:580px">
+  <h2>✍️ 写题解</h2>
+  <div class="form-group"><label>标题</label><input type="text" id="note-title" placeholder="例：P3376 最大流 Dinic 详解"></div>
+  <div class="form-row">
+    <div class="form-group"><label>洛谷题号</label><input type="text" id="note-problem" placeholder="P????"></div>
+    <div class="form-group"><label>知识点标签</label><input type="text" id="note-topic" placeholder="例：网络流"></div>
+  </div>
+  <div class="form-group"><label>解题思路</label><textarea id="note-content" placeholder="分析题意，描述算法思路…"></textarea></div>
+  <div class="form-group"><label>C++ 代码</label><textarea id="note-code" class="code-input" placeholder="#include &lt;bits/stdc++.h&gt;&#10;using namespace std;"></textarea></div>
+  <div class="form-group"><label>反思与总结</label><textarea id="note-reflection" placeholder="收获、易错点…"></textarea></div>
+  <div id="note-error" class="form-error"></div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('note-modal')">取消</button><button class="btn btn-primary" onclick="submitNote()">发布</button></div>
+</div></div>
+
+<!-- POST MODAL -->
+<div class="modal-overlay" id="post-modal"><div class="modal">
+  <h2>📝 写随笔</h2>
+  <div class="form-group"><label>内容</label><textarea id="post-content" placeholder="记录今天的训练感受…" style="min-height:130px"></textarea></div>
+  <div id="post-error" class="form-error"></div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('post-modal')">取消</button><button class="btn btn-primary" onclick="submitPost()">发布</button></div>
+</div></div>
+
+<!-- CONTEST MODAL -->
+<div class="modal-overlay" id="contest-modal"><div class="modal" style="width:580px">
+  <h2>🏆 录入模拟赛</h2>
+  <div class="form-row">
+    <div class="form-group"><label>赛名</label><input type="text" id="c-title" placeholder="第X次模拟赛 · 主题"></div>
+    <div class="form-group"><label>日期</label><input type="date" id="c-date"></div>
+  </div>
+  <div class="form-group"><label>题目列表（空格或逗号分隔）</label><input type="text" id="c-problems" placeholder="P3376 P3381 P1983"></div>
+  <div class="form-group"><label>教练点评</label><textarea id="c-comment" placeholder="本次比赛总结…"></textarea></div>
+  <h3 style="font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 10px;">成绩录入</h3>
+  <div class="results-editor">
+    <table><thead><tr><th>姓名</th><th>AC数</th><th>总分</th><th>排名</th><th></th></tr></thead><tbody id="results-rows"></tbody></table>
+    <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="addResultRow()">+ 添加选手</button>
+  </div>
+  <div id="contest-error" class="form-error"></div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('contest-modal')">取消</button><button class="btn btn-primary" onclick="submitContest()">保存</button></div>
+</div></div>
+
+<!-- LECTURE MODAL -->
+<div class="modal-overlay" id="lecture-modal"><div class="modal" style="width:620px">
+  <h2>📖 添加课程记录</h2>
+  <div class="form-row">
+    <div class="form-group"><label>日期</label><input type="date" id="l-date"></div>
+    <div class="form-group"><label>难度方向</label>
+      <select id="l-level"><option value="">不限</option><option value="入门">入门</option><option value="普及-">普及-</option><option value="普及">普及</option><option value="普及+/提高-">普及+/提高-</option><option value="提高">提高</option><option value="省选/NOI">省选/NOI</option></select>
+    </div>
+  </div>
+  <div class="form-group"><label>主题</label><input type="text" id="l-topic" placeholder="例：线段树区间修改 · 懒标记"></div>
+  <div class="form-group"><label>课程内容 / 讲解要点</label><textarea id="l-content" placeholder="本节课讲了什么，重点难点…" style="min-height:70px"></textarea></div>
+  <div class="form-group"><label>关键结论（每行一条，建议3~5条）</label><textarea id="l-conclusions" style="min-height:90px" placeholder="1. 懒标记下推时机&#10;2. pushdown 在修改和查询前都需调用&#10;3. 区间加与区间乘合并时先乘后加"></textarea></div>
+  <div class="form-row">
+    <div class="form-group"><label>讲解题（洛谷题号，空格分隔）</label><input type="text" id="l-problems" placeholder="P3372 P3373"></div>
+    <div class="form-group"><label>作业题（洛谷题号，空格分隔）</label><input type="text" id="l-homework" placeholder="P3374 P3953"></div>
+  </div>
+  <div id="lecture-error" class="form-error"></div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('lecture-modal')">取消</button><button class="btn btn-primary" onclick="submitLecture()">保存</button>
+  </div>
+</div></div>
+
+<!-- COPY PROBLEMS HELPER (inline script removed, now pure JS) -->
+
 
 <!-- CodeMirror -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
@@ -2140,1395 +2532,7 @@ section:not(.active) {
 </div></div>
 
 <!-- COPY PROBLEMS HELPER (inline script removed, now pure JS) -->
-<script>
-function copyProblems(ids,btnId){
-  navigator.clipboard.writeText(ids).then(()=>{
-    const btn=document.getElementById(btnId);
-    if(btn){const orig=btn.textContent;btn.textContent='✓ 已复制';setTimeout(()=>btn.textContent=orig,2000);}
-  });
-}
 
-// ── Utilities ──────────────────────────────────────────────
-function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-function fmtDate(s){if(!s)return'';const d=new Date(s);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type==='error'?'toast-error':'toast-success');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-function avatarGradient(username){const gs=[['#6c8ef5','#2de8b0'],['#f06292','#ffb347'],['#c792ea','#6c8ef5'],['#2de8b0','#ffb347'],['#ff5370','#c792ea']];const i=(username||'A').charCodeAt(0)%gs.length;return'linear-gradient(135deg,'+gs[i][0]+','+gs[i][1]+')';}
-function avatarEl(username,avatarUrl,size,fontSize){
-  size=size||42;fontSize=fontSize||16;
-  const initial=(username||'?').charAt(0).toUpperCase();
-  const grad=avatarGradient(username);
-  const fallback='<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+grad+';display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:'+fontSize+'px;color:var(--bg);font-weight:700;flex-shrink:0">'+initial+'</div>';
-  if(!avatarUrl)return fallback;
-  return '<img src="'+escHtml(avatarUrl)+'" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.replaceWith(this.nextSibling)">'+fallback;
-}
-
-// ── Flying Words Background ─────────────────────────────────
-(function(){
-  const canvas = document.getElementById('bg-canvas');
-  const ctx = canvas.getContext('2d');
-  let W, H;
-  function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-  resize(); window.addEventListener('resize', resize);
-
-  const words = [
-    'DFS','BFS','Dijkstra','Floyd','Bellman-Ford','SPFA','Prim','Kruskal',
-    'Tarjan','拓扑排序','强连通分量','二分图','最大匹配','匈牙利','KM算法',
-    'LCA','树的直径','虚树','点分治','边分治','DSU on Tree','2-SAT','圆方树',
-    '线段树','树状数组','平衡树','Splay','Treap','AVL','跳表','左偏树','可并堆',
-    '单调栈','单调队列','ST表','稀疏表','主席树','可持久化','Link-Cut Tree',
-    'K-D Tree','珂朵莉树','分块','根号分治','莫队','带修莫队','树上莫队',
-    'DP','背包','01背包','完全背包','分组背包','树形DP','区间DP','状压DP',
-    '数位DP','概率DP','期望DP','斜率优化','四边形不等式','单调队列优化DP',
-    '插头DP','轮廓线DP','记忆化搜索','最长公共子序列','最长上升子序列',
-    'KMP','Z函数','Manacher','Trie','AC自动机','后缀数组','后缀自动机',
-    'SAM','PAM','回文自动机','哈希','字符串哈希','最小表示法',
-    '欧拉函数','莫比乌斯','线性筛','埃氏筛','快速幂','矩阵乘法','矩阵快速幂',
-    'CRT','扩展欧几里得','费马小定理','二次剩余','原根','离散对数','BSGS',
-    'FFT','NTT','FWT','多项式求逆','多项式开根','拉格朗日插值',
-    '生成函数','指数生成函数','Polya','Burnside','斯特林数','贝尔数','卡特兰数',
-    '容斥原理','二项式定理','组合数','鸽巢原理','抽屉原理',
-    '最大流','最小割','费用流','网络流','Hall定理','最小路径覆盖',
-    '凸包','半平面交','旋转卡壳','最近点对','扫描线','李超树','Pick定理',
-    'SG函数','Sprague-Grundy','Nim','博弈论','线性基','高斯消元',
-    '二分答案','三分法','倍增','并查集','启发式合并',
-    'AC','WA','TLE','MLE','RE','CE','100pts','AK','AKIOI',
-    'O(1)','O(log n)','O(n)','O(n log n)','O(n²)','O(n³)','O(2ⁿ)',
-    'NOI','NOIP','CSP','IOI','ICPC','CF','洛谷','AtCoder',
-    '手玩样例','找规律','构造','贪心','分治','递推','归纳','暴力',
-    'long long','int','__int128','pb_ds','rope','bitset',
-    '#define','priority_queue','map','set','multiset','unordered_map',
-    'lower_bound','upper_bound','sort','unique','reverse','nth_element',
-    'memset','fill','accumulate','__gcd','__builtin_popcount',
-    'dfs序','欧拉序','括号序','重链剖分','轻重链','树链剖分',
-    '势能分析','摊还分析','均摊复杂度','启发式','随机化',
-    '模拟退火','爬山算法','随机增量','期望线性',
-  ];
-
-  const colors = [
-    'rgba(108,142,245,',
-    'rgba(45,232,176,',
-    'rgba(200,114,234,',
-    'rgba(255,179,71,',
-    'rgba(255,83,112,',
-    'rgba(122,134,168,',
-  ];
-
-  // Many lanes spread evenly across FULL screen height
-  const LANES = 18;
-  const streams = [];
-
-  function spawnStream(laneIdx, startX) {
-    // Divide full screen height evenly, slight random jitter per lane
-    const baseY = ((laneIdx + 0.5) / LANES) * H;
-    const y = baseY + (Math.random() - 0.5) * (H / LANES) * 0.6;
-    const speed = 0.22 + Math.random() * 0.65;
-    const size = 10 + Math.random() * 8;
-    const opacity = 0.15 + Math.random() * 0.35;
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const word = words[Math.floor(Math.random() * words.length)];
-    const x = startX !== undefined ? startX : W + 60 + Math.random() * 600;
-    return { word, color, x, y, speed, size, opacity, laneIdx };
-  }
-
-  // Pre-populate all lanes with words spread across screen
-  for (let l = 0; l < LANES; l++) {
-    const count = 5 + Math.floor(Math.random() * 5);
-    for (let i = 0; i < count; i++) {
-      const s = spawnStream(l);
-      s.x = Math.random() * W * 1.5 - W * 0.1; // spread across screen initially
-      streams.push(s);
-    }
-  }
-
-  let frame = 0;
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-
-    // Spawn new words from right
-    if (frame % 14 === 0) {
-      const l = Math.floor(Math.random() * LANES);
-      streams.push(spawnStream(l, W + 60 + Math.random() * 300));
-    }
-
-    for (let i = streams.length - 1; i >= 0; i--) {
-      const s = streams[i];
-      s.x -= s.speed;
-
-      ctx.save();
-      ctx.font = `${s.size}px 'JetBrains Mono', monospace`;
-      ctx.fillStyle = s.color + s.opacity + ')';
-      ctx.fillText(s.word, s.x, s.y);
-      ctx.restore();
-
-      if (s.x < -320) {
-        streams.splice(i, 1, spawnStream(s.laneIdx, W + 60 + Math.random() * 400));
-      }
-    }
-
-    frame++;
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-
-// ── Click Particles ────────────────────────────────────────
-document.addEventListener('click',function(e){
-  if(e.target.closest('.modal-overlay')||e.target.closest('input')||e.target.closest('textarea'))return;
-  const snippets=['if(l<r)','O(n log n)','{}','#define','while(1)','->','int*','[]','nullptr','return 0','n>>1','ans++','dp[i]','dfs()','auto','cout<<','cin>>','push_back','sort()','memset','break','continue','long long','max(','min(','swap(','{0}','i++','--j','|=','&=','<<1','+inf','-inf','vis[]','dist[]','fa[]','stk[]','vec<>'];
-  const colors=['#6c8ef5','#2de8b0','#c792ea','#ffb347','#ff5370','#7a86a8'];
-  const count=6+Math.floor(Math.random()*5);
-  for(let i=0;i<count;i++){
-    const el=document.createElement('div');
-    el.className='code-particle';
-    el.textContent=snippets[Math.floor(Math.random()*snippets.length)];
-    el.style.setProperty('--c',colors[Math.floor(Math.random()*colors.length)]);
-    const angle=(Math.random()*220-110)*(Math.PI/180); // spread upward
-    const dist=50+Math.random()*90;
-    const rot=(Math.random()-0.5)*40;
-    el.style.setProperty('--tx', Math.cos(angle)*dist+'px');
-    el.style.setProperty('--ty', Math.sin(angle)*dist-30+'px');
-    el.style.setProperty('--rot', rot+'deg');
-    el.style.setProperty('--delay', (i*30)+'ms');
-    el.style.left=e.clientX+'px';
-    el.style.top=e.clientY+'px';
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(), 900+i*30);
-  }
-});
-
-// ── Supabase ───────────────────────────────────────────────
-const SUPABASE_URL='https://dgsugcvedimcecudstkq.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDA2MDYsImV4cCI6MjA4ODIxNjYwNn0.0AnkF5MMrtiqwbau9q6pLD6pDrzXRkyPIoNsx4au8xI';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let currentUser=null,currentProfile=null;
-const isCoach=()=>currentProfile?.role==='coach';
-
-// ── Navigation ─────────────────────────────────────────────
-function show(id){
-  document.querySelectorAll('section').forEach(s=>{s.classList.remove('active');s.classList.remove('visible');});
-  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
-  const sec=document.getElementById(id);
-  sec.classList.add('active');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>sec.classList.add('visible')));
-  const navEl=document.getElementById('nav-'+id);
-  if(navEl)navEl.classList.add('active');
-  window.scrollTo(0,0);
-  const loaders={syllabus:loadSyllabus,judge:initJudge,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks};
-  if(loaders[id])loaders[id]();
-}
-
-// ── Auth UI ────────────────────────────────────────────────
-function renderAuthArea(){
-  const area=document.getElementById('nav-auth-area');
-  const coachNav=document.getElementById('nav-admin');
-  if(currentUser&&currentProfile){
-    area.innerHTML=`<span class="nav-user" style="cursor:pointer" onclick="showProfile('${currentProfile.username}')">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}<button class="btn btn-outline btn-sm" onclick="openModal('settings-modal');loadSettingsData()">设置</button><button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
-    if(isCoach())coachNav.style.display='';
-    ['btn-new-note','btn-new-post'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
-    if(isCoach())['btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
-  }else{
-    area.innerHTML=`<button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button>`;
-    coachNav.style.display='none';
-    ['btn-new-note','btn-new-post','btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
-  }
-}
-
-async function loadSession(){
-  const{data:{session}}=await sb.auth.getSession();
-  if(session){currentUser=session.user;const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();currentProfile=data;}
-  renderAuthArea();loadHomeFeed();if(currentUser)checkNotifDot();
-}
-sb.auth.onAuthStateChange(async(_,session)=>{
-  if(session){currentUser=session.user;const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();currentProfile=data;}
-  else{currentUser=null;currentProfile=null;}
-  renderAuthArea();
-  if(currentUser)checkNotifDot();
-});
-
-function usernameToEmail(u){return`${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@oiteam.local`;}
-function switchAuthTab(tab){
-  document.querySelectorAll('.modal-tab').forEach((t,i)=>t.classList.toggle('active',(i===0)===(tab==='login')));
-  document.getElementById('login-form').style.display=tab==='login'?'block':'none';
-  document.getElementById('register-form').style.display=tab==='register'?'block':'none';
-}
-async function doLogin(){
-  const username=document.getElementById('login-username').value.trim();
-  const password=document.getElementById('login-password').value;
-  document.getElementById('login-error').textContent='';
-  if(!username){document.getElementById('login-error').textContent='请填写用户名';return;}
-  const{error}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});
-  if(error){document.getElementById('login-error').textContent='用户名或密码错误';return;}
-  closeModal('auth-modal');showToast('登录成功 ✓','success');loadHomeFeed();
-}
-async function doRegister(){
-  const username=document.getElementById('reg-username').value.trim();
-  const password=document.getElementById('reg-password').value;
-  document.getElementById('reg-error').textContent='';document.getElementById('reg-success').textContent='';
-  if(!username||username.length<2){document.getElementById('reg-error').textContent='用户名至少2个字符';return;}
-  if(password.length<6){document.getElementById('reg-error').textContent='密码至少6位';return;}
-  const{data:ex}=await sb.from('profiles').select('id').eq('username',username).maybeSingle();
-  if(ex){document.getElementById('reg-error').textContent='用户名已被占用';return;}
-  const{data,error}=await sb.auth.signUp({email:usernameToEmail(username),password});
-  if(error){document.getElementById('reg-error').textContent=error.message;return;}
-  if(data.user)await sb.from('profiles').insert({id:data.user.id,username});
-  document.getElementById('reg-success').textContent='注册成功，正在登录…';
-  setTimeout(async()=>{const{error:le}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});if(!le){closeModal('auth-modal');showToast('注册并登录成功 ✓','success');loadHomeFeed();}},800);
-}
-async function doLogout(){await sb.auth.signOut();showToast('已退出登录','success');loadHomeFeed();}
-
-// ── Home ───────────────────────────────────────────────────
-async function loadHomeFeed(){
-  try{
-  loadHeroStats();
-  loadHomeDailyCard();
-  const feed=document.getElementById('home-feed');
-  feed.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const[{data:notes},{data:posts},{data:contests},{data:lectures},{data:anns}]=await Promise.all([
-    sb.from('notes').select('id,title,created_at,profiles(username)').order('created_at',{ascending:false}).limit(4),
-    sb.from('posts').select('id,content,created_at,profiles(username)').order('created_at',{ascending:false}).limit(4),
-    sb.from('contests').select('id,title,created_at').order('created_at',{ascending:false}).limit(3),
-    sb.from('lectures').select('id,topic,created_at').order('created_at',{ascending:false}).limit(3),
-    sb.from('announcements').select('id,title,created_at').order('created_at',{ascending:false}).limit(3),
-  ]);
-  const items=[...(notes||[]).map(n=>({...n,type:'note'})),...(posts||[]).map(p=>({...p,type:'post'})),...(contests||[]).map(c=>({...c,type:'contest'})),...(lectures||[]).map(l=>({...l,type:'lecture'})),...(anns||[]).map(a=>({...a,type:'ann'}))].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,12);
-  if(!items.length){
-    feed.innerHTML=`<div class="empty-home">
-      <div class="empty-home-icon">⌨️</div>
-      <div class="empty-home-text">// 还没有动态</div>
-      <button class="empty-home-action" onclick="openNoteModal()">发布第一篇题解 →</button>
-    </div>`;
-    return;
-  }
-  feed.innerHTML=items.map(item=>{
-    let content='';
-    if(item.type==='note')content=`<span class="clickable-name" onclick="showProfile('${item.profiles?.username||''}')">${item.profiles?.username||'匿名'}</span> 发布了题解：<span class="clickable-name" onclick="show('notes');setTimeout(()=>showNote(${item.id}),100)">${escHtml(item.title)}</span> <span class="update-tag tag-note">题解</span>`;
-    else if(item.type==='post')content=`<span class="clickable-name" onclick="showProfile('${item.profiles?.username||''}')">${item.profiles?.username||'匿名'}</span> 写了随笔：${escHtml((item.content||'').slice(0,40))}… <span class="update-tag tag-post">随笔</span>`;
-    else if(item.type==='contest')content=`新增模拟赛：<span class="clickable-name" onclick="show('contests')">${escHtml(item.title)}</span> <span class="update-tag tag-contest">模拟赛</span>`;
-    else if(item.type==='lecture')content=`新增课程：<span class="clickable-name" onclick="show('lectures')">${escHtml(item.topic)}</span> <span class="update-tag tag-lecture">课程</span>`;
-    else if(item.type==='ann')content=`📢 <span class="clickable-name" onclick="show('announcements')">${escHtml(item.title)}</span> <span class="update-tag tag-ann">公告</span>`;
-    return`<div class="update-item"><div class="update-date">${fmtDate(item.created_at)}</div><div class="update-content">${content}</div></div>`;
-  }).join('');
-  } catch(e){ console.error("loadHomeFeed:", e); showToast("加载失败，请刷新重试", "error"); }
-}
-
-// ── Announcements ──────────────────────────────────────────
-async function loadAnnouncements(){
-  try{
-  const list=document.getElementById('ann-list');
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const{data}=await sb.from('announcements').select('*,profiles(username)').order('is_pinned',{ascending:false}).order('created_at',{ascending:false});
-  if(!data||!data.length){list.innerHTML='<div class="empty-state"><div class="empty-state-icon">📢</div><h3>暂无公告</h3><p>教练发布的比赛通知和训练安排会出现在这里。</p></div>';return;}
-  const readIds=new Set(JSON.parse(localStorage.getItem('read_anns')||'[]'));
-  list.innerHTML='';
-  data.forEach(a=>{
-    const isRead=readIds.has(a.id);
-    const card=document.createElement('div');
-    card.className='ann-card'+(a.is_pinned?' pinned':'')+(isRead?'':' ann-unread');
-    card.innerHTML=
-      '<div class="ann-card-top">'
-      +'<div class="ann-title">'+escHtml(a.title)+(isRead?'':'<span class="ann-new-dot"></span>')+'</div>'
-      +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'
-      +(a.is_pinned?'<span class="ann-pin">📌 置顶</span>':'')
-      +(isCoach()?'<button class="btn btn-danger btn-sm" onclick="deleteAnn('+a.id+')">删除</button>':'')
-      +'</div></div>'
-      +'<div class="ann-meta">'+fmtDate(a.created_at)+' · '+(a.profiles?.username||'教练')+'</div>'
-      +'<div class="ann-content ann-preview">'+escHtml(a.content)+'</div>'
-      +'<button class="ann-read-btn" data-id="'+a.id+'">'+(isRead?'已读':'标记已读')+'</button>';
-    card.querySelector('.ann-read-btn').addEventListener('click', ()=>{
-      readIds.add(a.id);
-      localStorage.setItem('read_anns', JSON.stringify([...readIds]));
-      card.classList.remove('ann-unread');
-      card.querySelector('.ann-new-dot')?.remove();
-      card.querySelector('.ann-read-btn').textContent='已读';
-      updateUnreadAnnBadge(data);
-    });
-    list.appendChild(card);
-  });
-  updateUnreadAnnBadge(data);
-  } catch(e){ console.error("loadAnnouncements:", e); showToast("加载失败，请刷新重试", "error"); }
-}
-
-function updateUnreadAnnBadge(anns){
-  const readIds=new Set(JSON.parse(localStorage.getItem('read_anns')||'[]'));
-  const unread=(anns||[]).filter(a=>!readIds.has(a.id)).length;
-  const navAnn=document.getElementById('nav-announcements');
-  if(navAnn){
-    const existing=navAnn.querySelector('.nav-badge');
-    if(existing)existing.remove();
-    if(unread>0){
-      const b=document.createElement('span');
-      b.className='nav-badge';
-      b.textContent=unread;
-      navAnn.appendChild(b);
-    }
-  }
-}
-
-// ── DAILY PROBLEM ────────────────────────────────────────
-async function loadDaily(){
-  try{
-  const el=document.getElementById('daily-content');
-  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const today=new Date().toISOString().slice(0,10);
-  const[{data:daily},{data:recs}]=await Promise.all([
-    sb.from('daily_problems').select('*,profiles(username)').eq('date',today).maybeSingle(),
-    sb.from('daily_recommendations').select('*,profiles(username)').eq('status','pending').order('created_at',{ascending:false}),
-  ]);
-
-  let html='';
-
-  // Today's problem card
-  if(daily){
-    const{data:checkins}=await sb.from('daily_checkins').select('user_id,profiles(username,avatar_url)').eq('daily_id',daily.id);
-    const myCheckin=currentUser&&(checkins||[]).find(c=>c.user_id===currentUser.id);
-    const luoguUrl=daily.problem_id?'https://www.luogu.com.cn/problem/'+daily.problem_id:'';
-
-    html+='<div class="daily-card">';
-    html+='<div class="daily-card-header">';
-    html+='<div class="daily-date-badge">'+today+' · 今日一题</div>';
-    if(daily.difficulty)html+='<span class="difficulty-badge">'+escHtml(daily.difficulty)+'</span>';
-    if(isCoach())html+='<button class="btn btn-danger btn-sm" onclick="deleteDaily('+daily.id+')">删除</button>';
-    html+='</div>';
-    html+='<div class="daily-title">';
-    if(daily.problem_id)html+='<span class="daily-pid">'+escHtml(daily.problem_id)+'</span>';
-    html+=escHtml(daily.title);
-    html+='</div>';
-    if(daily.note)html+='<div class="daily-note">💬 '+escHtml(daily.note)+'</div>';
-    if(luoguUrl)html+='<a href="'+luoguUrl+'" target="_blank" class="daily-link-btn">在洛谷上查看 →</a>';
-
-    // Checkin section
-    html+='<div class="daily-checkin-section">';
-    if(currentUser){
-      if(myCheckin){
-        html+='<button class="checkin-btn checked" onclick="undoCheckin('+daily.id+')">✓ 已打卡 · 取消</button>';
-      } else {
-        html+='<button class="checkin-btn" onclick="doCheckin('+daily.id+')">我做出来了 ✓</button>';
-      }
-    } else {
-      html+='<button class="checkin-btn" onclick="openModal(\'auth-modal\')">登录后打卡</button>';
-    }
-    html+='<div class="checkin-count">'+(checkins?checkins.length:0)+' 人已打卡</div>';
-    // Avatar wall
-    if(checkins&&checkins.length){
-      html+='<div class="checkin-avatars">';
-      checkins.slice(0,20).forEach(c=>{
-        const u=c.profiles?.username||'?';
-        html+='<div class="checkin-avatar" title="@'+escHtml(u)+'" onclick="showProfile(\''+escHtml(u)+'\')" style="background:'+avatarGradient(u)+'">';
-        if(c.profiles?.avatar_url)html+='<img src="'+escHtml(c.profiles.avatar_url)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
-        else html+=u.charAt(0).toUpperCase();
-        html+='</div>';
-      });
-      if(checkins.length>20)html+='<div class="checkin-avatar-more">+'+( checkins.length-20)+'</div>';
-      html+='</div>';
-    }
-    html+='</div></div>';
-  } else {
-    html+='<div class="daily-empty">';
-    html+='<div class="daily-empty-icon">📭</div>';
-    html+='<div class="daily-empty-text">今天还没有题目</div>';
-    if(isCoach())html+='<button class="btn btn-primary" onclick="openSetDailyModal()">发布今日一题</button>';
-    else html+='<div style="font-size:12px;color:var(--text3);margin-top:8px">教练还没发布，或者你可以先推荐一道</div>';
-    html+='</div>';
-  }
-
-  // Past problems (last 7 days)
-  const{data:past}=await sb.from('daily_problems').select('*').lt('date',today).order('date',{ascending:false}).limit(7);
-  if(past&&past.length){
-    html+='<div class="daily-past-section"><div class="daily-past-title">// 近期题目</div>';
-    html+='<div class="daily-past-list">';
-    past.forEach(p=>{
-      html+='<div class="daily-past-item">';
-      html+='<span class="daily-past-date">'+p.date+'</span>';
-      if(p.problem_id)html+='<span class="daily-pid small">'+escHtml(p.problem_id)+'</span>';
-      html+='<span class="daily-past-title-text">'+escHtml(p.title)+'</span>';
-      if(p.difficulty)html+='<span class="difficulty-badge small">'+escHtml(p.difficulty)+'</span>';
-      if(p.problem_id)html+='<a href="https://www.luogu.com.cn/problem/'+escHtml(p.problem_id)+'" target="_blank" class="daily-past-link">洛谷 →</a>';
-      html+='</div>';
-    });
-    html+='</div></div>';
-  }
-
-  // Pending recommendations (coach sees all, others see their own)
-  const myRecs=isCoach()?recs:(recs||[]).filter(r=>r.recommended_by===currentUser?.id);
-  if(myRecs&&myRecs.length){
-    html+='<div class="daily-past-section"><div class="daily-past-title">'+( isCoach()?'// 待审核推荐 ('+myRecs.length+')':'// 我的推荐')+'</div>';
-    html+='<div class="daily-recs-list">';
-    myRecs.forEach(r=>{
-      html+='<div class="daily-rec-item">';
-      html+='<div><span class="daily-pid small">'+escHtml(r.problem_id||'')+'</span> '+escHtml(r.title)+'</div>';
-      if(r.reason)html+='<div style="font-size:12px;color:var(--text3)">「'+escHtml(r.reason)+'」</div>';
-      html+='<div style="font-size:12px;color:var(--text3)">by @'+escHtml(r.profiles?.username||'?')+'</div>';
-      if(isCoach()){
-        html+='<div style="display:flex;gap:6px;margin-top:6px">';
-        html+='<button class="btn btn-primary btn-sm" onclick="approveRec('+r.id+',\''+escHtml(r.problem_id||'')+'\',\''+escHtml(r.title)+'\')">✓ 采用</button>';
-        html+='<button class="btn btn-danger btn-sm" onclick="rejectRec('+r.id+')">✗ 拒绝</button>';
-        html+='</div>';
-      }
-      html+='</div>';
-    });
-    html+='</div></div>';
-  }
-
-  el.innerHTML=html;
-  } catch(e){ console.error("loadDaily:", e); showToast("加载失败，请刷新重试", "error"); }
-}
-
-
-// ── Home Daily Mini-Card ─────────────────────────────────
-async function loadHomeDailyCard(){
-  const el=document.getElementById('home-daily-card');
-  if(!el)return;
-  try{
-    const today=new Date().toISOString().slice(0,10);
-    const{data:daily}=await sb.from('daily_problems').select('*').eq('date',today).maybeSingle();
-    if(!daily){
-      el.innerHTML='<div class="home-daily-empty">📭 今天还没有每日一题 · <span style="color:var(--accent2);cursor:pointer" onclick="show(\'daily\')">去推荐一道 →</span></div>';
-      return;
-    }
-    const{data:checkins}=await sb.from('daily_checkins').select('user_id').eq('daily_id',daily.id);
-    const myCheckin=currentUser&&(checkins||[]).find(c=>c.user_id===currentUser.id);
-    const luoguUrl=daily.problem_id?'https://www.luogu.com.cn/problem/'+daily.problem_id:'#';
-    el.innerHTML=`<div class="home-daily-mini" onclick="show('daily')">
-      <span class="home-daily-label">// 每日一题</span>
-      ${daily.problem_id?`<span class="home-daily-pid">${escHtml(daily.problem_id)}</span>`:''}
-      <span class="home-daily-title">${escHtml(daily.title)}</span>
-      <span class="home-daily-checkin-count">${(checkins||[]).length} 人打卡</span>
-      ${currentUser?`<button class="home-daily-btn${myCheckin?' done':''}" onclick="event.stopPropagation();homeDailyCheckin(${daily.id},${!!myCheckin})">${myCheckin?'✓ 已打卡':'我做出来了'}</button>`:''}
-      ${daily.problem_id?`<a href="${luoguUrl}" target="_blank" onclick="event.stopPropagation()" class="home-daily-btn" style="text-decoration:none">洛谷 →</a>`:''}
-    </div>`;
-  }catch(e){el.innerHTML='';}
-}
-
-async function homeDailyCheckin(dailyId, isChecked){
-  if(!currentUser){showToast('请先登录','error');return;}
-  if(isChecked){
-    await sb.from('daily_checkins').delete().eq('daily_id',dailyId).eq('user_id',currentUser.id);
-  } else {
-    const{error}=await sb.from('daily_checkins').insert({daily_id:dailyId,user_id:currentUser.id});
-    if(error){showToast('打卡失败: '+error.message,'error');return;}
-    showToast('打卡成功 🎉','success');
-    triggerCheckinEffect();
-  }
-  loadHomeDailyCard();
-}
-
-async function doCheckin(dailyId){
-  if(!currentUser){showToast('请先登录','error');return;}
-  const{error}=await sb.from('daily_checkins').insert({daily_id:dailyId,user_id:currentUser.id});
-  if(error){showToast('打卡失败: '+error.message,'error');return;}
-  showToast('打卡成功 🎉','success');
-  triggerCheckinEffect();
-  loadDaily();
-}
-
-async function undoCheckin(dailyId){
-  await sb.from('daily_checkins').delete().eq('daily_id',dailyId).eq('user_id',currentUser.id);
-  loadDaily();
-}
-
-async function deleteDaily(id){
-  if(!confirm('确认删除今日题目？'))return;
-  await sb.from('daily_problems').delete().eq('id',id);
-  showToast('已删除','success');loadDaily();
-}
-
-function triggerCheckinEffect(){
-  // Burst celebration particles
-  const colors=['#2de8b0','#6c8ef5','#ffb347','#f06292'];
-  for(let i=0;i<20;i++){
-    const p=document.createElement('div');p.className='code-particle';
-    p.textContent=['AC!','✓','100分','通过','Accepted'][Math.floor(Math.random()*5)];
-    p.style.setProperty('--c',colors[Math.floor(Math.random()*colors.length)]);
-    const angle=(Math.random()*360)*(Math.PI/180);
-    const dist=60+Math.random()*120;
-    p.style.setProperty('--tx',Math.cos(angle)*dist+'px');
-    p.style.setProperty('--ty',Math.sin(angle)*dist-40+'px');
-    p.style.setProperty('--rot',(Math.random()-0.5)*60+'deg');
-    p.style.setProperty('--delay',Math.random()*200+'ms');
-    p.style.left='50%';p.style.top='50%';
-    document.body.appendChild(p);
-    setTimeout(()=>p.remove(),1200);
-  }
-}
-
-function openSetDailyModal(){
-  const d=new Date().toISOString().slice(0,10);
-  document.getElementById('daily-date').value=d;
-  document.getElementById('daily-problem-id').value='';
-  document.getElementById('daily-title').value='';
-  document.getElementById('daily-note').value='';
-  loadArchiveForDaily();
-  openModal('set-daily-modal');
-}
-
-function toggleDailySource(){
-  const src=document.getElementById('daily-source').value;
-  document.getElementById('daily-manual-fields').style.display=src==='manual'?'':'none';
-  document.getElementById('daily-archive-fields').style.display=src==='archive'?'':'none';
-}
-
-async function loadArchiveForDaily(){
-  const{data}=await sb.from('problem_archive').select('id,problem_id,title').order('created_at',{ascending:false});
-  const sel=document.getElementById('daily-archive-select');
-  sel.innerHTML='<option value="">-- 选择题目 --</option>';
-  (data||[]).forEach(p=>{
-    const o=document.createElement('option');
-    o.value=p.id;
-    o.textContent=(p.problem_id?p.problem_id+' · ':'')+p.title;
-    o.dataset.pid=p.problem_id||'';
-    o.dataset.title=p.title;
-    sel.appendChild(o);
-  });
-  sel.onchange=()=>{
-    const opt=sel.selectedOptions[0];
-    if(opt&&opt.value){
-      document.getElementById('daily-problem-id').value=opt.dataset.pid;
-      document.getElementById('daily-title').value=opt.dataset.title;
-    }
-  };
-}
-
-async function submitDaily(){
-  const src=document.getElementById('daily-source').value;
-  const pid=document.getElementById('daily-problem-id').value.trim();
-  const title=document.getElementById('daily-title').value.trim();
-  const note=document.getElementById('daily-note').value.trim();
-  const date=document.getElementById('daily-date').value;
-  const diff=document.getElementById('daily-difficulty').value;
-  if(!title){showToast('请填写题目名称','error');return;}
-  if(!date){showToast('请选择日期','error');return;}
-  const archiveId=src==='archive'?parseInt(document.getElementById('daily-archive-select').value)||null:null;
-  const{error}=await sb.from('daily_problems').upsert({
-    problem_id:pid||null,title,note:note||null,date,
-    difficulty:diff||null,source:src,archive_id:archiveId,
-    created_by:currentUser.id
-  },{onConflict:'date'});
-  if(error){showToast('发布失败: '+error.message,'error');return;}
-  showToast('今日一题已发布 ✓','success');
-  closeModal('set-daily-modal');loadDaily();
-}
-
-async function submitRec(){
-  if(!currentUser){showToast('请先登录','error');return;}
-  const pid=document.getElementById('rec-problem-id').value.trim();
-  const title=document.getElementById('rec-title').value.trim();
-  const reason=document.getElementById('rec-reason').value.trim();
-  if(!title){showToast('请填写题目名称','error');return;}
-  const{error}=await sb.from('daily_recommendations').insert({
-    problem_id:pid||null,title,reason:reason||null,
-    recommended_by:currentUser.id
-  });
-  if(error){showToast('提交失败: '+error.message,'error');return;}
-  showToast('推荐已提交，等待教练审核 ✓','success');
-  closeModal('rec-modal');loadDaily();
-}
-
-async function approveRec(recId,pid,title){
-  const d=new Date().toISOString().slice(0,10);
-  const{error}=await sb.from('daily_problems').upsert({
-    problem_id:pid||null,title,date:d,source:'rec',created_by:currentUser.id
-  },{onConflict:'date'});
-  if(error){showToast('发布失败: '+error.message,'error');return;}
-  await sb.from('daily_recommendations').update({status:'approved'}).eq('id',recId);
-  showToast('已采用该推荐作为今日题目 ✓','success');loadDaily();
-}
-
-async function rejectRec(recId){
-  await sb.from('daily_recommendations').update({status:'rejected'}).eq('id',recId);
-  showToast('已拒绝','success');loadDaily();
-}
-
-function openAnnModal(){if(!isCoach())return;openModal('ann-modal');}
-async function submitAnn(){
-  const title=document.getElementById('ann-title').value.trim(),content=document.getElementById('ann-content').value.trim();
-  if(!title||!content){document.getElementById('ann-error').textContent='请填写标题和内容';return;}
-  const{error}=await sb.from('announcements').insert({title,content,is_pinned:document.getElementById('ann-pinned').checked,created_by:currentUser.id});
-  if(error){document.getElementById('ann-error').textContent=error.message;return;}
-  closeModal('ann-modal');['ann-title','ann-content'].forEach(id=>document.getElementById(id).value='');document.getElementById('ann-pinned').checked=false;
-  showToast('公告发布成功 ✓','success');loadAnnouncements();
-}
-async function deleteAnn(id){if(!confirm('确认删除？'))return;await sb.from('announcements').delete().eq('id',id);showToast('已删除','success');loadAnnouncements();}
-
-// ── Contests ───────────────────────────────────────────────
-async function loadContests(){
-  try{
-  const list=document.getElementById('contests-list');
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const{data:contests}=await sb.from('contests').select('*').order('contest_date',{ascending:false});
-  if(!contests||!contests.length){list.innerHTML='<div class="empty">暂无模拟赛记录</div>';return;}
-  const{data:results}=await sb.from('contest_results').select('*').in('contest_id',contests.map(c=>c.id)).order('score',{ascending:false});
-  const rm={};(results||[]).forEach(r=>{if(!rm[r.contest_id])rm[r.contest_id]=[];rm[r.contest_id].push(r);});
-  list.innerHTML='';
-  contests.forEach(c=>{
-    const cr=rm[c.id]||[];
-    let div2Problems=[],div1Problems=[];
-    try{const p=typeof c.problems==='string'?JSON.parse(c.problems):c.problems;if(p&&p.div2)div2Problems=p.div2;if(p&&p.div1)div1Problems=p.div1;}catch(e){}
-    // Split into div1/div2 by detecting duplicate usernames
-    const seen={};const div2=[],div1=[];
-    cr.forEach(r=>{if(seen[r.student_name])div1.push(r);else{seen[r.student_name]=true;div2.push(r);}});
-    div2.sort((a,b)=>b.score-a.score);div1.sort((a,b)=>b.score-a.score);
-    const div2R=div2.map((r,i)=>({...r,rank:i+1}));
-    const div1R=div1.map((r,i)=>({...r,rank:i+1}));
-
-    function renderTable(rows,maxScore){
-      if(!rows.length)return'';
-      return '<table class="rank-table"><thead><tr><th>排名</th><th>用户名</th><th>总分</th></tr></thead><tbody>'
-        +rows.map(r=>'<tr><td class="'+(r.rank<=3?'rank-'+r.rank:'')+'">'+(r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':r.rank)+'</td>'
-          +'<td class="rank-name clickable-name" onclick="showProfile(\''+escHtml(r.student_name)+'\')" style="cursor:pointer">'+escHtml(r.student_name)+'</td>'
-          +'<td>'+r.score+'<span class="score-bar"><span class="score-fill" style="width:'+Math.round(r.score/maxScore*100)+'%"></span></span></td></tr>').join('')
-        +'</tbody></table>';
-    }
-    function renderProblems(probs){
-      if(!probs||!probs.length)return'';
-      return '<div class="problem-chips">'+probs.map(p=>'<a href="https://www.luogu.com.cn/problem/'+escHtml(p.luogu_id||'')+'" target="_blank" class="problem-chip">'+escHtml(p.luogu_id||'')+(p.name?' · '+escHtml(p.name):'')+'</a>').join('')+'</div>';
-    }
-
-    // Build card - collapsed by default
-    const card=document.createElement('div');
-    card.className='contest-card';
-    card.dataset.open='0';
-
-    // Header row (always visible)
-    const header=document.createElement('div');
-    header.className='contest-header';
-    header.innerHTML='<div class="contest-title">'+escHtml(c.title)+'</div>'
-      +'<div style="display:flex;gap:10px;align-items:center">'
-      +(div2R.length?'<span class="div-label div-label-2">Div.2</span>':'')
-      +(div1R.length?'<span class="div-label div-label-1">Div.1</span>':'')
-      +'<span class="contest-date">'+(c.date||c.contest_date||'')+'</span>'
-      +(isCoach()?'<button class="btn btn-danger btn-sm" data-cid="'+c.id+'" onclick="event.stopPropagation();deleteContest(+this.dataset.cid)">删除</button>':'')
-      +'<span class="contest-toggle">▼</span>'
-      +'</div>';
-    card.appendChild(header);
-
-    // Body (hidden by default)
-    const body=document.createElement('div');
-    body.className='contest-body';
-    body.style.display='none';
-
-    // Tabs
-    const hasBoth=div2R.length>0&&div1R.length>0;
-    if(hasBoth){
-      const tabs=document.createElement('div');
-      tabs.className='contest-tabs';
-      tabs.innerHTML='<button class="contest-tab active" data-div="2">Div.2 <span style="opacity:0.6;font-size:12px">入门/普及</span></button>'
-        +'<button class="contest-tab" data-div="1">Div.1 <span style="opacity:0.6;font-size:12px">普及+/提高</span></button>';
-      body.appendChild(tabs);
-    }
-
-    // Div2 panel
-    if(div2R.length){
-      const panel=document.createElement('div');
-      panel.className='contest-panel';panel.dataset.panel='2';
-      panel.innerHTML=(hasBoth?'':'<div class="div-label div-label-2" style="margin-bottom:12px">Div.2</div>')
-        +renderProblems(div2Problems)
-        +'<div class="rank-table-wrap">'+renderTable(div2R,div2R[0]?.score||1)+'</div>'
-        +'<div class="contest-chart-wrap" id="cchart-'+c.id+'-2" style="display:none"><h3>📊 成绩分布</h3><div class="chart-container"><canvas id="cc-'+c.id+'-2"></canvas></div></div>';
-      body.appendChild(panel);
-    }
-
-    // Div1 panel
-    if(div1R.length){
-      const panel=document.createElement('div');
-      panel.className='contest-panel';panel.dataset.panel='1';
-      panel.style.display=hasBoth?'none':'block';
-      panel.innerHTML=(hasBoth?'':'<div class="div-label div-label-1" style="margin-bottom:12px">Div.1</div>')
-        +renderProblems(div1Problems)
-        +'<div class="rank-table-wrap">'+renderTable(div1R,div1R[0]?.score||1)+'</div>'
-        +'<div class="contest-chart-wrap" id="cchart-'+c.id+'-1" style="display:none"><h3>📊 成绩分布</h3><div class="chart-container"><canvas id="cc-'+c.id+'-1"></canvas></div></div>';
-      body.appendChild(panel);
-    }
-
-    if(c.comment||c.note){
-      const note=document.createElement('div');
-      note.className='contest-comment';note.textContent=c.comment||c.note;
-      body.appendChild(note);
-    }
-    card.appendChild(body);
-
-    // Tab switching
-    body.querySelectorAll('.contest-tab').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        body.querySelectorAll('.contest-tab').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        const div=btn.dataset.div;
-        body.querySelectorAll('.contest-panel').forEach(p=>p.style.display=p.dataset.panel===div?'block':'none');
-        if(div==='2'&&div2R.length)showContestChart(c.id+'-2',div2R,'Div.2');
-        if(div==='1'&&div1R.length)showContestChart(c.id+'-1',div1R,'Div.1');
-      });
-    });
-
-    // Toggle expand/collapse
-    header.addEventListener('click',()=>{
-      const open=card.dataset.open==='1';
-      card.dataset.open=open?'0':'1';
-      body.style.display=open?'none':'block';
-      header.querySelector('.contest-toggle').textContent=open?'▼':'▲';
-      if(!open){
-        // Show chart for active tab
-        const activeDiv=body.querySelector('.contest-tab.active')?.dataset.div||'2';
-        if(activeDiv==='2'&&div2R.length)showContestChart(c.id+'-2',div2R,'Div.2');
-        else if(activeDiv==='1'&&div1R.length)showContestChart(c.id+'-1',div1R,'Div.1');
-      }
-    });
-
-    // wire up copy buttons
-    card.querySelectorAll('.copy-problems-btn').forEach(btn=>{
-      btn.addEventListener('click',e=>{
-        e.stopPropagation();
-        copyProblems(btn.dataset.ids, btn.dataset.bid);
-      });
-    });
-    list.appendChild(card);
-  });
-  } catch(e){ console.error("loadContests:", e); showToast("加载失败，请刷新重试", "error"); }
-}
-
-function openContestModal(){if(!isCoach())return;document.getElementById('results-rows').innerHTML='';addResultRow();addResultRow();addResultRow();openModal('contest-modal');}
-function addResultRow(){const tr=document.createElement('tr');tr.innerHTML=`<td><input type="text" placeholder="姓名"></td><td><input type="number" placeholder="0" min="0" style="width:60px"></td><td><input type="number" placeholder="0" min="0" style="width:70px"></td><td><input type="number" placeholder="1" min="1" style="width:55px"></td><td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">×</button></td>`;document.getElementById('results-rows').appendChild(tr);}
-async function submitContest(){
-  const title=document.getElementById('c-title').value.trim(),date=document.getElementById('c-date').value;
-  if(!title||!date){document.getElementById('contest-error').textContent='请填写赛名和日期';return;}
-  const{data:contest,error}=await sb.from('contests').insert({title,contest_date:date,problems:document.getElementById('c-problems').value.trim(),comment:document.getElementById('c-comment').value.trim(),created_by:currentUser.id}).select().single();
-  if(error){document.getElementById('contest-error').textContent=error.message;return;}
-  const rows=document.querySelectorAll('#results-rows tr');const rd=[];
-  rows.forEach(row=>{const inputs=row.querySelectorAll('input');const name=inputs[0].value.trim();if(name)rd.push({contest_id:contest.id,student_name:name,solved:parseInt(inputs[1].value)||0,score:parseInt(inputs[2].value)||0,rank:parseInt(inputs[3].value)||0});});
-  if(rd.length)await sb.from('contest_results').insert(rd);
-  closeModal('contest-modal');showToast('模拟赛录入成功 ✓','success');loadContests();
-  ['c-title','c-date','c-problems','c-comment'].forEach(id=>document.getElementById(id).value='');
-}
-async function deleteContest(id){if(!confirm('确认删除这场模拟赛及其所有成绩？'))return;await sb.from('contests').delete().eq('id',id);showToast('已删除','success');loadContests();}
-
-// ── Notes ──────────────────────────────────────────────────
-let activeNoteTag='';
-async function loadNotes(filterTag){
-  try{
-  if(filterTag!==undefined)activeNoteTag=filterTag;
-  const list=document.getElementById('notes-list'),detail=document.getElementById('note-detail');
-  detail.style.display='none';list.style.display='block';
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const{data}=await sb.from('notes').select('id,title,topic,problem_id,content,created_at,view_count,profiles(username)').order('created_at',{ascending:false});
-  if(!data||!data.length){
-    list.innerHTML='<div class="empty-state"><div class="empty-state-icon">📝</div><h3>还没有题解</h3><p>成为第一个分享解题思路的人吧！</p>'+(currentUser?'<button class="btn btn-primary" onclick="openNoteModal()">写第一篇题解</button>':'<button class="btn btn-outline" onclick="openModal(\'auth-modal\')">登录后发布</button>')+'</div>';
-    return;}
-  // Build tag list
-  const tagSet=new Set();data.forEach(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).forEach(t=>tagSet.add(t)));
-  const tags=[...tagSet];
-  const tagBar=document.getElementById('notes-tag-bar');
-  tagBar.innerHTML='<button class="tag-chip'+(activeNoteTag===''?' active':'')+'" onclick="loadNotes(\'\')">全部</button>'+tags.map(t=>`<button class="tag-chip${activeNoteTag===t?' active':''}" onclick="loadNotes('${escHtml(t)}')">${escHtml(t)}</button>`).join('');
-  const filtered=activeNoteTag?data.filter(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).includes(activeNoteTag)):data;
-  if(!filtered.length){list.innerHTML='<div class="empty">该标签下暂无题解</div>';return;}
-  list.innerHTML='<div class="blog-grid">'+filtered.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<div style="display:flex;gap:4px;flex-wrap:wrap">${(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge" onclick="event.stopPropagation();loadNotes('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?'<span class="view-count">${n.view_count}</span>':''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
-  } catch(e){ console.error("loadNotes:", e); showToast("加载失败，请刷新重试", "error"); }
-}
-function restoreNotesList(){
-  const savedFilter=sessionStorage.getItem('notes_filter')||'';
-  const savedScroll=parseInt(sessionStorage.getItem('notes_scroll')||'0');
-  loadNotes(savedFilter).then(()=>{
-    requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:savedScroll,behavior:'instant'})));
-  });
-}
-
-async function showNote(id){
-  // Save scroll position and active filter before entering detail
-  sessionStorage.setItem('notes_scroll', window.scrollY);
-  sessionStorage.setItem('notes_filter', activeNoteTag||'');
-  document.getElementById('notes-list').style.display='none';
-  const detail=document.getElementById('note-detail');detail.style.display='block';
-  detail.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const{data:n}=await sb.from('notes').select('*,profiles(username,id)').eq('id',id).single();
-  // Increment view count
-  if(n)sb.from('notes').update({view_count:(n.view_count||0)+1}).eq('id',id).then(()=>{});
-  const{data:comments}=await sb.from('comments').select('*,profiles(username)').eq('note_id',id).order('created_at');
-  const[{data:likes},{data:bms}]=await Promise.all([sb.from('likes').select('id,user_id').eq('note_id',id),currentUser?sb.from('bookmarks').select('id').eq('note_id',id).eq('user_id',currentUser?.id||''):Promise.resolve({data:[]})]);const bookmarked=bms&&bms.length>0;
-  const likeCount=likes?likes.length:0;const liked=currentUser&&likes&&likes.some(l=>l.user_id===currentUser.id);
-  const isOwner=currentUser&&n.profiles?.id===currentUser.id;
-  const renderMd=s=>{ if(!s)return ''; const html=DOMPurify.sanitize(marked.parse(s)); return html; };
-  detail._pendingHljs=true;
-  detail.innerHTML=`<button class="back-btn" onclick="restoreNotesList()">← 返回列表</button>
-    <div class="post-title">${escHtml(n.title)}</div>
-    <div class="post-meta"><span class="author" onclick="showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span><a href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} ↗</a></span>`:''} ${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}<span class="view-count">${n.view_count||0}</span><button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>${isOwner?`<button class="btn btn-outline btn-sm" onclick="openEditNote(${id})">编辑</button>`:''}<button class="export-btn" onclick="window.print()">📄 导出PDF</button> ${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''} <button class="bookmark-btn ${bookmarked?'saved':''}" onclick="toggleBookmark(${id},${bookmarked})">🔖 ${bookmarked?'已收藏':'收藏'}</button></div>
-    <div class="post-body md-body">${n.content?`<h4>解题思路</h4>${renderMd(n.content)}`:''} ${n.code?`<h4>C++ 代码</h4><pre><code>${escHtml(n.code)}</code></pre>`:''} ${n.reflection?`<h4>反思与总结</h4>${renderMd(n.reflection)}`:''}</div>
-    <div class="post-body md-body" id="note-body-rendered"></div>
-    <div class="comments-section"><h3>评论 (${comments?comments.length:0})</h3><div id="cl-${id}">${comments&&comments.length?comments.map(c=>`<div class="comment-item"><div class="comment-meta"><span class="author" onclick="showProfile('${c.profiles?.username||''}')">@${c.profiles?.username||'匿名'}</span><span>${fmtDate(c.created_at)}</span></div><div class="comment-text">${escHtml(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:10px 0">// 暂无评论</div>'}</div>${currentUser?`<div class="comment-form"><input type="text" id="ci-${id}" placeholder="写下你的评论…"><button class="btn btn-primary btn-sm" onclick="submitComment(${id})">发送</button></div>`:'<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:10px">登录后参与评论</div>'}</div>`;
-}
-async function applyHljs(){
-  if(typeof hljs==='undefined'){
-    await new Promise((res,rej)=>{
-      const s=document.createElement('script');
-      s.src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js';
-      // Load core first, then cpp
-      const core=document.createElement('script');
-      core.src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/core.min.js';
-      core.onload=()=>{document.head.appendChild(s);};
-      core.onerror=rej;s.onload=res;s.onerror=rej;
-      document.head.appendChild(core);
-    });
-  }
-  document.querySelectorAll('#note-detail pre code').forEach(b=>hljs.highlightElement(b));
-}
-async function toggleLike(noteId,isLiked){if(!currentUser){showToast('请先登录','error');return;}if(isLiked)await sb.from('likes').delete().eq('note_id',noteId).eq('user_id',currentUser.id);else await sb.from('likes').insert({note_id:noteId,user_id:currentUser.id});showNote(noteId);}
-async function submitComment(noteId){const input=document.getElementById(`ci-${noteId}`);const content=input.value.trim();if(!content)return;const{error}=await sb.from('comments').insert({note_id:noteId,author_id:currentUser.id,content});if(error){showToast('评论失败','error');return;}input.value='';showNote(noteId);showToast('评论成功 ✓','success');}
-async function deleteNote(id){if(!confirm('确认删除这篇题解？'))return;await sb.from('notes').delete().eq('id',id);showToast('已删除','success');loadNotes();}
-
-// ── Nav More Menu ──────────────────────────────────────────
-function toggleMoreMenu(e){
-  e.stopPropagation();
-  const menu=document.getElementById('nav-more-menu');
-  menu.classList.toggle('open');
-  if(menu.classList.contains('open')){
-    setTimeout(()=>document.addEventListener('click',closeMoreMenuOutside),50);
-  }
-}
-function closeMoreMenu(){document.getElementById('nav-more-menu').classList.remove('open');}
-function closeMoreMenuOutside(e){
-  if(!e.target.closest('.nav-more-wrap')){
-    closeMoreMenu();
-    document.removeEventListener('click',closeMoreMenuOutside);
-  }
-}
-
-// ── Hero Stats Bar ─────────────────────────────────────────
-async function loadHeroStats(){
-  try{
-  const el=document.getElementById('hero-stats-bar');
-  if(!el)return;
-  const[{count:nc},{count:uc},{count:cc}]=await Promise.all([
-    sb.from('notes').select('*',{count:'exact',head:true}),
-    sb.from('profiles').select('*',{count:'exact',head:true}),
-    sb.from('contests').select('*',{count:'exact',head:true}),
-  ]);
-  el.innerHTML=`<div class="hero-stats-bar">
-    <div class="hero-stat-item" onclick="show('notes')" style="cursor:pointer">
-      <div class="hero-stat-num" id="hs-notes">0</div>
-      <div class="hero-stat-label">篇题解</div>
-    </div>
-    <div class="hero-stat-item" onclick="show('members')" style="cursor:pointer">
-      <div class="hero-stat-num" id="hs-members">0</div>
-      <div class="hero-stat-label">位队员</div>
-    </div>
-    <div class="hero-stat-item" onclick="show('contests')" style="cursor:pointer">
-      <div class="hero-stat-num" id="hs-contests">0</div>
-      <div class="hero-stat-label">场模拟赛</div>
-    </div>
-  </div>`;
-  // Animate count up
-  function countUp(id,target){
-    const el=document.getElementById(id);if(!el||!target)return;
-    let start=null;
-    const dur=1200;
-    function ease(t){return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
-    function frame(ts){
-      if(!start)start=ts;
-      const p=Math.min((ts-start)/dur,1);
-      el.textContent=Math.round(ease(p)*target);
-      if(p<1){requestAnimationFrame(frame);}
-      else{
-        el.textContent=target;
-        el.style.transition='text-shadow 0.3s';
-        el.style.textShadow='0 0 20px var(--accent2)';
-        setTimeout(()=>el.style.textShadow='',600);
-      }
-    }
-    requestAnimationFrame(frame);
-  }
-  countUp('hs-notes',nc||0);
-  countUp('hs-members',uc||0);
-  countUp('hs-contests',cc||0);
-  } catch(e){ console.error("loadHeroStats:", e); showToast("加载失败，请刷新重试", "error"); }
-}
-
-// ── Heatmap ────────────────────────────────────────────────
-async function buildHeatmap(userId){
-  // Get notes+posts for user in last 52 weeks
-  const since=new Date();since.setDate(since.getDate()-364);
-  const sinceStr=since.toISOString();
-  const[{data:notes},{data:posts}]=await Promise.all([
-    sb.from('notes').select('created_at').eq('author_id',userId).gte('created_at',sinceStr),
-    sb.from('posts').select('created_at').eq('author_id',userId).gte('created_at',sinceStr),
-  ]);
-  const counts={};
-  [...(notes||[]),...(posts||[])].forEach(r=>{
-    const d=r.created_at.slice(0,10);counts[d]=(counts[d]||0)+1;
-  });
-  const total=Object.values(counts).reduce((a,b)=>a+b,0);
-  // Build 52 weeks × 7 days grid
-  const today=new Date();
-  const cells=[];
-  for(let w=51;w>=0;w--){
-    for(let d=0;d<7;d++){
-      const date=new Date(today);
-      date.setDate(today.getDate()-(w*7+(6-d)));
-      const key=date.toISOString().slice(0,10);
-      const cnt=counts[key]||0;
-      const level=cnt===0?'':cnt===1?'l1':cnt===2?'l2':cnt<=4?'l3':'l4';
-      cells.push(`<div class="hm-cell ${level}" title="${key}: ${cnt} 次活动"></div>`);
-    }
-  }
-  return`<div class="heatmap-wrap">
-    <div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-bottom:8px">过去一年 · 共 ${total} 次活动</div>
-    <div class="heatmap-grid" style="display:grid;grid-template-columns:repeat(52,12px);gap:3px">${cells.join('')}</div>
-    <div class="heatmap-legend">少 <div class="hm-cell"></div><div class="hm-cell l1"></div><div class="hm-cell l2"></div><div class="hm-cell l3"></div><div class="hm-cell l4"></div> 多</div>
-  </div>`;
-}
-
-function openNoteModal(){
-  if(!currentUser){openModal('auth-modal');return;}
-  document.getElementById('note-drawer-overlay').classList.add('open');
-  document.getElementById('note-drawer').classList.add('open');
-  document.body.style.overflow='hidden';
-  setTimeout(()=>initTopicAutocomplete('note-topic'),100);
-}
-function closeNoteDrawer(){
-  document.getElementById('note-drawer-overlay').classList.remove('open');
-  document.getElementById('note-drawer').classList.remove('open');
-  document.body.style.overflow='';
-}
-async function submitNote(){
-  const title=document.getElementById('note-title').value.trim();
-  if(!title){document.getElementById('note-error').textContent='请填写标题';return;}
-  const{error}=await sb.from('notes').insert({author_id:currentUser.id,title,problem_id:document.getElementById('note-problem').value.trim(),topic:document.getElementById('note-topic').value.trim(),content:document.getElementById('note-content').value.trim(),code:document.getElementById('note-code').value.trim(),reflection:document.getElementById('note-reflection').value.trim()});
-  if(error){document.getElementById('note-error').textContent=error.message;return;}
-  closeNoteDrawer();['note-title','note-problem','note-topic','note-content','note-code','note-reflection'].forEach(id=>document.getElementById(id).value='');['preview-content','preview-reflection'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=''});
-  showToast('题解发布成功 ✓','success');loadNotes();
-}
-
-// ── Posts ──────────────────────────────────────────────────
-async function loadPosts(){
-  const list=document.getElementById('emotions-list');
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const{data}=await sb.from('posts').select('*,profiles(username,id)').order('created_at',{ascending:false});
-  if(!data||!data.length){list.innerHTML='<div class="empty">暂无随笔</div>';return;}
-  list.innerHTML=data.map(p=>`<div class="emotion-post"><div class="emotion-dot"></div><div class="emotion-date"><span>${fmtDate(p.created_at)}</span><span class="emotion-author" onclick="showProfile('${p.profiles?.username||''}')">@${p.profiles?.username||'匿名'}</span>${currentUser&&p.profiles?.id===currentUser.id?`<button class="btn btn-outline btn-sm" style="margin-left:4px" onclick="openEditPost(${p.id},'${escHtml((p.content||'').replace(/'/g,"\\'\\'"))}')">编辑</button>`:''}${(currentUser&&p.profiles?.id===currentUser.id)||isCoach()?`<button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deletePost(${p.id})">删除</button>`:''}</div><div class="emotion-text">${escHtml(p.content).replace(/\n/g,'<br>')}</div></div>`).join('');
-}
-function openPostModal(){if(!currentUser){openModal('auth-modal');return;}openModal('post-modal');}
-async function submitPost(){const content=document.getElementById('post-content').value.trim();if(!content){document.getElementById('post-error').textContent='请填写内容';return;}const{error}=await sb.from('posts').insert({author_id:currentUser.id,content});if(error){document.getElementById('post-error').textContent=error.message;return;}closeModal('post-modal');document.getElementById('post-content').value='';showToast('随笔发布成功 ✓','success');loadPosts();}
-async function deletePost(id){if(!confirm('确认删除？'))return;await sb.from('posts').delete().eq('id',id);showToast('已删除','success');loadPosts();}
-
-// ── Lectures ───────────────────────────────────────────────
-async function loadLectures(){
-  try{
-  const list=document.getElementById('lectures-list');
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const{data}=await sb.from('lectures').select('*').order('lecture_date',{ascending:false});
-  if(!data||!data.length){list.innerHTML='<div class="empty">暂无课程记录</div>';return;}
-  const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-  list.innerHTML='';
-  data.forEach(l=>{
-    const problems=(l.problems||'').split(/[\s,]+/).filter(Boolean);
-    const homework=(l.homework||'').split(/[\s,]+/).filter(Boolean);
-    const conclusions=(l.conclusions||'').split('\n').map(s=>s.trim()).filter(Boolean);
-    const d=new Date(l.lecture_date);
-    const item=document.createElement('div');item.className='lecture-item';
-    function pchips(arr,cls){return arr.map(p=>'<a href="https://www.luogu.com.cn/problem/'+escHtml(p)+'" target="_blank" class="problem-chip '+cls+'">'+escHtml(p)+'</a>').join('');}
-    item.innerHTML=
-      '<div class="lecture-date-block">'
-      +'<div class="lecture-month">'+months[d.getMonth()]+'</div>'
-      +'<div class="lecture-day">'+d.getDate()+'</div>'
-      +'<div class="lecture-year">'+d.getFullYear()+'</div>'
-      +'</div>'
-      +'<div class="lecture-body">'
-      +'<div class="lecture-title-row"><span class="lecture-title-text">'+escHtml(l.topic)+'</span>'+(l.level?'<span class="lecture-level-tag">'+escHtml(l.level)+'</span>':'')+'</div>'
-      +(l.content?'<div class="lecture-desc">'+escHtml(l.content)+'</div>':'')
-      +(conclusions.length?'<div class="lecture-conclusions"><div class="lecture-section-label">💡 关键结论</div><ol class="conclusions-list">'+conclusions.map(c=>'<li>'+escHtml(c)+'</li>').join('')+'</ol></div>':'')
-      +(problems.length?'<div class="lecture-section-label" style="margin-top:10px">📌 讲解题</div><div class="problem-chips">'+pchips(problems,'chip-blue')+'</div>':'')
-      +(homework.length?'<div class="lecture-section-label" style="margin-top:8px">📝 作业题</div><div class="problem-chips">'+pchips(homework,'chip-green')+'</div>':'')
-      +(isCoach()?'<button class="btn btn-danger btn-sm" style="margin-top:10px" data-lid="'+l.id+'">删除</button>':'')
-      +'</div>';
-    if(isCoach()){const db=item.querySelector('[data-lid]');if(db)db.addEventListener('click',()=>deleteLecture(+db.dataset.lid));}
-    list.appendChild(item);
-  });;
-  } catch(e){ console.error("loadLectures:", e); showToast("加载失败，请刷新重试", "error"); }
-}
-function openLectureModal(){if(!isCoach())return;openModal('lecture-modal');}
-async function submitLecture(){
-  const date=document.getElementById('l-date').value,topic=document.getElementById('l-topic').value.trim();
-  if(!date||!topic){document.getElementById('lecture-error').textContent='请填写日期和主题';return;}
-  const row={lecture_date:date,topic,
-    content:document.getElementById('l-content').value.trim(),
-    problems:document.getElementById('l-problems').value.trim(),
-    homework:document.getElementById('l-homework').value.trim(),
-    conclusions:document.getElementById('l-conclusions').value.trim(),
-    level:document.getElementById('l-level').value,
-    created_by:currentUser.id};
-  const{error}=await sb.from('lectures').insert(row);
-  if(error){document.getElementById('lecture-error').textContent=error.message;return;}
-  closeModal('lecture-modal');
-  ['l-date','l-topic','l-content','l-problems','l-homework','l-conclusions'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('l-level').value='';
-  showToast('课程记录已保存 ✓','success');loadLectures();
-}
-async function deleteLecture(id){if(!confirm('确认删除？'))return;await sb.from('lectures').delete().eq('id',id);showToast('已删除','success');loadLectures();}
-
-// ── Archive ────────────────────────────────────────────────
-async function loadArchive(){
-  try{
-  const list=document.getElementById('archive-list');
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const{data}=await sb.from('problem_archive').select('*').order('created_at',{ascending:false});
-  if(!data||!data.length){list.innerHTML='<div class="empty">暂无题目，教练可添加</div>';return;}
-  list.innerHTML=`<div class="archive-table-wrap"><table class="archive-table"><thead><tr><th>题目</th><th>链接</th><th>难度</th><th>知识点</th>${isCoach()?'<th></th>':''}</tr></thead><tbody>${data.map(p=>`<tr><td>${escHtml(p.title)}</td><td><a href="https://www.luogu.com.cn/problem/${escHtml(p.problem_id)}" target="_blank">${escHtml(p.problem_id)}</a> <button class="archive-judge-btn" onclick="toggleArchiveJudge(${p.id},'${escHtml(p.title)}')">⚡ 做题</button></td><td><span class="diff-badge diff-${p.difficulty||''}">${p.difficulty||'-'}</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--text3)">${escHtml(p.topic||'-')}</td>${isCoach()?`<td><button class="btn btn-danger btn-sm" onclick="deleteProblem(${p.id})">删除</button></td>`:''}</tr>`).join('')}</tbody></table></div>
-  ${data.map(p=>`<div id="archive-judge-${p.id}" class="archive-judge-wrap">
-    <div class="judge-toolbar" style="padding:8px 10px;border-radius:8px 8px 0 0">
-      <span style="font-family:var(--mono);font-size:12px;color:var(--accent2)">⚡ ${escHtml(p.title)}</span>
-      <span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3)">C++ · Ctrl+Enter 运行</span>
-    </div>
-    <div class="archive-judge-editor" style="border:1px solid rgba(108,142,245,0.15);border-top:none"></div>
-    <div style="display:flex;gap:8px;padding:8px;background:rgba(6,8,15,0.4);border:1px solid rgba(108,142,245,0.1);border-top:none">
-      <textarea class="archive-judge-stdin judge-io-textarea" style="height:60px;flex:1" placeholder="自定义输入…"></textarea>
-      <button class="judge-btn judge-run-btn" onclick="runArchiveCode(${p.id},document.getElementById('archive-judge-${p.id}')._editor)" style="align-self:flex-end">▶ 运行</button>
-    </div>
-    <div class="archive-judge-output judge-output" style="min-height:80px;max-height:200px">点击运行查看结果</div>
-  </div>`).join('')}
-  `;
-  } catch(e){ console.error("loadArchive:", e); showToast("加载失败，请刷新重试", "error"); }
-}
-// ── Problem Archive ───────────────────────────────────────
-let currentArchiveFilter = { diff: 'all', tag: '', search: '' };
-let currentProblem = null;
-let pdEditor = null;
-let pdEditorInited = false;
-
-async function loadArchive(){
-  try{
-    const list = document.getElementById('archive-list');
-    list.innerHTML = '<div class="loading"><div class="spinner"></div>加载中…</div>';
-
-    let q = sb.from('problem_archive').select('*').order('created_at', {ascending:false});
-    if (!isCoach()) q = q.eq('status','published');
-
-    const { data, error } = await q;
-    if (error) throw error;
-
-    const problems = data || [];
-
-    // Render filters + student submit banner
-    const tags = [...new Set(problems.flatMap(p => p.tags || []))].sort();
-    list.innerHTML = `
-      ${!isCoach() && currentUser ? `
-        <div class="student-submit-banner">
-          <p>💡 有好题想推荐给大家？</p>
-          <button class="btn btn-sm btn-primary" onclick="openStudentSubmitProblem()">投稿题目</button>
-        </div>` : ''}
-      ${isCoach() ? `<div style="margin-bottom:16px"><button class="btn btn-primary btn-sm" onclick="openProblemModal()">+ 添加题目</button></div>` : ''}
-      <div class="archive-filters">
-        <input class="archive-search" id="arch-search" placeholder="🔍 搜索题目…" oninput="filterArchive()" value="${escHtml(currentArchiveFilter.search)}">
-        ${['all','入门','普及','提高','省选'].map(d=>
-          `<button class="filter-btn${currentArchiveFilter.diff===d?' active':''}" onclick="setArchiveDiff('${d}')">${d==='all'?'全部难度':d}</button>`
-        ).join('')}
-        ${tags.slice(0,8).map(t=>
-          `<button class="filter-btn${currentArchiveFilter.tag===t?' active':''}" onclick="setArchiveTag('${t}')">${t}</button>`
-        ).join('')}
-      </div>
-      <div class="archive-table-wrap">
-        <table class="archive-table">
-          <thead><tr>
-            <th>#</th><th>题目</th><th>难度</th><th>标签</th>
-            <th>时限</th><th>来源</th>
-            ${isCoach() ? '<th>状态</th><th></th>' : ''}
-          </tr></thead>
-          <tbody id="arch-tbody"></tbody>
-        </table>
-      </div>`;
-
-    renderArchiveRows(problems);
-  } catch(e){ document.getElementById('archive-list').innerHTML = `<div class="empty">加载失败: ${e.message}</div>`; }
-}
-
-function renderArchiveRows(problems){
-  const { diff, tag, search } = currentArchiveFilter;
-  const filtered = problems.filter(p => {
-    if (diff !== 'all' && p.difficulty !== diff) return false;
-    if (tag && !(p.tags||[]).includes(tag)) return false;
-    if (search && !p.title.toLowerCase().includes(search.toLowerCase()) &&
-        !(p.problem_id||'').toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
-  const tbody = document.getElementById('arch-tbody');
-  if (!tbody) return;
-  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text3)">没有匹配的题目</td></tr>'; return; }
-  tbody.innerHTML = filtered.map((p,i) => `
-    <tr onclick="openProblemDetail(${p.id})" style="cursor:pointer">
-      <td style="color:var(--text3);font-size:12px">${i+1}</td>
-      <td>
-        <span style="font-weight:600">${escHtml(p.title)}</span>
-        ${p.problem_id ? `<span style="font-size:11px;color:var(--accent);margin-left:6px">${escHtml(p.problem_id)}</span>` : ''}
-      </td>
-      <td><span class="diff-badge diff-${p.difficulty||'unrated'}">${p.difficulty||'—'}</span></td>
-      <td>${(p.tags||[]).map(t=>`<span class="tag-pill">${escHtml(t)}</span>`).join('')}</td>
-      <td style="font-family:var(--mono);font-size:12px;color:var(--text3)">${p.time_limit||1000}ms</td>
-      <td>${p.problem_id ? `<a href="${escHtml(p.source_url||'https://www.luogu.com.cn/problem/'+p.problem_id)}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent2);font-size:12px">洛谷 ↗</a>` : '—'}</td>
-      ${isCoach() ? `
-        <td><span class="diff-badge ${p.status==='published'?'diff-入门':'diff-unrated'}">${p.status==='published'?'已发布':'待审核'}</span></td>
-        <td onclick="event.stopPropagation()">
-          <button class="btn-icon" onclick="editProblem(${p.id})" title="编辑">✏️</button>
-          <button class="btn-icon" onclick="deleteProblem(${p.id})" title="删除">🗑</button>
-        </td>` : ''}
-    </tr>`).join('');
-  initStagger(document.querySelector('#arch-tbody'));
-}
-
-function setArchiveDiff(d){ currentArchiveFilter.diff = d; loadArchive(); }
-function setArchiveTag(t){ currentArchiveFilter.tag = currentArchiveFilter.tag===t?'':t; loadArchive(); }
-function filterArchive(){ currentArchiveFilter.search = document.getElementById('arch-search')?.value||''; loadArchive(); }
-
-// ── Problem Detail ──
-async function openProblemDetail(id){
-  const { data: p } = await sb.from('problem_archive').select('*').eq('id', id).single();
-  if (!p) return;
-  currentProblem = p;
-
-  const { data: examples } = await sb.from('problem_examples')
-    .select('*').eq('problem_id', id).order('seq');
-
-  // Fill header
-  document.getElementById('pd-title').textContent = p.title;
-  document.getElementById('pd-id').textContent = p.problem_id || '';
-  document.getElementById('pd-id').style.display = p.problem_id ? '' : 'none';
-  const diffEl = document.getElementById('pd-difficulty');
-  diffEl.textContent = p.difficulty || '未评级';
-  diffEl.className = `diff-badge diff-${p.difficulty||'unrated'}`;
-  document.getElementById('pd-tags').innerHTML = (p.tags||[]).map(t=>`<span class="tag-pill">${escHtml(t)}</span>`).join('');
-  document.getElementById('pd-time').textContent = `⏱ ${p.time_limit||1000}ms`;
-  document.getElementById('pd-mem').textContent = `💾 ${p.memory_limit||256}MB`;
-  const srcLink = document.getElementById('pd-source-link');
-  if (p.source_url || p.problem_id) {
-    srcLink.href = p.source_url || `https://www.luogu.com.cn/problem/${p.problem_id}`;
-    srcLink.style.display = '';
-  } else { srcLink.style.display = 'none'; }
-
-  // Fill statement
-  document.getElementById('pd-desc').textContent = p.description || '（暂无题目描述）';
-  document.getElementById('pd-input-fmt').textContent = p.input_format || '—';
-  document.getElementById('pd-output-fmt').textContent = p.output_format || '—';
-
-  // Examples
-  const exWrap = document.getElementById('pd-examples-wrap');
-  exWrap.innerHTML = (examples||[]).map((ex,i) => `
-    <div class="prob-section-label" style="margin-top:16px">样例 ${i+1}</div>
-    <div class="prob-example">
-      <div class="prob-example-label">输入</div>
-      <pre>${escHtml(ex.input)}</pre>
-      <div class="prob-example-label" style="margin-top:8px">输出</div>
-      <pre>${escHtml(ex.output)}</pre>
-      ${ex.explanation ? `<div class="prob-example-label" style="margin-top:8px">说明</div><div class="prob-text">${escHtml(ex.explanation)}</div>` : ''}
-    </div>`).join('');
-
-  const hintWrap = document.getElementById('pd-hint-wrap');
-  if (p.hint) {
-    hintWrap.innerHTML = `<div class="prob-section-label" style="margin-top:16px">数据范围</div><div class="prob-text">${escHtml(p.hint)}</div>`;
-  } else { hintWrap.innerHTML = ''; }
-
-  const solWrap = document.getElementById('pd-solution-wrap');
-  if (p.solution && isCoach()) {
-    document.getElementById('pd-solution').textContent = p.solution;
-    solWrap.style.display = '';
-  } else { solWrap.style.display = 'none'; }
-
-  openModal('problem-detail-modal');
-
-  // Init editor
-  setTimeout(() => {
-    const el = document.getElementById('pd-editor');
-    if (!el) return;
-    if (!pdEditor) {
-      pdEditor = CodeMirror(el, {
-        value: getDefaultTemplate(54),
-        mode: 'text/x-c++src',
-        theme: 'dracula',
-        lineNumbers: true,
-        matchBrackets: true,
-        autoCloseBrackets: true,
-        indentUnit: 4,
-        tabSize: 4,
-        indentWithTabs: false,
-        lineWrapping: false,
-        extraKeys: { 'Ctrl-Enter': runProblemCode, 'Tab': cm => cm.execCommand('insertSoftTab') }
-      });
-    } else {
-      pdEditor.setValue(getDefaultTemplate(54));
-    }
-    pdEditor.refresh();
-    document.getElementById('pd-lang').value = '54';
-  }, 200);
-}
-
-function onPdLangChange(){
-  const lang = parseInt(document.getElementById('pd-lang').value);
-  if (pdEditor) {
-    pdEditor.setValue(getDefaultTemplate(lang));
-    pdEditor.setOption('mode', getLangMode(lang));
-  }
-}
-function clearPdCode(){ pdEditor?.setValue(''); }
-
-function testWithSample(){
-  if (!currentProblem) return;
-  // Load first example input into stdin
-  sb.from('problem_examples').select('input').eq('problem_id', currentProblem.id).order('seq').limit(1)
-    .then(({data}) => {
-      if (data?.[0]) {
-        document.getElementById('pd-stdin').value = data[0].input;
-        runProblemCode();
-      }
-    });
-}
-
-async function runProblemCode(){
-  if (!pdEditor) return;
-  const code = pdEditor.getValue();
-  const langId = parseInt(document.getElementById('pd-lang').value);
-  const stdin = document.getElementById('pd-stdin').value;
-  const btn = document.getElementById('pd-run-btn');
-  btn.disabled = true; btn.textContent = '⏳ 运行中…';
-  document.getElementById('pd-output').innerHTML = '<div class="judge-output-placeholder">执行中…</div>';
-  document.getElementById('pd-verdict').innerHTML = '';
-  document.getElementById('pd-stats').innerHTML = '';
-
-  const result = await judgeSubmit(code, langId, stdin);
-  btn.disabled = false; btn.textContent = '▶ 提交';
-  renderJudgeResult(result, 'pd-output', 'pd-verdict', 'pd-stats');
-
-  // Save submission record
-  if (currentUser && currentProblem) {
-    const langName = document.getElementById('pd-lang').selectedOptions[0]?.text || '';
-    await sb.from('problem_submissions').insert({
-      problem_id: currentProblem.id,
-      user_id: currentUser.id,
-      language_id: langId,
-      language: langName,
-      code,
-      stdin,
-      stdout: result.stdout || '',
-      stderr: result.stderr || '',
-      verdict: result.status?.description || 'Unknown',
-      time_ms: result.time ? Math.round(parseFloat(result.time)*1000) : null,
-      memory_kb: result.memory || null,
-    });
-  }
-}
-
-// ── Problem Modal (add/edit) ──
-function openProblemModal(editId = null){
-  if (!currentUser) { showToast('请先登录','error'); return; }
-  // Students can submit pending problems
-  const fields = ['p-title','p-id','p-url','p-diff','p-tags','p-time','p-mem','p-desc','p-input-fmt','p-output-fmt','p-ex-in','p-ex-out','p-hint','p-solution','p-status'];
-  fields.forEach(f => { const el = document.getElementById(f); if(el) el.value = ''; });
-  document.getElementById('p-time').value = '1000';
-  document.getElementById('p-mem').value = '256';
-  document.getElementById('problem-error').textContent = '';
-  document.getElementById('problem-modal-title').textContent = editId ? '编辑题目' : (isCoach() ? '添加题目' : '投稿题目');
-  // Coach-only fields
-  document.getElementById('p-solution-wrap').style.display = isCoach() ? '' : 'none';
-  document.getElementById('p-status-wrap').style.display = isCoach() ? '' : 'none';
-  document.getElementById('problem-modal').dataset.editId = editId || '';
-
-  if (editId) {
-    sb.from('problem_archive').select('*').eq('id', editId).single().then(({data:p}) => {
-      if (!p) return;
-      document.getElementById('p-title').value = p.title || '';
-      document.getElementById('p-id').value = p.problem_id || '';
-      document.getElementById('p-url').value = p.source_url || '';
-      document.getElementById('p-diff').value = p.difficulty || 'unrated';
-      document.getElementById('p-tags').value = (p.tags||[]).join(', ');
-      document.getElementById('p-time').value = p.time_limit || 1000;
-      document.getElementById('p-mem').value = p.memory_limit || 256;
-      document.getElementById('p-desc').value = p.description || '';
-      document.getElementById('p-input-fmt').value = p.input_format || '';
-      document.getElementById('p-output-fmt').value = p.output_format || '';
-      document.getElementById('p-hint').value = p.hint || '';
-      if (isCoach()) {
-        document.getElementById('p-solution').value = p.solution || '';
-        document.getElementById('p-status').value = p.status || 'published';
-      }
-      // Load first example
-      sb.from('problem_examples').select('*').eq('problem_id',editId).order('seq').limit(1)
-        .then(({data:ex}) => {
-          if (ex?.[0]) {
-            document.getElementById('p-ex-in').value = ex[0].input;
-            document.getElementById('p-ex-out').value = ex[0].output;
-          }
-        });
-    });
-  }
-  openModal('problem-modal');
-}
-
-function openStudentSubmitProblem(){ openProblemModal(null); }
-
-async function submitProblem(){
-  const title = document.getElementById('p-title').value.trim();
-  const problem_id = document.getElementById('p-id').value.trim();
-  const errEl = document.getElementById('problem-error');
-  if (!title) { errEl.textContent = '请填写题目名称'; return; }
-  errEl.textContent = '';
-
-  const tags = document.getElementById('p-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
-  const payload = {
-    title,
-    problem_id: problem_id || null,
-    source_url: document.getElementById('p-url').value.trim() || null,
-    difficulty: document.getElementById('p-diff').value,
-    tags,
-    time_limit: parseInt(document.getElementById('p-time').value) || 1000,
-    memory_limit: parseInt(document.getElementById('p-mem').value) || 256,
-    description: document.getElementById('p-desc').value.trim() || null,
-    input_format: document.getElementById('p-input-fmt').value.trim() || null,
-    output_format: document.getElementById('p-output-fmt').value.trim() || null,
-    hint: document.getElementById('p-hint').value.trim() || null,
-    solution: isCoach() ? (document.getElementById('p-solution').value.trim() || null) : null,
-    status: isCoach() ? document.getElementById('p-status').value : 'pending',
-    created_by: currentUser.id,
-  };
-
-  const editId = document.getElementById('problem-modal').dataset.editId;
-  let problemDbId;
-
-  if (editId) {
-    const { error } = await sb.from('problem_archive').update(payload).eq('id', editId);
-    if (error) { errEl.textContent = error.message; return; }
-    problemDbId = parseInt(editId);
-  } else {
-    const { data, error } = await sb.from('problem_archive').insert(payload).select().single();
-    if (error) { errEl.textContent = error.message; return; }
-    problemDbId = data.id;
-  }
-
-  // Save example
-  const exIn = document.getElementById('p-ex-in').value;
-  const exOut = document.getElementById('p-ex-out').value;
-  if (exIn || exOut) {
-    if (editId) {
-      await sb.from('problem_examples').delete().eq('problem_id', editId).eq('seq', 1);
-    }
-    await sb.from('problem_examples').insert({ problem_id: problemDbId, seq: 1, input: exIn, output: exOut });
-  }
-
-  closeModal('problem-modal');
-  showToast(editId ? '题目已更新' : (isCoach() ? '题目已发布' : '投稿成功，等待教练审核'), 'success');
-  loadArchive();
-}
-
-async function editProblem(id){ openProblemModal(id); }
-
-async function deleteProblem(id){
-  if (!confirm('确认删除这道题目？')) return;
-  await sb.from('problem_archive').delete().eq('id', id);
-  showToast('已删除','success');
-  loadArchive();
-}
-
-// ── Archive toggle judge panel (inline in archive table) ──
-function toggleArchiveJudge(id, title){
-  openProblemDetail(id);
-}
-
-<!-- CodeMirror -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
@@ -3927,6 +2931,202 @@ function toggleArchiveJudge(id, title){
 </div></div>
 
 <!-- COPY PROBLEMS HELPER (inline script removed, now pure JS) -->
+
+
+
+
+<!-- JUDGE SECTION -->
+<section id="judge">
+<div class="container">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="label">// ONLINE JUDGE</div>
+      <h1>在线评测</h1>
+    </div>
+  </div>
+
+  <div class="judge-layout">
+    <!-- Left: Editor -->
+    <div class="judge-editor-panel">
+      <div class="judge-toolbar">
+        <select id="judge-lang" class="judge-select" onchange="onLangChange()">
+          <option value="54">C++ 17</option>
+          <option value="53">C++ 14</option>
+          <option value="50">C</option>
+          <option value="71">Python 3</option>
+          <option value="62">Java</option>
+          <option value="63">JavaScript</option>
+          <option value="60">Go</option>
+          <option value="72">Ruby</option>
+          <option value="83">Swift</option>
+          <option value="68">PHP</option>
+        </select>
+        <button class="judge-btn judge-run-btn" onclick="runCode()" id="judge-run-btn">
+          <span id="judge-run-icon">▶ 运行</span>
+        </button>
+        <button class="judge-btn" onclick="clearCode()" title="清空">⌫ 清空</button>
+        <button class="judge-btn" onclick="copyCode()" title="复制代码">⎘ 复制</button>
+        <span class="judge-shortcut">Ctrl+Enter 运行</span>
+      </div>
+      <div id="judge-editor" class="judge-editor"></div>
+    </div>
+
+    <!-- Right: IO -->
+    <div class="judge-io-panel">
+      <div class="judge-io-block">
+        <div class="judge-io-label">
+          <span>📥 输入</span>
+          <button class="judge-io-clear" onclick="document.getElementById('judge-stdin').value=''">清空</button>
+        </div>
+        <textarea id="judge-stdin" class="judge-io-textarea" placeholder="自定义输入数据…"></textarea>
+      </div>
+
+      <div class="judge-io-block">
+        <div class="judge-io-label">
+          <span>📤 输出</span>
+          <div id="judge-stats" class="judge-stats"></div>
+        </div>
+        <div id="judge-output" class="judge-output">
+          <div class="judge-output-placeholder">点击「运行」执行代码</div>
+        </div>
+      </div>
+
+      <div id="judge-verdict" class="judge-verdict"></div>
+    </div>
+  </div>
+
+  <!-- Template snippets -->
+  <div class="judge-templates">
+    <div class="judge-templates-label">// 快速模板</div>
+    <div class="judge-template-btns">
+      <button class="judge-tpl-btn" onclick="loadTemplate('io')">基础 I/O</button>
+      <button class="judge-tpl-btn" onclick="loadTemplate('graph')">图论框架</button>
+      <button class="judge-tpl-btn" onclick="loadTemplate('dp')">DP 框架</button>
+      <button class="judge-tpl-btn" onclick="loadTemplate('seg')">线段树</button>
+      <button class="judge-tpl-btn" onclick="loadTemplate('dsu')">并查集</button>
+      <button class="judge-tpl-btn" onclick="loadTemplate('sort')">快排模板</button>
+    </div>
+  </div>
+</div>
+</section>
+
+
+
+<section id="syllabus"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="label">// teaching_plan</div>
+      <h1>教学计划</h1>
+      <p>各班级每周教学内容、例题与作业。</p>
+    </div>
+    <button id="btn-add-syllabus" class="btn btn-primary btn-sm" onclick="openSyllabusModal()" style="display:none">+ 添加本周计划</button>
+  </div>
+
+  <div class="syllabus-tabs" id="syllabus-tabs">
+    <button class="syllabus-tab active" data-class="1" onclick="switchSyllabusClass(1)">周六早八</button>
+    <button class="syllabus-tab" data-class="2" onclick="switchSyllabusClass(2)">周六早十</button>
+    <button class="syllabus-tab" data-class="3" onclick="switchSyllabusClass(3)">周六午一</button>
+    <button class="syllabus-tab" data-class="4" onclick="switchSyllabusClass(4)">周六午三</button>
+    <button class="syllabus-tab" data-class="5" onclick="switchSyllabusClass(5)">周六晚八</button>
+    <button class="syllabus-tab" data-class="6" onclick="switchSyllabusClass(6)">周天早八</button>
+    <button class="syllabus-tab" data-class="7" onclick="switchSyllabusClass(7)">NOIP班</button>
+  </div>
+
+  <div id="syllabus-content"></div>
+</div></section>
+
+<!-- SYLLABUS MODAL -->
+<div class="modal-overlay" id="syllabus-modal">
+  <div class="modal" style="width:700px;max-width:96vw;max-height:92vh;overflow-y:auto">
+    <div class="modal-header">
+      <h2 id="syllabus-modal-title">添加教学计划</h2>
+      <button class="modal-close" onclick="closeModal('syllabus-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="syllabus-error" class="error-msg"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group">
+          <label>班级</label>
+          <select id="sl-class">
+            <option value="1">周六早八</option>
+            <option value="2">周六早十</option>
+            <option value="3">周六午一</option>
+            <option value="4">周六午三</option>
+            <option value="5">周六晚八</option>
+            <option value="6">周天早八</option>
+            <option value="7">NOIP班</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>第几周</label>
+          <input id="sl-week" type="number" min="1" max="52" placeholder="1" value="1">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>本周教学内容</label>
+          <textarea id="sl-content" rows="4" placeholder="本周讲解的知识点、学习目标…"></textarea>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>知识点标签（逗号分隔）</label>
+          <input id="sl-tags" type="text" placeholder="DP, 线段树, 贪心">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>课上例题</label>
+          <div id="sl-examples-list" class="sl-item-list"></div>
+          <div class="sl-add-row">
+            <input id="sl-ex-input" type="text" placeholder="题目名称 或 洛谷链接 https://…" onkeydown="if(event.key==='Enter')addSyllabusItem('examples')">
+            <button class="btn btn-sm btn-ghost" onclick="addSyllabusItem('examples')">+ 添加</button>
+          </div>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>课后习题</label>
+          <div id="sl-homework-list" class="sl-item-list"></div>
+          <div class="sl-add-row">
+            <input id="sl-hw-input" type="text" placeholder="题目名称 或 洛谷链接 https://…" onkeydown="if(event.key==='Enter')addSyllabusItem('homework')">
+            <button class="btn btn-sm btn-ghost" onclick="addSyllabusItem('homework')">+ 添加</button>
+          </div>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>参考资料 / 讲义链接（可选）</label>
+          <input id="sl-ref" type="text" placeholder="https://…">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('syllabus-modal')">取消</button>
+      <button class="btn btn-primary" onclick="submitSyllabus()" id="sl-submit-btn">保存</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- CodeMirror -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/ruby/ruby.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/go/go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/php/php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/ruby/ruby.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/go/go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/php/php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+
 <script>
 function copyProblems(ids,btnId){
   navigator.clipboard.writeText(ids).then(()=>{
@@ -6711,169 +5911,155 @@ async function showContestChart(contestId, preloaded, title){
 }
 </script>
 
-
-
-<!-- JUDGE SECTION -->
-<section id="judge">
-<div class="container">
-  <div class="page-header">
-    <div class="page-header-left">
-      <div class="label">// ONLINE JUDGE</div>
-      <h1>在线评测</h1>
-    </div>
-  </div>
-
-  <div class="judge-layout">
-    <!-- Left: Editor -->
-    <div class="judge-editor-panel">
-      <div class="judge-toolbar">
-        <select id="judge-lang" class="judge-select" onchange="onLangChange()">
-          <option value="54">C++ 17</option>
-          <option value="53">C++ 14</option>
-          <option value="50">C</option>
-          <option value="71">Python 3</option>
-          <option value="62">Java</option>
-          <option value="63">JavaScript</option>
-          <option value="60">Go</option>
-          <option value="72">Ruby</option>
-          <option value="83">Swift</option>
-          <option value="68">PHP</option>
-        </select>
-        <button class="judge-btn judge-run-btn" onclick="runCode()" id="judge-run-btn">
-          <span id="judge-run-icon">▶ 运行</span>
-        </button>
-        <button class="judge-btn" onclick="clearCode()" title="清空">⌫ 清空</button>
-        <button class="judge-btn" onclick="copyCode()" title="复制代码">⎘ 复制</button>
-        <span class="judge-shortcut">Ctrl+Enter 运行</span>
-      </div>
-      <div id="judge-editor" class="judge-editor"></div>
-    </div>
-
-    <!-- Right: IO -->
-    <div class="judge-io-panel">
-      <div class="judge-io-block">
-        <div class="judge-io-label">
-          <span>📥 输入</span>
-          <button class="judge-io-clear" onclick="document.getElementById('judge-stdin').value=''">清空</button>
-        </div>
-        <textarea id="judge-stdin" class="judge-io-textarea" placeholder="自定义输入数据…"></textarea>
-      </div>
-
-      <div class="judge-io-block">
-        <div class="judge-io-label">
-          <span>📤 输出</span>
-          <div id="judge-stats" class="judge-stats"></div>
-        </div>
-        <div id="judge-output" class="judge-output">
-          <div class="judge-output-placeholder">点击「运行」执行代码</div>
-        </div>
-      </div>
-
-      <div id="judge-verdict" class="judge-verdict"></div>
-    </div>
-  </div>
-
-  <!-- Template snippets -->
-  <div class="judge-templates">
-    <div class="judge-templates-label">// 快速模板</div>
-    <div class="judge-template-btns">
-      <button class="judge-tpl-btn" onclick="loadTemplate('io')">基础 I/O</button>
-      <button class="judge-tpl-btn" onclick="loadTemplate('graph')">图论框架</button>
-      <button class="judge-tpl-btn" onclick="loadTemplate('dp')">DP 框架</button>
-      <button class="judge-tpl-btn" onclick="loadTemplate('seg')">线段树</button>
-      <button class="judge-tpl-btn" onclick="loadTemplate('dsu')">并查集</button>
-      <button class="judge-tpl-btn" onclick="loadTemplate('sort')">快排模板</button>
-    </div>
-  </div>
-</div>
-</section>
-
-
-
-<section id="syllabus"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left">
-      <div class="label">// teaching_plan</div>
-      <h1>教学计划</h1>
-      <p>各班级每周教学内容、例题与作业。</p>
-    </div>
-    <button id="btn-add-syllabus" class="btn btn-primary btn-sm" onclick="openSyllabusModal()" style="display:none">+ 添加本周计划</button>
-  </div>
-
-  <div class="syllabus-tabs" id="syllabus-tabs">
-    <button class="syllabus-tab active" data-class="1" onclick="switchSyllabusClass(1)">周六早八</button>
-    <button class="syllabus-tab" data-class="2" onclick="switchSyllabusClass(2)">周六早十</button>
-    <button class="syllabus-tab" data-class="3" onclick="switchSyllabusClass(3)">周六午一</button>
-    <button class="syllabus-tab" data-class="4" onclick="switchSyllabusClass(4)">周六午三</button>
-    <button class="syllabus-tab" data-class="5" onclick="switchSyllabusClass(5)">周六晚八</button>
-    <button class="syllabus-tab" data-class="6" onclick="switchSyllabusClass(6)">周天早八</button>
-    <button class="syllabus-tab" data-class="7" onclick="switchSyllabusClass(7)">NOIP班</button>
-  </div>
-
-  <div id="syllabus-content"></div>
-</div></section>
-
-<!-- SYLLABUS MODAL -->
-<div class="modal-overlay" id="syllabus-modal">
-  <div class="modal" style="width:700px;max-width:96vw;max-height:92vh;overflow-y:auto">
+<!-- PROBLEM MODAL -->
+<div class="modal-overlay" id="problem-modal">
+  <div class="modal" style="width:720px;max-width:96vw;max-height:90vh;overflow-y:auto">
     <div class="modal-header">
-      <h2 id="syllabus-modal-title">添加教学计划</h2>
-      <button class="modal-close" onclick="closeModal('syllabus-modal')">✕</button>
+      <h2 id="problem-modal-title">添加题目</h2>
+      <button class="modal-close" onclick="closeModal('problem-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <div id="syllabus-error" class="error-msg"></div>
+      <div id="problem-error" class="error-msg"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>题目名称 *</label>
+          <input id="p-title" type="text" placeholder="如：最短路径问题">
+        </div>
         <div class="form-group">
-          <label>班级</label>
-          <select id="sl-class">
-            <option value="1">周六早八</option>
-            <option value="2">周六早十</option>
-            <option value="3">周六午一</option>
-            <option value="4">周六午三</option>
-            <option value="5">周六晚八</option>
-            <option value="6">周天早八</option>
-            <option value="7">NOIP班</option>
+          <label>题目编号（洛谷等）</label>
+          <input id="p-id" type="text" placeholder="如：P1001">
+        </div>
+        <div class="form-group">
+          <label>原题链接</label>
+          <input id="p-url" type="text" placeholder="https://www.luogu.com.cn/problem/P1001">
+        </div>
+        <div class="form-group">
+          <label>难度</label>
+          <select id="p-diff">
+            <option value="unrated">未评级</option>
+            <option value="入门">入门</option>
+            <option value="普及">普及</option>
+            <option value="提高">提高</option>
+            <option value="省选">省选</option>
           </select>
         </div>
         <div class="form-group">
-          <label>第几周</label>
-          <input id="sl-week" type="number" min="1" max="52" placeholder="1" value="1">
+          <label>算法标签（逗号分隔）</label>
+          <input id="p-tags" type="text" placeholder="DP, 图论, 贪心">
+        </div>
+        <div class="form-group">
+          <label>时间限制 (ms)</label>
+          <input id="p-time" type="number" value="1000" min="100" max="10000">
+        </div>
+        <div class="form-group">
+          <label>内存限制 (MB)</label>
+          <input id="p-mem" type="number" value="256" min="32" max="1024">
         </div>
         <div class="form-group" style="grid-column:1/-1">
-          <label>本周教学内容</label>
-          <textarea id="sl-content" rows="4" placeholder="本周讲解的知识点、学习目标…"></textarea>
+          <label>题目描述</label>
+          <textarea id="p-desc" rows="4" placeholder="支持 Markdown 和数学公式"></textarea>
+        </div>
+        <div class="form-group">
+          <label>输入格式</label>
+          <textarea id="p-input-fmt" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>输出格式</label>
+          <textarea id="p-output-fmt" rows="3"></textarea>
         </div>
         <div class="form-group" style="grid-column:1/-1">
-          <label>知识点标签（逗号分隔）</label>
-          <input id="sl-tags" type="text" placeholder="DP, 线段树, 贪心">
+          <label>样例输入</label>
+          <textarea id="p-ex-in" rows="3" placeholder="1 2"></textarea>
         </div>
         <div class="form-group" style="grid-column:1/-1">
-          <label>课上例题</label>
-          <div id="sl-examples-list" class="sl-item-list"></div>
-          <div class="sl-add-row">
-            <input id="sl-ex-input" type="text" placeholder="题目名称 或 洛谷链接 https://…" onkeydown="if(event.key==='Enter')addSyllabusItem('examples')">
-            <button class="btn btn-sm btn-ghost" onclick="addSyllabusItem('examples')">+ 添加</button>
-          </div>
+          <label>样例输出</label>
+          <textarea id="p-ex-out" rows="2" placeholder="3"></textarea>
         </div>
         <div class="form-group" style="grid-column:1/-1">
-          <label>课后习题</label>
-          <div id="sl-homework-list" class="sl-item-list"></div>
-          <div class="sl-add-row">
-            <input id="sl-hw-input" type="text" placeholder="题目名称 或 洛谷链接 https://…" onkeydown="if(event.key==='Enter')addSyllabusItem('homework')">
-            <button class="btn btn-sm btn-ghost" onclick="addSyllabusItem('homework')">+ 添加</button>
-          </div>
+          <label>数据范围 / 提示</label>
+          <textarea id="p-hint" rows="2"></textarea>
         </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label>参考资料 / 讲义链接（可选）</label>
-          <input id="sl-ref" type="text" placeholder="https://…">
+        <div class="form-group" style="grid-column:1/-1" id="p-solution-wrap">
+          <label>题解（仅教练可见）</label>
+          <textarea id="p-solution" rows="4"></textarea>
+        </div>
+        <div class="form-group" style="grid-column:1/-1" id="p-status-wrap">
+          <label>状态</label>
+          <select id="p-status">
+            <option value="published">发布</option>
+            <option value="pending">待审核</option>
+          </select>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('syllabus-modal')">取消</button>
-      <button class="btn btn-primary" onclick="submitSyllabus()" id="sl-submit-btn">保存</button>
+      <button class="btn btn-ghost" onclick="closeModal('problem-modal')">取消</button>
+      <button class="btn btn-primary" onclick="submitProblem()">保存</button>
     </div>
   </div>
 </div>
+
+<!-- PROBLEM DETAIL MODAL -->
+<div class="modal-overlay" id="problem-detail-modal">
+  <div class="modal prob-detail-modal" style="width:1100px;max-width:98vw;max-height:95vh;padding:0;overflow:hidden;display:flex;flex-direction:column">
+    <div class="prob-detail-header">
+      <div class="prob-detail-meta">
+        <span id="pd-difficulty" class="diff-badge"></span>
+        <span id="pd-id" class="pd-id"></span>
+        <span id="pd-tags" class="pd-tags"></span>
+      </div>
+      <h2 id="pd-title" style="margin:6px 0 0"></h2>
+      <div class="pd-limits">
+        <span id="pd-time">⏱ 1000ms</span>
+        <span id="pd-mem">💾 256MB</span>
+        <a id="pd-source-link" href="#" target="_blank" style="display:none" class="pd-source-btn">🔗 原题</a>
+      </div>
+      <button class="modal-close" onclick="closeModal('problem-detail-modal')" style="position:absolute;top:16px;right:16px">✕</button>
+    </div>
+    <div class="prob-detail-body">
+      <div class="prob-statement" id="pd-statement">
+        <div class="prob-section-label">题目描述</div>
+        <div id="pd-desc" class="prob-text"></div>
+        <div class="prob-section-label" style="margin-top:16px">输入格式</div>
+        <div id="pd-input-fmt" class="prob-text"></div>
+        <div class="prob-section-label" style="margin-top:16px">输出格式</div>
+        <div id="pd-output-fmt" class="prob-text"></div>
+        <div id="pd-examples-wrap"></div>
+        <div id="pd-hint-wrap"></div>
+        <div id="pd-solution-wrap" style="display:none">
+          <div class="prob-section-label" style="margin-top:16px;color:var(--accent2)">题解</div>
+          <div id="pd-solution" class="prob-text"></div>
+        </div>
+      </div>
+      <div class="prob-editor-panel">
+        <div class="judge-toolbar">
+          <select id="pd-lang" class="judge-select" onchange="onPdLangChange()">
+            <option value="54">C++ 17</option>
+            <option value="53">C++ 14</option>
+            <option value="50">C</option>
+            <option value="71">Python 3</option>
+            <option value="62">Java</option>
+            <option value="63">JavaScript</option>
+            <option value="60">Go</option>
+          </select>
+          <button class="judge-btn judge-run-btn" onclick="runProblemCode()" id="pd-run-btn">▶ 提交</button>
+          <button class="judge-btn" onclick="testWithSample()">🧪 测样例</button>
+          <button class="judge-btn" onclick="clearPdCode()">⌫ 清空</button>
+        </div>
+        <div id="pd-editor" class="judge-editor" style="height:340px"></div>
+        <div class="pd-io">
+          <div class="pd-io-row">
+            <div class="judge-io-label"><span>📥 自定义输入</span></div>
+            <textarea id="pd-stdin" class="judge-io-textarea" style="height:80px" placeholder="留空则用样例输入"></textarea>
+          </div>
+          <div id="pd-verdict" class="judge-verdict" style="margin-top:8px"></div>
+          <div class="judge-io-label" style="margin-top:8px"><span>📤 输出</span><div id="pd-stats" class="judge-stats"></div></div>
+          <div id="pd-output" class="judge-output" style="min-height:80px"><div class="judge-output-placeholder">点击提交运行代码</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
