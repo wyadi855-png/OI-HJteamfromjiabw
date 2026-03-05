@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HJOI — 登录</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #04070f;
+  --accent: #6c8ef5;
+  --accent2: #2de8b0;
+  --red: #ff5370;
+  --text: #e8eeff;
+  --text2: rgba(232,238,255,0.65);
+  --text3: rgba(232,238,255,0.35);
+  --glass: rgba(255,255,255,0.04);
+  --glass-border: rgba(255,255,255,0.09);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Canvas bg ── */
+#canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ── Scanline overlay ── */
+.scanlines {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+}
+
+/* ── Vignette ── */
+.vignette {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(4,7,15,0.85) 100%);
+}
+
+/* ── Main layout ── */
+.stage {
+  position: relative; z-index: 10;
+  width: 100vw; height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+/* ── HJOI wordmark ── */
+.wordmark {
+  position: relative;
+  margin-bottom: 48px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.3s forwards;
+}
+
+.wordmark-main {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(52px, 10vw, 96px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  background: linear-gradient(135deg, #fff 0%, #c8d4ff 40%, #6c8ef5 70%, #2de8b0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  display: inline-block;
+}
+
+/* glitch layers */
+.wordmark-main::before,
+.wordmark-main::after {
+  content: 'HJOI';
+  position: absolute; left: 0; top: 0;
+  width: 100%; height: 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.wordmark-main::before {
+  background: linear-gradient(135deg, #ff5370, #ff5370);
+  animation: glitch1 4s infinite;
+  clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
+}
+.wordmark-main::after {
+  background: linear-gradient(135deg, #2de8b0, #2de8b0);
+  animation: glitch2 4s infinite;
+  clip-path: polygon(0 55%, 100% 55%, 100% 75%, 0 75%);
+}
+
+@keyframes glitch1 {
+  0%,92%,100%{transform:translate(0);opacity:0;}
+  93%{transform:translate(-3px,1px);opacity:0.7;}
+  94%{transform:translate(3px,-1px);opacity:0.7;}
+  95%{transform:translate(0);opacity:0;}
+}
+@keyframes glitch2 {
+  0%,93%,100%{transform:translate(0);opacity:0;}
+  94%{transform:translate(3px,2px);opacity:0.6;}
+  95%{transform:translate(-2px,0);opacity:0.6;}
+  96%{transform:translate(0);opacity:0;}
+}
+
+.wordmark-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.35em;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-top: 10px;
+  display: block;
+}
+
+.wordmark-sub .cursor-blink {
+  animation: blink 1s step-end infinite;
+  color: var(--accent2);
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── Terminal line ── */
+.terminal-line {
+  font-size: 12px;
+  color: var(--text3);
+  margin-bottom: 28px;
+  height: 18px;
+  opacity: 0;
+  animation: fadeIn 0.4s ease 1.2s forwards;
+}
+.terminal-line .t-green { color: var(--accent2); }
+.terminal-line .t-blue  { color: var(--accent); }
+.terminal-line .t-red   { color: var(--red); }
+
+/* ── Glass card ── */
+.glass-card {
+  width: 400px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 240px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 32px 32px 28px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.045);
+  backdrop-filter: blur(48px) saturate(200%);
+  -webkit-backdrop-filter: blur(48px) saturate(200%);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    0 32px 80px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(255,255,255,0.03);
+  position: relative;
+  opacity: 0;
+  transform: translateY(24px) scale(0.97);
+  animation: cardIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.9s forwards;
+  scrollbar-width: none;
+}
+.glass-card::-webkit-scrollbar { display: none; }
+
+/* top refraction film */
+.glass-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
+  border-radius: 20px 20px 0 0;
+  pointer-events: none;
+}
+/* specular line */
+.glass-card::after {
+  content: '';
+  position: absolute; top: 0; left: 12%; right: 12%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+}
+
+@keyframes cardIn {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* card header */
+.card-header {
+  margin-bottom: 28px;
+}
+.card-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text3);
+}
+
+/* tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 24px;
+}
+.tab {
+  flex: 1;
+  padding: 7px 0;
+  text-align: center;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text3);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.25s;
+  border: none; background: none;
+  letter-spacing: 0.05em;
+}
+.tab.active {
+  background: rgba(108,142,245,0.2);
+  color: var(--accent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* form */
+.field {
+  margin-bottom: 14px;
+  position: relative;
+}
+.field label {
+  display: block;
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+}
+.field input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  -webkit-text-fill-color: var(--text);
+}
+.field input::placeholder { color: var(--text3); }
+.field input:focus {
+  border-color: rgba(108,142,245,0.45);
+  background: rgba(108,142,245,0.07);
+  box-shadow: 0 0 0 3px rgba(108,142,245,0.1), inset 0 1px 0 rgba(255,255,255,0.07);
+}
+.field input:focus + .field-glow {
+  opacity: 1;
+}
+.field-glow {
+  position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+  width: 60%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+
+/* btn */
+.btn-login {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, rgba(108,142,245,0.9), rgba(45,232,176,0.8));
+  color: #04070f;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 20px rgba(108,142,245,0.25);
+}
+.btn-login::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+  border-radius: inherit;
+}
+.btn-login:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(108,142,245,0.4);
+}
+.btn-login:active { transform: translateY(0) scale(0.98); }
+.btn-login.loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+.btn-login .btn-text { position: relative; z-index: 1; }
+
+/* ripple */
+.ripple {
+  position: absolute; border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transform: scale(0);
+  animation: rippleAnim 0.5s linear;
+  pointer-events: none;
+}
+@keyframes rippleAnim {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* error */
+.form-error {
+  font-size: 11px;
+  color: var(--red);
+  margin-top: 8px;
+  min-height: 16px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.form-error.show { opacity: 1; }
+
+/* corner decorations */
+.corner {
+  position: absolute;
+  width: 16px; height: 16px;
+  border-color: rgba(108,142,245,0.3);
+  border-style: solid;
+}
+.corner-tl { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
+.corner-tr { top: 10px; right: 10px; border-width: 1px 1px 0 0; }
+.corner-bl { bottom: 10px; left: 10px; border-width: 0 0 1px 1px; }
+.corner-br { bottom: 10px; right: 10px; border-width: 0 1px 1px 0; }
+
+/* footer */
+.page-footer {
+  position: fixed;
+  bottom: 20px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text3);
+  z-index: 10;
+  opacity: 0;
+  animation: fadeIn 0.5s ease 1.8s forwards;
+}
+.page-footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.page-footer a:hover { text-decoration: underline; }
+
+/* status dots */
+.status-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 20px;
+}
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent2);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:0.5;transform:scale(0.8)}
+}
+.status-text {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+/* success state */
+.success-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px;
+  background: rgba(4,7,15,0.95);
+  border-radius: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+  z-index: 10;
+}
+.success-overlay.show { opacity: 1; pointer-events: all; }
+.success-icon {
+  font-size: 40px;
+  animation: successPop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes successPop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.success-text {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  color: var(--accent2);
+}
+
+/* mobile */
+@media(max-width:480px){
+  .wordmark-main { font-size: 52px; }
+  .glass-card { padding: 28px 20px 22px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<div class="stage">
+
+  <!-- HJOI Wordmark -->
+  <div class="wordmark">
+    <div class="wordmark-main">HJOI</div>
+    <span class="wordmark-sub">
+      Harbin Junior OI Team
+      <span class="cursor-blink">_</span>
+    </span>
+  </div>
+
+  <!-- Terminal status line -->
+  <div class="terminal-line" id="terminal-line">
+    <span class="t-green">●</span>&nbsp;
+    <span id="terminal-text"></span>
+  </div>
+
+  <!-- Login Card -->
+  <div class="glass-card" id="glass-card">
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <div class="status-row">
+      <div class="status-dot"></div>
+      <span class="status-text">系统在线</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="switchTab('login')">登录</button>
+      <button class="tab" id="tab-register" onclick="switchTab('register')">注册</button>
+    </div>
+
+    <!-- Login form -->
+    <div id="form-login">
+      <div class="field">
+        <label>用户名</label>
+        <input type="text" id="l-username" placeholder="your_handle" autocomplete="username" spellcheck="false">
+        <div class="field-glow"></div>
+      </div>
+      <div class="field">
+        <label>密码</label>
+        <input type="password" id="l-password" placeholder="••••••••" autocomplete="current-password">
+        <div class="field-glow"></div>
+      </div>
+      <div class="form-error" id="login-error"></div>
+      <button class="btn-login" id="btn-login" onclick="doLogin()">
+        <span class="btn-text">进入系统 →</span>
+      </button>
+    </div>
+
+    <!-- Register form -->
+    <div id="form-register" style="display:none">
+      <div class="field">
+        <label>用户名</label>
+        <input type="text" id="r-username" placeholder="your_handle" autocomplete="username" spellcheck="false">
+        <div class="field-glow"></div>
+      </div>
+      <div class="field">
+        <label>密码</label>
+        <input type="password" id="r-password" placeholder="至少6位" autocomplete="new-password">
+        <div class="field-glow"></div>
+      </div>
+      <div class="field">
+        <label>确认密码</label>
+        <input type="password" id="r-password2" placeholder="再输一次" autocomplete="new-password">
+        <div class="field-glow"></div>
+      </div>
+      <div class="field">
+        <label>洛谷 UID <span style="font-size:10px;color:var(--text3);font-weight:400;letter-spacing:0">（选填，用于能力雷达）</span></label>
+        <input type="text" id="r-luogu-uid" placeholder="如：123456" autocomplete="off" spellcheck="false">
+        <div class="field-glow"></div>
+      </div>
+      <div class="form-error" id="register-error"></div>
+      <button class="btn-login" id="btn-register" onclick="doRegister()">
+        <span class="btn-text">创建账号 →</span>
+      </button>
+    </div>
+
+    <!-- Success overlay -->
+    <div class="success-overlay" id="success-overlay">
+      <div class="success-icon">✦</div>
+      <div class="success-text">认证成功</div>
+      <div style="font-size:12px;color:var(--text3)">正在跳转…</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  <a href="index.html">← 返回首页</a>
+  &nbsp;·&nbsp;
+  HJOI © 2025
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// PARTICLE CANVAS
+// ══════════════════════════════════════════════
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [], mouse = { x: -999, y: -999 };
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', () => { resize(); initParticles(); });
+window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+window.addEventListener('touchmove', e => {
+  mouse.x = e.touches[0].clientX;
+  mouse.y = e.touches[0].clientY;
+}, { passive: true });
+
+const COLORS = ['rgba(108,142,245,', 'rgba(45,232,176,', 'rgba(255,255,255,'];
+
+class Particle {
+  constructor() { this.reset(true); }
+  reset(init) {
+    this.x = Math.random() * W;
+    this.y = init ? Math.random() * H : (Math.random() > 0.5 ? -10 : H + 10);
+    this.baseX = this.x;
+    this.baseY = this.y;
+    this.size = Math.random() * 2 + 0.4;
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.speedY = (Math.random() - 0.5) * 0.3;
+    this.colorBase = COLORS[Math.floor(Math.random() * COLORS.length)];
+    this.alpha = Math.random() * 0.5 + 0.1;
+    this.twinkleSpeed = Math.random() * 0.02 + 0.005;
+    this.twinklePhase = Math.random() * Math.PI * 2;
+    this.life = 0;
+  }
+  update() {
+    this.life += this.twinkleSpeed;
+    const twinkle = Math.sin(this.life + this.twinklePhase);
+    const a = this.alpha + twinkle * 0.15;
+
+    // mouse repulsion
+    const dx = this.x - mouse.x;
+    const dy = this.y - mouse.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 120) {
+      const force = (120 - dist) / 120;
+      this.x += dx / dist * force * 2.5;
+      this.y += dy / dist * force * 2.5;
+    }
+
+    // drift back to base
+    this.x += (this.baseX - this.x) * 0.02;
+    this.y += (this.baseY - this.y) * 0.02;
+
+    // slow drift
+    this.baseX += this.speedX;
+    this.baseY += this.speedY;
+    if (this.baseX < -20 || this.baseX > W + 20 || this.baseY < -20 || this.baseY > H + 20) {
+      this.reset(false);
+    }
+
+    return Math.max(0, a);
+  }
+  draw(a) {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = this.colorBase + a + ')';
+    ctx.fill();
+  }
+}
+
+// Connection lines
+function drawConnections() {
+  const maxDist = 100;
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < maxDist) {
+        const a = (1 - dist / maxDist) * 0.08;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(108,142,245,${a})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function initParticles() {
+  const count = Math.min(Math.floor((W * H) / 9000), 120);
+  particles = Array.from({ length: count }, () => new Particle());
+}
+initParticles();
+
+// Shooting stars
+const stars = [];
+function spawnStar() {
+  if (Math.random() > 0.008) return;
+  stars.push({
+    x: Math.random() * W, y: 0,
+    vx: (Math.random() - 0.5) * 4 + 2,
+    vy: Math.random() * 3 + 2,
+    len: Math.random() * 60 + 40,
+    alpha: 1,
+    size: Math.random() * 1.5 + 0.5,
+  });
+}
+
+function drawStars() {
+  for (let i = stars.length - 1; i >= 0; i--) {
+    const s = stars[i];
+    const grad = ctx.createLinearGradient(s.x, s.y, s.x - s.vx * s.len/4, s.y - s.vy * s.len/4);
+    grad.addColorStop(0, `rgba(255,255,255,${s.alpha})`);
+    grad.addColorStop(1, `rgba(108,142,245,0)`);
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.lineTo(s.x - s.vx * s.len/4, s.y - s.vy * s.len/4);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = s.size;
+    ctx.stroke();
+    s.x += s.vx; s.y += s.vy; s.alpha -= 0.018;
+    if (s.alpha <= 0 || s.y > H) stars.splice(i, 1);
+  }
+}
+
+// Grid overlay
+function drawGrid() {
+  const gridSize = 80;
+  ctx.strokeStyle = 'rgba(108,142,245,0.025)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < W; x += gridSize) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += gridSize) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+}
+
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+  drawGrid();
+  drawConnections();
+  spawnStar();
+  drawStars();
+  particles.forEach(p => { const a = p.update(); p.draw(a); });
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ══════════════════════════════════════════════
+// TYPEWRITER TERMINAL
+// ══════════════════════════════════════════════
+const messages = [
+  '<span class="t-blue">connecting</span> to HJOI server…&nbsp;&nbsp;<span class="t-green">OK</span>',
+  '<span class="t-blue">verifying</span> session…&nbsp;&nbsp;<span class="t-green">READY</span>',
+  '<span class="t-blue">loading</span> problem database…&nbsp;&nbsp;<span class="t-green">OK</span>',
+];
+let msgIdx = 0;
+const termEl = document.getElementById('terminal-text');
+
+function typeMessage(msg, cb) {
+  termEl.innerHTML = '';
+  const stripped = msg.replace(/<[^>]*>/g, '');
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i >= stripped.length) {
+      clearInterval(interval);
+      termEl.innerHTML = msg; // show with colors
+      if (cb) setTimeout(cb, 2400);
+      return;
+    }
+    termEl.textContent = stripped.slice(0, ++i);
+  }, 28);
+}
+
+function cycleMessages() {
+  typeMessage(messages[msgIdx % messages.length], cycleMessages);
+  msgIdx++;
+}
+setTimeout(cycleMessages, 1400);
+
+// ══════════════════════════════════════════════
+// TAB SWITCH
+// ══════════════════════════════════════════════
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+  clearErrors();
+}
+
+function clearErrors() {
+  ['login-error', 'register-error'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = '';
+    el.classList.remove('show');
+  });
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+// Ripple effect on button click
+document.querySelectorAll('.btn-login').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    const r = this.getBoundingClientRect();
+    const rip = document.createElement('span');
+    rip.className = 'ripple';
+    const size = Math.max(r.width, r.height);
+    rip.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-r.left-size/2}px;top:${e.clientY-r.top-size/2}px`;
+    this.appendChild(rip);
+    setTimeout(() => rip.remove(), 500);
+  });
+});
+
+// Enter key
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const loginActive = document.getElementById('form-login').style.display !== 'none';
+  if (loginActive) doLogin();
+  else doRegister();
+});
+
+// ══════════════════════════════════════════════
+// SUPABASE AUTH (plug into your existing setup)
+// ══════════════════════════════════════════════
+const SUPABASE_URL = 'https://dgsugcvedimcecudstkq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYyNjQ0NTEsImV4cCI6MjA2MTg0MDQ1MX0.2UkVGNIpEhPfv7oLGPNo8-oR8UNBhTzMb5n8TKpRxnQ';
+
+function usernameToEmail(u) {
+  return `${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@oiteam.local`;
+}
+
+function showSuccess(username) {
+  const overlay = document.getElementById('success-overlay');
+  overlay.querySelector('.success-text').textContent = `欢迎，${username}`;
+  overlay.classList.add('show');
+  setTimeout(() => { window.location.href = 'index.html'; }, 1600);
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.classList.toggle('loading', loading);
+  btn.querySelector('.btn-text').textContent = loading ? '验证中…' : (btnId === 'btn-login' ? '进入系统 →' : '创建账号 →');
+}
+
+async function doLogin() {
+  clearErrors();
+  const username = document.getElementById('l-username').value.trim();
+  const password = document.getElementById('l-password').value;
+  if (!username) { showError('login-error', '请输入用户名'); return; }
+  if (!password) { showError('login-error', '请输入密码'); return; }
+  setLoading('btn-login', true);
+  try {
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { error } = await sb.auth.signInWithPassword({
+      email: usernameToEmail(username), password
+    });
+    if (error) { showError('login-error', '用户名或密码错误'); setLoading('btn-login', false); return; }
+    showSuccess(username);
+  } catch(e) {
+    showError('login-error', '网络错误，请重试');
+    setLoading('btn-login', false);
+  }
+}
+
+async function doRegister() {
+  clearErrors();
+  const username = document.getElementById('r-username').value.trim();
+  const password = document.getElementById('r-password').value;
+  const password2 = document.getElementById('r-password2').value;
+  const luogu_uid = document.getElementById('r-luogu-uid').value.trim();
+  if (!username || username.length < 2) { showError('register-error', '用户名至少2位'); return; }
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) { showError('register-error', '用户名只能含字母、数字、下划线'); return; }
+  if (password.length < 6) { showError('register-error', '密码至少6位'); return; }
+  if (password !== password2) { showError('register-error', '两次密码不一致'); return; }
+  setLoading('btn-register', true);
+  try {
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { error: signUpError } = await sb.auth.signUp({
+      email: usernameToEmail(username), password
+    });
+    if (signUpError) { showError('register-error', signUpError.message); setLoading('btn-register', false); return; }
+    // 等一下再登录确保 trigger 执行
+    await new Promise(r => setTimeout(r, 800));
+    const { error: loginError } = await sb.auth.signInWithPassword({
+      email: usernameToEmail(username), password
+    });
+    if (loginError) { showError('register-error', '注册成功，请手动登录'); setLoading('btn-register', false); switchTab('login'); return; }
+    // 保存 luogu_uid
+    if (luogu_uid) {
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) await sb.from('profiles').update({ luogu_uid }).eq('id', user.id);
+    }
+    showSuccess(username);
+  } catch(e) {
+    showError('register-error', '网络错误，请重试');
+    setLoading('btn-register', false);
+  }
+}
+</script>
+
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</body>
+</html>
