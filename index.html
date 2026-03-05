@@ -1726,6 +1726,22 @@ footer span{color:var(--accent2);}
 .qpdf-answer-badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:100px;background:rgba(255,255,255,0.05);color:var(--text2);}
 .qpdf-explanation{font-size:12px;color:var(--text3);background:rgba(255,255,255,0.03);border-radius:6px;padding:8px 10px;line-height:1.6;}
 
+/* 历史题目表格 */
+.daily-history-table{border:1px solid rgba(30,37,64,0.5);border-radius:10px;overflow:hidden;}
+.daily-history-header{display:grid;grid-template-columns:110px 1fr 100px 60px;padding:8px 14px;background:rgba(108,142,245,0.05);font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid rgba(30,37,64,0.5);}
+.daily-history-row{display:grid;grid-template-columns:110px 1fr 100px 60px;padding:10px 14px;border-bottom:1px solid rgba(30,37,64,0.3);align-items:center;transition:background 0.15s;}
+.daily-history-row:last-child{border-bottom:none;}
+.daily-history-row:hover{background:rgba(108,142,245,0.04);}
+.daily-history-date{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.daily-history-title{font-size:13px;color:var(--text);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.daily-history-by{font-family:var(--mono);font-size:11px;color:var(--accent2);}
+.daily-history-cnt{text-align:center;}
+.checkin-count-badge{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);background:rgba(108,142,245,0.1);padding:2px 8px;border-radius:100px;}
+@media(max-width:600px){
+  .daily-history-header,.daily-history-row{grid-template-columns:88px 1fr 50px;}
+  .daily-history-header span:nth-child(3),.daily-history-row .daily-history-by{display:none;}
+}
+
 /* ── COPY PROBLEMS ── */
 .problems-row{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin:8px 0;}
 .copy-problems-btn{font-family:var(--mono);font-size:12px;padding:4px 10px;border-radius:5px;border:1px solid rgba(108,142,245,0.2);background:rgba(108,142,245,0.06);color:var(--text2);cursor:pointer;white-space:nowrap;transition:all 0.2s;flex-shrink:0;margin-top:2px;}
@@ -4686,25 +4702,31 @@ function updateUnreadAnnBadge(anns){
 async function loadDaily(){
   try{
   const el=document.getElementById('daily-content');
-  el.innerHTML=Array(5).fill(0).map(()=>`
+  el.innerHTML=Array(3).fill(0).map(()=>`
     <div class="skel-card" style="margin-bottom:10px;padding:14px 18px">
       <div class="skel skel-line w-60" style="height:13px;margin-bottom:8px"></div>
       <div class="skel skel-line w-40 h-sm"></div>
     </div>`).join('');
   const today=getLocalToday();
-  const[{data:daily},{data:recs}]=await Promise.all([
+
+  // 并行加载所有数据
+  const[
+    {data:daily},
+    {data:recs},
+    {data:pastProblems}
+  ]=await Promise.all([
     sb.from('daily_problems').select('*,profiles(username)').eq('date',today).maybeSingle(),
     sb.from('daily_recommendations').select('*,profiles(username)').eq('status','pending').order('created_at',{ascending:false}),
+    sb.from('daily_problems').select('*,profiles(username)').lt('date',today).order('date',{ascending:false}).limit(14),
   ]);
 
   let html='';
 
-  // Today's problem card
+  // ── 今日题目 ──
   if(daily){
     const{data:checkins}=await sb.from('daily_checkins').select('user_id,profiles(username,avatar_url)').eq('daily_id',daily.id);
     const myCheckin=currentUser&&(checkins||[]).find(c=>c.user_id===currentUser.id);
     const luoguUrl=daily.problem_id?'https://www.luogu.com.cn/problem/'+daily.problem_id:'';
-
     html+='<div class="daily-card">';
     html+='<div class="daily-card-header">';
     html+='<div class="daily-date-badge">'+today+' · 今日一题</div>';
@@ -4717,8 +4739,6 @@ async function loadDaily(){
     html+='</div>';
     if(daily.note)html+='<div class="daily-note">💬 '+escHtml(daily.note)+'</div>';
     if(luoguUrl)html+='<a href="'+luoguUrl+'" target="_blank" class="daily-link-btn">在洛谷上查看 →</a>';
-
-    // Checkin section
     html+='<div class="daily-checkin-section">';
     if(currentUser){
       if(myCheckin){
@@ -4730,7 +4750,6 @@ async function loadDaily(){
       html+='<button class="checkin-btn" onclick="openModal(\'auth-modal\')">登录后打卡</button>';
     }
     html+='<div class="checkin-count">'+(checkins?checkins.length:0)+' 人已打卡</div>';
-    // Avatar wall
     if(checkins&&checkins.length){
       html+='<div class="checkin-avatars">';
       checkins.slice(0,20).forEach(c=>{
@@ -4740,7 +4759,7 @@ async function loadDaily(){
         else html+=u.charAt(0).toUpperCase();
         html+='</div>';
       });
-      if(checkins.length>20)html+='<div class="checkin-avatar-more">+'+( checkins.length-20)+'</div>';
+      if(checkins.length>20)html+='<div class="checkin-avatar-more">+'+(checkins.length-20)+'</div>';
       html+='</div>';
     }
     html+='</div></div>';
@@ -4749,40 +4768,26 @@ async function loadDaily(){
     html+='<div class="daily-empty-icon">📭</div>';
     html+='<div class="daily-empty-text">今天还没有题目</div>';
     if(isCoach())html+='<button class="btn btn-primary" onclick="openSetDailyModal()">发布今日一题</button>';
-    else html+='<div style="font-size:12px;color:var(--text3);margin-top:8px">教练还没发布，或者你可以先推荐一道</div>';
+    else html+='<div style="font-size:12px;color:var(--text3);margin-top:8px">教练还没发布，你也可以先推荐一道</div>';
     html+='</div>';
   }
 
-  // Past problems (last 7 days)
-  const{data:past}=await sb.from('daily_problems').select('*').lt('date',today).order('date',{ascending:false}).limit(7);
-  if(past&&past.length){
-    html+='<div class="daily-past-section"><div class="daily-past-title">// 近期题目</div>';
-    html+='<div class="daily-past-list">';
-    past.forEach(p=>{
-      html+='<div class="daily-past-item">';
-      html+='<span class="daily-past-date">'+p.date+'</span>';
-      if(p.problem_id)html+='<span class="daily-pid small">'+escHtml(p.problem_id)+'</span>';
-      html+='<span class="daily-past-title-text">'+escHtml(p.title)+'</span>';
-      if(p.difficulty)html+='<span class="difficulty-badge small">'+escHtml(p.difficulty)+'</span>';
-      if(p.problem_id)html+='<a href="https://www.luogu.com.cn/problem/'+escHtml(p.problem_id)+'" target="_blank" class="daily-past-link">洛谷 →</a>';
-      html+='</div>';
-    });
-    html+='</div></div>';
-  }
-
-  // Pending recommendations (coach sees all, others see their own)
+  // ── 待审核推荐（教练看所有，普通用户看自己的）──
   const myRecs=isCoach()?recs:(recs||[]).filter(r=>r.recommended_by===currentUser?.id);
   if(myRecs&&myRecs.length){
-    html+='<div class="daily-past-section"><div class="daily-past-title">'+( isCoach()?'// 待审核推荐 ('+myRecs.length+')':'// 我的推荐')+'</div>';
+    html+='<div class="daily-past-section"><div class="daily-past-title">'+(isCoach()?'// 待审核推荐 ('+myRecs.length+')':'// 我的推荐')+'</div>';
     html+='<div class="daily-recs-list">';
     myRecs.forEach(r=>{
       html+='<div class="daily-rec-item">';
-      html+='<div><span class="daily-pid small">'+escHtml(r.problem_id||'')+'</span> '+escHtml(r.title)+'</div>';
-      if(r.reason)html+='<div style="font-size:12px;color:var(--text3)">「'+escHtml(r.reason)+'」</div>';
-      html+='<div style="font-size:12px;color:var(--text3)">by @'+escHtml(r.profiles?.username||'?')+'</div>';
+      html+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+      if(r.problem_id)html+='<span class="daily-pid small">'+escHtml(r.problem_id)+'</span>';
+      html+='<span style="font-size:14px;color:var(--text)">'+escHtml(r.title)+'</span>';
+      html+='</div>';
+      if(r.reason)html+='<div style="font-size:12px;color:var(--text3);margin-top:4px">「'+escHtml(r.reason)+'」</div>';
+      html+='<div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono)">by @'+escHtml(r.profiles?.username||'?')+' · '+fmtDate(r.created_at)+'</div>';
       if(isCoach()){
-        html+='<div style="display:flex;gap:6px;margin-top:6px">';
-        html+='<button class="btn btn-primary btn-sm" onclick="approveRec('+r.id+',\''+escHtml(r.problem_id||'')+'\',\''+escHtml(r.title)+'\')">✓ 采用</button>';
+        html+='<div style="display:flex;gap:6px;margin-top:8px">';
+        html+='<button class="btn btn-primary btn-sm" onclick="approveRec('+r.id+',\''+escHtml(r.problem_id||'')+'\',\''+escHtml(r.title)+'\')">✓ 采用为今日题目</button>';
         html+='<button class="btn btn-danger btn-sm" onclick="rejectRec('+r.id+')">✗ 拒绝</button>';
         html+='</div>';
       }
@@ -4791,8 +4796,37 @@ async function loadDaily(){
     html+='</div></div>';
   }
 
+  // ── 历史题目列表（含打卡数和推荐人）──
+  if(pastProblems&&pastProblems.length){
+    // 批量获取各题的打卡数
+    const pastIds=pastProblems.map(p=>p.id);
+    const{data:pastCheckins}=await sb.from('daily_checkins').select('daily_id').in('daily_id',pastIds);
+    const checkinCountMap={};
+    (pastCheckins||[]).forEach(c=>{checkinCountMap[c.daily_id]=(checkinCountMap[c.daily_id]||0)+1;});
+
+    html+='<div class="daily-past-section">';
+    html+='<div class="daily-past-title">// 历史题目</div>';
+    html+='<div class="daily-history-table">';
+    html+='<div class="daily-history-header"><span>日期</span><span>题目</span><span>推荐人</span><span>打卡</span></div>';
+    pastProblems.forEach(p=>{
+      const cnt=checkinCountMap[p.id]||0;
+      const luoguUrl=p.problem_id?'https://www.luogu.com.cn/problem/'+p.problem_id:'';
+      html+='<div class="daily-history-row">';
+      html+='<span class="daily-history-date">'+p.date+'</span>';
+      html+='<span class="daily-history-title">';
+      if(p.problem_id)html+='<span class="daily-pid small">'+escHtml(p.problem_id)+'</span> ';
+      if(luoguUrl)html+='<a href="'+luoguUrl+'" target="_blank" class="daily-past-link">'+escHtml(p.title)+'</a>';
+      else html+=escHtml(p.title);
+      html+='</span>';
+      html+='<span class="daily-history-by">'+(p.profiles?.username?'@'+escHtml(p.profiles.username):'-')+'</span>';
+      html+='<span class="daily-history-cnt"><span class="checkin-count-badge">'+cnt+'</span></span>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  }
+
   el.innerHTML=html;
-  } catch(e){ console.error("loadDaily:", e); showToast("加载失败，请刷新重试", "error"); }
+  } catch(e){ console.error('loadDaily:', e); showToast('加载失败，请刷新重试','error'); }
 }
 
 
