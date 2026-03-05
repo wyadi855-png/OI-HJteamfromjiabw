@@ -1981,7 +1981,7 @@ section:not(.active) {
 
 <!-- PROFILE -->
 <section id="profile"><div class="container">
-  <button class="back-btn" onclick="history.back();show('notes')">← 返回</button>
+  <button class="back-btn" onclick="goBackFromProfile()">← 返回</button>
   <div id="profile-content"><div class="loading"><div class="spinner"></div>加载中…</div></div>
 </div></section>
 
@@ -3738,8 +3738,17 @@ function doSearch(){
   el.appendChild(grid);
 }
 
+let _profileFromSection = 'home'; // 记录进入 profile 前的来源 section
+
+function goBackFromProfile(){
+  show(_profileFromSection || 'home');
+}
+
 async function showProfile(username){
   if(!username)return;
+  // 记录来源 section（当前活跃的 section，用于返回）
+  const active = document.querySelector('section.active');
+  if(active && active.id !== 'profile') _profileFromSection = active.id;
   show('profile');
   const el=document.getElementById('profile-content');
   el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
