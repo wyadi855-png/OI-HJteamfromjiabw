@@ -7876,7 +7876,7 @@ async function loadMembers(){
   const ungrouped=(profiles||[]).filter(p=>p.role!=='coach'&&!p.group_id);
   if(ungrouped.length){
     const sec=document.createElement('div');sec.className='members-section';
-    sec.innerHTML='<div class="members-section-title">Oth<span class="members-section-count">'+ungrouped.length+' 人</span></div><div class="members-grid" id="mg-none"></div>';
+    sec.innerHTML='<div class="members-section-title">未分组<span class="members-section-count">'+ungrouped.length+' 人</span></div><div class="members-grid" id="mg-none"></div>';
     el.appendChild(sec);ungrouped.forEach(p=>sec.querySelector('#mg-none').appendChild(makeMemberCard(p,myFollowing,myFollowers,grps)));
   }
   } catch(e){ console.error("loadMembers:", e); showToast("加载失败，请刷新重试", "error"); }
