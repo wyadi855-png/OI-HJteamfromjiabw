@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<!DOCTYPE html>
-<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>算法竞赛训练队</title>
+<title>HJOI · 算法竞赛训练队</title>
+<meta name="description" content="hjoi.com.cn — 算法竞赛训练队内部平台，涵盖题解、模拟赛、课程记录与在线评测。">
+<meta name="theme-color" content="#080b12">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -15,7 +16,7 @@
 <!-- highlight.js loaded on demand -->
 <style>
 /* ── Variables ── */
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Noto+Serif+SC:wght@400;700&display=swap');
+/* 字体已通过 <link> 预连接加载，无需重复 @import */
 :root{
   --bg:#080b12;--surface:#0f1320;--surface2:#161c2e;--border:#1e2540;
   --accent:#6c8ef5;--accent2:#2de8b0;--accent3:#f06292;--accent4:#ffb347;
@@ -60,7 +61,7 @@ nav.scrolled{
 .nav-more-wrap{position:relative;display:inline-block;}
 .nav-more-menu{position:absolute;top:calc(100% + 6px);left:0;background:rgba(10,13,24,0.95);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:10px;padding:6px;min-width:120px;display:none;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
 .nav-more-menu.open{display:block;animation:fadeIn 0.15s ease;}
-.nav-more-menu a{display:block;padding:7px 12px;border-radius:6px;font-size:12px;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.15s;}
+.nav-more-menu a{display:block;padding:7px 12px;border-radius:6px;font-size:13px;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.15s;}
 .nav-more-menu a:hover{background:rgba(108,142,245,0.12);color:var(--accent);}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
 
@@ -610,14 +611,13 @@ body.light .modal{background:rgba(248,250,255,0.98);}
 /* ── NAV MORE MENU GROUPS ── */
 .nav-more-group-label{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;padding:6px 12px 3px;pointer-events:none;margin-top:2px;}
 .nav-more-divider{height:1px;background:rgba(108,142,245,0.08);margin:4px 8px;}
-.nav-more-menu a{display:block;padding:7px 12px;border-radius:6px;font-size:13px;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.15s;}
-.nav-more-menu a:hover{background:rgba(108,142,245,0.1);color:var(--accent);}
+/* .nav-more-menu a 已在上方统一定义 */
 
 /* ── TYPEWRITER ── */
 .typewriter-cursor{
   display:inline-block;
-  background:linear-gradient(135deg,#6c8ef5,#2de8b0);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  color: var(--accent2);
+  text-shadow: 0 0 10px rgba(45,232,176,0.7);
   animation:cursorBlink 0.75s step-end infinite;
   font-weight:300;margin-left:2px;}
 @keyframes cursorBlink{0%,100%{opacity:1;}50%{opacity:0;}}
@@ -1047,10 +1047,7 @@ body::after {
   background-clip: text;
   filter: drop-shadow(0 0 18px rgba(45,232,176,0.40));
 }
-.typewriter-cursor {
-  color: var(--accent2);
-  text-shadow: 0 0 10px rgba(45,232,176,0.7);
-}
+/* .typewriter-cursor 已在上方统一定义（含发光效果）*/
 
 /* 5. Nav — deeper frost + glow border */
 nav {
@@ -3230,7 +3227,11 @@ function avatarEl(username,avatarUrl,size,fontSize){
   }
 
   let frame = 0;
+  let rafId = null;
+  let paused = false;
+
   function draw() {
+    if(paused){ rafId = null; return; }
     ctx.clearRect(0, 0, W, H);
 
     // Spawn new words from right
@@ -3255,9 +3256,20 @@ function avatarEl(username,avatarUrl,size,fontSize){
     }
 
     frame++;
-    requestAnimationFrame(draw);
+    rafId = requestAnimationFrame(draw);
   }
-  draw();
+
+  // 页面隐藏时暂停动画，恢复时重启，节省 CPU
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden){
+      paused = true;
+    } else {
+      paused = false;
+      if(!rafId) rafId = requestAnimationFrame(draw);
+    }
+  });
+
+  rafId = requestAnimationFrame(draw);
 })();
 
 // ── Click Particles ────────────────────────────────────────
@@ -3285,12 +3297,28 @@ document.addEventListener('click',function(e){
   }
 });
 
-// ── Supabase ───────────────────────────────────────────────
+// ══════════════════════════════════════════════
+//  ⚠️  配置区 — 部署前请检查以下所有 Key
+//  生产环境建议通过后端代理转发，避免 Key 暴露
+// ══════════════════════════════════════════════
+
+// Supabase: anon key 为只读公开 key，但必须在 Supabase Dashboard
+// 中为所有表启用 Row Level Security (RLS)，否则任何人可读写数据。
+// 教练写权限必须通过 RLS policy 校验 role='coach'，不能只靠前端判断。
 const SUPABASE_URL='https://dgsugcvedimcecudstkq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDA2MDYsImV4cCI6MjA4ODIxNjYwNn0.0AnkF5MMrtiqwbau9q6pLD6pDrzXRkyPIoNsx4au8xI';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,currentProfile=null;
 const isCoach=()=>currentProfile?.role==='coach';
+
+// ── 权限守卫工具函数 ──────────────────────────
+// 所有写操作调用此函数做前端二次校验
+// 注意：真正的权限控制必须依赖 Supabase RLS，此处仅为 UI 层防护
+function guardCoach(action='此操作'){
+  if(!currentUser){showToast('请先登录','error');return false;}
+  if(!isCoach()){showToast(`${action}仅限教练操作`,'error');return false;}
+  return true;
+}
 
 // ── Navigation ─────────────────────────────────────────────
 function show(id){
@@ -3363,7 +3391,13 @@ async function doRegister(){
   document.getElementById('reg-success').textContent='注册成功，正在登录…';
   setTimeout(async()=>{const{error:le}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});if(!le){closeModal('auth-modal');showToast('注册并登录成功 ✓','success');loadHomeFeed();}},800);
 }
-async function doLogout(){await sb.auth.signOut();showToast('已退出登录','success');loadHomeFeed();}
+async function doLogout(){
+  try{
+    await sb.auth.signOut();
+    showToast('已退出登录','success');
+    loadHomeFeed();
+  }catch(e){showToast('退出失败: '+e.message,'error');}
+}
 
 // ── Home ───────────────────────────────────────────────────
 async function loadHomeFeed(){
@@ -3611,14 +3645,21 @@ async function doCheckin(dailyId){
 }
 
 async function undoCheckin(dailyId){
-  await sb.from('daily_checkins').delete().eq('daily_id',dailyId).eq('user_id',currentUser.id);
-  loadDaily();
+  try{
+    const{error}=await sb.from('daily_checkins').delete().eq('daily_id',dailyId).eq('user_id',currentUser.id);
+    if(error)throw error;
+    loadDaily();
+  }catch(e){showToast('取消打卡失败: '+e.message,'error');}
 }
 
 async function deleteDaily(id){
+  if(!guardCoach('删除今日题目'))return;
   if(!confirm('确认删除今日题目？'))return;
-  await sb.from('daily_problems').delete().eq('id',id);
-  showToast('已删除','success');loadDaily();
+  try{
+    const{error}=await sb.from('daily_problems').delete().eq('id',id);
+    if(error)throw error;
+    showToast('已删除','success');loadDaily();
+  }catch(e){showToast('删除失败: '+e.message,'error');}
 }
 
 function triggerCheckinEffect(){
@@ -3727,7 +3768,7 @@ async function rejectRec(recId){
   showToast('已拒绝','success');loadDaily();
 }
 
-function openAnnModal(){if(!isCoach())return;openModal('ann-modal');}
+function openAnnModal(){if(!guardCoach('发布公告'))return;openModal('ann-modal');}
 async function submitAnn(){
   const title=document.getElementById('ann-title').value.trim(),content=document.getElementById('ann-content').value.trim();
   if(!title||!content){document.getElementById('ann-error').textContent='请填写标题和内容';return;}
@@ -3736,7 +3777,15 @@ async function submitAnn(){
   closeModal('ann-modal');['ann-title','ann-content'].forEach(id=>document.getElementById(id).value='');document.getElementById('ann-pinned').checked=false;
   showToast('公告发布成功 ✓','success');loadAnnouncements();
 }
-async function deleteAnn(id){if(!confirm('确认删除？'))return;await sb.from('announcements').delete().eq('id',id);showToast('已删除','success');loadAnnouncements();}
+async function deleteAnn(id){
+  if(!guardCoach('删除公告'))return;
+  if(!confirm('确认删除？'))return;
+  try{
+    const{error}=await sb.from('announcements').delete().eq('id',id);
+    if(error)throw error;
+    showToast('已删除','success');loadAnnouncements();
+  }catch(e){showToast('删除失败: '+e.message,'error');}
+}
 
 // ── Contests ───────────────────────────────────────────────
 async function loadContests(){
@@ -3752,9 +3801,17 @@ async function loadContests(){
     const cr=rm[c.id]||[];
     let div2Problems=[],div1Problems=[];
     try{const p=typeof c.problems==='string'?JSON.parse(c.problems):c.problems;if(p&&p.div2)div2Problems=p.div2;if(p&&p.div1)div1Problems=p.div1;}catch(e){}
-    // Split into div1/div2 by detecting duplicate usernames
+    // ── Div 分组 ──────────────────────────────────────────
+    // 优先使用 contest_results 表中的 division 字段（'div1'/'div2'）
+    // 如无该字段则回退到旧逻辑（通过同名第二次出现判断），但建议迁移数据库加 division 列
+    const hasDivField = cr.length > 0 && cr[0].division !== undefined;
     const seen={};const div2=[],div1=[];
-    cr.forEach(r=>{if(seen[r.student_name])div1.push(r);else{seen[r.student_name]=true;div2.push(r);}});
+    if(hasDivField){
+      cr.forEach(r=>{ if(r.division==='div1') div1.push(r); else div2.push(r); });
+    } else {
+      // 旧逻辑回退：同名第二次出现视为 Div.1（依赖录入顺序，建议废弃）
+      cr.forEach(r=>{if(seen[r.student_name])div1.push(r);else{seen[r.student_name]=true;div2.push(r);}});
+    }
     div2.sort((a,b)=>b.score-a.score);div1.sort((a,b)=>b.score-a.score);
     const div2R=div2.map((r,i)=>({...r,rank:i+1}));
     const div1R=div1.map((r,i)=>({...r,rank:i+1}));
@@ -4813,7 +4870,8 @@ if (isMobile) {
 
 
 // ── JUDGE ────────────────────────────────────────────────
-// ⬇️ 填入你的 RapidAPI Key
+// ⚠️  Judge0 RapidAPI Key — 生产环境请替换为自己的 Key
+// 免费额度有限，建议自建 Judge0 实例或通过后端代理
 const JUDGE0_KEY = '6e74464ed0msh3d3da024a0c8009p172b3fjsndfe1c71a7283';
 const JUDGE0_HOST = 'judge0-ce.p.rapidapi.com';
 
