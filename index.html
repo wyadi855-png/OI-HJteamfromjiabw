@@ -2191,9 +2191,9 @@ section:not(.active) {
              xmlns="http://www.w3.org/2000/svg"
              xmlns:xlink="http://www.w3.org/1999/xlink">
           <defs>
-            <!-- ── 发光滤镜 ── -->
+            <!-- 发光滤镜 -->
             <filter id="glow-strong" x="-100%" y="-100%" width="300%" height="300%">
-              <feGaussianBlur stdDeviation="5" result="b1"/>
+              <feGaussianBlur stdDeviation="6" result="b1"/>
               <feGaussianBlur stdDeviation="2" result="b2" in="SourceGraphic"/>
               <feMerge><feMergeNode in="b1"/><feMergeNode in="b2"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
@@ -2202,188 +2202,197 @@ section:not(.active) {
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
             <filter id="glow-letter" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feGaussianBlur stdDeviation="3.5" result="blur"/>
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
+            <filter id="glow-neon" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="5" result="b1"/>
+              <feGaussianBlur stdDeviation="1.5" result="b2" in="SourceGraphic"/>
+              <feMerge><feMergeNode in="b1"/><feMergeNode in="b1"/><feMergeNode in="b2"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
 
-            <!-- ── 径向渐变：节点 ── -->
+            <!-- H字母渐变 — 冷蓝主色 -->
+            <linearGradient id="hg" x1="0%" y1="0%" x2="8%" y2="100%">
+              <stop offset="0%"   stop-color="#90d8f8"/>
+              <stop offset="40%"  stop-color="#3898d0"/>
+              <stop offset="100%" stop-color="#0c5888"/>
+            </linearGradient>
+            <!-- J字母渐变 -->
+            <linearGradient id="jg" x1="5%" y1="0%" x2="20%" y2="100%">
+              <stop offset="0%"   stop-color="#b0e8ff"/>
+              <stop offset="35%"  stop-color="#50b8e8"/>
+              <stop offset="100%" stop-color="#1070a8"/>
+            </linearGradient>
+            <!-- 霓虹描边渐变 — 青白交替 -->
+            <linearGradient id="neon-stroke" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stop-color="#00ffff" stop-opacity="0.9"/>
+              <stop offset="50%"  stop-color="#ffffff" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#00cfff" stop-opacity="0.9"/>
+            </linearGradient>
+            <!-- J顶点节点渐变 -->
             <radialGradient id="ng-hub" cx="32%" cy="28%" r="65%">
               <stop offset="0%"   stop-color="#ffffff"/>
               <stop offset="30%"  stop-color="#b0efff"/>
               <stop offset="70%"  stop-color="#28c4f0"/>
               <stop offset="100%" stop-color="#0a7ab8"/>
             </radialGradient>
-            <radialGradient id="ng-mid" cx="32%" cy="28%" r="65%">
-              <stop offset="0%"   stop-color="#e0f8ff"/>
-              <stop offset="45%"  stop-color="#64d4ff"/>
-              <stop offset="100%" stop-color="#1090c8"/>
-            </radialGradient>
-            <radialGradient id="ng-small" cx="32%" cy="28%" r="65%">
-              <stop offset="0%"   stop-color="#c8f2ff"/>
-              <stop offset="55%"  stop-color="#48c0f0"/>
-              <stop offset="100%" stop-color="#0878a8"/>
-            </radialGradient>
 
-            <!-- ── 线性渐变：字母 H ── -->
-            <linearGradient id="hg" x1="0%" y1="0%" x2="15%" y2="100%">
-              <stop offset="0%"   stop-color="#a0d8f8"/>
-              <stop offset="40%"  stop-color="#5ab0e0"/>
-              <stop offset="100%" stop-color="#1870a8"/>
+            <!-- 扫光渐变 -->
+            <linearGradient id="shimmer-h" x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
+              <stop offset="0%"   stop-color="#ffffff" stop-opacity="0"/>
+              <stop offset="42%"  stop-color="#ffffff" stop-opacity="0"/>
+              <stop offset="50%"  stop-color="#c8f8ff" stop-opacity="0.5"/>
+              <stop offset="58%"  stop-color="#ffffff" stop-opacity="0"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+              <animateTransform attributeName="gradientTransform" type="translate"
+                values="0 -1.3;0 1.3;0 -1.3" dur="2.6s" repeatCount="indefinite"/>
             </linearGradient>
-            <!-- ── 线性渐变：字母 J ── -->
-            <linearGradient id="jg" x1="5%" y1="0%" x2="25%" y2="100%">
-              <stop offset="0%"   stop-color="#c0e8ff"/>
-              <stop offset="35%"  stop-color="#70c8f0"/>
-              <stop offset="100%" stop-color="#2090c0"/>
-            </linearGradient>
-            <!-- ── 边渐变 ── -->
-            <linearGradient id="eg1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stop-color="rgba(80,210,255,0.3)"/>
-              <stop offset="50%"  stop-color="rgba(80,210,255,0.95)"/>
-              <stop offset="100%" stop-color="rgba(80,210,255,0.3)"/>
+            <linearGradient id="shimmer-j" x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
+              <stop offset="0%"   stop-color="#ffffff" stop-opacity="0"/>
+              <stop offset="42%"  stop-color="#ffffff" stop-opacity="0"/>
+              <stop offset="50%"  stop-color="#a0f0ff" stop-opacity="0.55"/>
+              <stop offset="58%"  stop-color="#ffffff" stop-opacity="0"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+              <animateTransform attributeName="gradientTransform" type="translate"
+                values="0 -1.3;0 1.3;0 -1.3" dur="3.1s" repeatCount="indefinite" begin="0.8s"/>
             </linearGradient>
 
-            <!-- ── 粒子路径（用于 animateMotion）── -->
-            <!-- P1: N1→N3 -->
-            <path id="path-p1" d="M 55 32 L 90 70"/>
-            <!-- P2: N1→N2 -->
-            <path id="path-p2" d="M 55 32 L 22 88"/>
-            <!-- P3: N2→N3 -->
-            <path id="path-p3" d="M 22 88 L 90 70"/>
-            <!-- P4: N2→N4 -->
-            <path id="path-p4" d="M 22 88 L 30 138"/>
+            <!-- 扫描线渐变 -->
+            <linearGradient id="scan-sweep" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stop-color="#00ffff" stop-opacity="0"/>
+              <stop offset="50%"  stop-color="#00ffff" stop-opacity="1"/>
+              <stop offset="100%" stop-color="#00ffff" stop-opacity="0"/>
+            </linearGradient>
+            <!-- clipPath：扫光限定在字母内 -->
+            <clipPath id="clip-H">
+              <rect x="112" y="28" width="14" height="100" rx="3.5"/>
+              <rect x="152" y="28" width="14" height="100" rx="3.5"/>
+              <rect x="112" y="68" width="54" height="13"  rx="2.5"/>
+            </clipPath>
+            <clipPath id="clip-J">
+              <path d="M 199 28 L 199 118 Q 199 158 175 162 Q 152 166 150 148"
+                    fill="none" stroke="white" stroke-width="16" stroke-linecap="round"/>
+            </clipPath>
+            <!-- 粒子路径 -->
+            <path id="h-left"    d="M 119 28  L 119 128"/>
+            <path id="h-right"   d="M 159 28  L 159 128"/>
+            <path id="h-bar"     d="M 112 74  L 166 74"/>
+            <path id="h-left-r"  d="M 119 128 L 119 28"/>
+            <path id="h-right-r" d="M 159 128 L 159 28"/>
+            <path id="j-full"    d="M 199 28 L 199 118 Q 199 158 175 162 Q 152 166 150 148"/>
+            <path id="j-full-r"  d="M 150 148 Q 152 166 175 162 Q 199 158 199 118 L 199 28"/>
           </defs>
 
           <!-- ══════════════════════════════════════
+               整体浮动容器          <!-- ══════════════════════════════════════
                整体浮动容器
           ════════════════════════════════════════ -->
           <g class="hjoi-float">
 
-            <!-- ── 背景光晕（极淡，营造氛围）── -->
-            <ellipse cx="70" cy="85" rx="68" ry="58"
-                     fill="rgba(40,180,255,0.04)" filter="url(#glow-strong)"/>
-            <ellipse cx="190" cy="85" rx="70" ry="58"
-                     fill="rgba(30,140,220,0.03)" filter="url(#glow-strong)"/>
-
-            <!-- ══════════════════════════════
-                 图论边（先于节点绘制）
-            ═════════════════════════════════ -->
-            <g filter="url(#glow-soft)">
-              <!-- e1: N1(55,32)→N3(90,70) len≈52 -->
-              <line class="hjoi-edge hjoi-e1"
-                    x1="55" y1="32" x2="90" y2="70"
-                    stroke="url(#eg1)" stroke-width="2.2" stroke-linecap="round"
-                    stroke-dasharray="55" stroke-dashoffset="55"/>
-              <!-- e2: N1(55,32)→N2(22,88) len≈70 -->
-              <line class="hjoi-edge hjoi-e2"
-                    x1="55" y1="32" x2="22" y2="88"
-                    stroke="rgba(80,210,255,0.82)" stroke-width="2.2" stroke-linecap="round"
-                    stroke-dasharray="72" stroke-dashoffset="72"/>
-              <!-- e3: N2(22,88)→N3(90,70) len≈70 -->
-              <line class="hjoi-edge hjoi-e3"
-                    x1="22" y1="88" x2="90" y2="70"
-                    stroke="rgba(80,210,255,0.75)" stroke-width="1.9" stroke-linecap="round"
-                    stroke-dasharray="72" stroke-dashoffset="72"/>
-              <!-- e4: N2(22,88)→N4(30,138) len≈51 -->
-              <line class="hjoi-edge hjoi-e4"
-                    x1="22" y1="88" x2="30" y2="138"
-                    stroke="rgba(80,210,255,0.72)" stroke-width="1.9" stroke-linecap="round"
-                    stroke-dasharray="52" stroke-dashoffset="52"/>
-              <!-- e5: N3(90,70)→N5(72,138) len≈70 -->
-              <line class="hjoi-edge hjoi-e5"
-                    x1="90" y1="70" x2="72" y2="138"
-                    stroke="rgba(80,210,255,0.65)" stroke-width="1.7" stroke-linecap="round"
-                    stroke-dasharray="72" stroke-dashoffset="72"/>
-              <!-- e6: N4(30,138)→N5(72,138) len≈42 -->
-              <line class="hjoi-edge hjoi-e6"
-                    x1="30" y1="138" x2="72" y2="138"
-                    stroke="rgba(80,210,255,0.55)" stroke-width="1.5" stroke-linecap="round"
-                    stroke-dasharray="44" stroke-dashoffset="44"/>
+            <!-- ══ 赛博格栅背景 ══ -->
+            <g opacity="0.07">
+              <!-- 竖线 -->
+              <line x1="119" y1="10" x2="119" y2="175" stroke="#00ffff" stroke-width="0.6"/>
+              <line x1="139" y1="10" x2="139" y2="175" stroke="#00ffff" stroke-width="0.6"/>
+              <line x1="159" y1="10" x2="159" y2="175" stroke="#00ffff" stroke-width="0.6"/>
+              <line x1="179" y1="10" x2="179" y2="175" stroke="#00ffff" stroke-width="0.6"/>
+              <line x1="199" y1="10" x2="199" y2="175" stroke="#00ffff" stroke-width="0.6"/>
+              <!-- 横线 -->
+              <line x1="83"  y1="50"  x2="235" y2="50"  stroke="#00ffff" stroke-width="0.6"/>
+              <line x1="83"  y1="80"  x2="235" y2="80"  stroke="#00ffff" stroke-width="0.6"/>
+              <line x1="83"  y1="110" x2="235" y2="110" stroke="#00ffff" stroke-width="0.6"/>
+              <line x1="83"  y1="140" x2="235" y2="140" stroke="#00ffff" stroke-width="0.6"/>
             </g>
 
-            <!-- ══════════════════════════════
-                 粒子流（沿边运动的数据流点）
-            ═════════════════════════════════ -->
-            <g filter="url(#glow-soft)">
-              <!-- Particle on e1 -->
-              <circle r="2.8" fill="#c0f0ff" class="hjoi-particle hjoi-p1">
-                <animateMotion dur="2.0s" repeatCount="indefinite" begin="0.9s">
-                  <mpath xlink:href="#path-p1"/>
-                </animateMotion>
-                <animate attributeName="opacity" values="0;0;1;1;0" dur="2.0s" repeatCount="indefinite" begin="0.9s"/>
-              </circle>
-              <!-- Particle on e2 -->
-              <circle r="2.4" fill="#a0e8ff" class="hjoi-particle hjoi-p2">
-                <animateMotion dur="2.6s" repeatCount="indefinite" begin="1.3s">
-                  <mpath xlink:href="#path-p2"/>
-                </animateMotion>
-                <animate attributeName="opacity" values="0;0;1;1;0" dur="2.6s" repeatCount="indefinite" begin="1.3s"/>
-              </circle>
-              <!-- Particle on e3 reverse -->
-              <circle r="2.2" fill="#b8f0ff" class="hjoi-particle hjoi-p3">
-                <animateMotion dur="1.8s" repeatCount="indefinite" begin="1.6s" keyPoints="1;0" keyTimes="0;1" calcMode="linear">
-                  <mpath xlink:href="#path-p3"/>
-                </animateMotion>
-                <animate attributeName="opacity" values="0;0;1;1;0" dur="1.8s" repeatCount="indefinite" begin="1.6s"/>
-              </circle>
-              <!-- Particle on e4 -->
-              <circle r="2.5" fill="#90e4ff" class="hjoi-particle hjoi-p4">
-                <animateMotion dur="2.3s" repeatCount="indefinite" begin="1.1s">
-                  <mpath xlink:href="#path-p4"/>
-                </animateMotion>
-                <animate attributeName="opacity" values="0;0;1;1;0" dur="2.3s" repeatCount="indefinite" begin="1.1s"/>
-              </circle>
+            <!-- ══ 横向扫描线（从上往下扫，赛博CRT感）══ -->
+            <rect x="83"  y="15" width="152" height="6" rx="1"
+                  fill="url(#scan-sweep)" opacity="0.18">
+              <animateTransform attributeName="transform" type="translate"
+                values="0 0;0 155;0 0" dur="3.5s" repeatCount="indefinite" calcMode="spline"
+                keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+            </rect>
+
+            <!-- ══ 角点装饰（四角霓虹框）══ -->
+            <g stroke="#00ffff" stroke-width="1.5" fill="none" opacity="0.5">
+              <polyline points="83,8  83,24  99,24"/>
+              <polyline points="235,8  235,24  219,24"/>
+              <polyline points="83,172 83,156 99,156"/>
+              <polyline points="235,172 235,156 219,156"/>
+              <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.4s" repeatCount="indefinite"/>
             </g>
 
-            <!-- ══════════════════════════════
-                 图论节点
-            ═════════════════════════════════ -->
-            <!-- N1: 顶部小节点 -->
-            <circle class="hjoi-node hjoi-n1" cx="55" cy="32" r="7.5"
-                    fill="url(#ng-small)" filter="url(#glow-strong)"/>
-            <!-- N2: 左侧中节点 -->
-            <circle class="hjoi-node hjoi-n2" cx="22" cy="88" r="9.5"
-                    fill="url(#ng-mid)" filter="url(#glow-strong)"/>
-            <!-- N3: 中心最大节点（H交叉点）-->
-            <circle class="hjoi-node hjoi-n3" cx="90" cy="70" r="12"
-                    fill="url(#ng-hub)" filter="url(#glow-strong)"/>
-            <!-- N4: 左下节点 -->
-            <circle class="hjoi-node hjoi-n4" cx="30" cy="138" r="8"
-                    fill="url(#ng-mid)" filter="url(#glow-strong)"/>
-            <!-- N5: 右下小节点 -->
-            <circle class="hjoi-node hjoi-n5" cx="72" cy="138" r="6.5"
-                    fill="url(#ng-small)" filter="url(#glow-strong)"/>
-
-            <!-- ══════════════════════════════
-                 HJ 字母
-            ═════════════════════════════════ -->
+            <!-- ══ H字母本体 ══ -->
             <g class="hjoi-letters" filter="url(#glow-letter)">
-              <!-- H 左竖柱 -->
               <rect x="112" y="28" width="14" height="100" rx="3.5" fill="url(#hg)"/>
-              <!-- H 右竖柱 -->
               <rect x="152" y="28" width="14" height="100" rx="3.5" fill="url(#hg)"/>
-              <!-- H 横梁 -->
-              <rect x="112" y="68" width="54" height="13" rx="2.5" fill="url(#hg)"/>
-
-              <!-- J 竖柱 -->
-              <rect x="192" y="28" width="14" height="82" rx="3.5" fill="url(#jg)"/>
-              <!-- J 底弧 (精确路径) -->
-              <path d="M 192 110 Q 193 150 170 155 Q 152 160 150 144"
+              <rect x="112" y="68" width="54" height="13"  rx="2.5" fill="url(#hg)"/>
+              <!-- J -->
+              <path d="M 199 28 L 199 118 Q 199 158 175 162 Q 152 166 150 148"
                     fill="none" stroke="url(#jg)" stroke-width="14"
                     stroke-linecap="round" stroke-linejoin="round"/>
-              <!-- J 顶点（与N3尺寸呼应）-->
+              <!-- J顶点 -->
               <circle cx="199" cy="18" r="9.5" fill="url(#ng-hub)" filter="url(#glow-strong)"/>
-              <!-- J 顶点内核（高光）-->
               <circle cx="196" cy="15" r="3.5" fill="rgba(255,255,255,0.85)"/>
             </g>
 
-            <!-- ══════════════════════════════
-                 HJOI 品牌文字
-            ═════════════════════════════════ -->
-            <g class="hjoi-text" filter="url(#glow-soft)">
-              <!-- 装饰线 -->
-              <line x1="82" y1="178" x2="118" y2="178" stroke="rgba(80,200,255,0.3)" stroke-width="1"/>
-              <line x1="202" y1="178" x2="238" y2="178" stroke="rgba(80,200,255,0.3)" stroke-width="1"/>
+            <!-- ══ 霓虹描边（字母外轮廓呼吸光晕）══ -->
+            <g filter="url(#glow-neon)" fill="none">
+              <!-- H描边 -->
+              <rect x="112" y="28" width="14" height="100" rx="3.5"
+                    stroke="url(#neon-stroke)" stroke-width="1.2">
+                <animate attributeName="stroke-opacity" values="0.15;0.7;0.15" dur="2.8s" repeatCount="indefinite"/>
+              </rect>
+              <rect x="152" y="28" width="14" height="100" rx="3.5"
+                    stroke="url(#neon-stroke)" stroke-width="1.2">
+                <animate attributeName="stroke-opacity" values="0.15;0.7;0.15" dur="2.8s" repeatCount="indefinite" begin="0.3s"/>
+              </rect>
+              <rect x="112" y="68" width="54" height="13" rx="2.5"
+                    stroke="url(#neon-stroke)" stroke-width="1.2">
+                <animate attributeName="stroke-opacity" values="0.15;0.65;0.15" dur="2.1s" repeatCount="indefinite" begin="0.6s"/>
+              </rect>
+              <!-- J描边 -->
+              <path d="M 199 28 L 199 118 Q 199 158 175 162 Q 152 166 150 148"
+                    stroke="#00cfff" stroke-width="1.5" stroke-linecap="round">
+                <animate attributeName="stroke-opacity" values="0.1;0.65;0.1" dur="3.1s" repeatCount="indefinite" begin="0.4s"/>
+              </path>
+            </g>
+
+            <!-- ══ 扫光层 ══ -->
+            <g clip-path="url(#clip-H)" filter="url(#glow-letter)">
+              <rect x="108" y="24" width="62" height="108" fill="url(#shimmer-h)"/>
+            </g>
+            <g clip-path="url(#clip-J)" filter="url(#glow-letter)">
+              <rect x="140" y="14" width="68" height="158" fill="url(#shimmer-j)"/>
+            </g>
+
+            <!-- ══ 粒子流（极细，若隐若现）══ -->
+            <g filter="url(#glow-soft)" opacity="0.65">
+              <circle r="1.4" fill="#c8f0ff">
+                <animateMotion dur="2.8s" repeatCount="indefinite" begin="0s"><mpath href="#h-left"/></animateMotion>
+                <animate attributeName="opacity" values="0;0;0.5;0.5;0" keyTimes="0;0.12;0.25;0.78;1" dur="2.8s" repeatCount="indefinite" begin="0s"/>
+              </circle>
+              <circle r="1.1" fill="#a0e8ff">
+                <animateMotion dur="3.2s" repeatCount="indefinite" begin="1.1s"><mpath href="#h-right-r"/></animateMotion>
+                <animate attributeName="opacity" values="0;0;0.45;0.45;0" keyTimes="0;0.12;0.25;0.78;1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
+              </circle>
+              <circle r="1.3" fill="#e0f8ff">
+                <animateMotion dur="2.2s" repeatCount="indefinite" begin="0.6s"><mpath href="#h-bar"/></animateMotion>
+                <animate attributeName="opacity" values="0;0;0.5;0.5;0" keyTimes="0;0.12;0.25;0.78;1" dur="2.2s" repeatCount="indefinite" begin="0.6s"/>
+              </circle>
+              <circle r="1.5" fill="#d8f6ff">
+                <animateMotion dur="3.8s" repeatCount="indefinite" begin="0.4s"><mpath href="#j-full"/></animateMotion>
+                <animate attributeName="opacity" values="0;0;0.48;0.48;0" keyTimes="0;0.08;0.2;0.82;1" dur="3.8s" repeatCount="indefinite" begin="0.4s"/>
+              </circle>
+              <circle r="1.1" fill="#b0ecff">
+                <animateMotion dur="3.8s" repeatCount="indefinite" begin="2.2s"><mpath href="#j-full-r"/></animateMotion>
+                <animate attributeName="opacity" values="0;0;0.4;0.4;0" keyTimes="0;0.08;0.2;0.82;1" dur="3.8s" repeatCount="indefinite" begin="2.2s"/>
+              </circle>
+            </g>
+
+            <!-- ══ HJOI 品牌文字 ══ -->
+            <g filter="url(#glow-soft)">
+              <line x1="82"  y1="178" x2="118" y2="178" stroke="rgba(0,220,255,0.25)" stroke-width="1"/>
+              <line x1="202" y1="178" x2="238" y2="178" stroke="rgba(0,220,255,0.25)" stroke-width="1"/>
               <text x="160" y="193"
                     text-anchor="middle"
                     font-family="'JetBrains Mono', 'Space Mono', monospace"
