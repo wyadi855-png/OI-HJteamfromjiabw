@@ -4365,17 +4365,22 @@ async function loadProfileSocial(profile, username){
   const isSelf = currentUser && currentUser.id === profileId;
 
   // ── 并发拉取所有数据 ──
+  // 分开查询避免 400 Bad Request（同表双 join / fkey 歧义）
   const [
-    { data: followingRows },  // profileId 关注了哪些人
-    { data: followerRows },   // 哪些人关注了 profileId
+    { data: followingRows },
+    { data: followerRows },
     { data: labelsReceived },
-    { data: allRelationships },
+    { data: relAB },
+    { data: relBA },
   ] = await Promise.all([
-    sb.from('follows').select('following_id, profiles!follows_following_id_fkey(id,username)').eq('follower_id', profileId),
-    sb.from('follows').select('follower_id, profiles!follows_follower_id_fkey(id,username)').eq('following_id', profileId),
-    sb.from('relationships').select('from_id, label, profiles!relationships_from_id_fkey(username)').eq('to_id', profileId),
-    sb.from('relationships').select('from_id, to_id, label, profiles!relationships_from_id_fkey(username), profiles!relationships_to_id_fkey(username)'),
+    sb.from('follows').select('following_id').eq('follower_id', profileId),
+    sb.from('follows').select('follower_id').eq('following_id', profileId),
+    sb.from('relationships').select('from_id, label').eq('to_id', profileId),
+    sb.from('relationships').select('from_id, to_id, label').eq('from_id', profileId),
+    sb.from('relationships').select('from_id, to_id, label').eq('to_id', profileId),
   ]);
+  // 合并双向 relationships
+  const allRelationships = [...(relAB||[]), ...(relBA||[])];
 
   // ── isMutual 修正：
   //   followingRows = profileId 关注的人 → following_id 是被关注者
@@ -4398,9 +4403,16 @@ async function loadProfileSocial(profile, username){
   const relSec = document.createElement('div');
   relSec.className = 'profile-section rel-graph-section';
   relSec.innerHTML = '<div class="profile-section-title">// 关系网络</div>';
-  const mutualPeers = (followingRows||[])
-    .filter(r => profileFollowerIds.has(r.following_id))
-    .map(r => ({ id: r.following_id, username: r.profiles?.username || '?' }));
+  const mutualPeerIds = (followingRows||[])
+    .map(r => r.following_id)
+    .filter(id => profileFollowerIds.has(id));
+  // 查询互关用户的用户名
+  let peerUsernameMap = {};
+  if (mutualPeerIds.length > 0) {
+    const { data: peerProfiles } = await sb.from('profiles').select('id, username').in('id', mutualPeerIds);
+    (peerProfiles||[]).forEach(p => peerUsernameMap[p.id] = p.username);
+  }
+  const mutualPeers = mutualPeerIds.map(id => ({ id, username: peerUsernameMap[id] || '?' }));
   if (mutualPeers.length === 0) {
     relSec.innerHTML += '<div class="rel-empty">暂无互关好友，关系网络将在互关后自动生成</div>';
   } else {
@@ -4449,13 +4461,17 @@ async function loadProfileSocial(profile, username){
   }
   div.appendChild(relSec);
 
-  // 2. 标签墙
+  // 2. 标签墙（单独查询 sender 用户名）
   if (labelsReceived && labelsReceived.length) {
+    const fromIds = [...new Set(labelsReceived.map(r => r.from_id))];
+    const { data: labelSenders } = await sb.from('profiles').select('id, username').in('id', fromIds);
+    const senderMap = {};
+    (labelSenders||[]).forEach(p => senderMap[p.id] = p.username);
     const sec = document.createElement('div'); sec.className = 'profile-section';
     sec.innerHTML = '<div class="profile-section-title">大家眼中的 @' + escHtml(username) + '</div><div class="label-wall"></div>';
     labelsReceived.forEach(r => {
       const chip = document.createElement('div'); chip.className = 'label-chip';
-      chip.innerHTML = '<span class="label-from">@' + escHtml(r.profiles?.username||'?') + '</span><span class="label-text">' + escHtml(r.label) + '</span>';
+      chip.innerHTML = '<span class="label-from">@' + escHtml(senderMap[r.from_id]||'?') + '</span><span class="label-text">' + escHtml(r.label) + '</span>';
       sec.querySelector('.label-wall').appendChild(chip);
     });
     div.appendChild(sec);
@@ -4464,15 +4480,20 @@ async function loadProfileSocial(profile, username){
   // 3. 自己主页：我给别人的标签
   if (isSelf && currentUser) {
     const { data: myLabels } = await sb.from('relationships')
-      .select('to_id, label, profiles!relationships_to_id_fkey(username)')
+      .select('to_id, label')
       .eq('from_id', currentUser.id);
     if (myLabels && myLabels.length) {
+      const toIds = myLabels.map(r => r.to_id);
+      const { data: labelTargets } = await sb.from('profiles').select('id, username').in('id', toIds);
+      const targetMap = {};
+      (labelTargets||[]).forEach(p => targetMap[p.id] = p.username);
       const sec = document.createElement('div'); sec.className = 'profile-section';
       sec.innerHTML = '<div class="profile-section-title">我给他们的标签</div><div class="label-wall"></div>';
       myLabels.forEach(r => {
+        const uname = targetMap[r.to_id] || '?';
         const chip = document.createElement('div'); chip.className = 'label-chip'; chip.style.cursor = 'pointer';
-        chip.innerHTML = '<span class="label-from">@' + escHtml(r.profiles?.username||'?') + '</span><span class="label-text">' + escHtml(r.label) + '</span>';
-        chip.addEventListener('click', () => showProfile(r.profiles?.username));
+        chip.innerHTML = '<span class="label-from">@' + escHtml(uname) + '</span><span class="label-text">' + escHtml(r.label) + '</span>';
+        chip.addEventListener('click', () => showProfile(uname));
         sec.querySelector('.label-wall').appendChild(chip);
       });
       div.appendChild(sec);
