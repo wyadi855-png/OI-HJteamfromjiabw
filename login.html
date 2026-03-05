@@ -546,16 +546,16 @@ html, body {
         <div class="field-glow"></div>
       </div>
       <div class="field">
-        <label>训练组 <span style="font-size:10px;color:var(--text3);font-weight:400;letter-spacing:0">（选填）</span></label>
-        <select id="r-group">
-          <option value="">暂不选择</option>
-          <option value="1">周六早八</option>
-          <option value="2">周六早十</option>
-          <option value="3">周六午一</option>
-          <option value="4">周六午三</option>
-          <option value="5">周六晚八</option>
-          <option value="6">周天早八</option>
-          <option value="7">NOIP班</option>
+        <label>训练组 <span style="font-size:10px;color:var(--red);font-weight:400;letter-spacing:0">必填</span></label>
+        <select id="r-group" required>
+          <option value="">请选择…</option>
+          <option value="1">L1</option>
+          <option value="2">L2</option>
+          <option value="3">L3</option>
+          <option value="4">L4</option>
+          <option value="5">L5</option>
+          <option value="6">L6</option>
+          <option value="7">Oth</option>
         </select>
       </div>
       <div class="form-error" id="register-error"></div>
@@ -874,6 +874,7 @@ async function doRegister() {
   const luogu_uid = document.getElementById('r-luogu-uid').value.trim();
   const group_val = document.getElementById('r-group').value;
   const group_id = group_val ? parseInt(group_val) : null;
+  if (!group_id) { showError('register-error', '请选择训练组'); return; }
   if (!username || username.length < 2) { showError('register-error', '用户名至少2位'); return; }
   if (!/^[a-zA-Z0-9_]+$/.test(username)) { showError('register-error', '用户名只能含字母、数字、下划线'); return; }
   if (password.length < 6) { showError('register-error', '密码至少6位'); return; }
