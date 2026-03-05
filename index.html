@@ -5926,7 +5926,7 @@ async function showProfile(username){
   if(profile.motto)html+='<div class="profile-motto">「'+escHtml(profile.motto)+'」</div>';
   if(profile.bio)html+='<div class="profile-bio">'+escHtml(profile.bio)+'</div>';
   if(isSelf)html+='<button class="profile-edit-btn" onclick="openModal(&apos;settings-modal&apos;);loadSettingsData()">编辑资料</button>';
-  if(!isSelf&&currentUser)html+='<button class="profile-dm-btn" onclick="openDMWith(&apos;'+escHtml(profile.id)+'&apos;,&apos;'+escHtml(username)+'&apos;)">💬 发私信</button>';
+  if(!isSelf&&currentUser)html+='<button class="profile-dm-btn" data-uid="'+escHtml(profile.id)+'" data-uname="'+escHtml(username)+'">💬 发私信</button>';
   html+='<div class="profile-stats">';
   html+='<div class="profile-stat"><div class="num">'+(notes?notes.length:0)+'</div><div class="lbl">题解</div></div>';
   html+='<div class="profile-stat"><div class="num">'+(posts?posts.length:0)+'</div><div class="lbl">随笔</div></div>';
@@ -5980,6 +5980,9 @@ async function showProfile(username){
     html+='<div class="empty">这位同学还没有发布任何内容</div>';
   }
   el.innerHTML=html;
+  // 绑定发私信按钮
+  const dmBtn=el.querySelector('.profile-dm-btn');
+  if(dmBtn) dmBtn.addEventListener('click',()=>openDMWith(dmBtn.dataset.uid, dmBtn.dataset.uname));
   buildHeatmap(profile.id).then(h=>{const hel=document.getElementById('heatmap-'+username);if(hel)hel.innerHTML=h;});
   // 有洛谷UID则拉洛谷数据，否则用本站题解
   if(profile.luogu_uid){
