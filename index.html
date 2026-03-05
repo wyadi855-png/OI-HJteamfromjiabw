@@ -587,6 +587,44 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .post-content{font-size:14px;color:var(--text2);line-height:1.75;white-space:pre-wrap;}
 .post-actions{display:flex;gap:6px;margin-top:10px;}
 
+/* ── POST CARD (new) ── */
+.post-card{border-radius:12px;padding:20px 24px;margin-bottom:16px;cursor:pointer;transition:border-color 0.2s,transform 0.15s;}
+.post-card:hover{border-color:rgba(108,142,245,0.35);transform:translateY(-1px);}
+.post-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.post-card-author{font-family:var(--mono);font-size:13px;color:var(--accent2);cursor:pointer;}
+.post-card-author:hover{text-decoration:underline;}
+.post-card-date{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.post-card-body{font-size:14px;color:var(--text2);line-height:1.8;white-space:pre-wrap;word-break:break-word;}
+.post-card-footer{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(30,37,64,0.5);}
+.post-comment-toggle{font-family:var(--mono);font-size:12px;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:5px;transition:color 0.2s;}
+.post-comment-toggle:hover{color:var(--accent2);}
+.post-card-actions{margin-left:auto;display:flex;gap:6px;}
+
+/* ── COMMENT SECTION ── */
+.post-comments{margin-top:14px;border-top:1px solid rgba(30,37,64,0.4);padding-top:14px;display:none;}
+.post-comments.open{display:block;}
+.comment-thread{margin-bottom:12px;}
+.comment-bubble{background:rgba(10,14,26,0.6);border:1px solid rgba(30,37,64,0.5);border-radius:8px;padding:10px 14px;}
+.comment-bubble-meta{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.comment-bubble-author{font-family:var(--mono);font-size:12px;color:var(--accent2);cursor:pointer;}
+.comment-bubble-author:hover{text-decoration:underline;}
+.comment-bubble-date{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.comment-bubble-text{font-size:13px;color:var(--text2);line-height:1.65;white-space:pre-wrap;}
+.comment-reply-btn{font-family:var(--mono);font-size:11px;color:var(--text3);cursor:pointer;margin-top:6px;display:inline-flex;align-items:center;gap:3px;}
+.comment-reply-btn:hover{color:var(--accent2);}
+.comment-replies{margin-left:20px;margin-top:8px;border-left:2px solid rgba(108,142,245,0.15);padding-left:12px;}
+.reply-bubble{background:rgba(8,11,22,0.5);border:1px solid rgba(30,37,64,0.4);border-radius:6px;padding:8px 12px;margin-bottom:8px;}
+.reply-bubble-meta{display:flex;gap:8px;align-items:center;margin-bottom:4px;}
+.reply-to{font-family:var(--mono);font-size:11px;color:var(--accent);opacity:0.7;}
+
+/* comment input */
+.post-comment-input-row{display:flex;gap:8px;margin-top:12px;align-items:flex-start;}
+.post-comment-input-row textarea{flex:1;background:rgba(10,14,26,0.8);border:1px solid rgba(30,37,64,0.6);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;resize:none;min-height:38px;max-height:100px;font-family:inherit;transition:border-color 0.2s;}
+.post-comment-input-row textarea:focus{outline:none;border-color:rgba(108,142,245,0.4);}
+.reply-input-row{display:flex;gap:8px;margin-top:8px;margin-left:20px;align-items:flex-start;}
+.reply-input-row textarea{flex:1;background:rgba(10,14,26,0.8);border:1px solid rgba(30,37,64,0.5);border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;resize:none;min-height:34px;font-family:inherit;}
+.reply-input-row textarea:focus{outline:none;border-color:rgba(108,142,245,0.4);}
+
 /* ── LECTURES ── */
 .lecture-item{display:flex;gap:20px;padding:18px 0;border-bottom:1px solid rgba(30,37,64,0.4);}
 .lecture-item:last-child{border-bottom:none;}
@@ -3974,7 +4012,151 @@ async function loadPosts(){
   list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
   const{data}=await sb.from('posts').select('*,profiles(username,id)').order('created_at',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty">暂无随笔</div>';return;}
-  list.innerHTML=data.map(p=>`<div class="emotion-post"><div class="emotion-dot"></div><div class="emotion-date"><span>${fmtDate(p.created_at)}</span><span class="emotion-author" onclick="showProfile('${p.profiles?.username||''}')">@${p.profiles?.username||'匿名'}</span>${currentUser&&p.profiles?.id===currentUser.id?`<button class="btn btn-outline btn-sm" style="margin-left:4px" onclick="openEditPost(${p.id},'${escHtml((p.content||'').replace(/'/g,"\\'\\'"))}')">编辑</button>`:''}${(currentUser&&p.profiles?.id===currentUser.id)||isCoach()?`<button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deletePost(${p.id})">删除</button>`:''}</div><div class="emotion-text">${escHtml(p.content).replace(/\n/g,'<br>')}</div></div>`).join('');
+  list.innerHTML='';
+  for(const p of data){
+    const card=document.createElement('div');
+    card.className='post-card emotion-post';
+    card.dataset.postId=p.id;
+    const isMine=currentUser&&p.profiles?.id===currentUser.id;
+    const canDel=isMine||isCoach();
+    card.innerHTML=`
+      <div class="post-card-header">
+        <span class="post-card-author" onclick="event.stopPropagation();showProfile('${escHtml(p.profiles?.username||'')}')")>@${escHtml(p.profiles?.username||'匿名')}</span>
+        <span class="post-card-date">${fmtDate(p.created_at)}</span>
+      </div>
+      <div class="post-card-body">${escHtml(p.content).replace(/\n/g,'<br>')}</div>
+      <div class="post-card-footer">
+        <span class="post-comment-toggle" onclick="event.stopPropagation();togglePostComments(${p.id},this)">💬 <span class="cmt-count">...</span> 条评论</span>
+        <div class="post-card-actions">
+          ${isMine?`<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openEditPost(${p.id},'${escHtml((p.content||'').replace(/'/g,"\\'"))}')">编辑</button>`:''}
+          ${canDel?`<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deletePost(${p.id})">删除</button>`:''}
+        </div>
+      </div>
+      <div class="post-comments" id="post-cmt-${p.id}"></div>`;
+    list.appendChild(card);
+    // 预加载评论数
+    loadPostCommentCount(p.id);
+  }
+}
+
+async function loadPostCommentCount(postId){
+  const{count}=await sb.from('post_comments').select('id',{count:'exact',head:true}).eq('post_id',postId);
+  const el=document.querySelector(`[data-post-id="${postId}"] .cmt-count`);
+  if(el)el.textContent=count||0;
+}
+
+async function togglePostComments(postId,btn){
+  const box=document.getElementById(`post-cmt-${postId}`);
+  if(box.classList.contains('open')){box.classList.remove('open');return;}
+  box.classList.add('open');
+  box.innerHTML='<div style="font-family:var(--mono);font-size:12px;color:var(--text3);padding:8px 0">加载中…</div>';
+  await renderPostComments(postId);
+}
+
+async function renderPostComments(postId){
+  const box=document.getElementById(`post-cmt-${postId}`);
+  const{data:comments}=await sb.from('post_comments')
+    .select('*,profiles(username,id),reply_to_profile:profiles!post_comments_reply_to_fkey(username)')
+    .eq('post_id',postId).order('created_at');
+  // 更新计数
+  const countEl=document.querySelector(`[data-post-id="${postId}"] .cmt-count`);
+  if(countEl)countEl.textContent=comments?.length||0;
+
+  let html='';
+  // 顶层评论
+  const topLevel=(comments||[]).filter(c=>!c.parent_id);
+  for(const c of topLevel){
+    const replies=(comments||[]).filter(r=>r.parent_id===c.id);
+    const canDelC=(currentUser&&c.profiles?.id===currentUser.id)||isCoach();
+    html+=`<div class="comment-thread" id="cmt-${c.id}">
+      <div class="comment-bubble">
+        <div class="comment-bubble-meta">
+          <span class="comment-bubble-author" onclick="showProfile('${escHtml(c.profiles?.username||'')}')")>@${escHtml(c.profiles?.username||'?')}</span>
+          <span class="comment-bubble-date">${fmtDate(c.created_at)}</span>
+          ${canDelC?`<button class="btn btn-danger btn-sm" style="margin-left:auto;padding:1px 7px;font-size:11px" onclick="deletePostComment(${c.id},${postId})">删除</button>`:''}
+        </div>
+        <div class="comment-bubble-text">${escHtml(c.content).replace(/\n/g,'<br>')}</div>
+        ${currentUser?`<span class="comment-reply-btn" onclick="toggleReplyInput(${c.id},${postId})">↩ 回复</span>`:''}
+      </div>
+      ${replies.length?`<div class="comment-replies">${replies.map(r=>{
+        const canDelR=(currentUser&&r.profiles?.id===currentUser.id)||isCoach();
+        return `<div class="reply-bubble" id="cmt-${r.id}">
+          <div class="reply-bubble-meta">
+            <span class="comment-bubble-author" onclick="showProfile('${escHtml(r.profiles?.username||'')}')")>@${escHtml(r.profiles?.username||'?')}</span>
+            ${r.reply_to_profile?.username?`<span class="reply-to">→ @${escHtml(r.reply_to_profile.username)}</span>`:''}
+            <span class="comment-bubble-date">${fmtDate(r.created_at)}</span>
+            ${canDelR?`<button class="btn btn-danger btn-sm" style="margin-left:auto;padding:1px 7px;font-size:11px" onclick="deletePostComment(${r.id},${postId})">删除</button>`:''}
+          </div>
+          <div class="comment-bubble-text">${escHtml(r.content).replace(/\n/g,'<br>')}</div>
+          ${currentUser?`<span class="comment-reply-btn" onclick="toggleReplyInput(${c.id},${postId},'${escHtml(r.profiles?.username||'')}',${r.profiles?.id||'null'})">↩ 回复</span>`:''}
+        </div>`;
+      }).join('')}</div>`:''}
+      <div id="reply-input-${c.id}" style="display:none">
+        <div class="reply-input-row">
+          <textarea placeholder="写回复…" rows="1" id="reply-ta-${c.id}"></textarea>
+          <button class="btn btn-primary btn-sm" onclick="submitReply(${c.id},${postId})">发送</button>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('reply-input-${c.id}').style.display='none'">取消</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  // 评论输入框
+  html+=currentUser?`<div class="post-comment-input-row">
+    <textarea placeholder="写评论…" rows="1" id="cmt-ta-${postId}"></textarea>
+    <button class="btn btn-primary btn-sm" onclick="submitPostComment(${postId})">发送</button>
+  </div>`:`<div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:8px">登录后参与评论</div>`;
+
+  box.innerHTML=html||(`<div style="font-family:var(--mono);font-size:12px;color:var(--text3);padding:4px 0">// 暂无评论</div>`+
+    (currentUser?`<div class="post-comment-input-row"><textarea placeholder="写评论…" rows="1" id="cmt-ta-${postId}"></textarea><button class="btn btn-primary btn-sm" onclick="submitPostComment(${postId})">发送</button></div>`:
+    `<div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:8px">登录后参与评论</div>`));
+}
+
+function toggleReplyInput(commentId,postId,replyToUsername='',replyToId=null){
+  const el=document.getElementById(`reply-input-${commentId}`);
+  el.style.display=el.style.display==='none'?'block':'none';
+  const ta=document.getElementById(`reply-ta-${commentId}`);
+  if(ta){
+    ta.dataset.replyToId=replyToId||'';
+    ta.placeholder=replyToUsername?`回复 @${replyToUsername}…`:'写回复…';
+    if(el.style.display==='block')setTimeout(()=>ta.focus(),50);
+  }
+}
+
+async function submitPostComment(postId){
+  if(!currentUser){openModal('auth-modal');return;}
+  const ta=document.getElementById(`cmt-ta-${postId}`);
+  const content=ta.value.trim();
+  if(!content)return;
+  const{error}=await sb.from('post_comments').insert({post_id:postId,author_id:currentUser.id,content});
+  if(error){showToast('评论失败','error');return;}
+  ta.value='';
+  showToast('评论成功 ✓','success');
+  await renderPostComments(postId);
+}
+
+async function submitReply(parentId,postId){
+  if(!currentUser){openModal('auth-modal');return;}
+  const ta=document.getElementById(`reply-ta-${parentId}`);
+  const content=ta.value.trim();
+  if(!content)return;
+  const replyToId=ta.dataset.replyToId||null;
+  const{error}=await sb.from('post_comments').insert({
+    post_id:postId,author_id:currentUser.id,content,
+    parent_id:parentId,
+    reply_to:replyToId||undefined
+  });
+  if(error){showToast('回复失败','error');return;}
+  ta.value='';
+  document.getElementById(`reply-input-${parentId}`).style.display='none';
+  showToast('回复成功 ✓','success');
+  await renderPostComments(postId);
+}
+
+async function deletePostComment(id,postId){
+  if(!confirm('确认删除？'))return;
+  await sb.from('post_comments').delete().eq('id',id);
+  showToast('已删除','success');
+  await renderPostComments(postId);
 }
 function openPostModal(){if(!currentUser){openModal('auth-modal');return;}openModal('post-modal');}
 async function submitPost(){const content=document.getElementById('post-content').value.trim();if(!content){document.getElementById('post-error').textContent='请填写内容';return;}const{error}=await sb.from('posts').insert({author_id:currentUser.id,content});if(error){document.getElementById('post-error').textContent=error.message;return;}closeModal('post-modal');document.getElementById('post-content').value='';showToast('随笔发布成功 ✓','success');loadPosts();}
