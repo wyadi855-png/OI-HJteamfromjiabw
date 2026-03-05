@@ -1171,6 +1171,57 @@ footer span{color:var(--accent2);}
 }
 
 /* ══════════════════════════════════════════
+   实时提示横幅
+   ══════════════════════════════════════════ */
+#new-content-banner{
+  position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-60px);
+  z-index:9999;
+  background:rgba(45,232,176,0.13);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(45,232,176,0.32);
+  border-top:none;border-radius:0 0 16px 16px;
+  padding:10px 28px;
+  font-family:var(--mono);font-size:13px;color:#2de8b0;
+  cursor:pointer;
+  box-shadow:0 8px 32px rgba(45,232,176,0.12),inset 0 1px 0 rgba(255,255,255,0.1);
+  transition:transform 0.45s cubic-bezier(0.34,1.56,0.64,1);
+  white-space:nowrap;
+}
+#new-content-banner.show{transform:translateX(-50%) translateY(0);}
+#new-content-banner:hover{background:rgba(45,232,176,0.2);}
+
+/* ══════════════════════════════════════════
+   鼠标全局光晕
+   ══════════════════════════════════════════ */
+#mouse-glow{
+  position:fixed;top:0;left:0;
+  width:400px;height:400px;
+  background:radial-gradient(circle,rgba(108,142,245,0.055) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+  will-change:transform;
+}
+
+/* ══════════════════════════════════════════
+   卡片内鼠标光点
+   ══════════════════════════════════════════ */
+.blog-card,.post-card,.lb-row,.ann-card{--gx:50%;--gy:50%;}
+.card-glow-active.blog-card{
+  background:rgba(255,255,255,0.07) !important;
+}
+.card-glow-active.blog-card::before,
+.card-glow-active.post-card::before,
+.card-glow-active.ann-card::before{
+  content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(circle 140px at var(--gx) var(--gy),rgba(108,142,245,0.1) 0%,transparent 70%);
+  z-index:0;
+}
+
+/* ══════════════════════════════════════════
+   无限滚动 sentinel
+   ══════════════════════════════════════════ */
+#notes-sentinel{width:100%;grid-column:1/-1;min-height:40px;}
+
+/* ══════════════════════════════════════════
    MOBILE OVERHAUL — 全新移动端适配
    ══════════════════════════════════════════ */
 @media(max-width:768px){
@@ -3787,6 +3838,7 @@ async function loadSession(){
   renderAuthArea();
   loadHomeFeed();
   if(currentUser){ checkNotifDot(); initCheckinState(); }
+  initRealtime();
 }
 
 // onAuthStateChange 仅处理登录/登出事件，不与 loadSession 竞争
@@ -3847,6 +3899,147 @@ async function doRegister(){
   setTimeout(async()=>{const{error:le}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});if(!le){closeModal('auth-modal');showToast('注册并登录成功 ✓','success');loadHomeFeed();}},800);
 }
 async function doLogout(){await sb.auth.signOut();showToast('已退出登录','success');loadHomeFeed();}
+
+// ══════════════════════════════════════════════════════
+// 1. 实时新内容提示
+// ══════════════════════════════════════════════════════
+const _newContentCounts = {notes:0, posts:0};
+let _realtimeChannel = null;
+
+function initRealtime(){
+  if(_realtimeChannel) _realtimeChannel.unsubscribe();
+  _realtimeChannel = sb.channel('public-feed')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'notes'},payload=>{
+      _newContentCounts.notes++;
+      showNewContentBanner();
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'posts'},payload=>{
+      _newContentCounts.posts++;
+      showNewContentBanner();
+    })
+    .subscribe();
+}
+
+function showNewContentBanner(){
+  const total = _newContentCounts.notes + _newContentCounts.posts;
+  let banner = document.getElementById('new-content-banner');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'new-content-banner';
+    banner.onclick = ()=>{
+      _newContentCounts.notes=0; _newContentCounts.posts=0;
+      banner.classList.remove('show');
+      // 刷新当前页面
+      const active = document.querySelector('section.active');
+      if(active?.id === 'notes') loadNotes();
+      else if(active?.id === 'emotions') loadPosts();
+      else loadHomeFeed();
+    };
+    document.body.appendChild(banner);
+  }
+  const parts = [];
+  if(_newContentCounts.notes) parts.push(`${_newContentCounts.notes} 篇新题解`);
+  if(_newContentCounts.posts) parts.push(`${_newContentCounts.posts} 条新随笔`);
+  banner.innerHTML = `<span>↑ 有 ${parts.join('、')}，点击刷新</span>`;
+  banner.classList.add('show');
+}
+
+// ══════════════════════════════════════════════════════
+// 2. 无限滚动（题解列表）
+// ══════════════════════════════════════════════════════
+const NOTES_PAGE_SIZE = 12;
+let _notesPage = 0;
+let _notesAllData = [];
+let _notesLoading = false;
+let _notesScrollObserver = null;
+
+function renderNotesPage(){
+  const list = document.getElementById('notes-list');
+  const grid = list.querySelector('.blog-grid');
+  if(!grid) return;
+  const start = _notesPage * NOTES_PAGE_SIZE;
+  const filtered = activeNoteTag
+    ? _notesAllData.filter(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).includes(activeNoteTag))
+    : _notesAllData;
+  const chunk = filtered.slice(start, start + NOTES_PAGE_SIZE);
+  if(!chunk.length){
+    // remove sentinel
+    const sentinel = document.getElementById('notes-sentinel');
+    if(sentinel) sentinel.remove();
+    return;
+  }
+  chunk.forEach(n=>{
+    const div = document.createElement('div');
+    div.className = 'blog-card';
+    div.onclick = ()=>showNote(n.id);
+    div.innerHTML = `<div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<div style="display:flex;gap:4px;flex-wrap:wrap">${(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge" onclick="event.stopPropagation();loadNotes('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?`<span class="view-count">${n.view_count}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p>`;
+    grid.insertBefore(div, document.getElementById('notes-sentinel'));
+  });
+  _notesPage++;
+  const remaining = filtered.length - _notesPage * NOTES_PAGE_SIZE;
+  const sentinel = document.getElementById('notes-sentinel');
+  if(sentinel){
+    if(remaining <= 0) sentinel.remove();
+    else sentinel.innerHTML = `<div style="text-align:center;padding:16px;font-family:var(--mono);font-size:12px;color:var(--text3)">还有 ${remaining} 篇 ↓</div>`;
+  }
+}
+
+function initNotesInfiniteScroll(){
+  if(_notesScrollObserver) _notesScrollObserver.disconnect();
+  _notesScrollObserver = new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting && !_notesLoading){
+      _notesLoading = true;
+      renderNotesPage();
+      _notesLoading = false;
+    }
+  },{rootMargin:'200px'});
+  const sentinel = document.getElementById('notes-sentinel');
+  if(sentinel) _notesScrollObserver.observe(sentinel);
+}
+
+// ══════════════════════════════════════════════════════
+// 3. 鼠标跟随光晕
+// ══════════════════════════════════════════════════════
+(function initMouseGlow(){
+  const isMobile = ()=>window.matchMedia('(max-width:768px)').matches;
+  if(isMobile()) return;
+
+  // 全局光晕跟随鼠标
+  const glow = document.createElement('div');
+  glow.id = 'mouse-glow';
+  document.body.appendChild(glow);
+
+  let mx=0,my=0,cx=0,cy=0;
+  document.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; });
+  (function animate(){
+    cx += (mx-cx)*0.08;
+    cy += (my-cy)*0.08;
+    glow.style.transform = `translate(${cx-200}px,${cy-200}px)`;
+    requestAnimationFrame(animate);
+  })();
+
+  // 卡片悬停光点（跟随鼠标在卡片内移动）
+  function addCardGlow(el){
+    el.addEventListener('mousemove',e=>{
+      const r = el.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+      el.style.setProperty('--gx', x+'px');
+      el.style.setProperty('--gy', y+'px');
+      el.classList.add('card-glow-active');
+    });
+    el.addEventListener('mouseleave',()=>el.classList.remove('card-glow-active'));
+  }
+
+  // 用 MutationObserver 监听动态生成的卡片
+  const cardObserver = new MutationObserver(()=>{
+    document.querySelectorAll('.blog-card:not([data-glow]),.skel-card:not([data-glow]),.lb-row:not([data-glow]),.post-card:not([data-glow]),.home-daily-card:not([data-glow])').forEach(el=>{
+      el.dataset.glow='1';
+      addCardGlow(el);
+    });
+  });
+  cardObserver.observe(document.body,{childList:true,subtree:true});
+})();
 
 // ── Home ───────────────────────────────────────────────────
 async function loadHomeFeed(){
@@ -4459,7 +4652,12 @@ async function loadNotes(filterTag){
   tagBar.innerHTML='<button class="tag-chip'+(activeNoteTag===''?' active':'')+'" onclick="loadNotes(\'\')">全部</button>'+tags.map(t=>`<button class="tag-chip${activeNoteTag===t?' active':''}" onclick="loadNotes('${escHtml(t)}')">${escHtml(t)}</button>`).join('');
   const filtered=activeNoteTag?data.filter(n=>(n.topic||'').split(/[,，、]/).map(t=>t.trim()).includes(activeNoteTag)):data;
   if(!filtered.length){list.innerHTML='<div class="empty">该标签下暂无题解</div>';return;}
-  list.innerHTML='<div class="blog-grid">'+filtered.map(n=>`<div class="blog-card" onclick="showNote(${n.id})"><div class="blog-card-top"><h3>${escHtml(n.title)}</h3>${n.topic?`<div style="display:flex;gap:4px;flex-wrap:wrap">${(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge" onclick="event.stopPropagation();loadNotes('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>`:''}</div><div class="blog-meta"><span class="author" onclick="event.stopPropagation();showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span><span>${fmtDate(n.created_at)}</span>${n.problem_id?`<span>${escHtml(n.problem_id)}</span>`:''} ${n.view_count?`<span class="view-count">${n.view_count}</span>`:''}</div><p class="blog-excerpt">${escHtml((n.content||'').slice(0,100))}…</p></div>`).join('')+'</div>';
+  // 无限滚动：重置分页状态
+  _notesAllData = data;
+  _notesPage = 0;
+  list.innerHTML = '<div class="blog-grid"><div id="notes-sentinel"></div></div>';
+  renderNotesPage();
+  setTimeout(initNotesInfiniteScroll, 100);
   } catch(e){ console.error("loadNotes:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 function restoreNotesList(){
