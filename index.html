@@ -639,6 +639,45 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .course-sub-tab{background:none;border:none;border-bottom:2px solid transparent;padding:8px 16px;font-family:var(--mono);font-size:13px;color:var(--text3);cursor:pointer;transition:all 0.2s;margin-bottom:-1px;}
 .course-sub-tab:hover{color:var(--text);}
 .course-sub-tab.active{color:var(--accent2);border-bottom-color:var(--accent2);}
+/* hero tag row with checkin */
+.hero-tag-row{display:flex;align-items:center;gap:16px;margin-bottom:20px;opacity:0;animation:fadeSlideUp 0.7s 0.1s forwards;}
+.hero-tag-row .hero-tag{margin-bottom:0;opacity:1;animation:none;}
+/* pixel checkin button */
+.checkin-btn{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(45,232,176,0.06);
+  border:1px solid rgba(45,232,176,0.25);
+  border-radius:4px;
+  padding:4px 10px 4px 7px;
+  cursor:pointer;
+  color:rgba(45,232,176,0.7);
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:0.1em;
+  transition:all 0.15s;
+  image-rendering:pixelated;
+  position:relative;
+  overflow:visible;
+}
+.checkin-btn:hover{background:rgba(45,232,176,0.12);border-color:rgba(45,232,176,0.5);color:rgba(45,232,176,1);}
+.checkin-btn.checked{background:rgba(45,232,176,0.15);border-color:rgba(45,232,176,0.6);color:#2de8b0;box-shadow:0 0 10px rgba(45,232,176,0.2);}
+.checkin-icon{width:14px;height:14px;flex-shrink:0;}
+/* falling code particles */
+.code-fall{
+  position:fixed;
+  pointer-events:none;
+  font-family:var(--mono);
+  font-size:11px;
+  image-rendering:pixelated;
+  z-index:9999;
+  animation:codeFall linear forwards;
+  white-space:nowrap;
+}
+@keyframes codeFall{
+  0%  {opacity:1;transform:translateY(0) rotate(0deg);}
+  80% {opacity:1;}
+  100%{opacity:0;transform:translateY(220px) rotate(var(--rot));}
+}
 /* ── LECTURES ── */
 .lecture-item{display:flex;gap:20px;padding:18px 0;border-bottom:1px solid rgba(30,37,64,0.4);}
 .lecture-item:last-child{border-bottom:none;}
@@ -1438,14 +1477,13 @@ body::after {
   -webkit-background-clip: unset !important;
   background-clip: unset !important;
   animation: phraseBreath 3.5s ease-in-out infinite;
-  opacity: 1 !important;
 }
 .hero-phrase.phrase-1 { animation-delay: 0.7s; }
 .hero-phrase.phrase-2 { animation-delay: 1.4s; }
 @keyframes phraseBreath {
-  0%   { -webkit-text-fill-color: rgba(45,232,176,0.2) !important; text-shadow: none; }
-  50%  { -webkit-text-fill-color: rgba(180,240,255,1.0) !important; text-shadow: 0 0 16px rgba(45,232,176,0.8); }
-  100% { -webkit-text-fill-color: rgba(45,232,176,0.2) !important; text-shadow: none; }
+  0%   { opacity: 0.2; text-shadow: none; }
+  50%  { opacity: 1;   text-shadow: 0 0 16px rgba(45,232,176,0.9), 0 0 32px rgba(45,232,176,0.4); }
+  100% { opacity: 0.2; text-shadow: none; }
 }
 /* 旧的 typewriter 隐藏 */
 .typewriter-cursor { display: none; }
@@ -2522,9 +2560,23 @@ section:not(.active) {
 
             <!-- 文字区域 -->
       <div class="hero-text">
-        <div class="hero-tag">算法竞赛训练队</div>
+        <div class="hero-tag-row">
+          <div class="hero-tag">// 每日知识点</div>
+          <button class="checkin-btn" id="checkin-btn" onclick="doCheckin(event)" title="打卡">
+            <svg class="checkin-icon" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <!-- pixel checkbox -->
+              <rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1"/>
+              <rect x="3" y="7" width="3" height="2" fill="currentColor"/>
+              <rect x="5" y="9" width="2" height="2" fill="currentColor"/>
+              <rect x="6" y="11" width="2" height="2" fill="currentColor"/>
+              <rect x="7" y="9" width="2" height="2" fill="currentColor"/>
+              <rect x="8" y="7" width="3" height="2" fill="currentColor"/>
+              <rect x="10" y="5" width="2" height="2" fill="currentColor"/>
+            </svg>
+            <span class="checkin-label">打卡</span>
+          </button>
+        </div>
         <h1 id="hero-main-title"></h1>
-
       </div>
     </div>
   </div>
@@ -5041,6 +5093,33 @@ function markAllRead(){
   loadNotifs();
 }
 
+
+// ── Checkin ──────────────────────────────────────────────
+const CODE_SNIPPETS=['AC','O(1)','O(n)','O(log n)','++i','i++','int','long long','void','for','while','if','else','return','true','false','dfs()','bfs()','dp[]','ans++','inf','mod','n--','ok','#define','scanf','printf','sort()','swap()','min()','max()','0x3f','1e9','n<<1','>>1','&1','|=','n-1','n+1'];
+const CODE_COLORS=['#2de8b0','#6c8ef5','#c792ea','#ffb347','#7dd3fc','#86efac'];
+function doCheckin(e){
+  const btn=document.getElementById('checkin-btn');
+  if(btn.classList.contains('checked'))return;
+  btn.classList.add('checked');
+  btn.querySelector('.checkin-label').textContent='已打卡';
+  const bx=e.clientX,by=e.clientY;
+  for(let i=0;i<28;i++){
+    setTimeout(()=>{
+      const el=document.createElement('span');
+      el.className='code-fall';
+      el.textContent=CODE_SNIPPETS[Math.floor(Math.random()*CODE_SNIPPETS.length)];
+      el.style.color=CODE_COLORS[Math.floor(Math.random()*CODE_COLORS.length)];
+      el.style.left=(bx+(Math.random()-0.5)*180)+'px';
+      el.style.top=(by+(Math.random()-0.5)*60)+'px';
+      el.style.setProperty('--rot',(Math.random()*60-30)+'deg');
+      el.style.animationDuration=(0.8+Math.random()*0.8)+'s';
+      el.style.fontSize=(9+Math.floor(Math.random()*7))+'px';
+      document.body.appendChild(el);
+      el.addEventListener('animationend',()=>el.remove());
+    },i*30);
+  }
+  showToast('今日打卡成功 ✓','success');
+}
 
 // ── Emoji Picker ────────────────────────────────────────────
 const EMOJIS=['😀','😂','🥹','😊','😎','🤔','😅','😭','🥰','😍','🤩','😤','😡','😱','🤯','😴','🥳','🤣','👍','👎','👏','🙌','🔥','✨','💯','❤️','💙','💚','💛','💜','🎉','🎊','🚀','⭐','💡','📝','🏆','🎯','💪','🧠','👀','🙏','😈','👻','🤖','🐛','💀','🌈','⚡','🎮'];
