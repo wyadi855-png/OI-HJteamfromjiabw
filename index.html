@@ -4453,6 +4453,8 @@ function markAllRead(){
   loadNotifs();
 }
 
+} // end loadProfileSocial — closing brace was missing
+
 // ── Settings ────────────────────────────────────────────────
 function switchSettingsTab(tab){
   document.querySelectorAll('#settings-modal .modal-tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='avatar'?0:1)));
