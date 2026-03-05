@@ -2,553 +2,347 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HJOI — 登录</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HJOI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
-:root {
-  --bg: #04070f;
-  --accent: #6c8ef5;
-  --accent2: #2de8b0;
-  --red: #ff5370;
-  --text: #e8eeff;
-  --text2: rgba(232,238,255,0.65);
-  --text3: rgba(232,238,255,0.35);
-  --glass: rgba(255,255,255,0.04);
-  --glass-border: rgba(255,255,255,0.09);
-}
-
-html, body {
-  width: 100%; height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'JetBrains Mono', monospace;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
+:root{
+  --ink:       #0a0a0f;
+  --ink2:      #12121a;
+  --surface:   rgba(255,255,255,0.055);
+  --surface2:  rgba(255,255,255,0.035);
+  --border:    rgba(255,255,255,0.1);
+  --border2:   rgba(255,255,255,0.06);
+  --text:      rgba(255,255,255,0.92);
+  --text2:     rgba(255,255,255,0.5);
+  --text3:     rgba(255,255,255,0.28);
+  --blue:      #4f8ef7;
+  --teal:      #2de8b0;
+  --red:       #ff453a;
+  --mono:      'JetBrains Mono', monospace;
+  --sans:      'Outfit', sans-serif;
 }
 
-/* ── Canvas bg ── */
-#canvas {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
+html,body{
+  width:100%;height:100%;
+  background:var(--ink);
+  color:var(--text);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
 }
 
-/* ── Scanline overlay ── */
-.scanlines {
-  position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0,0,0,0.03) 2px,
-    rgba(0,0,0,0.03) 4px
-  );
+/* ── Background mesh ── */
+.bg{
+  position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(79,142,247,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 90%, rgba(45,232,176,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 60% 40%, rgba(120,80,255,0.06) 0%, transparent 50%);
 }
 
-/* ── Vignette ── */
-.vignette {
-  position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(4,7,15,0.85) 100%);
+/* subtle noise */
+.bg::after{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:.4;pointer-events:none;
 }
 
-/* ── Main layout ── */
-.stage {
-  position: relative; z-index: 10;
-  width: 100vw; height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
+/* ── Canvas orbs ── */
+#orb-canvas{position:fixed;inset:0;z-index:1;pointer-events:none;}
+
+/* ── Layout ── */
+.page{
+  position:relative;z-index:10;
+  width:100vw;height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-/* ── HJOI wordmark ── */
-.wordmark {
-  position: relative;
-  margin-bottom: 48px;
-  text-align: center;
-  opacity: 0;
-  transform: translateY(-20px);
-  animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.3s forwards;
+/* ── Logo ── */
+.logo-wrap{
+  position:fixed;top:32px;left:50%;transform:translateX(-50%);
+  z-index:20;text-align:center;
+  opacity:0;animation:riseIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.1s forwards;
+}
+.logo-text{
+  font-family:var(--sans);
+  font-size:22px;font-weight:800;
+  letter-spacing:0.18em;
+  background:linear-gradient(135deg,#fff 30%,rgba(79,142,247,0.9) 70%,rgba(45,232,176,0.9) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.logo-sub{
+  font-family:var(--mono);font-size:9px;font-weight:300;
+  letter-spacing:0.3em;color:var(--text3);text-transform:uppercase;
+  margin-top:4px;
 }
 
-.wordmark-main {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(52px, 10vw, 96px);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  background: linear-gradient(135deg, #fff 0%, #c8d4ff 40%, #6c8ef5 70%, #2de8b0 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  position: relative;
-  display: inline-block;
-}
-
-/* glitch layers */
-.wordmark-main::before,
-.wordmark-main::after {
-  content: 'HJOI';
-  position: absolute; left: 0; top: 0;
-  width: 100%; height: 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.wordmark-main::before {
-  background: linear-gradient(135deg, #ff5370, #ff5370);
-  animation: glitch1 4s infinite;
-  clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
-}
-.wordmark-main::after {
-  background: linear-gradient(135deg, #2de8b0, #2de8b0);
-  animation: glitch2 4s infinite;
-  clip-path: polygon(0 55%, 100% 55%, 100% 75%, 0 75%);
-}
-
-@keyframes glitch1 {
-  0%,92%,100%{transform:translate(0);opacity:0;}
-  93%{transform:translate(-3px,1px);opacity:0.7;}
-  94%{transform:translate(3px,-1px);opacity:0.7;}
-  95%{transform:translate(0);opacity:0;}
-}
-@keyframes glitch2 {
-  0%,93%,100%{transform:translate(0);opacity:0;}
-  94%{transform:translate(3px,2px);opacity:0.6;}
-  95%{transform:translate(-2px,0);opacity:0.6;}
-  96%{transform:translate(0);opacity:0;}
-}
-
-.wordmark-sub {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 300;
-  letter-spacing: 0.35em;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-top: 10px;
-  display: block;
-}
-
-.wordmark-sub .cursor-blink {
-  animation: blink 1s step-end infinite;
-  color: var(--accent2);
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-
-/* ── Terminal line ── */
-.terminal-line {
-  font-size: 12px;
-  color: var(--text3);
-  margin-bottom: 28px;
-  height: 18px;
-  opacity: 0;
-  animation: fadeIn 0.4s ease 1.2s forwards;
-}
-.terminal-line .t-green { color: var(--accent2); }
-.terminal-line .t-blue  { color: var(--accent); }
-.terminal-line .t-red   { color: var(--red); }
-
-/* ── Glass card ── */
-.glass-card {
-  width: 400px;
-  max-width: calc(100vw - 32px);
-  max-height: calc(100vh - 240px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 32px 32px 28px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.045);
-  backdrop-filter: blur(48px) saturate(200%);
-  -webkit-backdrop-filter: blur(48px) saturate(200%);
-  border: 1px solid rgba(255,255,255,0.1);
+/* ── Card ── */
+.card{
+  width:min(400px, calc(100vw - 40px));
+  border-radius:28px;
+  background:rgba(18,18,28,0.72);
+  backdrop-filter:blur(60px) saturate(180%);
+  -webkit-backdrop-filter:blur(60px) saturate(180%);
+  border:1px solid var(--border);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.15),
-    0 32px 80px rgba(0,0,0,0.5),
-    0 0 0 1px rgba(255,255,255,0.03);
-  position: relative;
-  opacity: 0;
-  transform: translateY(24px) scale(0.97);
-  animation: cardIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.9s forwards;
-  scrollbar-width: none;
-}
-.glass-card::-webkit-scrollbar { display: none; }
-
-/* top refraction film */
-.glass-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 50%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
-  border-radius: 20px 20px 0 0;
-  pointer-events: none;
-}
-/* specular line */
-.glass-card::after {
-  content: '';
-  position: absolute; top: 0; left: 12%; right: 12%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    0 0 0 0.5px rgba(255,255,255,0.06) inset,
+    0 1px 0 rgba(255,255,255,0.12) inset,
+    0 40px 100px -20px rgba(0,0,0,0.7),
+    0 8px 32px rgba(0,0,0,0.4);
+  overflow:hidden;
+  position:relative;
+  opacity:0;
+  transform:translateY(30px) scale(0.96);
+  animation:cardRise 0.8s cubic-bezier(0.22,1,0.36,1) 0.25s forwards;
 }
 
-@keyframes cardIn {
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes fadeUp {
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  to { opacity: 1; }
+/* top specular */
+.card::before{
+  content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent);
+  pointer-events:none;
 }
 
-/* card header */
-.card-header {
-  margin-bottom: 28px;
+@keyframes cardRise{to{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes riseIn{to{opacity:1;}}
+
+/* ── Tabs ── */
+.tabs{
+  display:flex;padding:6px;gap:4px;
+  background:rgba(255,255,255,0.04);
+  border-bottom:1px solid var(--border2);
 }
-.card-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 4px;
+.tab-btn{
+  flex:1;padding:10px;border:none;background:none;
+  font-family:var(--sans);font-size:13px;font-weight:500;
+  color:var(--text3);cursor:pointer;border-radius:14px;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+  position:relative;letter-spacing:0.02em;
 }
-.card-subtitle {
-  font-size: 12px;
-  color: var(--text3);
+.tab-btn.active{
+  background:rgba(255,255,255,0.08);
+  color:var(--text);
+  box-shadow:0 1px 0 rgba(255,255,255,0.1) inset, 0 2px 8px rgba(0,0,0,0.2);
 }
 
-/* tabs */
-.tabs {
-  display: flex;
-  gap: 0;
-  background: rgba(255,255,255,0.05);
-  border-radius: 10px;
-  padding: 3px;
-  margin-bottom: 24px;
-}
-.tab {
-  flex: 1;
-  padding: 7px 0;
-  text-align: center;
-  font-size: 12px;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--text3);
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.25s;
-  border: none; background: none;
-  letter-spacing: 0.05em;
-}
-.tab.active {
-  background: rgba(108,142,245,0.2);
-  color: var(--accent);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+/* ── Form body ── */
+.form-body{
+  padding:28px 28px 24px;
 }
 
-/* form */
-.field {
-  margin-bottom: 14px;
-  position: relative;
+/* field */
+.field{margin-bottom:14px;}
+.field-label{
+  font-family:var(--mono);font-size:10px;font-weight:400;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:7px;display:flex;
+  align-items:center;justify-content:space-between;
 }
-.field label {
-  display: block;
-  font-size: 11px;
-  color: var(--text3);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 7px;
+.field-label .req{color:var(--red);font-size:9px;letter-spacing:0;}
+
+.input-wrap{position:relative;}
+.field input,
+.field select{
+  width:100%;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px;
+  padding:13px 16px;
+  font-family:var(--sans);font-size:15px;font-weight:400;
+  color:var(--text);
+  outline:none;
+  transition:border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  -webkit-appearance:none;
 }
-.field input {
-  width: 100%;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  padding: 11px 14px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-  -webkit-text-fill-color: var(--text);
+.field select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;
+  padding-right:36px;cursor:pointer;
 }
-.field input::placeholder { color: var(--text3); }
-.field select {
-  width: 100%;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  padding: 11px 14px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  color: var(--text);
-  outline: none;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(232,238,255,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  transition: border-color 0.2s;
+.field select option{background:#141420;color:var(--text);}
+.field input::placeholder{color:var(--text3);}
+.field input:focus,
+.field select:focus{
+  border-color:rgba(79,142,247,0.5);
+  background:rgba(79,142,247,0.07);
+  box-shadow:0 0 0 3px rgba(79,142,247,0.12), 0 1px 0 rgba(255,255,255,0.08) inset;
 }
-.field select:focus {
-  border-color: rgba(108,142,245,0.45);
-  background-color: rgba(108,142,245,0.07);
-}
-.field select option { background: #0d1526; color: var(--text); }
-.field input:focus {
-  border-color: rgba(108,142,245,0.45);
-  background: rgba(108,142,245,0.07);
-  box-shadow: 0 0 0 3px rgba(108,142,245,0.1), inset 0 1px 0 rgba(255,255,255,0.07);
-}
-/* 修复浏览器 autofill 覆盖背景色和文字颜色 */
+/* autofill fix */
 .field input:-webkit-autofill,
-.field input:-webkit-autofill:hover,
-.field input:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--text) !important;
-  -webkit-box-shadow: 0 0 0 1000px rgba(20,28,55,0.95) inset !important;
-  transition: background-color 5000s ease-in-out 0s;
-  caret-color: var(--text);
-}
-.field input:focus + .field-glow {
-  opacity: 1;
-}
-.field-glow {
-  position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
-  width: 60%; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0; transition: opacity 0.3s;
+.field input:-webkit-autofill:focus{
+  -webkit-text-fill-color:var(--text) !important;
+  -webkit-box-shadow:0 0 0 1000px #1a1a2e inset !important;
+  transition:background-color 9999s;caret-color:var(--text);
 }
 
-/* btn */
-.btn-login {
-  width: 100%;
-  margin-top: 8px;
-  padding: 13px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(135deg, rgba(108,142,245,0.9), rgba(45,232,176,0.8));
-  color: #04070f;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.15s, box-shadow 0.15s;
-  box-shadow: 0 4px 20px rgba(108,142,245,0.25);
+/* ── Error ── */
+.form-err{
+  font-family:var(--mono);font-size:11px;color:var(--red);
+  min-height:16px;margin-top:-6px;margin-bottom:10px;
+  opacity:0;transform:translateY(-4px);
+  transition:opacity 0.2s,transform 0.2s;
 }
-.btn-login::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%);
-  border-radius: inherit;
+.form-err.show{opacity:1;transform:translateY(0);}
+
+/* ── Submit button ── */
+.btn-submit{
+  width:100%;margin-top:6px;
+  padding:15px;border:none;border-radius:16px;
+  background:linear-gradient(135deg, #4f8ef7 0%, #2de8b0 100%);
+  font-family:var(--sans);font-size:15px;font-weight:600;
+  color:#08080f;letter-spacing:0.01em;
+  cursor:pointer;position:relative;overflow:hidden;
+  transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, opacity 0.2s;
+  box-shadow:0 4px 24px rgba(79,142,247,0.3), 0 1px 0 rgba(255,255,255,0.25) inset;
 }
-.btn-login:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 32px rgba(108,142,245,0.4);
+.btn-submit::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,0.18) 0%,transparent 100%);
+  border-radius:inherit;pointer-events:none;
 }
-.btn-login:active { transform: translateY(0) scale(0.98); }
-.btn-login.loading {
-  pointer-events: none;
-  opacity: 0.8;
+.btn-submit:hover:not(:disabled){
+  transform:translateY(-1px) scale(1.01);
+  box-shadow:0 8px 32px rgba(79,142,247,0.4), 0 1px 0 rgba(255,255,255,0.25) inset;
 }
-.btn-login .btn-text { position: relative; z-index: 1; }
+.btn-submit:active:not(:disabled){transform:scale(0.98);}
+.btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+.btn-submit .btn-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:8px;}
+
+/* loading spinner */
+.spinner-ring{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid rgba(8,8,15,0.3);
+  border-top-color:#08080f;
+  animation:spin 0.7s linear infinite;display:none;
+}
+.btn-submit.loading .spinner-ring{display:block;}
+.btn-submit.loading .btn-label{opacity:0.7;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
 /* ripple */
-.ripple {
-  position: absolute; border-radius: 50%;
-  background: rgba(255,255,255,0.3);
-  transform: scale(0);
-  animation: rippleAnim 0.5s linear;
-  pointer-events: none;
+.ripple{
+  position:absolute;border-radius:50%;
+  background:rgba(255,255,255,0.25);
+  transform:scale(0);animation:ripple 0.5s ease-out;pointer-events:none;
 }
-@keyframes rippleAnim {
-  to { transform: scale(4); opacity: 0; }
+@keyframes ripple{to{transform:scale(4);opacity:0;}}
+
+/* ── Success overlay ── */
+.success-overlay{
+  position:absolute;inset:0;border-radius:28px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;
+  background:rgba(10,10,18,0.96);
+  backdrop-filter:blur(20px);
+  opacity:0;pointer-events:none;
+  transition:opacity 0.4s;z-index:50;
+}
+.success-overlay.show{opacity:1;pointer-events:all;}
+.success-check{
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,#4f8ef7,#2de8b0);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+  animation:checkPop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow:0 8px 32px rgba(45,232,176,0.3);
+}
+@keyframes checkPop{from{transform:scale(0);opacity:0;}}
+.success-name{
+  font-family:var(--sans);font-size:18px;font-weight:600;color:var(--text);
+}
+.success-hint{
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+  letter-spacing:0.08em;
 }
 
-/* error */
-.form-error {
-  font-size: 11px;
-  color: var(--red);
-  margin-top: 8px;
-  min-height: 16px;
-  opacity: 0;
-  transition: opacity 0.2s;
+/* ── Bottom link ── */
+.page-foot{
+  position:fixed;bottom:max(24px, env(safe-area-inset-bottom));
+  left:0;right:0;text-align:center;
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+  z-index:20;
+  opacity:0;animation:riseIn 0.6s ease 1.2s forwards;
 }
-.form-error.show { opacity: 1; }
+.page-foot a{color:rgba(79,142,247,0.8);text-decoration:none;}
+.page-foot a:hover{color:var(--blue);}
 
-/* corner decorations */
-.corner {
-  position: absolute;
-  width: 16px; height: 16px;
-  border-color: rgba(108,142,245,0.3);
-  border-style: solid;
-}
-.corner-tl { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
-.corner-tr { top: 10px; right: 10px; border-width: 1px 1px 0 0; }
-.corner-bl { bottom: 10px; left: 10px; border-width: 0 0 1px 1px; }
-.corner-br { bottom: 10px; right: 10px; border-width: 0 1px 1px 0; }
+/* ── Scroll container for register ── */
+.form-body{max-height:calc(100vh - 220px);overflow-y:auto;scrollbar-width:none;}
+.form-body::-webkit-scrollbar{display:none;}
 
-/* footer */
-.page-footer {
-  position: fixed;
-  bottom: 20px; left: 0; right: 0;
-  text-align: center;
-  font-size: 11px;
-  color: var(--text3);
-  z-index: 10;
-  opacity: 0;
-  animation: fadeIn 0.5s ease 1.8s forwards;
-}
-.page-footer a {
-  color: var(--accent);
-  text-decoration: none;
-}
-.page-footer a:hover { text-decoration: underline; }
+/* ── Divider ── */
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 
-/* status dots */
-.status-row {
-  display: flex; align-items: center; gap: 6px;
-  margin-bottom: 20px;
-}
-.status-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent2);
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%,100%{opacity:1;transform:scale(1)}
-  50%{opacity:0.5;transform:scale(0.8)}
-}
-.status-text {
-  font-size: 11px;
-  color: var(--text3);
-}
-
-/* success state */
-.success-overlay {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 12px;
-  background: rgba(4,7,15,0.95);
-  border-radius: 20px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s;
-  z-index: 10;
-}
-.success-overlay.show { opacity: 1; pointer-events: all; }
-.success-icon {
-  font-size: 40px;
-  animation: successPop 0.5s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes successPop {
-  from { transform: scale(0); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
-}
-.success-text {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 16px;
-  color: var(--accent2);
-}
-
-/* mobile */
-@media(max-width:480px){
-  .wordmark-main { font-size: 52px; }
-  .glass-card { padding: 28px 20px 22px; }
+/* ── Mobile ── */
+@media(max-width:420px){
+  .form-body{padding:22px 20px 20px;}
+  .field-row{grid-template-columns:1fr;}
 }
 </style>
 </head>
 <body>
 
-<canvas id="canvas"></canvas>
-<div class="scanlines"></div>
-<div class="vignette"></div>
+<div class="bg"></div>
+<canvas id="orb-canvas"></canvas>
 
-<div class="stage">
+<div class="logo-wrap">
+  <div class="logo-text">HJOI</div>
+  <div class="logo-sub">Harbin Junior OI</div>
+</div>
 
-  <!-- HJOI Wordmark -->
-  <div class="wordmark">
-    <div class="wordmark-main">HJOI</div>
-    <span class="wordmark-sub">
-      Harbin Junior OI Team
-      <span class="cursor-blink">_</span>
-    </span>
-  </div>
-
-  <!-- Terminal status line -->
-  <div class="terminal-line" id="terminal-line">
-    <span class="t-green">●</span>&nbsp;
-    <span id="terminal-text"></span>
-  </div>
-
-  <!-- Login Card -->
-  <div class="glass-card" id="glass-card">
-    <div class="corner corner-tl"></div>
-    <div class="corner corner-tr"></div>
-    <div class="corner corner-bl"></div>
-    <div class="corner corner-br"></div>
-
-    <div class="status-row">
-      <div class="status-dot"></div>
-      <span class="status-text">系统在线</span>
-    </div>
+<div class="page">
+  <div class="card" id="card">
 
     <!-- Tabs -->
     <div class="tabs">
-      <button class="tab active" id="tab-login" onclick="switchTab('login')">登录</button>
-      <button class="tab" id="tab-register" onclick="switchTab('register')">注册</button>
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">登录</button>
+      <button class="tab-btn" id="tab-register" onclick="switchTab('register')">注册</button>
     </div>
 
-    <!-- Login form -->
-    <div id="form-login">
+    <!-- Login -->
+    <div class="form-body" id="form-login">
       <div class="field">
-        <label>用户名</label>
-        <input type="text" id="l-username" placeholder="your_handle" autocomplete="username" spellcheck="false">
-        <div class="field-glow"></div>
+        <div class="field-label">用户名</div>
+        <input id="l-user" type="text" placeholder="your_handle" autocomplete="username" spellcheck="false">
       </div>
       <div class="field">
-        <label>密码</label>
-        <input type="password" id="l-password" placeholder="••••••••" autocomplete="current-password">
-        <div class="field-glow"></div>
+        <div class="field-label">密码</div>
+        <input id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password">
       </div>
-      <div class="form-error" id="login-error"></div>
-      <button class="btn-login" id="btn-login" onclick="doLogin()">
-        <span class="btn-text">进入系统 →</span>
+      <div class="form-err" id="login-err"></div>
+      <button class="btn-submit" id="btn-login" onclick="doLogin()">
+        <div class="btn-inner">
+          <div class="spinner-ring"></div>
+          <span class="btn-label">进入系统</span>
+        </div>
       </button>
     </div>
 
-    <!-- Register form -->
-    <div id="form-register" style="display:none">
+    <!-- Register -->
+    <div class="form-body" id="form-register" style="display:none">
       <div class="field">
-        <label>用户名</label>
-        <input type="text" id="r-username" placeholder="your_handle" autocomplete="username" spellcheck="false">
-        <div class="field-glow"></div>
+        <div class="field-label">用户名</div>
+        <input id="r-user" type="text" placeholder="只含字母、数字、下划线" autocomplete="username" spellcheck="false">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">密码</div>
+          <input id="r-pass" type="password" placeholder="至少6位" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <div class="field-label">确认密码</div>
+          <input id="r-pass2" type="password" placeholder="再输一次" autocomplete="new-password">
+        </div>
       </div>
       <div class="field">
-        <label>密码</label>
-        <input type="password" id="r-password" placeholder="至少6位" autocomplete="new-password">
-        <div class="field-glow"></div>
-      </div>
-      <div class="field">
-        <label>确认密码</label>
-        <input type="password" id="r-password2" placeholder="再输一次" autocomplete="new-password">
-        <div class="field-glow"></div>
-      </div>
-      <div class="field">
-        <label>洛谷 UID <span style="font-size:10px;color:var(--text3);font-weight:400;letter-spacing:0">（选填，用于能力雷达）</span></label>
-        <input type="text" id="r-luogu-uid" placeholder="如：123456" autocomplete="off" spellcheck="false">
-        <div class="field-glow"></div>
-      </div>
-      <div class="field">
-        <label>训练组 <span style="font-size:10px;color:var(--red);font-weight:400;letter-spacing:0">必填</span></label>
-        <select id="r-group" required>
-          <option value="">请选择…</option>
+        <div class="field-label">训练组 <span class="req">必填</span></div>
+        <select id="r-group">
+          <option value="">选择你的班级…</option>
           <option value="1">L1</option>
           <option value="2">L2</option>
           <option value="3">L3</option>
@@ -558,269 +352,124 @@ html, body {
           <option value="7">Oth</option>
         </select>
       </div>
-      <div class="form-error" id="register-error"></div>
-      <button class="btn-login" id="btn-register" onclick="doRegister()">
-        <span class="btn-text">创建账号 →</span>
+      <div class="field">
+        <div class="field-label">洛谷 UID <span style="color:var(--text3);font-size:9px;font-family:var(--mono)">选填</span></div>
+        <input id="r-luogu" type="text" placeholder="如：123456" autocomplete="off" inputmode="numeric">
+      </div>
+      <div class="form-err" id="register-err"></div>
+      <button class="btn-submit" id="btn-register" onclick="doRegister()">
+        <div class="btn-inner">
+          <div class="spinner-ring"></div>
+          <span class="btn-label">创建账号</span>
+        </div>
       </button>
     </div>
 
-    <!-- Success overlay -->
+    <!-- Success -->
     <div class="success-overlay" id="success-overlay">
-      <div class="success-icon">✦</div>
-      <div class="success-text">认证成功</div>
-      <div style="font-size:12px;color:var(--text3)">正在跳转…</div>
+      <div class="success-check">✓</div>
+      <div class="success-name" id="success-name">欢迎</div>
+      <div class="success-hint">正在跳转…</div>
     </div>
-  </div>
 
+  </div>
 </div>
 
-<div class="page-footer">
+<div class="page-foot">
   <a href="index.html">← 返回首页</a>
-  &nbsp;·&nbsp;
-  HJOI © 2025
+  &nbsp;·&nbsp; HJOI © 2025
 </div>
 
 <script>
-// ══════════════════════════════════════════════
-// PARTICLE CANVAS
-// ══════════════════════════════════════════════
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let W, H, particles = [], mouse = { x: -999, y: -999 };
+// ══════════════════════════════════════════
+// AMBIENT ORBS
+// ══════════════════════════════════════════
+const cv = document.getElementById('orb-canvas');
+const cx2 = cv.getContext('2d');
+let W2, H2, mouse2 = {x:-999, y:-999};
 
-function resize() {
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener('resize', () => { resize(); initParticles(); });
-window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-window.addEventListener('touchmove', e => {
-  mouse.x = e.touches[0].clientX;
-  mouse.y = e.touches[0].clientY;
-}, { passive: true });
+function rsz(){ W2=cv.width=innerWidth; H2=cv.height=innerHeight; }
+rsz(); window.addEventListener('resize', rsz);
+window.addEventListener('mousemove', e=>{mouse2.x=e.clientX;mouse2.y=e.clientY;});
+window.addEventListener('touchmove', e=>{mouse2.x=e.touches[0].clientX;mouse2.y=e.touches[0].clientY;},{passive:true});
 
-const COLORS = ['rgba(108,142,245,', 'rgba(45,232,176,', 'rgba(255,255,255,'];
-
-class Particle {
-  constructor() { this.reset(true); }
-  reset(init) {
-    this.x = Math.random() * W;
-    this.y = init ? Math.random() * H : (Math.random() > 0.5 ? -10 : H + 10);
-    this.baseX = this.x;
-    this.baseY = this.y;
-    this.size = Math.random() * 2 + 0.4;
-    this.speedX = (Math.random() - 0.5) * 0.3;
-    this.speedY = (Math.random() - 0.5) * 0.3;
-    this.colorBase = COLORS[Math.floor(Math.random() * COLORS.length)];
-    this.alpha = Math.random() * 0.5 + 0.1;
-    this.twinkleSpeed = Math.random() * 0.02 + 0.005;
-    this.twinklePhase = Math.random() * Math.PI * 2;
-    this.life = 0;
-  }
-  update() {
-    this.life += this.twinkleSpeed;
-    const twinkle = Math.sin(this.life + this.twinklePhase);
-    const a = this.alpha + twinkle * 0.15;
-
-    // mouse repulsion
-    const dx = this.x - mouse.x;
-    const dy = this.y - mouse.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < 120) {
-      const force = (120 - dist) / 120;
-      this.x += dx / dist * force * 2.5;
-      this.y += dy / dist * force * 2.5;
-    }
-
-    // drift back to base
-    this.x += (this.baseX - this.x) * 0.02;
-    this.y += (this.baseY - this.y) * 0.02;
-
-    // slow drift
-    this.baseX += this.speedX;
-    this.baseY += this.speedY;
-    if (this.baseX < -20 || this.baseX > W + 20 || this.baseY < -20 || this.baseY > H + 20) {
-      this.reset(false);
-    }
-
-    return Math.max(0, a);
-  }
-  draw(a) {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fillStyle = this.colorBase + a + ')';
-    ctx.fill();
-  }
-}
-
-// Connection lines
-function drawConnections() {
-  const maxDist = 100;
-  for (let i = 0; i < particles.length; i++) {
-    for (let j = i + 1; j < particles.length; j++) {
-      const dx = particles[i].x - particles[j].x;
-      const dy = particles[i].y - particles[j].y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < maxDist) {
-        const a = (1 - dist / maxDist) * 0.08;
-        ctx.beginPath();
-        ctx.moveTo(particles[i].x, particles[i].y);
-        ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.strokeStyle = `rgba(108,142,245,${a})`;
-        ctx.lineWidth = 0.5;
-        ctx.stroke();
-      }
-    }
-  }
-}
-
-function initParticles() {
-  const count = Math.min(Math.floor((W * H) / 9000), 120);
-  particles = Array.from({ length: count }, () => new Particle());
-}
-initParticles();
-
-// Shooting stars
-const stars = [];
-function spawnStar() {
-  if (Math.random() > 0.008) return;
-  stars.push({
-    x: Math.random() * W, y: 0,
-    vx: (Math.random() - 0.5) * 4 + 2,
-    vy: Math.random() * 3 + 2,
-    len: Math.random() * 60 + 40,
-    alpha: 1,
-    size: Math.random() * 1.5 + 0.5,
-  });
-}
-
-function drawStars() {
-  for (let i = stars.length - 1; i >= 0; i--) {
-    const s = stars[i];
-    const grad = ctx.createLinearGradient(s.x, s.y, s.x - s.vx * s.len/4, s.y - s.vy * s.len/4);
-    grad.addColorStop(0, `rgba(255,255,255,${s.alpha})`);
-    grad.addColorStop(1, `rgba(108,142,245,0)`);
-    ctx.beginPath();
-    ctx.moveTo(s.x, s.y);
-    ctx.lineTo(s.x - s.vx * s.len/4, s.y - s.vy * s.len/4);
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = s.size;
-    ctx.stroke();
-    s.x += s.vx; s.y += s.vy; s.alpha -= 0.018;
-    if (s.alpha <= 0 || s.y > H) stars.splice(i, 1);
-  }
-}
-
-// Grid overlay
-function drawGrid() {
-  const gridSize = 80;
-  ctx.strokeStyle = 'rgba(108,142,245,0.025)';
-  ctx.lineWidth = 0.5;
-  for (let x = 0; x < W; x += gridSize) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-  }
-  for (let y = 0; y < H; y += gridSize) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-  }
-}
-
-function animate() {
-  ctx.clearRect(0, 0, W, H);
-  drawGrid();
-  drawConnections();
-  spawnStar();
-  drawStars();
-  particles.forEach(p => { const a = p.update(); p.draw(a); });
-  requestAnimationFrame(animate);
-}
-animate();
-
-// ══════════════════════════════════════════════
-// TYPEWRITER TERMINAL
-// ══════════════════════════════════════════════
-const messages = [
-  '<span class="t-blue">connecting</span> to HJOI server…&nbsp;&nbsp;<span class="t-green">OK</span>',
-  '<span class="t-blue">verifying</span> session…&nbsp;&nbsp;<span class="t-green">READY</span>',
-  '<span class="t-blue">loading</span> problem database…&nbsp;&nbsp;<span class="t-green">OK</span>',
+const ORBS = [
+  {x:0.2, y:0.15, r:280, c:[79,142,247], phase:0,    speed:0.0008},
+  {x:0.8, y:0.8,  r:220, c:[45,232,176], phase:2.1,  speed:0.0011},
+  {x:0.6, y:0.3,  r:180, c:[140,80,255], phase:4.2,  speed:0.0007},
+  {x:0.15,y:0.75, r:160, c:[247,140,79], phase:1.05, speed:0.0013},
 ];
-let msgIdx = 0;
-const termEl = document.getElementById('terminal-text');
-
-function typeMessage(msg, cb) {
-  termEl.innerHTML = '';
-  const stripped = msg.replace(/<[^>]*>/g, '');
-  let i = 0;
-  const interval = setInterval(() => {
-    if (i >= stripped.length) {
-      clearInterval(interval);
-      termEl.innerHTML = msg; // show with colors
-      if (cb) setTimeout(cb, 2400);
-      return;
-    }
-    termEl.textContent = stripped.slice(0, ++i);
-  }, 28);
+let t2=0;
+function drawOrbs(){
+  cx2.clearRect(0,0,W2,H2);
+  t2+=1;
+  ORBS.forEach(o=>{
+    const fx = (o.x + Math.sin(t2*o.speed + o.phase)*0.08) * W2;
+    const fy = (o.y + Math.cos(t2*o.speed + o.phase*1.3)*0.06) * H2;
+    // mouse pull
+    const dx=mouse2.x-fx, dy=mouse2.y-fy;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const pull=Math.max(0, (400-dist)/400)*0.04;
+    const px=fx+dx*pull, py=fy+dy*pull;
+    const grad=cx2.createRadialGradient(px,py,0,px,py,o.r);
+    grad.addColorStop(0,`rgba(${o.c},0.13)`);
+    grad.addColorStop(0.5,`rgba(${o.c},0.05)`);
+    grad.addColorStop(1,`rgba(${o.c},0)`);
+    cx2.fillStyle=grad;
+    cx2.beginPath();cx2.arc(px,py,o.r,0,Math.PI*2);cx2.fill();
+  });
+  requestAnimationFrame(drawOrbs);
 }
+drawOrbs();
 
-function cycleMessages() {
-  typeMessage(messages[msgIdx % messages.length], cycleMessages);
-  msgIdx++;
-}
-setTimeout(cycleMessages, 1400);
-
-// ══════════════════════════════════════════════
-// TAB SWITCH
-// ══════════════════════════════════════════════
-function switchTab(tab) {
-  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
-  document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+// ══════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════
+function switchTab(tab){
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('form-login').style.display = tab==='login' ? '' : 'none';
+  document.getElementById('form-register').style.display = tab==='register' ? '' : 'none';
   clearErrors();
 }
 
-function clearErrors() {
-  ['login-error', 'register-error'].forEach(id => {
-    const el = document.getElementById(id);
-    el.textContent = '';
-    el.classList.remove('show');
+function clearErrors(){
+  ['login-err','register-err'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.textContent=''; el.classList.remove('show');
   });
 }
-
-function showError(id, msg) {
-  const el = document.getElementById(id);
-  el.textContent = msg;
-  el.classList.add('show');
+function showError(id, msg){
+  const el=document.getElementById(id);
+  el.textContent=msg; el.classList.add('show');
 }
 
-// Ripple effect on button click
-document.querySelectorAll('.btn-login').forEach(btn => {
-  btn.addEventListener('click', function(e) {
-    const r = this.getBoundingClientRect();
-    const rip = document.createElement('span');
-    rip.className = 'ripple';
-    const size = Math.max(r.width, r.height);
-    rip.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-r.left-size/2}px;top:${e.clientY-r.top-size/2}px`;
-    this.appendChild(rip);
-    setTimeout(() => rip.remove(), 500);
+// ripple
+document.querySelectorAll('.btn-submit').forEach(btn=>{
+  btn.addEventListener('pointerdown', e=>{
+    const r=btn.getBoundingClientRect();
+    const rip=document.createElement('span');
+    rip.className='ripple';
+    const s=Math.max(r.width,r.height);
+    rip.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;
+    btn.appendChild(rip);
+    setTimeout(()=>rip.remove(),500);
   });
 });
 
-// Enter key
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  const loginActive = document.getElementById('form-login').style.display !== 'none';
-  if (loginActive) doLogin();
-  else doRegister();
+// enter key
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  const isLogin = document.getElementById('form-login').style.display !== 'none';
+  if(isLogin) doLogin(); else doRegister();
 });
 
-// ══════════════════════════════════════════════
-// SUPABASE AUTH (plug into your existing setup)
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════
+// SUPABASE AUTH
+// ══════════════════════════════════════════
 const SUPABASE_URL = 'https://dgsugcvedimcecudstkq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDA2MDYsImV4cCI6MjA4ODIxNjYwNn0.0AnkF5MMrtiqwbau9q6pLD6pDrzXRkyPIoNsx4au8xI';
 
-// 已登录则直接跳首页
 (async()=>{
   const{createClient}=supabase;
   const _sb=createClient(SUPABASE_URL,SUPABASE_KEY);
@@ -828,94 +477,79 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   if(session) window.location.href='index.html';
 })();
 
-function usernameToEmail(u) {
+function usernameToEmail(u){
   return `${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@oiteam.local`;
 }
 
-function showSuccess(username) {
-  const overlay = document.getElementById('success-overlay');
-  overlay.querySelector('.success-text').textContent = `欢迎，${username}`;
-  overlay.classList.add('show');
-  setTimeout(() => { window.location.href = 'index.html'; }, 1600);
+function showSuccess(username){
+  document.getElementById('success-name').textContent=`欢迎，${username}`;
+  document.getElementById('success-overlay').classList.add('show');
+  setTimeout(()=>{ window.location.href='index.html'; }, 1600);
 }
 
-function setLoading(btnId, loading) {
-  const btn = document.getElementById(btnId);
-  btn.classList.toggle('loading', loading);
-  btn.querySelector('.btn-text').textContent = loading ? '验证中…' : (btnId === 'btn-login' ? '进入系统 →' : '创建账号 →');
+function setLoading(id, on){
+  const btn=document.getElementById(id);
+  btn.disabled=on; btn.classList.toggle('loading',on);
+  btn.querySelector('.btn-label').textContent = on ? '验证中…' : (id==='btn-login' ? '进入系统' : '创建账号');
 }
 
-async function doLogin() {
+async function doLogin(){
   clearErrors();
-  const username = document.getElementById('l-username').value.trim();
-  const password = document.getElementById('l-password').value;
-  if (!username) { showError('login-error', '请输入用户名'); return; }
-  if (!password) { showError('login-error', '请输入密码'); return; }
-  setLoading('btn-login', true);
-  try {
-    const { createClient } = supabase;
-    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-    const { error } = await sb.auth.signInWithPassword({
-      email: usernameToEmail(username), password
-    });
-    if (error) { showError('login-error', '用户名或密码错误'); setLoading('btn-login', false); return; }
+  const username=document.getElementById('l-user').value.trim();
+  const password=document.getElementById('l-pass').value;
+  if(!username){showError('login-err','请输入用户名');return;}
+  if(!password){showError('login-err','请输入密码');return;}
+  setLoading('btn-login',true);
+  try{
+    const{createClient}=supabase;
+    const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
+    const{error}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});
+    if(error){showError('login-err','用户名或密码错误');setLoading('btn-login',false);return;}
     showSuccess(username);
-  } catch(e) {
-    showError('login-error', '网络错误，请重试');
-    setLoading('btn-login', false);
+  }catch(e){
+    showError('login-err','网络错误，请重试');
+    setLoading('btn-login',false);
   }
 }
 
-async function doRegister() {
+async function doRegister(){
   clearErrors();
-  const username = document.getElementById('r-username').value.trim();
-  const password = document.getElementById('r-password').value;
-  const password2 = document.getElementById('r-password2').value;
-  const luogu_uid = document.getElementById('r-luogu-uid').value.trim();
-  const group_val = document.getElementById('r-group').value;
-  const group_id = group_val ? parseInt(group_val) : null;
-  if (!group_id) { showError('register-error', '请选择训练组'); return; }
-  if (!username || username.length < 2) { showError('register-error', '用户名至少2位'); return; }
-  if (!/^[a-zA-Z0-9_]+$/.test(username)) { showError('register-error', '用户名只能含字母、数字、下划线'); return; }
-  if (password.length < 6) { showError('register-error', '密码至少6位'); return; }
-  if (password !== password2) { showError('register-error', '两次密码不一致'); return; }
-  setLoading('btn-register', true);
-  try {
-    const { createClient } = supabase;
-    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-    const { error: signUpError } = await sb.auth.signUp({
-      email: usernameToEmail(username), password
-    });
-    if (signUpError) { showError('register-error', signUpError.message); setLoading('btn-register', false); return; }
-    // 等一下再登录确保 trigger 执行
-    await new Promise(r => setTimeout(r, 1200));
-    const { error: loginError } = await sb.auth.signInWithPassword({
-      email: usernameToEmail(username), password
-    });
-    if (loginError) { showError('register-error', '注册成功，请手动登录'); setLoading('btn-register', false); switchTab('login'); return; }
-    // upsert profile：确保 username、group_id、luogu_uid 都写入
-    const { data: { user } } = await sb.auth.getUser();
-    if (user) {
-      // 先检查 trigger 是否已创建 profile
-      const { data: existingProfile } = await sb.from('profiles').select('id').eq('id', user.id).maybeSingle();
-      if (existingProfile) {
-        // profile 已存在，update 附加字段
-        await sb.from('profiles').update({ username, group_id, luogu_uid: luogu_uid||'' }).eq('id', user.id);
-      } else {
-        // trigger 未创建，手动 insert
-        await sb.from('profiles').insert({ id: user.id, username, group_id, luogu_uid: luogu_uid||'' });
+  const username=document.getElementById('r-user').value.trim();
+  const password=document.getElementById('r-pass').value;
+  const password2=document.getElementById('r-pass2').value;
+  const group_val=document.getElementById('r-group').value;
+  const group_id=group_val?parseInt(group_val):null;
+  const luogu_uid=document.getElementById('r-luogu').value.trim();
+  if(!username||username.length<2){showError('register-err','用户名至少2位');return;}
+  if(!/^[a-zA-Z0-9_]+$/.test(username)){showError('register-err','只能含字母、数字、下划线');return;}
+  if(password.length<6){showError('register-err','密码至少6位');return;}
+  if(password!==password2){showError('register-err','两次密码不一致');return;}
+  if(!group_id){showError('register-err','请选择训练组');return;}
+  setLoading('btn-register',true);
+  try{
+    const{createClient}=supabase;
+    const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
+    const{error:signUpError}=await sb.auth.signUp({email:usernameToEmail(username),password});
+    if(signUpError){showError('register-err',signUpError.message);setLoading('btn-register',false);return;}
+    await new Promise(r=>setTimeout(r,1200));
+    const{error:loginError}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});
+    if(loginError){showError('register-err','注册成功，请手动登录');setLoading('btn-register',false);switchTab('login');return;}
+    const{data:{user}}=await sb.auth.getUser();
+    if(user){
+      const{data:existing}=await sb.from('profiles').select('id').eq('id',user.id).maybeSingle();
+      if(existing){
+        await sb.from('profiles').update({username,group_id,luogu_uid:luogu_uid||''}).eq('id',user.id);
+      }else{
+        await sb.from('profiles').insert({id:user.id,username,group_id,luogu_uid:luogu_uid||''});
       }
     }
     showSuccess(username);
-  } catch(e) {
-    showError('register-error', '网络错误，请重试');
-    setLoading('btn-register', false);
+  }catch(e){
+    showError('register-err','网络错误，请重试');
+    setLoading('btn-register',false);
   }
 }
 </script>
-
-<!-- Supabase JS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 </body>
 </html>
