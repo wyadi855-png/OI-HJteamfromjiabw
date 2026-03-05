@@ -1083,6 +1083,44 @@ mark.search-hl{
   cursor:pointer;transition:all 0.2s;}
 .follow-chip:hover{color:var(--accent);border-color:rgba(108,142,245,0.3);}
 
+/* ── 关系网图 (飞书风格) ── */
+.rel-graph-section { margin-bottom: 28px; }
+.rel-graph-wrap {
+  position: relative;
+  width: 100%;
+  background: rgba(10,14,26,0.6);
+  border: 1px solid rgba(108,142,245,0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+.rel-graph-svg { display: block; width: 100%; }
+/* 边动画 */
+.rel-edge {
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: relEdgeDraw 0.6s ease forwards;
+}
+@keyframes relEdgeDraw { to { stroke-dashoffset: 0; } }
+/* 标签文字气泡 */
+.rel-label-bubble {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--accent2);
+}
+/* 节点 */
+.rel-node-center { cursor: default; }
+.rel-node-peer   { cursor: pointer; transition: opacity 0.2s; }
+.rel-node-peer:hover { opacity: 0.8; }
+/* 空状态 */
+.rel-empty {
+  text-align: center;
+  padding: 32px 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text3);
+}
+
 /* ── HOME DAILY MINI-CARD ── */
 .home-daily-mini{
   background:linear-gradient(135deg,rgba(108,142,245,0.06),rgba(45,232,176,0.04));
@@ -4322,77 +4360,223 @@ async function showProfile(username){
   loadProfileSocial(profile,username);
 }
 
-async function loadProfileSocial(profile,username){
-  const[{data:followingRows},{data:followerRows},{data:labelsReceived}]=await Promise.all([
-    sb.from('follows').select('following_id,profiles!follows_following_id_fkey(username)').eq('follower_id',profile.id),
-    sb.from('follows').select('follower_id,profiles!follows_follower_id_fkey(username)').eq('following_id',profile.id),
-    sb.from('relationships').select('from_id,label,profiles!relationships_from_id_fkey(username)').eq('to_id',profile.id),
-  ]);
-  const isSelf=currentUser&&currentUser.id===profile.id;
-  const theyFollowMe=!!(followerRows||[]).find(r=>r.follower_id===currentUser?.id);
-  const myFollowCheck=currentUser?await sb.from('follows').select('id').eq('follower_id',currentUser.id).eq('following_id',profile.id).maybeSingle():{data:null};
-  const isMutual=!isSelf&&myFollowCheck.data&&theyFollowMe;
-  const el=document.getElementById('profile-content');
-  if(!el)return;
-  const div=document.createElement('div');div.className='profile-social';
+async function loadProfileSocial(profile, username){
+  const profileId = profile.id;
+  const isSelf = currentUser && currentUser.id === profileId;
 
-  // Label wall
-  if(labelsReceived&&labelsReceived.length){
-    const sec=document.createElement('div');sec.className='profile-section';
-    sec.innerHTML='<div class="profile-section-title">大家眼中的 @'+escHtml(username)+'</div><div class="label-wall"></div>';
-    const wall=sec.querySelector('.label-wall');
-    labelsReceived.forEach(r=>{
-      const chip=document.createElement('div');chip.className='label-chip';
-      chip.innerHTML='<span class="label-from">@'+escHtml(r.profiles?.username||'?')+'</span><span class="label-text">'+escHtml(r.label)+'</span>';
+  // ── 并发拉取所有数据 ──
+  const [
+    { data: followingRows },
+    { data: followerRows },
+    { data: labelsReceived },
+    { data: allRelationships },
+  ] = await Promise.all([
+    sb.from('follows').select('following_id, profiles!follows_following_id_fkey(id,username)').eq('follower_id', profileId),
+    sb.from('follows').select('follower_id, profiles!follows_follower_id_fkey(id,username)').eq('following_id', profileId),
+    sb.from('relationships').select('from_id, label, profiles!relationships_from_id_fkey(username)').eq('to_id', profileId),
+    // 拉所有涉及该用户的 relationships（双向），用于关系网
+    sb.from('relationships').select('from_id, to_id, label, profiles!relationships_from_id_fkey(username), profiles!relationships_to_id_fkey(username)'),
+  ]);
+
+  // ── isMutual：修正版，直接用已拉取数据判断 ──
+  const followingIds = new Set((followingRows||[]).map(r => r.following_id));
+  const followerIds  = new Set((followerRows||[]).map(r => r.follower_id));
+  const isMutual = !isSelf && currentUser &&
+    followingIds.has(currentUser.id) && followerIds.has(currentUser.id);
+
+  const el = document.getElementById('profile-content');
+  if (!el) return;
+  const div = document.createElement('div');
+  div.className = 'profile-social';
+
+  // ══════════════════════════════════════════
+  // 1. 关系网图（飞书风格）
+  // ══════════════════════════════════════════
+  const relSec = document.createElement('div');
+  relSec.className = 'profile-section rel-graph-section';
+  relSec.innerHTML = '<div class="profile-section-title">// 关系网络</div>';
+
+  // 找出所有与 profileId 互关的用户
+  const mutualPeers = (followingRows||[])
+    .filter(r => followerIds.has(r.following_id))
+    .map(r => ({ id: r.following_id, username: r.profiles?.username || '?' }));
+
+  if (mutualPeers.length === 0) {
+    relSec.innerHTML += '<div class="rel-empty">暂无互关好友，关系网络将在互关后自动生成</div>';
+  } else {
+    // 构建标签 map: labelMap[fromId][toId] = label
+    const labelMap = {};
+    (allRelationships||[]).forEach(r => {
+      if (!labelMap[r.from_id]) labelMap[r.from_id] = {};
+      labelMap[r.from_id][r.to_id] = r.label;
+    });
+
+    const wrap = document.createElement('div');
+    wrap.className = 'rel-graph-wrap';
+    const W = 520, H = 80 + mutualPeers.length * 64;
+    const cx = W / 2, cy = 56; // 中心节点位置
+    const peerStartY = 140;
+    const peerSpacing = 64;
+
+    // 放射状布局：节点扇形排列
+    const peers = mutualPeers.slice(0, 12); // 最多12个避免拥挤
+    const angleStep = peers.length === 1 ? 0 : Math.PI / (peers.length + 1);
+    const radius = Math.min(180, 80 + peers.length * 14);
+    const peerPositions = peers.map((p, i) => {
+      const angle = (Math.PI / 2) + (i - (peers.length - 1) / 2) * angleStep;
+      return {
+        ...p,
+        x: cx + Math.cos(angle) * radius,
+        y: cy + Math.sin(angle) * radius + 40,
+      };
+    });
+
+    const svgH = Math.max(240, cy + radius + 100);
+    let svg = `<svg class="rel-graph-svg" viewBox="0 0 ${W} ${svgH}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="rg-glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="rg-center" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#a0eaff"/>
+      <stop offset="100%" stop-color="#2090c8"/>
+    </radialGradient>
+    <radialGradient id="rg-peer" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#c0d8ff"/>
+      <stop offset="100%" stop-color="#4060a8"/>
+    </radialGradient>
+  </defs>`;
+
+    // 背景细格
+    svg += `<pattern id="rg-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+    <path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(108,142,245,0.04)" stroke-width="1"/>
+  </pattern>
+  <rect width="${W}" height="${svgH}" fill="url(#rg-grid)"/>`;
+
+    // 边 + 标签
+    peerPositions.forEach((peer, i) => {
+      const delay = (i * 0.08).toFixed(2);
+      // 计算线段长度用于 dasharray
+      const dx = peer.x - cx, dy = peer.y - cy;
+      const len = Math.sqrt(dx*dx + dy*dy).toFixed(0);
+      // 标签内容（双向）
+      const labelAB = labelMap[profileId]?.[peer.id] || '';
+      const labelBA = labelMap[peer.id]?.[profileId] || '';
+      const midX = ((cx + peer.x) / 2).toFixed(1);
+      const midY = ((cy + peer.y) / 2).toFixed(1);
+      // 线
+      svg += `<line class="rel-edge" x1="${cx}" y1="${cy}" x2="${peer.x.toFixed(1)}" y2="${peer.y.toFixed(1)}"
+        stroke="rgba(108,142,245,0.35)" stroke-width="1.5" stroke-linecap="round"
+        stroke-dasharray="${len}" stroke-dashoffset="${len}"
+        style="animation-delay:${delay}s"/>`;
+      // 标签气泡（如果有）
+      if (labelAB || labelBA) {
+        const txt = [labelAB, labelBA].filter(Boolean).join(' · ');
+        svg += `<rect x="${(midX-txt.length*3.5).toFixed(0)}" y="${(midY-10).toFixed(0)}"
+          width="${(txt.length*7+12).toFixed(0)}" height="18" rx="9"
+          fill="rgba(10,14,26,0.85)" stroke="rgba(45,232,176,0.25)" stroke-width="1"/>
+        <text x="${midX}" y="${midY+4}" text-anchor="middle" class="rel-label-bubble">${escHtml(txt)}</text>`;
+      }
+    });
+
+    // 中心节点
+    svg += `<circle cx="${cx}" cy="${cy}" r="28" fill="url(#rg-center)" filter="url(#rg-glow)" class="rel-node-center"/>
+  <text x="${cx}" y="${cy-6}" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="rgba(255,255,255,0.5)">@</text>
+  <text x="${cx}" y="${cy+7}" text-anchor="middle" font-family="var(--mono)" font-size="12" font-weight="700" fill="#e8f8ff">${escHtml(username.slice(0,8))}</text>`;
+
+    // 周边节点
+    peerPositions.forEach((peer, i) => {
+      const delay = (0.1 + i * 0.08).toFixed(2);
+      svg += `<g class="rel-node-peer" onclick="showProfile('${escHtml(peer.username)}')"
+        style="animation:logoFadeIn 0.3s ease forwards;opacity:0;animation-delay:${delay}s">
+        <circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="22"
+          fill="url(#rg-peer)" filter="url(#rg-glow)"/>
+        <text x="${peer.x.toFixed(1)}" y="${(peer.y - 5).toFixed(1)}" text-anchor="middle"
+          font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.45)">@</text>
+        <text x="${peer.x.toFixed(1)}" y="${(peer.y + 7).toFixed(1)}" text-anchor="middle"
+          font-family="var(--mono)" font-size="11" font-weight="600" fill="#c8dcff">${escHtml(peer.username.slice(0,7))}</text>
+      </g>`;
+    });
+
+    svg += `</svg>`;
+    wrap.innerHTML = svg;
+    relSec.appendChild(wrap);
+  }
+  div.appendChild(relSec);
+
+  // ══════════════════════════════════════════
+  // 2. 大家眼中的标签墙
+  // ══════════════════════════════════════════
+  if (labelsReceived && labelsReceived.length) {
+    const sec = document.createElement('div');
+    sec.className = 'profile-section';
+    sec.innerHTML = '<div class="profile-section-title">大家眼中的 @' + escHtml(username) + '</div><div class="label-wall"></div>';
+    const wall = sec.querySelector('.label-wall');
+    labelsReceived.forEach(r => {
+      const chip = document.createElement('div');
+      chip.className = 'label-chip';
+      chip.innerHTML = '<span class="label-from">@' + escHtml(r.profiles?.username||'?') + '</span><span class="label-text">' + escHtml(r.label) + '</span>';
       wall.appendChild(chip);
     });
     div.appendChild(sec);
   }
 
-  // Give/edit label
-  if(!isSelf&&currentUser){
-    const myLabelRow=currentUser?(await sb.from('relationships').select('label').eq('from_id',currentUser.id).eq('to_id',profile.id).maybeSingle()).data:null;
-    const sec=document.createElement('div');sec.className='profile-section label-give-section';
-    sec.innerHTML='<div class="profile-section-title">你给 @'+escHtml(username)+' 的标签</div>';
-    if(isMutual){
-      const row=document.createElement('div');row.className='label-action-row';
-      if(myLabelRow){
-        row.innerHTML='<span class="label-text">'+escHtml(myLabelRow.label)+'</span>';
-        const editBtn=document.createElement('button');editBtn.className='label-edit-btn';editBtn.textContent='修改';
-        editBtn.addEventListener('click',()=>showLabelInput(row,profile.id,username,myLabelRow.label));
+  // ══════════════════════════════════════════
+  // 3. 给对方贴标签（互关才能贴）
+  // ══════════════════════════════════════════
+  if (!isSelf && currentUser) {
+    const myLabelRow = (await sb.from('relationships').select('label')
+      .eq('from_id', currentUser.id).eq('to_id', profileId).maybeSingle()).data;
+    const sec = document.createElement('div');
+    sec.className = 'profile-section label-give-section';
+    sec.innerHTML = '<div class="profile-section-title">你给 @' + escHtml(username) + ' 的标签</div>';
+    if (isMutual) {
+      const row = document.createElement('div');
+      row.className = 'label-action-row';
+      if (myLabelRow?.label) {
+        row.innerHTML = '<span class="label-text">' + escHtml(myLabelRow.label) + '</span>';
+        const editBtn = document.createElement('button');
+        editBtn.className = 'label-edit-btn';
+        editBtn.textContent = '修改';
+        editBtn.addEventListener('click', () => showLabelInput(row, profileId, username, myLabelRow.label));
         row.appendChild(editBtn);
       } else {
-        const addBtn=document.createElement('button');addBtn.className='give-label-btn';addBtn.textContent='+ 贴标签';
-        addBtn.addEventListener('click',()=>showLabelInput(row,profile.id,username,''));
+        const addBtn = document.createElement('button');
+        addBtn.className = 'give-label-btn';
+        addBtn.textContent = '+ 贴标签';
+        addBtn.addEventListener('click', () => showLabelInput(row, profileId, username, ''));
         row.appendChild(addBtn);
       }
       sec.appendChild(row);
     } else {
-      sec.innerHTML+='<div style="font-family:var(--mono);font-size:12px;color:var(--text3)">互相关注后可以贴标签</div>';
+      sec.innerHTML += '<div style="font-family:var(--mono);font-size:12px;color:var(--text3)">互相关注后可以贴标签</div>';
     }
     div.appendChild(sec);
   }
 
-  // Following list
-  const following=(followingRows||[]).map(r=>r.profiles?.username).filter(Boolean);
-  const followers=(followerRows||[]).map(r=>r.profiles?.username).filter(Boolean);
-  if(following.length){
-    const sec=document.createElement('div');sec.className='profile-section';
-    sec.innerHTML='<div class="profile-section-title">关注了 ('+following.length+')</div><div class="follow-list"></div>';
-    const list=sec.querySelector('.follow-list');
-    following.forEach(u=>{const c=document.createElement('span');c.className='follow-chip';c.textContent='@'+u;c.addEventListener('click',()=>showProfile(u));list.appendChild(c);});
+  // ══════════════════════════════════════════
+  // 4. 关注 / 粉丝列表
+  // ══════════════════════════════════════════
+  const following = (followingRows||[]).map(r => r.profiles?.username).filter(Boolean);
+  const followers = (followerRows||[]).map(r => r.profiles?.username).filter(Boolean);
+  if (following.length) {
+    const sec = document.createElement('div'); sec.className = 'profile-section';
+    sec.innerHTML = '<div class="profile-section-title">关注了 (' + following.length + ')</div><div class="follow-list"></div>';
+    const list = sec.querySelector('.follow-list');
+    following.forEach(u => { const c = document.createElement('span'); c.className = 'follow-chip'; c.textContent = '@' + u; c.addEventListener('click', () => showProfile(u)); list.appendChild(c); });
     div.appendChild(sec);
   }
-  if(followers.length){
-    const sec=document.createElement('div');sec.className='profile-section';
-    sec.innerHTML='<div class="profile-section-title">粉丝 ('+followers.length+')</div><div class="follow-list"></div>';
-    const list=sec.querySelector('.follow-list');
-    followers.forEach(u=>{const c=document.createElement('span');c.className='follow-chip';c.textContent='@'+u;c.addEventListener('click',()=>showProfile(u));list.appendChild(c);});
+  if (followers.length) {
+    const sec = document.createElement('div'); sec.className = 'profile-section';
+    sec.innerHTML = '<div class="profile-section-title">粉丝 (' + followers.length + ')</div><div class="follow-list"></div>';
+    const list = sec.querySelector('.follow-list');
+    followers.forEach(u => { const c = document.createElement('span'); c.className = 'follow-chip'; c.textContent = '@' + u; c.addEventListener('click', () => showProfile(u)); list.appendChild(c); });
     div.appendChild(sec);
   }
 
-  const notesSection=el.querySelector('.profile-section');
-  if(notesSection)notesSection.insertAdjacentElement('beforebegin',div);
+  const notesSection = el.querySelector('.profile-section');
+  if (notesSection) notesSection.insertAdjacentElement('beforebegin', div);
   else el.appendChild(div);
 }
 
