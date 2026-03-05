@@ -280,6 +280,15 @@ html, body {
   background: rgba(108,142,245,0.07);
   box-shadow: 0 0 0 3px rgba(108,142,245,0.1), inset 0 1px 0 rgba(255,255,255,0.07);
 }
+/* 修复浏览器 autofill 覆盖背景色和文字颜色 */
+.field input:-webkit-autofill,
+.field input:-webkit-autofill:hover,
+.field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text) !important;
+  -webkit-box-shadow: 0 0 0 1000px rgba(20,28,55,0.95) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: var(--text);
+}
 .field input:focus + .field-glow {
   opacity: 1;
 }
