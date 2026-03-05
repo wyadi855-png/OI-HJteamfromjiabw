@@ -3728,13 +3728,16 @@ section:not(.active) {
 </div></div>
 
 <!-- RECOMMEND MODAL (all users) -->
-<div class="modal-overlay" id="rec-modal"><div class="modal" style="max-width:460px;width:100%">
-  <h2>💡 推荐题目</h2>
-  <div class="form-group"><label>洛谷题号</label><input type="text" id="rec-problem-id" placeholder="如 P1001"></div>
-  <div class="form-group"><label>题目名称</label><input type="text" id="rec-title" placeholder="题目名称"></div>
-  <div class="form-group"><label>推荐理由（可选）</label><textarea id="rec-reason" placeholder="为什么推荐这道题？" style="min-height:60px"></textarea></div>
+<div class="modal-overlay" id="rec-modal"><div class="modal-box" style="max-width:460px">
+  <div class="modal-header"><h2>💡 推荐题目</h2><button class="modal-close" onclick="closeModal('rec-modal')">✕</button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>洛谷题号</label><input type="text" id="rec-problem-id" placeholder="如 P1001"></div>
+    <div class="form-group"><label>题目名称 <span style="color:var(--red)">*</span></label><input type="text" id="rec-title" placeholder="题目名称"></div>
+    <div class="form-group"><label>推荐理由 <span style="color:var(--red)">*</span></label><textarea id="rec-reason" placeholder="为什么推荐这道题？" style="min-height:80px"></textarea></div>
+    <div id="rec-error" class="form-error"></div>
+  </div>
   <div class="modal-footer">
-    <button class="btn btn-outline" onclick="closeModal('rec-modal')">取消</button>
+    <button class="btn btn-ghost" onclick="closeModal('rec-modal')">取消</button>
     <button class="btn btn-primary" onclick="submitRec()">提交推荐</button>
   </div>
 </div></div>
@@ -4949,15 +4952,33 @@ async function submitDaily(){
 
 async function submitRec(){
   if(!currentUser){showToast('请先登录','error');return;}
+  const errEl=document.getElementById('rec-error');
+  if(errEl) errEl.textContent='';
   const pid=document.getElementById('rec-problem-id').value.trim();
   const title=document.getElementById('rec-title').value.trim();
   const reason=document.getElementById('rec-reason').value.trim();
-  if(!title){showToast('请填写题目名称','error');return;}
+  if(!title){
+    if(errEl) errEl.textContent='请填写题目名称';
+    else showToast('请填写题目名称','error');
+    return;
+  }
+  if(!reason){
+    if(errEl) errEl.textContent='请填写推荐理由';
+    else showToast('请填写推荐理由','error');
+    return;
+  }
+  const btn=document.querySelector('#rec-modal .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='提交中…';}
   const{error}=await sb.from('daily_recommendations').insert({
-    problem_id:pid||null,title,reason:reason||null,
+    problem_id:pid||null,title,reason,
     recommended_by:currentUser.id
   });
-  if(error){showToast('提交失败: '+error.message,'error');return;}
+  if(btn){btn.disabled=false;btn.textContent='提交推荐';}
+  if(error){
+    if(errEl) errEl.textContent='提交失败: '+error.message;
+    else showToast('提交失败: '+error.message,'error');
+    return;
+  }
   showToast('推荐已提交，等待教练审核 ✓','success');
   closeModal('rec-modal');loadDaily();
 }
@@ -8962,10 +8983,27 @@ async function processPDFFile(file){
     const raw=data.content?.find(b=>b.type==='text')?.text||'';
     let parsed;
     try{
-      const clean=raw.replace(/```json|```/g,'').trim();
-      parsed=JSON.parse(clean);
+      // 多重尝试：去掉 markdown 代码块、提取第一个 { 到最后一个 } 之间的内容
+      let clean = raw.trim();
+      // 去掉 ```json ... ``` 或 ``` ... ```
+      clean = clean.replace(/^```(?:json)?\s*/,'').replace(/\s*```\s*$/,'');
+      // 尝试提取 JSON 对象部分（从第一个 { 到最后一个 }）
+      const start = clean.indexOf('{');
+      const end = clean.lastIndexOf('}');
+      if(start !== -1 && end !== -1 && end > start){
+        clean = clean.slice(start, end + 1);
+      }
+      parsed = JSON.parse(clean);
     }catch(e){
-      throw new Error('AI 返回格式解析失败，请重试');
+      // 最后尝试：用正则找出 problems 数组
+      try{
+        const m = raw.match(/"problems"\s*:\s*(\[[\s\S]*?\])/);
+        if(m) parsed = {problems: JSON.parse(m[1])};
+        else throw new Error('无法提取 JSON');
+      }catch(e2){
+        console.error('AI raw response:', raw);
+        throw new Error('AI 返回格式解析失败，请重试（已记录到控制台）');
+      }
     }
 
     const problems=parsed.problems||[];
