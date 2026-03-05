@@ -1119,7 +1119,17 @@ textarea{resize:vertical;min-height:100px;line-height:1.6;}
 .admin-row:last-child{border-bottom:none;}
 .admin-row-info{flex:1;}
 .admin-sub{font-size:12px;color:var(--text3);margin-top:2px;}
-.admin-actions{display:flex;gap:6px;}
+.admin-group-sel{
+  font-family:var(--mono);font-size:12px;
+  padding:4px 10px;border-radius:7px;
+  background:rgba(108,142,245,0.08);
+  border:1px solid rgba(108,142,245,0.18);
+  color:var(--accent);cursor:pointer;outline:none;
+  transition:border-color 0.2s;
+}
+.admin-group-sel:hover,.admin-group-sel:focus{border-color:rgba(108,142,245,0.4);}
+.admin-group-sel option{background:#0d1526;color:var(--text);}
+.admin-actions{display:flex;gap:6px;align-items:center;}
 .admin-profile-link{color:var(--accent2);cursor:pointer;font-family:var(--mono);font-size:13px;}
 .admin-profile-link:hover{text-decoration:underline;}
 
@@ -7709,6 +7719,8 @@ async function loadAdmin(){
   usersEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   notesEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   const{data:users}=await sb.from('profiles').select('*').order('created_at');
+  const GROUP_OPTS=['','1','2','3','4','5','6','7'];
+  const GROUP_NAMES={'':'未分组','1':'L1','2':'L2','3':'L3','4':'L4','5':'L5','6':'L6','7':'Oth'};
   if(users&&users.length){
     usersEl.innerHTML=users.map(u=>{
       let actions='';
@@ -7719,11 +7731,14 @@ async function loadAdmin(){
       } else {
         actions='<button class="btn btn-outline btn-sm" data-id="'+u.id+'" data-role="student" onclick="setRoleBtn(this)">降为学生</button>';
       }
+      const groupSel='<select class="admin-group-sel" data-uid="'+u.id+'" onchange="adminSetGroup(this)">'
+        +GROUP_OPTS.map(v=>'<option value="'+v+'"'+(String(u.group_id||'')=== v?' selected':'')+'>'+GROUP_NAMES[v]+'</option>').join('')
+        +'</select>';
       return '<div class="admin-row"><div class="admin-row-info">'
         +'<strong class="admin-profile-link" data-u="'+escHtml(u.username)+'">@'+escHtml(u.username)+'</strong>'
         +'<span class="user-role role-'+u.role+'" style="margin-left:8px">'+u.role+'</span>'
         +'<div class="admin-sub">加入 '+fmtDate(u.created_at)+'</div>'
-        +'</div><div class="admin-actions">'+actions+'</div></div>';
+        +'</div><div class="admin-actions">'+groupSel+actions+'</div></div>';
     }).join('');
     usersEl.querySelectorAll('.admin-profile-link').forEach(el=>el.addEventListener('click',()=>showProfile(el.dataset.u)));
   } else { usersEl.innerHTML='<div class="empty">暂无用户</div>'; }
@@ -7739,6 +7754,14 @@ async function loadAdmin(){
   } catch(e){ console.error("loadAdmin:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 function adminViewNote(id){show('notes');setTimeout(()=>showNote(id),300);}
+async function adminSetGroup(sel){
+  const uid=sel.dataset.uid;
+  const group_id=sel.value?parseInt(sel.value):null;
+  const{error}=await sb.from('profiles').update({group_id}).eq('id',uid);
+  if(error){showToast('修改失败: '+error.message,'error');sel.value=sel.dataset.prev||'';return;}
+  showToast('分组已更新 ✓','success');
+  sel.dataset.prev=sel.value;
+}
 async function setRoleBtn(el){
   const userId=el.dataset.id,role=el.dataset.role;
   const{error}=await sb.from('profiles').update({role}).eq('id',userId);
