@@ -801,7 +801,7 @@ async function doLogin() {
   setLoading('btn-login', true);
   try {
     const { createClient } = supabase;
-    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{storageKey:"hjoi-login-sb"}});
     const { error } = await sb.auth.signInWithPassword({
       email: usernameToEmail(username), password
     });
@@ -826,7 +826,7 @@ async function doRegister() {
   setLoading('btn-register', true);
   try {
     const { createClient } = supabase;
-    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{storageKey:"hjoi-login-sb"}});
     const { error: signUpError } = await sb.auth.signUp({
       email: usernameToEmail(username), password
     });
