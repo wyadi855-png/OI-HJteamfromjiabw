@@ -4066,8 +4066,16 @@ async function loadSession(){
     return;
   }
   currentUser=session.user;
-  const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
-  currentProfile=data;
+  let{data:profile}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  // profile 不存在时（trigger 未执行）自动创建
+  if(!profile){
+    const emailPart=currentUser.email?.split('@')[0]||'user';
+    const fallbackUsername=emailPart.replace(/[^a-zA-Z0-9_]/g,'_');
+    await sb.from('profiles').upsert({id:currentUser.id,username:fallbackUsername});
+    const{data:p2}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+    profile=p2;
+  }
+  currentProfile=profile;
   renderAuthArea();
   loadHomeFeed();
   checkNotifDot(); initCheckinState();
