@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:;">
 <title>算法竞赛训练队</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -1169,139 +1168,6 @@ section.visible { opacity:1; transform:translateY(0); }
   box-shadow: 0 0 12px rgba(45,232,176,0.4);
 }
 
-/* ── AI TEACHER MODAL ── */
-.ai-modal-inner{
-  border: 1px solid rgba(45,232,176,0.2) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.06),
-    0 0 0 1px rgba(45,232,176,0.08),
-    0 48px 96px rgba(0,0,0,0.75),
-    0 0 60px rgba(45,232,176,0.06) !important;
-}
-.ai-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px;
-  border-bottom:1px solid rgba(108,142,245,0.12);
-  background:linear-gradient(135deg,rgba(255,255,255,0.03) 0%,rgba(255,255,255,0.008) 100%);
-  flex-shrink:0;
-}
-.ai-header-left{display:flex;align-items:center;gap:12px;}
-.ai-avatar{
-  width:42px;height:42px;border-radius:50%;flex-shrink:0;
-  background:linear-gradient(135deg,#2de8b0,#6c8ef5);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--serif);font-size:18px;font-weight:700;color:#06080f;
-  box-shadow:0 0 16px rgba(45,232,176,0.35);
-}
-.ai-name{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);}
-.ai-badge{
-  font-size:9px;letter-spacing:0.1em;padding:1px 6px;border-radius:4px;
-  background:rgba(45,232,176,0.15);color:var(--accent2);border:1px solid rgba(45,232,176,0.25);
-  vertical-align:middle;margin-left:6px;
-}
-.ai-status{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:5px;}
-.ai-online-dot{
-  width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;
-  box-shadow:0 0 6px rgba(45,232,176,0.7);
-  animation:pulse 2s infinite;
-}
-.ai-close-btn{
-  width:30px;height:30px;border-radius:8px;border:1px solid rgba(108,142,245,0.15);
-  background:rgba(108,142,245,0.08);color:var(--text2);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-size:13px;
-  transition:all 0.2s;
-}
-.ai-close-btn:hover{background:rgba(255,83,112,0.15);border-color:rgba(255,83,112,0.3);color:#ff5370;}
-.ai-messages{
-  flex:1;overflow-y:auto;padding:20px 18px;
-  display:flex;flex-direction:column;gap:16px;
-  scroll-behavior:smooth;
-}
-.ai-messages::-webkit-scrollbar{width:4px;}
-.ai-messages::-webkit-scrollbar-thumb{background:rgba(108,142,245,0.3);border-radius:2px;}
-.ai-msg{display:flex;gap:10px;align-items:flex-start;}
-.ai-msg-user{flex-direction:row-reverse;}
-.ai-msg-avatar{
-  width:30px;height:30px;border-radius:50%;flex-shrink:0;
-  background:linear-gradient(135deg,#2de8b0,#6c8ef5);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--serif);font-size:13px;font-weight:700;color:#06080f;
-  box-shadow:0 0 10px rgba(45,232,176,0.25);margin-top:2px;
-}
-.ai-msg-user .ai-msg-avatar{
-  background:linear-gradient(135deg,#6c8ef5,#c792ea);
-  box-shadow:0 0 10px rgba(108,142,245,0.25);
-}
-.ai-msg-bubble{
-  max-width:78%;padding:11px 15px;border-radius:14px;
-  font-family:var(--mono);font-size:13px;line-height:1.7;color:var(--text);
-  background:linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
-  border:1px solid rgba(108,142,245,0.14);
-  box-shadow:0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
-}
-.ai-msg-user .ai-msg-bubble{
-  background:linear-gradient(135deg,rgba(108,142,245,0.15),rgba(108,142,245,0.08));
-  border-color:rgba(108,142,245,0.25);
-  border-radius:14px 4px 14px 14px;
-}
-.ai-msg-bot .ai-msg-bubble{border-radius:4px 14px 14px 14px;}
-/* Markdown-ish styling inside bubbles */
-.ai-msg-bubble code{
-  background:rgba(0,0,0,0.35);padding:1px 5px;border-radius:4px;
-  font-family:var(--mono);font-size:12px;color:var(--accent2);
-}
-.ai-msg-bubble pre{
-  background:rgba(0,0,0,0.4);border:1px solid rgba(108,142,245,0.15);
-  border-radius:8px;padding:10px 12px;margin:8px 0;overflow-x:auto;
-  font-size:12px;line-height:1.6;
-}
-.ai-msg-bubble strong{color:var(--accent2);}
-.ai-typing{display:flex;gap:5px;align-items:center;padding:4px 0;}
-.ai-typing span{
-  width:6px;height:6px;border-radius:50%;background:var(--accent2);opacity:0.6;
-  animation:typingBounce 1.2s infinite ease-in-out;
-}
-.ai-typing span:nth-child(2){animation-delay:0.2s;}
-.ai-typing span:nth-child(3){animation-delay:0.4s;}
-@keyframes typingBounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);opacity:1;}}
-.ai-quick-prompts{
-  display:flex;gap:7px;padding:8px 18px;flex-wrap:wrap;flex-shrink:0;
-  border-top:1px solid rgba(108,142,245,0.08);
-}
-.ai-quick-prompts button{
-  font-family:var(--mono);font-size:11px;padding:5px 11px;border-radius:20px;
-  background:rgba(108,142,245,0.08);border:1px solid rgba(108,142,245,0.18);
-  color:var(--text2);cursor:pointer;transition:all 0.18s;white-space:nowrap;
-}
-.ai-quick-prompts button:hover{
-  background:rgba(108,142,245,0.16);border-color:rgba(108,142,245,0.35);color:var(--accent);
-}
-.ai-input-row{
-  display:flex;align-items:flex-end;gap:10px;
-  padding:12px 16px 16px;
-  border-top:1px solid rgba(108,142,245,0.1);
-  background:rgba(6,8,15,0.4);flex-shrink:0;
-}
-.ai-input{
-  flex:1;background:rgba(4,6,12,0.65) !important;
-  border:1px solid rgba(108,142,245,0.2) !important;
-  border-radius:10px !important;
-  padding:10px 14px !important;resize:none;
-  font-family:var(--mono) !important;font-size:13px !important;
-  color:var(--text) !important;line-height:1.5;
-  max-height:120px;transition:border-color 0.2s !important;
-}
-.ai-input:focus{border-color:rgba(45,232,176,0.4) !important;box-shadow:0 0 0 3px rgba(45,232,176,0.08) !important;}
-.ai-send-btn{
-  width:38px;height:38px;border-radius:10px;flex-shrink:0;
-  background:linear-gradient(135deg,#2de8b0,#6c8ef5);
-  border:none;cursor:pointer;color:#06080f;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 14px rgba(45,232,176,0.35);
-  transition:all 0.2s;
-}
-.ai-send-btn:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(45,232,176,0.5);}
-.ai-send-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
 </style>
 </head>
 <body>
@@ -1335,7 +1201,6 @@ section.visible { opacity:1; transform:translateY(0); }
           <div class="nav-more-group-label">工具</div>
           <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
           <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
-          <a onclick="closeMoreMenu();openAIChat()">🤖 AI 万老师</a>
           <div class="nav-more-divider"></div>
           <div class="nav-more-group-label">数据</div>
           <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
@@ -3180,123 +3045,6 @@ async function safeLoad(fn, fallbackEl, label){
     }
   }
 }
-// ── AI 万老师 ─────────────────────────────────────────────
-const AI_SYSTEM_PROMPT = `你是万老师，一位专注于信息学竞赛（OI）的教练，风格严谨但亲切，善于用类比和例子讲解复杂算法。
-
-你的特点：
-- 讲解算法时总是先讲思路和直觉，再说实现细节
-- 喜欢举具体的例题来辅助说明
-- 对学生的错误思路会温和但直接地指出问题
-- 经常用「我们」而不是「你」来营造一起思考的感觉
-- 讲代码时用 C++，符合 OI 竞赛习惯
-- 回答简洁有力，不废话，但关键地方会反复强调
-- 偶尔会问「你理解了吗？」或「来，你来说说这道题的思路？」
-
-你精通的领域：图论（Dijkstra/最大流/LCA/Tarjan）、动态规划（各类DP优化）、数据结构（线段树/平衡树/主席树）、字符串（SAM/AC自动机）、数论、多项式、计算几何等所有竞赛内容。
-
-当学生提问时，用中文回答。可以用 markdown 格式，代码块用 \`\`\`cpp 包裹。`;
-
-let aiHistory = [];
-
-function openAIChat(){
-  openModal('ai-modal');
-  setTimeout(()=>document.getElementById('ai-input')?.focus(), 100);
-}
-
-function sendQuickPrompt(text){
-  document.getElementById('ai-input').value = text;
-  document.getElementById('ai-quick-prompts').style.display = 'none';
-  sendAIMessage();
-}
-
-async function sendAIMessage(){
-  const input = document.getElementById('ai-input');
-  const text = input.value.trim();
-  if(!text) return;
-
-  // Add user message to UI
-  appendAIMessage('user', text);
-  input.value = '';
-  input.style.height = 'auto';
-
-  // Add to history
-  aiHistory.push({ role:'user', content: text });
-
-  // Show typing indicator
-  const typingId = showAITyping();
-
-  // Disable send
-  const sendBtn = document.getElementById('ai-send-btn');
-  sendBtn.disabled = true;
-
-  try {
-    const WORKER_URL = 'https://oi-ai-proxy.wanjiabao84.workers.dev';
-    const response = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: AI_SYSTEM_PROMPT,
-        messages: aiHistory
-      })
-    });
-
-    const data = await response.json();
-    removeAITyping(typingId);
-
-    if(data.content && data.content[0]){
-      const reply = data.content.map(b => b.text || '').join('');
-      aiHistory.push({ role:'assistant', content: reply });
-      appendAIMessage('bot', reply);
-    } else {
-      appendAIMessage('bot', '抱歉，出了点问题。请稍后再试。');
-    }
-  } catch(e) {
-    removeAITyping(typingId);
-    appendAIMessage('bot', '网络连接出了问题，请检查后重试。');
-  }
-
-  sendBtn.disabled = false;
-  input.focus();
-}
-
-function appendAIMessage(role, text){
-  const container = document.getElementById('ai-messages');
-  const div = document.createElement('div');
-  div.className = `ai-msg ai-msg-${role}`;
-  const avatarText = role === 'bot' ? '万' : (currentProfile?.username?.charAt(0).toUpperCase() || '我');
-  // Render markdown-ish: code blocks, bold, inline code
-  let html = escHtml(text)
-    .replace(/```cpp\n?([\s\S]*?)```/g, (_,c)=>`<pre>${c}</pre>`)
-    .replace(/```\n?([\s\S]*?)```/g, (_,c)=>`<pre>${c}</pre>`)
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br>');
-  div.innerHTML = `
-    <div class="ai-msg-avatar">${escHtml(avatarText)}</div>
-    <div class="ai-msg-bubble">${html}</div>`;
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-}
-
-function showAITyping(){
-  const container = document.getElementById('ai-messages');
-  const id = 'typing-' + Date.now();
-  const div = document.createElement('div');
-  div.className = 'ai-msg ai-msg-bot';
-  div.id = id;
-  div.innerHTML = `<div class="ai-msg-avatar">万</div>
-    <div class="ai-msg-bubble"><div class="ai-typing"><span></span><span></span><span></span></div></div>`;
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-  return id;
-}
-
-function removeAITyping(id){
-  document.getElementById(id)?.remove();
-}
-
 
 loadSession();
 
@@ -3691,48 +3439,6 @@ async function showContestChart(contestId, preloaded, title){
 }
 </script>
 
-<!-- AI TEACHER MODAL -->
-<div class="modal-overlay" id="ai-modal">
-  <div class="modal ai-modal-inner" style="width:680px;max-width:96vw;height:82vh;max-height:700px;display:flex;flex-direction:column;padding:0;overflow:hidden;">
-    <!-- Header -->
-    <div class="ai-header">
-      <div class="ai-header-left">
-        <div class="ai-avatar">万</div>
-        <div>
-          <div class="ai-name">万老师 <span class="ai-badge">AI</span></div>
-          <div class="ai-status"><span class="ai-online-dot"></span>随时在线 · OI 教练</div>
-        </div>
-      </div>
-      <button class="ai-close-btn" onclick="closeModal('ai-modal')">✕</button>
-    </div>
-    <!-- Messages -->
-    <div class="ai-messages" id="ai-messages">
-      <div class="ai-msg ai-msg-bot">
-        <div class="ai-msg-avatar">万</div>
-        <div class="ai-msg-bubble">
-          同学你好！我是万老师，专注于信息学竞赛训练。<br>
-          有什么算法问题或者比赛难题尽管问我，我们一起来分析思路 💡
-        </div>
-      </div>
-    </div>
-    <!-- Quick prompts -->
-    <div class="ai-quick-prompts" id="ai-quick-prompts">
-      <button onclick="sendQuickPrompt('帮我解释一下线段树的懒标记原理')">线段树懒标记</button>
-      <button onclick="sendQuickPrompt('Dijkstra和SPFA的区别是什么？什么时候用哪个？')">Dijkstra vs SPFA</button>
-      <button onclick="sendQuickPrompt('树形DP的一般思路和常见模型有哪些？')">树形DP思路</button>
-      <button onclick="sendQuickPrompt('如何判断一道题是否可以用贪心解决？')">贪心判断方法</button>
-    </div>
-    <!-- Input area -->
-    <div class="ai-input-row">
-      <textarea id="ai-input" class="ai-input" placeholder="问万老师一个算法问题…" rows="1"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIMessage()}"
-        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
-      <button class="ai-send-btn" id="ai-send-btn" onclick="sendAIMessage()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
