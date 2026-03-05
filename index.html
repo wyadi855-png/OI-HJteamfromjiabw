@@ -1593,6 +1593,139 @@ footer span{color:var(--accent2);}
 }
 .dm-toast.show{transform:translateY(0);opacity:1;}
 
+/* ══════════════════════════════════════════
+   QUIZ MODULE
+══════════════════════════════════════════ */
+.quiz-filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;align-items:center;}
+.quiz-sel{font-family:var(--mono);font-size:12px;padding:6px 28px 6px 10px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(108,142,245,0.15);color:var(--text);outline:none;cursor:pointer;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.3)' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+.quiz-sel option{background:#0d1526;}
+.quiz-mode-btn{font-family:var(--mono);font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid rgba(108,142,245,0.2);background:rgba(108,142,245,0.05);color:var(--text2);cursor:pointer;transition:all 0.2s;}
+.quiz-mode-btn:hover{background:rgba(108,142,245,0.12);color:var(--text);}
+.quiz-mode-btn.active{background:rgba(108,142,245,0.18);border-color:rgba(108,142,245,0.4);color:var(--accent);}
+.contest-mode-btn{border-color:rgba(255,200,50,0.2);background:rgba(255,200,50,0.04);color:rgba(255,200,50,0.7);}
+.contest-mode-btn:hover,.contest-mode-btn.active{background:rgba(255,200,50,0.12);border-color:rgba(255,200,50,0.4);color:rgb(255,200,50);}
+
+/* Problem list */
+.quiz-prob-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(30,37,64,0.5);cursor:pointer;transition:background 0.15s;border-radius:8px;}
+.quiz-prob-row:hover{background:rgba(108,142,245,0.06);}
+.quiz-prob-num{font-family:var(--mono);font-size:11px;color:var(--text3);min-width:36px;}
+.quiz-prob-title{flex:1;font-size:14px;color:var(--text);}
+.quiz-prob-tags{display:flex;gap:4px;flex-wrap:wrap;}
+.quiz-prob-status{font-size:18px;min-width:22px;text-align:center;}
+.quiz-diff-badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:100px;}
+.quiz-diff-badge.easy{background:rgba(45,232,176,0.12);color:var(--accent2);border:1px solid rgba(45,232,176,0.2);}
+.quiz-diff-badge.medium{background:rgba(255,200,50,0.1);color:rgb(255,200,50);border:1px solid rgba(255,200,50,0.2);}
+.quiz-diff-badge.hard{background:rgba(255,80,80,0.1);color:#ff5555;border:1px solid rgba(255,80,80,0.2);}
+.quiz-tag-chip{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:100px;background:rgba(108,142,245,0.08);border:1px solid rgba(108,142,245,0.15);color:rgba(180,195,255,0.7);}
+
+/* Solve UI */
+.quiz-solve-header{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+.quiz-back-btn{font-family:var(--mono);font-size:12px;background:none;border:none;color:var(--accent);cursor:pointer;padding:0;white-space:nowrap;}
+.quiz-back-btn:hover{color:var(--accent2);}
+.quiz-progress-wrap{flex:1;display:flex;align-items:center;gap:10px;}
+.quiz-progress-bar{flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;}
+#quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+.quiz-progress-label{font-family:var(--mono);font-size:11px;color:var(--text3);white-space:nowrap;}
+.quiz-timer{font-family:var(--mono);font-size:13px;color:rgb(255,200,50);white-space:nowrap;}
+.quiz-timer.urgent{color:var(--red);animation:timerPulse 0.8s ease-in-out infinite;}
+@keyframes timerPulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+
+/* Card */
+.quiz-card{background:var(--glass-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:28px;max-width:680px;margin:0 auto;}
+.quiz-card-meta{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.quiz-bookmark-btn{margin-left:auto;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);transition:color 0.2s,transform 0.2s;}
+.quiz-bookmark-btn:hover{color:rgb(255,200,50);}
+.quiz-bookmark-btn.marked{color:rgb(255,200,50);}
+.quiz-tags-wrap{display:flex;gap:4px;flex-wrap:wrap;}
+.quiz-question{font-size:16px;line-height:1.7;color:var(--text);margin-bottom:24px;font-weight:500;}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:0;}
+.quiz-opt-btn{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;border-radius:12px;
+  border:1px solid rgba(108,142,245,0.15);
+  background:rgba(255,255,255,0.04);
+  cursor:pointer;text-align:left;
+  transition:border-color 0.2s,background 0.2s,transform 0.15s;
+  color:var(--text);font-size:14px;
+}
+.quiz-opt-btn:hover:not(:disabled){border-color:rgba(108,142,245,0.35);background:rgba(108,142,245,0.08);transform:translateX(3px);}
+.quiz-opt-btn:disabled{cursor:not-allowed;}
+.quiz-opt-btn.correct{border-color:rgba(45,232,176,0.5);background:rgba(45,232,176,0.1);}
+.quiz-opt-btn.wrong{border-color:rgba(255,80,80,0.5);background:rgba(255,80,80,0.08);}
+.quiz-opt-key{font-family:var(--mono);font-size:13px;font-weight:600;min-width:22px;text-align:center;padding:2px 6px;border-radius:6px;background:rgba(108,142,245,0.12);color:var(--accent);}
+.quiz-opt-btn.correct .quiz-opt-key{background:rgba(45,232,176,0.2);color:var(--accent2);}
+.quiz-opt-btn.wrong .quiz-opt-key{background:rgba(255,80,80,0.2);color:#ff5555;}
+
+/* Result */
+.quiz-result{margin-top:20px;border-top:1px solid rgba(30,37,64,0.5);padding-top:20px;animation:fadeSlideUp 0.3s ease;}
+.quiz-result-icon{font-size:32px;text-align:center;margin-bottom:12px;}
+.quiz-explanation{font-size:13px;color:var(--text2);line-height:1.7;background:rgba(255,255,255,0.03);border-radius:8px;padding:12px 14px;margin-bottom:16px;}
+.quiz-next-btn{width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));font-family:var(--mono);font-size:13px;font-weight:600;color:var(--bg);cursor:pointer;margin-top:16px;transition:opacity 0.2s,transform 0.2s;}
+.quiz-next-btn:hover{opacity:0.88;transform:translateY(-1px);}
+
+/* Comments */
+.quiz-comments-section{margin-bottom:16px;}
+.quiz-comments-title{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.1em;margin-bottom:10px;}
+.quiz-comment-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(30,37,64,0.4);}
+.quiz-comment-item:last-child{border-bottom:none;}
+.quiz-comment-author{font-family:var(--mono);font-size:11px;color:var(--accent2);white-space:nowrap;}
+.quiz-comment-text{font-size:13px;color:var(--text2);flex:1;}
+.quiz-comment-input-wrap{display:flex;gap:8px;margin-top:8px;}
+#quiz-comment-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(108,142,245,0.15);border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;resize:none;}
+#quiz-comment-input:focus{border-color:rgba(108,142,245,0.4);}
+
+/* Contest list */
+.quiz-contest-card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius);padding:18px 20px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.quiz-contest-info h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.quiz-contest-meta{font-family:var(--mono);font-size:11px;color:var(--text3);}
+
+/* Stats strip */
+.quiz-stats-strip{display:flex;gap:20px;margin-bottom:24px;flex-wrap:wrap;}
+.quiz-stat-item{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:10px;padding:12px 18px;text-align:center;min-width:80px;}
+.quiz-stat-num{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--accent);margin-bottom:2px;}
+.quiz-stat-lbl{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.08em;}
+
+/* Leaderboard */
+.quiz-lb-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid rgba(30,37,64,0.4);}
+.quiz-lb-rank{font-family:var(--mono);font-size:13px;font-weight:700;min-width:28px;color:var(--text3);}
+.quiz-lb-rank.gold{color:gold;}
+.quiz-lb-rank.silver{color:silver;}
+.quiz-lb-rank.bronze{color:#cd7f32;}
+.quiz-lb-name{flex:1;font-family:var(--mono);font-size:12px;color:var(--accent2);}
+.quiz-lb-score{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);}
+
+@media(max-width:600px){
+  .quiz-card{padding:18px;}
+  .quiz-filter-bar{gap:6px;}
+  .quiz-mode-btn{padding:5px 10px;font-size:11px;}
+}
+
+.quiz-type-badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:100px;}
+.quiz-type-badge.judge{background:rgba(45,232,176,0.1);color:var(--accent2);border:1px solid rgba(45,232,176,0.2);}
+.quiz-type-badge.choice{background:rgba(108,142,245,0.1);color:var(--accent);border:1px solid rgba(108,142,245,0.2);}
+
+/* PDF 导入 */
+.qpdf-upload-zone{border:2px dashed rgba(108,142,245,0.25);border-radius:14px;padding:32px;text-align:center;cursor:pointer;transition:border-color 0.2s,background 0.2s;margin-bottom:14px;}
+.qpdf-upload-zone:hover,.qpdf-upload-zone.drag-over{border-color:rgba(108,142,245,0.5);background:rgba(108,142,245,0.05);}
+.qpdf-upload-icon{font-size:36px;margin-bottom:10px;}
+.qpdf-upload-text{font-size:14px;color:var(--text);margin-bottom:4px;}
+.qpdf-upload-hint{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.qpdf-loading{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--text3);padding:8px 0;}
+.qpdf-status-text{font-family:var(--mono);font-size:12px;padding:8px 0;}
+.qpdf-ok{color:var(--accent2);}
+.qpdf-warn{color:rgb(255,200,50);}
+.qpdf-err{color:var(--red);}
+.qpdf-preview-header{padding:8px 0;margin-bottom:6px;border-bottom:1px solid rgba(30,37,64,0.5);}
+.qpdf-prob-item{border:1px solid rgba(30,37,64,0.6);border-radius:10px;margin-bottom:8px;overflow:hidden;transition:border-color 0.15s;}
+.qpdf-prob-item:has(.qpdf-check:checked){border-color:rgba(108,142,245,0.25);}
+.qpdf-prob-check-wrap{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;cursor:pointer;}
+.qpdf-prob-check-wrap input[type=checkbox]{margin-top:3px;flex-shrink:0;accent-color:var(--accent);}
+.qpdf-prob-body{flex:1;min-width:0;}
+.qpdf-prob-title{font-size:14px;color:var(--text);margin-bottom:8px;line-height:1.6;}
+.qpdf-prob-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px;}
+.qpdf-answer-badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:100px;background:rgba(255,255,255,0.05);color:var(--text2);}
+.qpdf-explanation{font-size:12px;color:var(--text3);background:rgba(255,255,255,0.03);border-radius:6px;padding:8px 10px;line-height:1.6;}
+
 /* ── COPY PROBLEMS ── */
 .problems-row{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin:8px 0;}
 .copy-problems-btn{font-family:var(--mono);font-size:12px;padding:4px 10px;border-radius:5px;border:1px solid rgba(108,142,245,0.2);background:rgba(108,142,245,0.06);color:var(--text2);cursor:pointer;white-space:nowrap;transition:all 0.2s;flex-shrink:0;margin-top:2px;}
@@ -3046,6 +3179,7 @@ section:not(.active) {
           <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
           <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
           <a onclick="closeMoreMenu();show('judge')" id="nav-judge">⚡ 在线评测</a>
+          <a onclick="closeMoreMenu();show('quiz')" id="nav-quiz">🧠 判断题练习</a>
           <div class="nav-more-divider"></div>
           <div class="nav-more-group-label">数据</div>
           <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
@@ -3659,6 +3793,107 @@ section:not(.active) {
 
 
 
+<!-- QUIZ SECTION -->
+<section id="quiz"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="label">// QUIZ</div>
+      <h1>判断题练习</h1>
+      <p>巩固算法知识，挑战自我极限。</p>
+    </div>
+    <div class="page-header-right" id="quiz-header-btns"></div>
+  </div>
+
+  <!-- 模式选择 / 主界面 -->
+  <div id="quiz-home">
+    <!-- 筛选栏 -->
+    <div class="quiz-filter-bar">
+      <select class="quiz-sel" id="qf-diff">
+        <option value="">全部难度</option>
+        <option value="easy">简单</option>
+        <option value="medium">中等</option>
+        <option value="hard">困难</option>
+      </select>
+      <select class="quiz-sel" id="qf-tag">
+        <option value="">全部标签</option>
+      </select>
+      <button class="quiz-mode-btn active" data-mode="seq" onclick="setQuizMode('seq',this)">顺序刷题</button>
+      <button class="quiz-mode-btn" data-mode="rand" onclick="setQuizMode('rand',this)">随机一题</button>
+      <button class="quiz-mode-btn" data-mode="wrong" onclick="setQuizMode('wrong',this)">错题本</button>
+      <button class="quiz-mode-btn contest-mode-btn" data-mode="contest" onclick="setQuizMode('contest',this)">⚔️ 竞赛</button>
+    </div>
+
+    <!-- 题目列表 -->
+    <div id="quiz-problem-list"></div>
+  </div>
+
+  <!-- 答题界面 -->
+  <div id="quiz-solve" style="display:none">
+    <div class="quiz-solve-header">
+      <button class="quiz-back-btn" onclick="exitQuizSolve()">← 返回</button>
+      <div class="quiz-progress-wrap">
+        <div class="quiz-progress-bar"><div id="quiz-progress-fill"></div></div>
+        <span id="quiz-progress-text" class="quiz-progress-label">0 / 0</span>
+      </div>
+      <div id="quiz-timer" class="quiz-timer" style="display:none">⏱ <span id="quiz-timer-val">00:00</span></div>
+    </div>
+
+    <div class="quiz-card" id="quiz-card">
+      <div class="quiz-card-meta">
+        <span id="qc-type-badge" class="quiz-type-badge judge">判断题</span>
+        <span id="qc-diff-badge" class="quiz-diff-badge"></span>
+        <span id="qc-tags" class="quiz-tags-wrap"></span>
+        <button class="quiz-bookmark-btn" id="quiz-bookmark-btn" onclick="toggleQuizBookmark()" title="加入错题本">☆</button>
+      </div>
+      <div class="quiz-question" id="qc-question"></div>
+      <div class="quiz-options" id="quiz-options">
+        <button class="quiz-opt-btn" id="qopt-A" onclick="submitQuizAnswer('A')">
+          <span class="quiz-opt-key">A</span>
+          <span class="quiz-opt-text" id="qopt-A-text"></span>
+        </button>
+        <button class="quiz-opt-btn" id="qopt-B" onclick="submitQuizAnswer('B')">
+          <span class="quiz-opt-key">B</span>
+          <span class="quiz-opt-text" id="qopt-B-text"></span>
+        </button>
+        <button class="quiz-opt-btn" id="qopt-C" onclick="submitQuizAnswer('C')" style="display:none">
+          <span class="quiz-opt-key">C</span>
+          <span class="quiz-opt-text" id="qopt-C-text"></span>
+        </button>
+        <button class="quiz-opt-btn" id="qopt-D" onclick="submitQuizAnswer('D')" style="display:none">
+          <span class="quiz-opt-key">D</span>
+          <span class="quiz-opt-text" id="qopt-D-text"></span>
+        </button>
+      </div>
+
+      <!-- 答题结果 -->
+      <div class="quiz-result" id="quiz-result" style="display:none">
+        <div class="quiz-result-icon" id="quiz-result-icon"></div>
+        <div class="quiz-explanation" id="quiz-explanation"></div>
+        <div class="quiz-comments-section">
+          <div class="quiz-comments-title">// 讨论</div>
+          <div id="quiz-comments-list"></div>
+          <div class="quiz-comment-input-wrap">
+            <textarea id="quiz-comment-input" placeholder="写下你的想法…" rows="2" maxlength="500"></textarea>
+            <button class="btn btn-primary btn-sm" onclick="postQuizComment()">发送</button>
+          </div>
+        </div>
+        <button class="quiz-next-btn" id="quiz-next-btn" onclick="nextQuizProblem()">下一题 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 竞赛模式界面 -->
+  <div id="quiz-contest-panel" style="display:none">
+    <div id="quiz-contest-list"></div>
+  </div>
+
+  <!-- 排行榜 -->
+  <div id="quiz-leaderboard" style="display:none">
+    <div id="quiz-lb-list"></div>
+  </div>
+
+</div></section>
+
 <!-- JUDGE SECTION -->
 <section id="judge">
 <div class="container">
@@ -4037,7 +4272,7 @@ function show(id){
   const navEl=document.getElementById('nav-'+id);
   if(navEl)navEl.classList.add('active');
   window.scrollTo(0,0);
-  const loaders={syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks};
+  const loaders={syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,quiz:initQuiz,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks};
   if(loaders[id])loaders[id]();
 }
 
@@ -8167,7 +8402,645 @@ document.addEventListener('click',e=>{
   }
 });
 
-// ── Nav scroll shrink ────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// 判断题练习模块 (QUIZ)
+// ══════════════════════════════════════════════════════
+let _quizProblems = [];       // 当前题目列表
+let _quizIdx = 0;             // 当前题目下标
+let _quizMode = 'seq';        // seq / rand / wrong / contest
+let _quizMistakes = new Set();// 当前用户错题本 problem_id
+let _quizDone = new Set();    // 已答过的 problem_id（本次session）
+let _quizTimer = null;        // 竞赛计时器
+let _quizTimeLeft = 0;
+let _quizContestId = null;
+let _quizScore = {correct:0, total:0};
+
+// ── 初始化 ─────────────────────────────────────────────
+async function initQuiz(){
+  const hdr = document.getElementById('quiz-header-btns');
+  if(isCoach()) hdr.innerHTML = `
+    <button class="btn btn-primary btn-sm" onclick="openQuizAddModal()">+ 添加题目</button>
+    <button class="btn btn-outline btn-sm" onclick="openQuizPDFModal()">📄 PDF 导入</button>
+    <button class="btn btn-outline btn-sm" onclick="showQuizLeaderboard()">排行榜</button>`;
+  else hdr.innerHTML = `<button class="btn btn-outline btn-sm" onclick="showQuizLeaderboard()">排行榜</button>`;
+
+  await loadQuizMistakes();
+  await loadQuizTagFilter();
+  await renderQuizList();
+  showQuizHome();
+}
+
+function showQuizHome(){
+  document.getElementById('quiz-home').style.display='';
+  document.getElementById('quiz-solve').style.display='none';
+  document.getElementById('quiz-contest-panel').style.display='none';
+  document.getElementById('quiz-leaderboard').style.display='none';
+}
+
+function setQuizMode(mode, btn){
+  _quizMode = mode;
+  document.querySelectorAll('.quiz-mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(mode==='contest'){showQuizContestList();return;}
+  if(mode==='wrong'){renderQuizList(true);return;}
+  renderQuizList();
+}
+
+// ── 加载用户错题本 ─────────────────────────────────────
+async function loadQuizMistakes(){
+  if(!currentUser) return;
+  const{data}=await sb.from('judge_mistakes').select('problem_id').eq('user_id',currentUser.id);
+  _quizMistakes=new Set((data||[]).map(r=>r.problem_id));
+}
+
+// ── 加载标签过滤器 ─────────────────────────────────────
+async function loadQuizTagFilter(){
+  const{data}=await sb.from('judge_problems').select('tags').eq('is_active',true);
+  const tags=new Set();
+  (data||[]).forEach(p=>(p.tags||[]).forEach(t=>tags.add(t)));
+  const sel=document.getElementById('qf-tag');
+  tags.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);});
+  sel.onchange=renderQuizList;
+  document.getElementById('qf-diff').onchange=renderQuizList;
+}
+
+// ── 渲染题目列表 ───────────────────────────────────────
+async function renderQuizList(wrongOnly=false){
+  const el=document.getElementById('quiz-problem-list');
+  el.innerHTML=`<div class="loading"><div class="spinner"></div>加载中…</div>`;
+  const diff=document.getElementById('qf-diff').value;
+  const tag=document.getElementById('qf-tag').value;
+
+  let q=sb.from('judge_problems').select('id,title,difficulty,tags,type').eq('is_active',true);
+  if(diff) q=q.eq('difficulty',diff);
+  if(tag)  q=q.contains('tags',[tag]);
+  q=q.order('id');
+
+  const{data:probs,error}=await q;
+  if(error){el.innerHTML=`<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>${error.message}</h3></div>`;return;}
+
+  let list=(probs||[]);
+  if(wrongOnly) list=list.filter(p=>_quizMistakes.has(p.id));
+  if(!list.length){el.innerHTML=`<div class="empty-state"><div class="empty-state-icon">${wrongOnly?'📭':'📋'}</div><h3>${wrongOnly?'错题本是空的':'暂无题目'}</h3></div>`;return;}
+
+  // 统计每题作答情况
+  let statMap={};
+  if(currentUser){
+    const{data:subs}=await sb.from('judge_submissions').select('problem_id,is_correct').eq('user_id',currentUser.id);
+    (subs||[]).forEach(s=>{ if(!statMap[s.problem_id]) statMap[s.problem_id]={any:true,correct:s.is_correct}; if(s.is_correct) statMap[s.problem_id].correct=true; });
+  }
+
+  // 统计 strip
+  const total=list.length, done=list.filter(p=>statMap[p.id]?.any).length, correct=list.filter(p=>statMap[p.id]?.correct).length;
+  el.innerHTML=`
+    <div class="quiz-stats-strip">
+      <div class="quiz-stat-item"><div class="quiz-stat-num">${total}</div><div class="quiz-stat-lbl">共</div></div>
+      <div class="quiz-stat-item"><div class="quiz-stat-num">${done}</div><div class="quiz-stat-lbl">已答</div></div>
+      <div class="quiz-stat-item"><div class="quiz-stat-num" style="color:var(--accent2)">${correct}</div><div class="quiz-stat-lbl">已通过</div></div>
+      <div class="quiz-stat-item"><div class="quiz-stat-num" style="color:var(--red)">${_quizMistakes.size}</div><div class="quiz-stat-lbl">错题</div></div>
+    </div>
+    <div id="quiz-rows"></div>`;
+
+  const rows=document.getElementById('quiz-rows');
+  if(_quizMode==='rand'){
+    const btn=document.createElement('button');
+    btn.className='btn btn-primary';btn.style.marginBottom='16px';
+    btn.textContent='🎲 随机一题';
+    btn.onclick=()=>{const r=list[Math.floor(Math.random()*list.length)];startQuizSolve(list,[list.indexOf(r)]);};
+    rows.appendChild(btn);
+  }
+
+  list.forEach((p,i)=>{
+    const stat=statMap[p.id];
+    const icon=!stat?.any?'○':stat.correct?'✓':'✗';
+    const iconColor=!stat?.any?'var(--text3)':stat.correct?'var(--accent2)':'var(--red)';
+    const row=document.createElement('div');row.className='quiz-prob-row';
+    row.innerHTML=`
+      <span class="quiz-prob-num">#${String(p.id).padStart(3,'0')}</span>
+      <span class="quiz-prob-title">${escHtml(p.title)}</span>
+      <span class="quiz-type-badge ${p.type||'judge'}">${(p.type||'judge')==='choice'?'单选':'判断'}</span>
+      <span class="quiz-diff-badge ${p.difficulty||'medium'}">${{easy:'简单',medium:'中等',hard:'困难'}[p.difficulty]||'中等'}</span>
+      <span class="quiz-prob-tags">${(p.tags||[]).slice(0,2).map(t=>`<span class="quiz-tag-chip">${escHtml(t)}</span>`).join('')}</span>
+      <span class="quiz-prob-status" style="color:${iconColor}">${icon}</span>`;
+    row.onclick=()=>startQuizSolve(list,[i]);
+    rows.appendChild(row);
+  });
+
+  _quizProblems=list;
+}
+
+// ── 开始答题 ───────────────────────────────────────────
+function startQuizSolve(list, startIndices){
+  _quizProblems=list;
+  _quizIdx=startIndices[0];
+  _quizScore={correct:0,total:0};
+  document.getElementById('quiz-home').style.display='none';
+  document.getElementById('quiz-solve').style.display='';
+  document.getElementById('quiz-leaderboard').style.display='none';
+  loadQuizProblem(_quizIdx);
+  updateQuizProgress();
+}
+
+function loadQuizProblem(idx){
+  const p=_quizProblems[idx];
+  if(!p) return;
+
+  // meta
+  const diffNames={easy:'简单',medium:'中等',hard:'困难'};
+  const diffEl=document.getElementById('qc-diff-badge');
+  diffEl.textContent=diffNames[p.difficulty||'medium'];
+  diffEl.className='quiz-diff-badge '+(p.difficulty||'medium');
+
+  document.getElementById('qc-tags').innerHTML=(p.tags||[]).map(t=>`<span class="quiz-tag-chip">${escHtml(t)}</span>`).join('');
+  document.getElementById('qc-question').textContent=p.title||(p.content||'');
+
+  const isChoice=(p.type||'judge')==='choice';
+  // 设置选项文字
+  document.getElementById('qopt-A-text').textContent=p.option_a||(isChoice?'A':'正确');
+  document.getElementById('qopt-B-text').textContent=p.option_b||(isChoice?'B':'错误');
+  // C/D 只有单选题才显示
+  ['C','D'].forEach(k=>{
+    const btn=document.getElementById('qopt-'+k);
+    const txt=p['option_'+k.toLowerCase()];
+    btn.style.display=(isChoice&&txt)?'':'none';
+    document.getElementById('qopt-'+k+'-text').textContent=txt||'';
+  });
+
+  // 题型标签
+  const typeBadge=document.getElementById('qc-type-badge');
+  if(typeBadge){typeBadge.textContent=isChoice?'单选题':'判断题';typeBadge.className='quiz-type-badge '+(isChoice?'choice':'judge');}
+
+  // reset state
+  ['A','B','C','D'].forEach(k=>{
+    const btn=document.getElementById('qopt-'+k);
+    btn.className='quiz-opt-btn';btn.disabled=false;
+  });
+  document.getElementById('quiz-result').style.display='none';
+  document.getElementById('quiz-comment-input').value='';
+  document.getElementById('quiz-comments-list').innerHTML='';
+
+  // bookmark state
+  const bkBtn=document.getElementById('quiz-bookmark-btn');
+  bkBtn.classList.toggle('marked',_quizMistakes.has(p.id));
+  bkBtn.textContent=_quizMistakes.has(p.id)?'★':'☆';
+}
+
+async function submitQuizAnswer(choice){
+  const p=_quizProblems[_quizIdx];
+  if(!p) return;
+
+  // fetch full problem to get answer + explanation
+  const{data:full}=await sb.from('judge_problems').select('*').eq('id',p.id).single();
+  if(!full) return;
+
+  const correct=choice===full.answer;
+  _quizScore.total++;
+  if(correct) _quizScore.correct++;
+
+  // UI feedback
+  ['A','B','C','D'].forEach(k=>{
+    const btn=document.getElementById('qopt-'+k);
+    if(btn.style.display==='none') return;
+    btn.disabled=true;
+    if(k===full.answer) btn.classList.add('correct');
+    else if(k===choice&&choice!==full.answer) btn.classList.add('wrong');
+  });
+
+  document.getElementById('quiz-result-icon').textContent=correct?'🎉':'❌';
+  document.getElementById('quiz-explanation').textContent=full.explanation||(correct?'回答正确！':'正确答案是 '+full.answer+'。');
+  document.getElementById('quiz-result').style.display='';
+
+  // save submission
+  if(currentUser){
+    await sb.from('judge_submissions').insert({user_id:currentUser.id,problem_id:p.id,answer:choice,is_correct:correct,contest_id:_quizContestId||null});
+    // 答错自动加入错题本
+    if(!correct){
+      await sb.from('judge_mistakes').upsert({user_id:currentUser.id,problem_id:p.id});
+      _quizMistakes.add(p.id);
+      document.getElementById('quiz-bookmark-btn').classList.add('marked');
+      document.getElementById('quiz-bookmark-btn').textContent='★';
+    }
+  }
+
+  // load comments
+  loadQuizComments(p.id);
+  updateQuizProgress();
+}
+
+function updateQuizProgress(){
+  const total=_quizProblems.length;
+  const fill=document.getElementById('quiz-progress-fill');
+  const label=document.getElementById('quiz-progress-text');
+  const pct=total>0?((_quizIdx+1)/total)*100:0;
+  fill.style.width=pct+'%';
+  label.textContent=`${_quizScore.correct} ✓  ${_quizIdx+1} / ${total}`;
+}
+
+function nextQuizProblem(){
+  if(_quizMode==='rand'){
+    _quizIdx=Math.floor(Math.random()*_quizProblems.length);
+  } else {
+    _quizIdx=(_quizIdx+1)%_quizProblems.length;
+  }
+  loadQuizProblem(_quizIdx);
+  updateQuizProgress();
+  // scroll to top of card
+  document.getElementById('quiz-card').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function exitQuizSolve(){
+  if(_quizTimer) clearInterval(_quizTimer);
+  _quizContestId=null;
+  showQuizHome();
+  renderQuizList();
+}
+
+// ── 错题本切换 ─────────────────────────────────────────
+async function toggleQuizBookmark(){
+  const p=_quizProblems[_quizIdx];
+  if(!p||!currentUser) return;
+  const btn=document.getElementById('quiz-bookmark-btn');
+  if(_quizMistakes.has(p.id)){
+    await sb.from('judge_mistakes').delete().eq('user_id',currentUser.id).eq('problem_id',p.id);
+    _quizMistakes.delete(p.id);
+    btn.classList.remove('marked');btn.textContent='☆';
+  } else {
+    await sb.from('judge_mistakes').upsert({user_id:currentUser.id,problem_id:p.id});
+    _quizMistakes.add(p.id);
+    btn.classList.add('marked');btn.textContent='★';
+  }
+}
+
+// ── 评论 ───────────────────────────────────────────────
+async function loadQuizComments(problemId){
+  const el=document.getElementById('quiz-comments-list');
+  const{data}=await sb.from('judge_comments').select('*,profiles(username)').eq('problem_id',problemId).order('created_at');
+  if(!data||!data.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:6px 0">暂无讨论，来第一个发言吧</div>';return;}
+  el.innerHTML=data.map(c=>`
+    <div class="quiz-comment-item">
+      <span class="quiz-comment-author">@${escHtml(c.profiles?.username||'?')}</span>
+      <span class="quiz-comment-text">${escHtml(c.content)}</span>
+    </div>`).join('');
+}
+
+async function postQuizComment(){
+  const p=_quizProblems[_quizIdx];
+  if(!p||!currentUser) return;
+  const input=document.getElementById('quiz-comment-input');
+  const content=input.value.trim();
+  if(!content) return;
+  const{error}=await sb.from('judge_comments').insert({problem_id:p.id,user_id:currentUser.id,content});
+  if(error){showToast('发送失败','error');return;}
+  input.value='';
+  loadQuizComments(p.id);
+}
+
+// ── 竞赛模式 ───────────────────────────────────────────
+async function showQuizContestList(){
+  document.getElementById('quiz-home').style.display='';
+  document.getElementById('quiz-contest-panel').style.display='';
+  document.getElementById('quiz-solve').style.display='none';
+  const el=document.getElementById('quiz-contest-list');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const{data}=await sb.from('judge_contests').select('*').eq('is_active',true).order('created_at',{ascending:false});
+  if(!data||!data.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">⚔️</div><h3>暂无竞赛场次</h3></div>';return;}
+  el.innerHTML=data.map(c=>`
+    <div class="quiz-contest-card">
+      <div class="quiz-contest-info">
+        <h3>${escHtml(c.title)}</h3>
+        <div class="quiz-contest-meta">${(c.problem_ids||[]).length} 题 · ${Math.round(c.duration/60)} 分钟</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="startQuizContest(${c.id},${JSON.stringify(c.problem_ids)},${c.duration})">开始</button>
+    </div>`).join('');
+  if(isCoach()) el.innerHTML=`<button class="btn btn-outline btn-sm" style="margin-bottom:14px" onclick="openQuizContestModal()">+ 创建竞赛</button>`+el.innerHTML;
+}
+
+async function startQuizContest(contestId, problemIds, duration){
+  _quizContestId=contestId;
+  const{data:probs}=await sb.from('judge_problems').select('id,title,difficulty,tags,option_a,option_b').in('id',problemIds).eq('is_active',true);
+  if(!probs||!probs.length){showToast('题目加载失败','error');return;}
+  startQuizSolve(probs,[0]);
+  // 启动计时器
+  _quizTimeLeft=duration;
+  document.getElementById('quiz-timer').style.display='';
+  _quizTimer=setInterval(()=>{
+    _quizTimeLeft--;
+    const m=String(Math.floor(_quizTimeLeft/60)).padStart(2,'0');
+    const s=String(_quizTimeLeft%60).padStart(2,'0');
+    document.getElementById('quiz-timer-val').textContent=`${m}:${s}`;
+    if(_quizTimeLeft<=30) document.getElementById('quiz-timer').classList.add('urgent');
+    if(_quizTimeLeft<=0){clearInterval(_quizTimer);showToast('时间到！','info');exitQuizSolve();}
+  },1000);
+}
+
+// ── 排行榜 ─────────────────────────────────────────────
+async function showQuizLeaderboard(){
+  document.getElementById('quiz-home').style.display='none';
+  document.getElementById('quiz-solve').style.display='none';
+  document.getElementById('quiz-leaderboard').style.display='';
+  const el=document.getElementById('quiz-lb-list');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  // 按正确数排名
+  const{data}=await sb.from('judge_submissions').select('user_id,is_correct,profiles(username)');
+  if(!data){el.innerHTML='<div class="empty">暂无数据</div>';return;}
+  const map={};
+  data.forEach(s=>{
+    if(!map[s.user_id]) map[s.user_id]={username:s.profiles?.username||'?',correct:0,total:0};
+    map[s.user_id].total++;
+    if(s.is_correct) map[s.user_id].correct++;
+  });
+  const sorted=Object.values(map).sort((a,b)=>b.correct-a.correct||b.total-a.total).slice(0,50);
+  const rankClasses=['gold','silver','bronze'];
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-family:var(--mono);font-size:13px;color:var(--text3)">// 判断题排行榜</h3>
+      <button class="btn btn-outline btn-sm" onclick="showQuizHome()">← 返回</button>
+    </div>`+
+    sorted.map((u,i)=>`
+      <div class="quiz-lb-row">
+        <span class="quiz-lb-rank ${rankClasses[i]||''}">${i+1}</span>
+        <span class="quiz-lb-name">@${escHtml(u.username)}</span>
+        <span class="quiz-lb-score">${u.correct} <span style="font-size:11px;color:var(--text3)">/ ${u.total} 题</span></span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text3)">${u.total>0?Math.round(u.correct/u.total*100):0}%</span>
+      </div>`).join('');
+}
+
+// ── 教练：添加题目 modal ───────────────────────────────
+function openQuizAddModal(){
+  // 复用现有 modal 结构，动态构建
+  const existing=document.getElementById('quiz-add-modal');
+  if(existing){openModal('quiz-add-modal');return;}
+  const m=document.createElement('div');
+  m.className='modal-overlay';m.id='quiz-add-modal';
+  m.innerHTML=`<div class="modal-box" style="max-width:560px">
+    <div class="modal-header"><h2>添加题目</h2><button class="modal-close" onclick="closeModal('quiz-add-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>题型</label>
+        <select id="qa-type" onchange="onQuizTypeChange()">
+          <option value="judge">判断题</option>
+          <option value="choice">单选题</option>
+        </select>
+      </div>
+      <div class="form-group"><label>题目描述</label><textarea id="qa-title" rows="3" placeholder="输入题目内容…"></textarea></div>
+      <div id="qa-judge-opts">
+        <div class="form-group"><label>选项 A</label><input type="text" id="qa-optA" value="正确"></div>
+        <div class="form-group"><label>选项 B</label><input type="text" id="qa-optB" value="错误"></div>
+      </div>
+      <div id="qa-choice-opts" style="display:none">
+        <div class="form-group"><label>选项 A</label><input type="text" id="qa-optA-c" placeholder="选项A内容"></div>
+        <div class="form-group"><label>选项 B</label><input type="text" id="qa-optB-c" placeholder="选项B内容"></div>
+        <div class="form-group"><label>选项 C</label><input type="text" id="qa-optC" placeholder="选项C内容"></div>
+        <div class="form-group"><label>选项 D</label><input type="text" id="qa-optD" placeholder="选项D内容"></div>
+      </div>
+      <div class="form-group"><label>正确答案</label>
+        <select id="qa-answer">
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C" class="qa-choice-only" style="display:none">C</option>
+          <option value="D" class="qa-choice-only" style="display:none">D</option>
+        </select>
+      </div>
+      <div class="form-group"><label>解析（选填）</label><textarea id="qa-exp" rows="2" placeholder="解析说明…"></textarea></div>
+      <div class="form-group"><label>难度</label>
+        <select id="qa-diff"><option value="easy">简单</option><option value="medium" selected>中等</option><option value="hard">困难</option></select>
+      </div>
+      <div class="form-group"><label>标签（逗号分隔）</label><input type="text" id="qa-tags" placeholder="如：贪心,DP,树"></div>
+      <div id="qa-error" class="form-error"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('quiz-add-modal')">取消</button>
+      <button class="btn btn-primary" onclick="saveQuizProblem()">保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  openModal('quiz-add-modal');
+}
+
+function onQuizTypeChange(){
+  const isChoice=document.getElementById('qa-type').value==='choice';
+  document.getElementById('qa-judge-opts').style.display=isChoice?'none':'';
+  document.getElementById('qa-choice-opts').style.display=isChoice?'':'none';
+  document.querySelectorAll('.qa-choice-only').forEach(o=>o.style.display=isChoice?'':'none');
+}
+
+async function saveQuizProblem(){
+  const type=document.getElementById('qa-type').value;
+  const isChoice=type==='choice';
+  const title=document.getElementById('qa-title').value.trim();
+  const answer=document.getElementById('qa-answer').value;
+  const explanation=document.getElementById('qa-exp').value.trim();
+  const difficulty=document.getElementById('qa-diff').value;
+  const tagsRaw=document.getElementById('qa-tags').value;
+  const tags=tagsRaw.split(/[,，]/).map(t=>t.trim()).filter(Boolean);
+  const errEl=document.getElementById('qa-error');
+  if(!title){errEl.textContent='请输入题目描述';return;}
+  const row={title,answer,explanation,difficulty,tags,type,created_by:currentUser.id,is_active:true};
+  if(isChoice){
+    row.option_a=document.getElementById('qa-optA-c').value.trim();
+    row.option_b=document.getElementById('qa-optB-c').value.trim();
+    row.option_c=document.getElementById('qa-optC').value.trim()||null;
+    row.option_d=document.getElementById('qa-optD').value.trim()||null;
+    if(!row.option_a||!row.option_b){errEl.textContent='至少填写 A、B 两个选项';return;}
+  } else {
+    row.option_a=document.getElementById('qa-optA').value.trim()||'正确';
+    row.option_b=document.getElementById('qa-optB').value.trim()||'错误';
+  }
+  const{error}=await sb.from('judge_problems').insert(row);
+  if(error){errEl.textContent=error.message;return;}
+  showToast('题目已添加 ✓','success');
+  closeModal('quiz-add-modal');
+  renderQuizList();
+}
+
+// ── PDF 导入题目 ───────────────────────────────────────
+function openQuizPDFModal(){
+  const existing=document.getElementById('quiz-pdf-modal');
+  if(existing){document.getElementById('qpdf-preview').innerHTML='';document.getElementById('qpdf-file').value='';document.getElementById('qpdf-status').textContent='';openModal('quiz-pdf-modal');return;}
+  const m=document.createElement('div');
+  m.className='modal-overlay';m.id='quiz-pdf-modal';
+  m.innerHTML=`<div class="modal-box" style="max-width:680px;max-height:90vh;display:flex;flex-direction:column">
+    <div class="modal-header">
+      <h2>📄 PDF 导入判断题</h2>
+      <button class="modal-close" onclick="closeModal('quiz-pdf-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="flex:1;overflow-y:auto">
+      <!-- 上传区 -->
+      <div class="qpdf-upload-zone" id="qpdf-drop-zone" onclick="document.getElementById('qpdf-file').click()">
+        <div class="qpdf-upload-icon">📄</div>
+        <div class="qpdf-upload-text">点击或拖拽 PDF 文件到这里</div>
+        <div class="qpdf-upload-hint">AI 将自动识别其中的判断题</div>
+        <input type="file" id="qpdf-file" accept=".pdf" style="display:none" onchange="onQuizPDFSelected(this)">
+      </div>
+      <div id="qpdf-status" class="qpdf-status"></div>
+      <!-- 预览区 -->
+      <div id="qpdf-preview"></div>
+    </div>
+    <div class="modal-footer" id="qpdf-footer" style="display:none">
+      <button class="btn btn-ghost" onclick="closeModal('quiz-pdf-modal')">取消</button>
+      <button class="btn btn-primary" id="qpdf-import-btn" onclick="importQuizFromPDF()">导入选中题目</button>
+    </div>
+  </div>`;
+  // drag-drop
+  document.body.appendChild(m);
+  const zone=m.querySelector('#qpdf-drop-zone');
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag-over');});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('drag-over'));
+  zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)processPDFFile(f);});
+  openModal('quiz-pdf-modal');
+}
+
+function onQuizPDFSelected(input){
+  const f=input.files[0];if(f) processPDFFile(f);
+}
+
+async function processPDFFile(file){
+  if(!file.name.endsWith('.pdf')){showToast('请上传 PDF 文件','error');return;}
+  if(file.size>20*1024*1024){showToast('文件不能超过 20MB','error');return;}
+
+  const status=document.getElementById('qpdf-status');
+  const preview=document.getElementById('qpdf-preview');
+  const footer=document.getElementById('qpdf-footer');
+  preview.innerHTML='';
+  footer.style.display='none';
+
+  // 更新上传区显示
+  const zone=document.getElementById('qpdf-drop-zone');
+  zone.innerHTML=`<div class="qpdf-upload-icon">📄</div><div class="qpdf-upload-text">${escHtml(file.name)}</div><div class="qpdf-upload-hint">${(file.size/1024).toFixed(0)} KB</div>`;
+
+  status.innerHTML='<div class="qpdf-loading"><div class="spinner" style="width:18px;height:18px;border-width:2px"></div> AI 正在解析 PDF，请稍候…</div>';
+
+  try{
+    // 读取文件为 base64
+    const base64=await new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=()=>res(r.result.split(',')[1]);
+      r.onerror=()=>rej(new Error('读取失败'));
+      r.readAsDataURL(file);
+    });
+
+    // 调用 Claude API
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:4000,
+        system:`你是一个题目提取助手。从用户提供的 PDF 中提取所有单选题和判断题。
+严格只返回 JSON，不要有任何其他文字、不要有 markdown 代码块：
+{"problems":[{"type":"judge或choice","title":"题目描述","option_a":"选项A","option_b":"选项B","option_c":"选项C或null","option_d":"选项D或null","answer":"A或B或C或D","explanation":"解析（若有）","difficulty":"easy或medium或hard","tags":["标签1"]}]}
+
+提取规则：
+1. type: 判断题填"judge"，单选题填"choice"
+2. title: 题目题干，保留完整原文（含代码）
+3. 单选题: option_a~d 填写对应选项内容（去掉A.B.C.D前缀），只有2个选项时option_c/option_d填null
+4. 判断题: option_a固定"正确"，option_b固定"错误"，option_c/option_d为null
+5. answer: 对照 PDF 中的答案表或题目标注，填写正确选项字母（大写A/B/C/D）
+   - 判断题：答案是"√/对/T/正确"→A，"×/错/F/错误"→B
+6. explanation: 若题目带解析则提取，否则留空字符串
+7. difficulty: 根据题目复杂程度判断，默认 medium
+8. tags: 从题目内容推断知识点标签，如["排列组合","DP","图论"]，没有则空数组
+9. 若 PDF 中没有题目，返回 {"problems":[]}`,
+        messages:[{
+          role:'user',
+          content:[
+            {type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},
+            {type:'text',text:'请从这份 PDF 中提取所有单选题和判断题，严格按照 JSON 格式返回，不要有任何其他文字。'}
+          ]
+        }]
+      })
+    });
+
+    if(!resp.ok){
+      const err=await resp.json();
+      throw new Error(err.error?.message||`API 错误 ${resp.status}`);
+    }
+
+    const data=await resp.json();
+    const raw=data.content?.find(b=>b.type==='text')?.text||'';
+    let parsed;
+    try{
+      const clean=raw.replace(/```json|```/g,'').trim();
+      parsed=JSON.parse(clean);
+    }catch(e){
+      throw new Error('AI 返回格式解析失败，请重试');
+    }
+
+    const problems=parsed.problems||[];
+    if(!problems.length){
+      status.innerHTML='<div class="qpdf-status-text qpdf-warn">⚠️ 未在 PDF 中识别到判断题</div>';
+      return;
+    }
+
+    status.innerHTML=`<div class="qpdf-status-text qpdf-ok">✓ 识别到 <strong>${problems.length}</strong> 道判断题，请确认后导入</div>`;
+    renderPDFPreview(problems);
+    footer.style.display='';
+
+  }catch(e){
+    status.innerHTML=`<div class="qpdf-status-text qpdf-err">❌ ${escHtml(e.message)}</div>`;
+  }
+}
+
+let _pdfProblems=[];
+function renderPDFPreview(problems){
+  _pdfProblems=problems;
+  const el=document.getElementById('qpdf-preview');
+  const diffNames={easy:'简单',medium:'中等',hard:'困难'};
+  el.innerHTML=`<div class="qpdf-preview-header">
+    <label style="font-family:var(--mono);font-size:11px;color:var(--text3);cursor:pointer">
+      <input type="checkbox" id="qpdf-select-all" checked onchange="toggleAllPDFProblems(this.checked)"> 全选
+    </label>
+  </div>`+
+  problems.map((p,i)=>`
+    <div class="qpdf-prob-item" id="qpdf-item-${i}">
+      <label class="qpdf-prob-check-wrap">
+        <input type="checkbox" class="qpdf-check" data-idx="${i}" checked>
+        <div class="qpdf-prob-body">
+          <div class="qpdf-prob-title">${escHtml(p.title)}</div>
+          <div class="qpdf-prob-meta">
+            <span class="quiz-type-badge ${p.type||'judge'}">${(p.type||'judge')==='choice'?'单选题':'判断题'}</span>
+            <span class="quiz-diff-badge ${p.difficulty||'medium'}">${diffNames[p.difficulty]||'中等'}</span>
+            <span class="qpdf-answer-badge">答案：${p.answer}</span>
+            ${(p.tags||[]).map(t=>`<span class="quiz-tag-chip">${escHtml(t)}</span>`).join('')}
+          </div>
+          ${(p.type||'judge')==='choice'?`<div class="qpdf-explanation" style="margin-bottom:4px;font-size:12px">A. ${escHtml(p.option_a||'')}　B. ${escHtml(p.option_b||'')}${p.option_c?'　C. '+escHtml(p.option_c):''}${p.option_d?'　D. '+escHtml(p.option_d):''}</div>`:''}
+          ${p.explanation?`<div class="qpdf-explanation">💡 ${escHtml(p.explanation)}</div>`:''}
+        </div>
+      </label>
+    </div>`).join('');
+}
+
+function toggleAllPDFProblems(checked){
+  document.querySelectorAll('.qpdf-check').forEach(cb=>cb.checked=checked);
+}
+
+async function importQuizFromPDF(){
+  const checked=[...document.querySelectorAll('.qpdf-check:checked')].map(cb=>parseInt(cb.dataset.idx));
+  if(!checked.length){showToast('请至少选择一道题','error');return;}
+  const btn=document.getElementById('qpdf-import-btn');
+  btn.disabled=true;btn.textContent='导入中…';
+
+  const rows=checked.map(i=>({
+    type:_pdfProblems[i].type||'judge',
+    title:_pdfProblems[i].title,
+    option_a:_pdfProblems[i].option_a||'正确',
+    option_b:_pdfProblems[i].option_b||'错误',
+    option_c:_pdfProblems[i].option_c||null,
+    option_d:_pdfProblems[i].option_d||null,
+    answer:_pdfProblems[i].answer||'A',
+    explanation:_pdfProblems[i].explanation||'',
+    difficulty:_pdfProblems[i].difficulty||'medium',
+    tags:_pdfProblems[i].tags||[],
+    created_by:currentUser.id,
+    is_active:true
+  }));
+
+  const{error}=await sb.from('judge_problems').insert(rows);
+  btn.disabled=false;btn.textContent='导入选中题目';
+  if(error){showToast('导入失败: '+error.message,'error');return;}
+  showToast(`成功导入 ${rows.length} 道题 ✓`,'success');
+  closeModal('quiz-pdf-modal');
+  renderQuizList();
+}
 window.addEventListener('scroll',()=>{
   document.querySelector('nav').classList.toggle('scrolled', window.scrollY > 40);
 },{ passive:true });
