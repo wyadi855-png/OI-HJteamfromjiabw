@@ -3217,13 +3217,13 @@ section:not(.active) {
   <!-- 教学计划内容 -->
   <div id="syllabus-pane" class="course-pane" style="display:none">
     <div class="syllabus-tabs" id="syllabus-tabs" style="margin-bottom:16px">
-      <button class="syllabus-tab active" data-class="1" onclick="switchSyllabusClass(1)">周六早八</button>
-      <button class="syllabus-tab" data-class="2" onclick="switchSyllabusClass(2)">周六早十</button>
-      <button class="syllabus-tab" data-class="3" onclick="switchSyllabusClass(3)">周六午一</button>
-      <button class="syllabus-tab" data-class="4" onclick="switchSyllabusClass(4)">周六午三</button>
-      <button class="syllabus-tab" data-class="5" onclick="switchSyllabusClass(5)">周六晚八</button>
-      <button class="syllabus-tab" data-class="6" onclick="switchSyllabusClass(6)">周天早八</button>
-      <button class="syllabus-tab" data-class="7" onclick="switchSyllabusClass(7)">NOIP班</button>
+      <button class="syllabus-tab active" data-class="1" onclick="switchSyllabusClass(1)">L1</button>
+      <button class="syllabus-tab" data-class="2" onclick="switchSyllabusClass(2)">L2</button>
+      <button class="syllabus-tab" data-class="3" onclick="switchSyllabusClass(3)">L3</button>
+      <button class="syllabus-tab" data-class="4" onclick="switchSyllabusClass(4)">L4</button>
+      <button class="syllabus-tab" data-class="5" onclick="switchSyllabusClass(5)">L5</button>
+      <button class="syllabus-tab" data-class="6" onclick="switchSyllabusClass(6)">L6</button>
+      <button class="syllabus-tab" data-class="7" onclick="switchSyllabusClass(7)">NOIP</button>
     </div>
     <div id="syllabus-content"></div>
   </div>
@@ -3320,7 +3320,7 @@ section:not(.active) {
 
 <!-- MEMBERS -->
 <section id="members"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// members</div><h1>队员列表</h1><p>认识我们的每一位成员。</p></div></div>
+  <div class="page-header"><div class="page-header-left"><div class="label">// members</div><h1>Oiers</h1><p>认识我们的每一位 Oier。</p></div></div>
   <div id="members-list"><div class="loading"><div class="spinner"></div>加载中…</div></div>
 </div></section>
 
@@ -3358,13 +3358,13 @@ section:not(.active) {
     <div class="form-group"><label>训练组</label>
       <select id="reg-group">
         <option value="">暂不选择</option>
-        <option value="1">周六早八</option>
-        <option value="2">周六早十</option>
-        <option value="3">周六午一</option>
-        <option value="4">周六午三</option>
-        <option value="5">周六晚八</option>
-        <option value="6">周天早八</option>
-        <option value="7">NOIP班</option>
+        <option value="1">L1</option>
+        <option value="2">L2</option>
+        <option value="3">L3</option>
+        <option value="4">L4</option>
+        <option value="5">L5</option>
+        <option value="6">L6</option>
+        <option value="7">Oth</option>
         <option value="8">抖音</option>
       </select>
     </div>
@@ -3568,13 +3568,13 @@ section:not(.active) {
         <div class="form-group">
           <label>班级</label>
           <select id="sl-class">
-            <option value="1">周六早八</option>
-            <option value="2">周六早十</option>
-            <option value="3">周六午一</option>
-            <option value="4">周六午三</option>
-            <option value="5">周六晚八</option>
-            <option value="6">周天早八</option>
-            <option value="7">NOIP班</option>
+            <option value="1">L1</option>
+            <option value="2">L2</option>
+            <option value="3">L3</option>
+            <option value="4">L4</option>
+            <option value="5">L5</option>
+            <option value="6">L6</option>
+            <option value="7">Oth</option>
           </select>
         </div>
         <div class="form-group">
@@ -7455,7 +7455,7 @@ async function runArchiveCode(problemId, editor){
 }
 
 // ── 教学计划 ──────────────────────────────────────────────────
-const CLASS_NAMES = {1:'周六早八',2:'周六早十',3:'周六午一',4:'周六午三',5:'周六晚八',6:'周天早八',7:'NOIP班'};
+const CLASS_NAMES = {1:'L1',2:'L2',3:'L3',4:'L4',5:'L5',6:'L6',7:'Oth'};
 let currentSyllabusClass = 1;
 let syllabusExamples = [];  // [{text, url}]
 let syllabusHomework = [];
@@ -7876,7 +7876,7 @@ async function loadMembers(){
   const ungrouped=(profiles||[]).filter(p=>p.role!=='coach'&&!p.group_id);
   if(ungrouped.length){
     const sec=document.createElement('div');sec.className='members-section';
-    sec.innerHTML='<div class="members-section-title">其他成员<span class="members-section-count">'+ungrouped.length+' 人</span></div><div class="members-grid" id="mg-none"></div>';
+    sec.innerHTML='<div class="members-section-title">Oth<span class="members-section-count">'+ungrouped.length+' 人</span></div><div class="members-grid" id="mg-none"></div>';
     el.appendChild(sec);ungrouped.forEach(p=>sec.querySelector('#mg-none').appendChild(makeMemberCard(p,myFollowing,myFollowers,grps)));
   }
   } catch(e){ console.error("loadMembers:", e); showToast("加载失败，请刷新重试", "error"); }
@@ -8418,14 +8418,14 @@ async function showContestChart(contestId, preloaded, title){
       <div class="form-group" id="set-group-wrap">
         <label>训练组</label>
         <select id="set-group">
-          <option value="">不设置</option>
-          <option value="1">周六早八</option>
-          <option value="2">周六早十</option>
-          <option value="3">周六午一</option>
-          <option value="4">周六午三</option>
-          <option value="5">周六晚八</option>
-          <option value="6">周天早八</option>
-          <option value="7">NOIP班</option>
+          <option value="">请选择</option>
+          <option value="1">L1</option>
+          <option value="2">L2</option>
+          <option value="3">L3</option>
+          <option value="4">L4</option>
+          <option value="5">L5</option>
+          <option value="6">L6</option>
+          <option value="7">Oth</option>
         </select>
       </div>
       <div id="settings-avatar-error" class="form-error"></div>
