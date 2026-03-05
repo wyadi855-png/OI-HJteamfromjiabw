@@ -3124,8 +3124,8 @@ function avatarEl(username,avatarUrl,size,fontSize){
   function draw() {
     ctx.clearRect(0, 0, W, H);
 
-    // 每 50 帧新增一个词，更稀疏
-    if (frame % 50 === 0) {
+    // 每 50 帧新增一个词，最多保持 18 个
+    if (frame % 50 === 0 && streams.length < 18) {
       const l = Math.floor(Math.random() * LANES);
       streams.push(spawnStream(l, W + 60 + Math.random() * 300));
     }
@@ -5833,12 +5833,16 @@ function switchCourseTab(tab){
   const lPane=document.getElementById('lectures-list');
   const sPane=document.getElementById('syllabus-pane');
   if(lPane)lPane.style.display=isLectures?'':'none';
-  if(sPane)sPane.style.display=isLectures?'none':'';
+  if(sPane)sPane.style.display=isLectures?'none':'block';
   const btnL=document.getElementById('btn-new-lecture');
   const btnS=document.getElementById('btn-add-syllabus');
   if(btnL)btnL.style.display=(!isLectures||!isCoach())?'none':'';
   if(btnS)btnS.style.display=(isLectures||!isCoach())?'none':'';
-  if(!isLectures)switchSyllabusClass(currentSyllabusClass||1);
+  if(!isLectures){
+    // 确保 syllabus-content 存在后再加载
+    const sc=document.getElementById('syllabus-content');
+    if(sc)switchSyllabusClass(currentSyllabusClass||1);
+  }
 }
 async function loadSyllabus(){
   switchSyllabusClass(currentSyllabusClass||1);
@@ -5856,7 +5860,7 @@ async function switchSyllabusClass(classId){
   const { data, error } = await sb.from('syllabus')
     .select('*').eq('class_id', classId).order('week', {ascending: false});
 
-  if (error){ el.innerHTML = `<div class="empty">加载失败: ${error.message}</div>`; return; }
+  if (error){ el.innerHTML = `<div class="empty" style="color:var(--red);font-family:var(--mono);font-size:12px">加载失败: ${error.message}<br>code: ${error.code}<br>hint: ${error.hint||''}</div>`; return; }
   if (!data || !data.length){
     el.innerHTML = `
       <div class="syllabus-empty">
