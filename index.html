@@ -635,6 +635,10 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .emoji-grid{display:flex;flex-wrap:wrap;gap:2px;}
 .emoji-grid span{width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;border-radius:6px;transition:background 0.1s;}
 .emoji-grid span:hover{background:rgba(108,142,245,0.15);}
+/* ── COURSE SUB TABS ── */
+.course-sub-tab{background:none;border:none;border-bottom:2px solid transparent;padding:8px 16px;font-family:var(--mono);font-size:13px;color:var(--text3);cursor:pointer;transition:all 0.2s;margin-bottom:-1px;}
+.course-sub-tab:hover{color:var(--text);}
+.course-sub-tab.active{color:var(--accent2);border-bottom-color:var(--accent2);}
 /* ── LECTURES ── */
 .lecture-item{display:flex;gap:20px;padding:18px 0;border-bottom:1px solid rgba(30,37,64,0.4);}
 .lecture-item:last-child{border-bottom:none;}
@@ -2232,7 +2236,6 @@ section:not(.active) {
           <a onclick="closeMoreMenu();show('emotions')" id="nav-emotions-m">✍️ 随笔</a>
           <div class="nav-more-divider"></div>
           <div class="nav-more-group-label">教学</div>
-          <a onclick="closeMoreMenu();show('syllabus')" id="nav-syllabus">📅 教学计划</a>
           <div class="nav-more-divider"></div>
           <div class="nav-more-group-label">工具</div>
           <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
@@ -2570,10 +2573,32 @@ section:not(.active) {
 <!-- LECTURES -->
 <section id="lectures"><div class="container">
   <div class="page-header">
-    <div class="page-header-left"><div class="label">// lecture_records</div><h1>课程记录</h1><p>每次课的主题与练习题，题目均链接至洛谷。</p></div>
-    <button class="btn btn-yellow btn-sm" id="btn-new-lecture" onclick="openLectureModal()" style="display:none">+ 添加课程</button>
+    <div class="page-header-left"><div class="label">// courses</div><h1>课程</h1><p>课程记录与各班教学计划。</p></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-yellow btn-sm" id="btn-new-lecture" onclick="openLectureModal()" style="display:none">+ 添加课程</button>
+      <button id="btn-add-syllabus" class="btn btn-primary btn-sm" onclick="openSyllabusModal()" style="display:none">+ 添加本周计划</button>
+    </div>
   </div>
-  <div id="lectures-list"></div>
+  <!-- 子标签 -->
+  <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid rgba(30,37,64,0.5);padding-bottom:0">
+    <button id="course-tab-lectures" class="course-sub-tab active" onclick="switchCourseTab('lectures')">📖 课程记录</button>
+    <button id="course-tab-syllabus" class="course-sub-tab" onclick="switchCourseTab('syllabus')">📅 教学计划</button>
+  </div>
+  <!-- 课程记录内容 -->
+  <div id="lectures-list" class="course-pane"></div>
+  <!-- 教学计划内容 -->
+  <div id="syllabus-pane" class="course-pane" style="display:none">
+    <div class="syllabus-tabs" id="syllabus-tabs" style="margin-bottom:16px">
+      <button class="syllabus-tab active" data-class="1" onclick="switchSyllabusClass(1)">周六早八</button>
+      <button class="syllabus-tab" data-class="2" onclick="switchSyllabusClass(2)">周六早十</button>
+      <button class="syllabus-tab" data-class="3" onclick="switchSyllabusClass(3)">周六午一</button>
+      <button class="syllabus-tab" data-class="4" onclick="switchSyllabusClass(4)">周六午三</button>
+      <button class="syllabus-tab" data-class="5" onclick="switchSyllabusClass(5)">周六晚八</button>
+      <button class="syllabus-tab" data-class="6" onclick="switchSyllabusClass(6)">周天早八</button>
+      <button class="syllabus-tab" data-class="7" onclick="switchSyllabusClass(7)">NOIP班</button>
+    </div>
+    <div id="syllabus-content"></div>
+  </div>
 </div></section>
 
 <!-- ARCHIVE -->
@@ -2900,28 +2925,7 @@ section:not(.active) {
 
 
 
-<section id="syllabus"><div class="container">
-  <div class="page-header">
-    <div class="page-header-left">
-      <div class="label">// teaching_plan</div>
-      <h1>教学计划</h1>
-      <p>各班级每周教学内容、例题与作业。</p>
-    </div>
-    <button id="btn-add-syllabus" class="btn btn-primary btn-sm" onclick="openSyllabusModal()" style="display:none">+ 添加本周计划</button>
-  </div>
 
-  <div class="syllabus-tabs" id="syllabus-tabs">
-    <button class="syllabus-tab active" data-class="1" onclick="switchSyllabusClass(1)">周六早八</button>
-    <button class="syllabus-tab" data-class="2" onclick="switchSyllabusClass(2)">周六早十</button>
-    <button class="syllabus-tab" data-class="3" onclick="switchSyllabusClass(3)">周六午一</button>
-    <button class="syllabus-tab" data-class="4" onclick="switchSyllabusClass(4)">周六午三</button>
-    <button class="syllabus-tab" data-class="5" onclick="switchSyllabusClass(5)">周六晚八</button>
-    <button class="syllabus-tab" data-class="6" onclick="switchSyllabusClass(6)">周天早八</button>
-    <button class="syllabus-tab" data-class="7" onclick="switchSyllabusClass(7)">NOIP班</button>
-  </div>
-
-  <div id="syllabus-content"></div>
-</div></section>
 
 <!-- SYLLABUS MODAL -->
 <div class="modal-overlay" id="syllabus-modal">
@@ -3222,7 +3226,7 @@ function show(id){
   const navEl=document.getElementById('nav-'+id);
   if(navEl)navEl.classList.add('active');
   window.scrollTo(0,0);
-  const loaders={syllabus:loadSyllabus,judge:initJudge,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks};
+  const loaders={syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks};
   if(loaders[id])loaders[id]();
 }
 
@@ -3234,7 +3238,7 @@ function renderAuthArea(){
     area.innerHTML=`<span class="nav-user" style="cursor:pointer" onclick="showProfile('${currentProfile.username}')">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}<button class="btn btn-outline btn-sm" onclick="openModal('settings-modal');loadSettingsData()">设置</button><button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
     if(isCoach())coachNav.style.display='';
     ['btn-new-note','btn-new-post'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
-    if(isCoach())['btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
+    if(isCoach())['btn-new-contest','btn-new-problem','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
   }else{
     area.innerHTML=`<button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button>`;
     coachNav.style.display='none';
@@ -5822,11 +5826,22 @@ let syllabusExamples = [];  // [{text, url}]
 let syllabusHomework = [];
 let syllabusEditId = null;
 
+function switchCourseTab(tab){
+  const isLectures=tab==='lectures';
+  document.getElementById('course-tab-lectures')?.classList.toggle('active',isLectures);
+  document.getElementById('course-tab-syllabus')?.classList.toggle('active',!isLectures);
+  const lPane=document.getElementById('lectures-list');
+  const sPane=document.getElementById('syllabus-pane');
+  if(lPane)lPane.style.display=isLectures?'':'none';
+  if(sPane)sPane.style.display=isLectures?'none':'';
+  const btnL=document.getElementById('btn-new-lecture');
+  const btnS=document.getElementById('btn-add-syllabus');
+  if(btnL)btnL.style.display=(!isLectures||!isCoach())?'none':'';
+  if(btnS)btnS.style.display=(isLectures||!isCoach())?'none':'';
+  if(!isLectures)switchSyllabusClass(currentSyllabusClass||1);
+}
 async function loadSyllabus(){
-  // Show add button only for coach
-  const btn = document.getElementById('btn-add-syllabus');
-  if (btn) btn.style.display = isCoach() ? '' : 'none';
-  switchSyllabusClass(currentSyllabusClass);
+  switchSyllabusClass(currentSyllabusClass||1);
 }
 
 async function switchSyllabusClass(classId){
