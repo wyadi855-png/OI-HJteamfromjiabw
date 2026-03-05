@@ -4837,7 +4837,12 @@ async function showProfile(username){
   }
   el.innerHTML=html;
   buildHeatmap(profile.id).then(h=>{const hel=document.getElementById('heatmap-'+username);if(hel)hel.innerHTML=h;});
-  buildRadar(notes||[], username);
+  // 有洛谷UID则拉洛谷数据，否则用本站题解
+  if(profile.luogu_uid){
+    fetchLuoguAndBuildRadar(profile.luogu_uid, notes||[], username);
+  } else {
+    buildRadar(notes||[], [], username);
+  }
   loadProfileSocial(profile,username);
 }
 
@@ -5161,7 +5166,84 @@ function markAllRead(){
 
 
 // ── Ability Radar ─────────────────────────────────────────
-function buildRadar(notes, username){
+// 洛谷题号 → 知识点标签映射（常见题目）
+const LUOGU_TAG_MAP = {
+  // 题目tags由洛谷API返回，这里做fallback
+};
+
+// 洛谷标签ID → 我们的维度关键词
+const LUOGU_TAG_KEYWORDS = {
+  // 数据结构
+  '线段树':' 数据结构','树状数组':'数据结构','并查集':'数据结构','堆':'数据结构',
+  '单调栈':'数据结构','单调队列':'数据结构','哈希表':'数据结构','分块':'数据结构',
+  // 图论
+  '最短路':'图论','最小生成树':'图论','拓扑排序':'图论','二分图':'图论',
+  '网络流':'图论','强连通分量':'图论','LCA':'图论','差分约束':'图论',
+  // DP
+  '动态规划':'动态规划','背包':'动态规划','树形dp':'动态规划','数位dp':'动态规划',
+  '区间dp':'动态规划','状压dp':'动态规划',
+  // 数学
+  '数论':'数学','质数':'数学','组合数学':'数学','矩阵':'数学','多项式':'数学',
+  '博弈论':'数学','概率期望':'数学',
+  // 字符串
+  'KMP':'字符串','后缀数组':'字符串','后缀自动机':'字符串','AC自动机':'字符串',
+  'Manacher':'字符串','字符串哈希':'字符串',
+  // 搜索
+  'BFS':'搜索','DFS':'搜索','搜索':'搜索','迭代加深':'搜索',
+  // 模拟
+  '模拟':'模拟','构造':'模拟',
+  // 常规算法
+  '二分':'常规算法','前缀和':'常规算法','差分':'常规算法','双指针':'常规算法',
+  '排序':'常规算法','离散化':'常规算法',
+  // 贪心
+  '贪心':'贪心',
+};
+
+async function fetchLuoguAndBuildRadar(uid, localNotes, username){
+  const canvas = document.getElementById('radar-'+username);
+  if(!canvas) return;
+  // 显示加载状态
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.font='13px monospace'; ctx.fillStyle='rgba(108,142,245,0.6)';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('正在拉取洛谷数据…', canvas.width/2, canvas.height/2);
+
+  try {
+    // 使用 allorigins 代理绕过 CORS
+    const url = `https://www.luogu.com.cn/user/${uid}?_contentOnly=1`;
+    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const res = await fetch(proxy, {signal: AbortSignal.timeout(8000)});
+    const json = await res.json();
+    const data = JSON.parse(json.contents);
+
+    // 提取通过题目的标签
+    const luoguTags = [];
+    const passed = data?.currentData?.passedProblems || [];
+    passed.forEach(p => {
+      (p.tags||[]).forEach(tag => {
+        const name = tag.name||'';
+        luoguTags.push(name);
+      });
+    });
+
+    buildRadar(localNotes, luoguTags, username, passed.length);
+  } catch(e) {
+    console.warn('洛谷数据拉取失败:', e);
+    // fallback到本地题解
+    buildRadar(localNotes, [], username);
+    // 提示
+    const canvas2 = document.getElementById('radar-'+username);
+    if(canvas2){
+      const ctx2 = canvas2.getContext('2d');
+      ctx2.font='11px monospace'; ctx2.fillStyle='rgba(255,150,100,0.6)';
+      ctx2.textAlign='center'; ctx2.textBaseline='bottom';
+      ctx2.fillText('洛谷数据加载失败，使用本站数据', canvas2.width/2, canvas2.height-4);
+    }
+  }
+}
+
+function buildRadar(notes, luoguTags=[], username, luoguTotal=0){
   const canvas = document.getElementById('radar-'+username);
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -5179,14 +5261,20 @@ function buildRadar(notes, username){
     { label:'贪心',     keys:['贪心','greedy','交换论证','区间贪心','哈夫曼'] },
   ];
 
-  // 统计每个维度的题目数
+  // 统计每个维度的题目数（本站题解 + 洛谷标签）
   const scores = DIMS.map(dim => {
     let cnt = 0;
+    // 本站题解
     notes.forEach(n => {
       const t = (n.topic||'').toLowerCase();
       if(dim.keys.some(k => t.includes(k.toLowerCase()))) cnt++;
     });
-    return cnt;
+    // 洛谷标签（每个匹配的tag算0.5，避免权重过高）
+    luoguTags.forEach(tag => {
+      const mappedDim = LUOGU_TAG_KEYWORDS[tag];
+      if(mappedDim === dim.label) cnt += 0.5;
+    });
+    return Math.round(cnt);
   });
 
   // 归一化：最多不超过10分，至少显示一点底色
@@ -5282,10 +5370,10 @@ function buildRadar(notes, username){
   ctx.fillStyle='rgba(45,232,176,0.9)';
   ctx.textAlign='center';
   ctx.textBaseline='middle';
-  ctx.fillText(total, cx, cy-6);
+  ctx.fillText(luoguTotal||total, cx, cy-6);
   ctx.font='10px monospace';
   ctx.fillStyle='rgba(120,130,160,0.6)';
-  ctx.fillText('题解总数', cx, cy+10);
+  ctx.fillText(luoguTotal?'洛谷通过数':'题解总数', cx, cy+10);
 }
 
 // ── Post Likes (orz) ─────────────────────────────────────
@@ -5414,15 +5502,17 @@ async function loadSettingsData(){
   if(!currentProfile)return;
   document.getElementById('set-avatar').value=currentProfile.avatar_url||'';
   document.getElementById('set-bio').value=currentProfile.bio||'';
+  document.getElementById('set-luogu-uid').value=currentProfile.luogu_uid||'';
 }
 async function saveSettings(){
   const avatar_url=document.getElementById('set-avatar').value.trim();
   const bio=document.getElementById('set-bio').value.trim();
+  const luogu_uid=document.getElementById('set-luogu-uid').value.trim();
   const gv=document.getElementById('set-group')?.value;
   const group_id=gv?parseInt(gv):null;
-  const{error}=await sb.from('profiles').update({avatar_url,bio,group_id}).eq('id',currentUser.id);
+  const{error}=await sb.from('profiles').update({avatar_url,bio,group_id,luogu_uid}).eq('id',currentUser.id);
   if(error){document.getElementById('settings-avatar-error').textContent=error.message;return;}
-  currentProfile={...currentProfile,avatar_url,bio,group_id};
+  currentProfile={...currentProfile,avatar_url,bio,group_id,luogu_uid};
   closeModal('settings-modal');showToast('设置已保存 ✓','success');
 }
 async function savePassword(){
@@ -7226,6 +7316,10 @@ async function showContestChart(contestId, preloaded, title){
       <div class="form-group">
         <label>个人简介</label>
         <textarea id="set-bio" rows="3" placeholder="介绍一下自己…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>洛谷 UID <span style="font-size:11px;color:var(--text3);font-weight:400">（填写后雷达图将使用洛谷通过题目）</span></label>
+        <input type="text" id="set-luogu-uid" placeholder="如：123456">
       </div>
       <div class="form-group" id="set-group-wrap" style="display:none">
         <label>班级</label>
