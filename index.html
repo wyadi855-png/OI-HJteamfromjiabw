@@ -803,6 +803,18 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .note-img-preview{position:relative;width:80px;height:80px;}
 .note-img-preview img{width:100%;height:100%;object-fit:cover;border-radius:6px;border:1px solid rgba(108,142,245,0.2);}
 .note-img-preview-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#e53e3e;border:none;border-radius:50%;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+/* note detail meta */
+.note-meta-block{display:flex;flex-direction:column;gap:10px;margin:12px 0 20px;padding-bottom:16px;border-bottom:1px solid rgba(108,142,245,0.1);}
+.note-meta-info{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text3);}
+.note-meta-info .author{color:var(--accent);cursor:pointer;}
+.note-meta-info .author:hover{text-decoration:underline;}
+.note-problem-link{color:rgba(108,142,245,0.8);text-decoration:none;font-family:var(--mono);font-size:12px;}
+.note-problem-link:hover{color:var(--accent2);}
+.note-meta-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+.note-meta-actions .like-btn,.note-meta-actions .bookmark-btn{padding:5px 12px;font-size:12px;}
+.note-meta-actions .btn-ghost{color:rgba(120,130,160,0.5);border-color:rgba(108,142,245,0.12);font-size:11px;padding:4px 10px;}
+.note-meta-actions .btn-ghost:hover{color:rgba(180,195,255,0.8);border-color:rgba(108,142,245,0.3);}
+.note-meta-actions .btn-danger{font-size:11px;padding:4px 10px;}
 /* ── LECTURES ── */
 .lecture-item{display:flex;gap:20px;padding:18px 0;border-bottom:1px solid rgba(30,37,64,0.4);}
 .lecture-item:last-child{border-bottom:none;}
@@ -4131,19 +4143,23 @@ async function showNote(id){
        </div>`
     : '';
 
-  detail.innerHTML=`<button class="back-btn" onclick="restoreNotesList()">返回列表</button>
+  detail.innerHTML=`<button class="back-btn" onclick="restoreNotesList()">← 返回列表</button>
     <div class="post-title">${escHtml(n.title)}</div>
-    <div class="post-meta">
-      <span class="author" onclick="showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span>
-      <span>${fmtDate(n.created_at)}</span>
-      ${n.problem_id?`<span><a href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} ↗</a></span>`:''}
-      ${n.topic?`<span class="topic-badge">${escHtml(n.topic)}</span>`:''}
-      <span class="view-count">${n.view_count||0}</span>
-      <button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>
-      ${isOwner?`<button class="btn btn-outline btn-sm" onclick="openEditNote(${id})">编辑</button>`:''}
-      <button class="export-btn" onclick="window.print()">📄 导出PDF</button>
-      ${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''}
-      <button class="bookmark-btn ${bookmarked?'saved':''}" onclick="toggleBookmark(${id},${bookmarked})">🔖 ${bookmarked?'已收藏':'收藏'}</button>
+    <div class="note-meta-block">
+      <div class="note-meta-info">
+        <span class="author" onclick="showProfile('${n.profiles?.username||''}')">@${n.profiles?.username||'匿名'}</span>
+        <span>${fmtDate(n.created_at)}</span>
+        ${n.problem_id?`<a class="note-problem-link" href="https://www.luogu.com.cn/problem/${escHtml(n.problem_id)}" target="_blank">${escHtml(n.problem_id)} ↗</a>`:''}
+        ${n.topic?(n.topic||'').split(/[,，、]/).map(t=>t.trim()).filter(Boolean).map(t=>`<span class="topic-badge">${escHtml(t)}</span>`).join(''):''}
+        <span class="view-count">👁 ${n.view_count||0}</span>
+      </div>
+      <div class="note-meta-actions">
+        <button class="like-btn ${liked?'liked':''}" onclick="toggleLike(${id},${liked})">♥ ${likeCount}</button>
+        <button class="bookmark-btn ${bookmarked?'saved':''}" onclick="toggleBookmark(${id},${bookmarked})">${bookmarked?'🔖 已收藏':'🔖 收藏'}</button>
+        ${isOwner?`<button class="btn btn-outline btn-sm" onclick="openEditNote(${id})">编辑</button>`:''}
+        ${isOwner||isCoach()?`<button class="btn btn-danger btn-sm" onclick="deleteNote(${id})">删除</button>`:''}
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">导出 PDF</button>
+      </div>
     </div>
     <div class="post-body md-body" id="note-body-md">
       ${n.content?`<div class="note-section-title">解题思路</div>${renderMd(n.content)}`:''}
