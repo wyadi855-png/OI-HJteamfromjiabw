@@ -1397,24 +1397,23 @@ body::after {
 
 /* 4. Hero title depth */
 #hero-main-title {
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
+  font-size: 0;
+  line-height: 1;
   background: none;
   -webkit-text-fill-color: unset;
   filter: none;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 /* 主题词：强制一行，字号自适应不换行 */
 .hero-topic {
   display: block;
   color: rgba(225, 240, 255, 0.95);
-  font-size: inherit;
+  font-size: clamp(22px, 4vw, 56px);
   font-weight: 800;
   white-space: nowrap;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   text-shadow:
     0 1px 0   rgba(255,255,255,0.06),
     0 4px 24px rgba(0,0,0,0.7);
@@ -1429,27 +1428,21 @@ body::after {
 /* 每条说明：边缘呼吸闪光，静态显示 */
 .hero-phrase {
   display: block;
-  font-size: 0.3em;
+  font-size: 13px;
   font-weight: 400;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   white-space: nowrap;
-  color: transparent;
-  background: linear-gradient(90deg,
-    rgba(45,232,176,0.0)   0%,
-    rgba(45,232,176,0.35) 15%,
-    rgba(180,240,255,0.75) 50%,
-    rgba(45,232,176,0.35) 85%,
-    rgba(45,232,176,0.0)  100%
-  );
-  background-size: 300% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: phraseShimmer 4s ease-in-out infinite;
+  /* 用 color + text-shadow 做呼吸光，比 background-clip 更可靠 */
+  color: rgba(45,232,176,0.5);
+  animation: phraseBreath 3.5s ease-in-out infinite;
 }
-@keyframes phraseShimmer {
-  0%   { background-position: 100% center; }
-  50%  { background-position:   0% center; }
-  100% { background-position: 100% center; }
+.hero-phrase { animation: phraseBreath 3.5s ease-in-out infinite; }
+.hero-phrase.phrase-1 { animation-delay: 0.7s; }
+.hero-phrase.phrase-2 { animation-delay: 1.4s; }
+@keyframes phraseBreath {
+  0%   { color: rgba(45,232,176,0.25); text-shadow: none; }
+  50%  { color: rgba(180,240,255,0.9); text-shadow: 0 0 12px rgba(45,232,176,0.6), 0 0 24px rgba(45,232,176,0.25); }
+  100% { color: rgba(45,232,176,0.25); text-shadow: none; }
 }
 /* 旧的 typewriter 隐藏 */
 .typewriter-cursor { display: none; }
@@ -5332,7 +5325,7 @@ function initTopicAutocomplete(inputId){
   const titleEl = document.getElementById('hero-main-title');
   if(titleEl){
     const phrasesHtml = daily.phrases.map((p,i) =>
-      `<span class="hero-phrase" style="animation-delay:${i*0.6}s">${p}</span>`
+      `<span class="hero-phrase phrase-${i}">${p}</span>`
     ).join('');
     titleEl.innerHTML =
       `<span class="hero-topic">${daily.line1}${daily.line2 ? '&nbsp;' + daily.line2 : ''}</span>` +
