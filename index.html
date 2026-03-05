@@ -63,7 +63,7 @@ nav.scrolled{
 @keyframes fadeIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
 
 /* ── SECTIONS ── */
-section{display:none;padding:88px 0 60px;min-height:100vh;opacity:0;transform:translateY(14px);transition:opacity 0.4s cubic-bezier(0.4,0,0.2,1),transform 0.4s cubic-bezier(0.4,0,0.2,1);}
+section{display:none;padding:128px 0 60px;min-height:100vh;opacity:0;transform:translateY(14px);transition:opacity 0.4s cubic-bezier(0.4,0,0.2,1),transform 0.4s cubic-bezier(0.4,0,0.2,1);}
 section.active{display:block;}
 section.active.visible{opacity:1;transform:translateY(0);}
 
@@ -95,7 +95,7 @@ section.active.visible{opacity:1;transform:translateY(0);}
 
 /* ── PAGE HEADER ── */
 .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid rgba(108,142,245,0.08);}
-.page-header-left .label{font-size:12px;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;font-family:var(--mono);}
+.page-header-left .label{font-size:11px;color:var(--text3);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:10px;font-family:var(--mono);opacity:0.6;}
 .page-header-left h1{font-size:28px;font-weight:700;letter-spacing:-0.02em;}
 .page-header-left p{font-size:13px;color:var(--text2);margin-top:6px;}
 
@@ -527,7 +527,7 @@ body.light .modal{background:rgba(248,250,255,0.98)!important;}
   .nav-logo{font-size:15px;}
 
   /* Sections */
-  section{padding:72px 0 48px;}
+  section{padding:104px 0 48px;}
   .container{padding:0 16px;}
   .page-header{flex-direction:column;gap:12px;}
   .page-header-left h1{font-size:22px;}
@@ -1887,8 +1887,22 @@ section:not(.active) {
 <!-- ARCHIVE -->
 <section id="archive"><div class="container">
   <div class="page-header">
-    <div class="page-header-left"><div class="label">// problem_archive</div><h1>题目存档</h1><p>训练题库，按难度与知识点分类。</p></div>
-    <button class="btn btn-yellow btn-sm" id="btn-new-problem" onclick="openProblemModal()" style="display:none">+ 添加题目</button>
+    <div class="page-header-left"><div class="label">// problem_archive</div><h1>题目存档</h1><p>训练题库，按难度与知识点分类。点击题号可直达洛谷。</p></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-outline btn-sm" id="btn-luogu-import" onclick="openModal('luogu-import-modal')" style="display:none">📥 洛谷批量导入</button>
+      <button class="btn btn-yellow btn-sm" id="btn-new-problem" onclick="openProblemModal()" style="display:none">+ 添加题目</button>
+    </div>
+  </div>
+  <!-- 搜索栏 -->
+  <div style="display:flex;gap:10px;margin-bottom:16px">
+    <input type="text" id="archive-search" placeholder="🔍 搜索题号或标题…" style="flex:1;max-width:320px" oninput="filterArchive(this.value)">
+    <select id="archive-diff-filter" onchange="filterArchive()" style="font-family:var(--mono);font-size:12px">
+      <option value="">全部难度</option>
+      <option value="入门">入门</option>
+      <option value="普及">普及</option>
+      <option value="提高">提高</option>
+      <option value="省选">省选</option>
+    </select>
   </div>
   <div id="archive-list"></div>
 </div></section>
@@ -2385,28 +2399,27 @@ function avatarEl(username,avatarUrl,size,fontSize){
   ];
 
   // Many lanes spread evenly across FULL screen height
-  const LANES = 18;
+  const LANES = 6;  // 减少到6条，行间距更宽，不拥挤
   const streams = [];
 
   function spawnStream(laneIdx, startX) {
-    // Divide full screen height evenly, slight random jitter per lane
     const baseY = ((laneIdx + 0.5) / LANES) * H;
-    const y = baseY + (Math.random() - 0.5) * (H / LANES) * 0.6;
-    const speed = 0.22 + Math.random() * 0.65;
-    const size = 10 + Math.random() * 8;
-    const opacity = 0.15 + Math.random() * 0.35;
+    const y = baseY + (Math.random() - 0.5) * (H / LANES) * 0.4;
+    const speed = 0.14 + Math.random() * 0.28;   // 更慢，飘逸感
+    const size = 11 + Math.random() * 5;
+    const opacity = 0.05 + Math.random() * 0.10; // 更淡，不抢眼
     const color = colors[Math.floor(Math.random() * colors.length)];
     const word = words[Math.floor(Math.random() * words.length)];
     const x = startX !== undefined ? startX : W + 60 + Math.random() * 600;
     return { word, color, x, y, speed, size, opacity, laneIdx };
   }
 
-  // Pre-populate all lanes with words spread across screen
+  // 每条 lane 初始只放 1~2 个词，让画面更疏朗
   for (let l = 0; l < LANES; l++) {
-    const count = 5 + Math.floor(Math.random() * 5);
+    const count = 1 + Math.floor(Math.random() * 2);
     for (let i = 0; i < count; i++) {
       const s = spawnStream(l);
-      s.x = Math.random() * W * 1.5 - W * 0.1; // spread across screen initially
+      s.x = Math.random() * W * 1.3 - W * 0.1;
       streams.push(s);
     }
   }
@@ -2415,8 +2428,8 @@ function avatarEl(username,avatarUrl,size,fontSize){
   function draw() {
     ctx.clearRect(0, 0, W, H);
 
-    // Spawn new words from right
-    if (frame % 14 === 0) {
+    // 每 50 帧新增一个词，更稀疏
+    if (frame % 50 === 0) {
       const l = Math.floor(Math.random() * LANES);
       streams.push(spawnStream(l, W + 60 + Math.random() * 300));
     }
@@ -2504,11 +2517,11 @@ function renderAuthArea(){
     area.innerHTML=`<span class="nav-user" style="cursor:pointer" onclick="showProfile('${currentProfile.username}')">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}<button class="btn btn-outline btn-sm" onclick="openModal('settings-modal');loadSettingsData()">设置</button><button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
     if(isCoach())coachNav.style.display='';
     ['btn-new-note','btn-new-post'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
-    if(isCoach())['btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
+    if(isCoach())['btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
   }else{
     area.innerHTML=`<button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button>`;
     coachNav.style.display='none';
-    ['btn-new-note','btn-new-post','btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+    ['btn-new-note','btn-new-post','btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   }
 }
 
@@ -3377,13 +3390,20 @@ async function submitLecture(){
 async function deleteLecture(id){if(!confirm('确认删除？'))return;await sb.from('lectures').delete().eq('id',id);showToast('已删除','success');loadLectures();}
 
 // ── Archive ────────────────────────────────────────────────
-async function loadArchive(){
-  try{
-  const list=document.getElementById('archive-list');
-  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
-  const{data}=await sb.from('problem_archive').select('*').order('created_at',{ascending:false});
-  if(!data||!data.length){list.innerHTML='<div class="empty">暂无题目，教练可添加</div>';return;}
-  list.innerHTML=`<div class="archive-table-wrap"><table class="archive-table"><thead><tr><th>题目</th><th>链接</th><th>难度</th><th>知识点</th>${isCoach()?'<th></th>':''}</tr></thead><tbody>${data.map(p=>`<tr><td>${escHtml(p.title)}</td><td><a href="https://www.luogu.com.cn/problem/${escHtml(p.problem_id)}" target="_blank">${escHtml(p.problem_id)}</a> <button class="archive-judge-btn" onclick="toggleArchiveJudge(${p.id},'${escHtml(p.title)}')">⚡ 做题</button></td><td><span class="diff-badge diff-${p.difficulty||''}">${p.difficulty||'-'}</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--text3)">${escHtml(p.topic||'-')}</td>${isCoach()?`<td><button class="btn btn-danger btn-sm" onclick="deleteProblem(${p.id})">删除</button></td>`:''}</tr>`).join('')}</tbody></table></div>
+let _archiveData = [];
+
+function renderArchiveTable(data){
+  const list = document.getElementById('archive-list');
+  if(!data||!data.length){list.innerHTML='<div class="empty">暂无匹配题目</div>';return;}
+  list.innerHTML=`<div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-bottom:10px">共 ${data.length} 道题</div>
+  <div class="archive-table-wrap"><table class="archive-table"><thead><tr><th>题目</th><th>题号 / 链接</th><th>难度</th><th>知识点</th>${isCoach()?'<th></th>':''}</tr></thead><tbody>${data.map(p=>`<tr>
+    <td>${escHtml(p.title)}</td>
+    <td><a href="https://www.luogu.com.cn/problem/${escHtml(p.problem_id)}" target="_blank" style="font-family:var(--mono);color:var(--accent)">${escHtml(p.problem_id)}</a>
+    <button class="archive-judge-btn" onclick="toggleArchiveJudge(${p.id},'${escHtml(p.title)}')">⚡ 做题</button></td>
+    <td><span class="diff-badge diff-${p.difficulty||''}">${p.difficulty||'-'}</span></td>
+    <td style="font-family:var(--mono);font-size:12px;color:var(--text3)">${escHtml(p.topic||'-')}</td>
+    ${isCoach()?`<td><button class="btn btn-danger btn-sm" onclick="deleteProblem(${p.id})">删除</button></td>`:''}
+  </tr>`).join('')}</tbody></table></div>
   ${data.map(p=>`<div id="archive-judge-${p.id}" class="archive-judge-wrap">
     <div class="judge-toolbar" style="padding:8px 10px;border-radius:8px 8px 0 0">
       <span style="font-family:var(--mono);font-size:12px;color:var(--accent2)">⚡ ${escHtml(p.title)}</span>
@@ -3395,9 +3415,217 @@ async function loadArchive(){
       <button class="judge-btn judge-run-btn" onclick="runArchiveCode(${p.id},document.getElementById('archive-judge-${p.id}')._editor)" style="align-self:flex-end">▶ 运行</button>
     </div>
     <div class="archive-judge-output judge-output" style="min-height:80px;max-height:200px">点击运行查看结果</div>
-  </div>`).join('')}
-  `;
+  </div>`).join('')}`;
+}
+
+async function loadArchive(){
+  try{
+  const list=document.getElementById('archive-list');
+  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const{data}=await sb.from('problem_archive').select('*').order('created_at',{ascending:false});
+  _archiveData = data || [];
+  renderArchiveTable(_archiveData);
   } catch(e){ console.error("loadArchive:", e); showToast("加载失败，请刷新重试", "error"); }
+}
+
+function filterArchive(q){
+  const query = (q !== undefined ? q : document.getElementById('archive-search')?.value || '').toLowerCase();
+  const diff  = document.getElementById('archive-diff-filter')?.value || '';
+  const filtered = _archiveData.filter(p=>{
+    const matchQ = !query || p.title.toLowerCase().includes(query) || (p.problem_id||'').toLowerCase().includes(query) || (p.topic||'').toLowerCase().includes(query);
+    const matchD = !diff || p.difficulty === diff;
+    return matchQ && matchD;
+  });
+  renderArchiveTable(filtered);
+}
+
+// ── 洛谷经典题目预置库 ────────────────────────────────────────
+const LUOGU_PRESETS = {
+  '入门': [
+    {id:'P1001',title:'A+B Problem',diff:'入门',topic:'模拟'},
+    {id:'P1000',title:'超级玛丽游戏',diff:'入门',topic:'模拟'},
+    {id:'P1421',title:'小玉买文具',diff:'入门',topic:'模拟'},
+    {id:'P1425',title:'小鱼的游泳时间',diff:'入门',topic:'模拟'},
+    {id:'P1085',title:'不高兴的津津',diff:'入门',topic:'模拟'},
+    {id:'P1089',title:'津津的储蓄计划',diff:'入门',topic:'模拟'},
+    {id:'P1909',title:'买铅笔',diff:'入门',topic:'模拟'},
+    {id:'P2141',title:'珠心算测验',diff:'入门',topic:'模拟'},
+    {id:'P1035',title:'级数求和',diff:'入门',topic:'模拟'},
+    {id:'P1046',title:'陶陶摘苹果',diff:'入门',topic:'模拟'},
+    {id:'P1047',title:'校门外的树',diff:'入门',topic:'模拟'},
+    {id:'P1116',title:'车厢重组',diff:'入门',topic:'排序'},
+    {id:'P1217',title:'[USACO1.5]回文质数',diff:'入门',topic:'数论'},
+    {id:'P1914',title:'小书童——凯撒密码',diff:'入门',topic:'字符串'},
+    {id:'P2550',title:'[AHOI2001]彩票摇奖',diff:'入门',topic:'模拟'},
+    {id:'P1055',title:'[NOIP2008 普及组] ISBN号码',diff:'入门',topic:'模拟'},
+    {id:'P1071',title:'[NOIP2009 提高组] 潜伏者',diff:'入门',topic:'模拟'},
+    {id:'P1308',title:'[NOIP2011 普及组] 火星人',diff:'入门',topic:'模拟'},
+    {id:'P1478',title:'陶陶摘苹果（升级版）',diff:'入门',topic:'模拟'},
+    {id:'P1957',title:'口算练习题',diff:'入门',topic:'模拟'},
+  ],
+  '普及': [
+    {id:'P1177',title:'【模板】排序',diff:'普及',topic:'排序'},
+    {id:'P1226',title:'【模板】快速幂',diff:'普及',topic:'数论'},
+    {id:'P1090',title:'[NOIP2004 提高组] 合并果子',diff:'普及',topic:'贪心'},
+    {id:'P1182',title:'数列分段 Section II',diff:'普及',topic:'二分'},
+    {id:'P1115',title:'最大子段和',diff:'普及',topic:'DP'},
+    {id:'P1025',title:'[NOIP2001 提高组] 数的划分',diff:'普及',topic:'搜索'},
+    {id:'P1028',title:'[NOIP2001 普及组] 数的计算',diff:'普及',topic:'DP'},
+    {id:'P1036',title:'[NOIP2002 普及组] 选数',diff:'普及',topic:'搜索'},
+    {id:'P1048',title:'[NOIP2005 普及组] 采药',diff:'普及',topic:'背包'},
+    {id:'P1060',title:'[NOIP2006 普及组] 解题报告',diff:'普及',topic:'贪心'},
+    {id:'P1064',title:'[NOIP2006 提高组] 金明的预算方案',diff:'普及',topic:'背包'},
+    {id:'P1068',title:'[NOIP2009 普及组] 幸运数',diff:'普及',topic:'模拟'},
+    {id:'P1072',title:'[NOIP2009 提高组] Hankson的趣味题',diff:'普及',topic:'数论'},
+    {id:'P1396',title:'营救',diff:'普及',topic:'并查集'},
+    {id:'P1525',title:'关押罪犯',diff:'普及',topic:'并查集'},
+    {id:'P1678',title:'烦恼的高考志愿',diff:'普及',topic:'二分'},
+    {id:'P2249',title:'【模板】二分查找',diff:'普及',topic:'二分'},
+    {id:'P3366',title:'【模板】最小生成树',diff:'普及',topic:'图论'},
+    {id:'P4779',title:'【模板】单源最短路径（标准版）',diff:'普及',topic:'图论'},
+    {id:'P1551',title:'亲戚',diff:'普及',topic:'并查集'},
+  ],
+  '提高': [
+    {id:'P3376',title:'【模板】网络最大流',diff:'提高',topic:'网络流'},
+    {id:'P3381',title:'【模板】最小费用最大流',diff:'提高',topic:'网络流'},
+    {id:'P1438',title:'无聊的数列',diff:'提高',topic:'线段树'},
+    {id:'P3372',title:'【模板】线段树 1',diff:'提高',topic:'数据结构'},
+    {id:'P3373',title:'【模板】线段树 2',diff:'提高',topic:'数据结构'},
+    {id:'P3368',title:'【模板】树状数组 2',diff:'提高',topic:'数据结构'},
+    {id:'P3374',title:'【模板】树状数组 1',diff:'提高',topic:'数据结构'},
+    {id:'P2023',title:'[AHOI2009] 维护序列',diff:'提高',topic:'线段树'},
+    {id:'P1972',title:'[SDOI2009] HH的项链',diff:'提高',topic:'莫队'},
+    {id:'P1379',title:'八数码难题',diff:'提高',topic:'搜索'},
+    {id:'P1600',title:'[NOIP2016 提高组] 天天爱跑步',diff:'提高',topic:'树论'},
+    {id:'P2014',title:'[CTSC1997] 选课',diff:'提高',topic:'树形DP'},
+    {id:'P2679',title:'[NOIP2015 提高组] 子串',diff:'提高',topic:'DP'},
+    {id:'P1967',title:'[NOIP2013 提高组] 货车运输',diff:'提高',topic:'图论'},
+    {id:'P2045',title:'[CEOI2011] Balloons',diff:'提高',topic:'贪心'},
+    {id:'P2764',title:'最小路径覆盖问题',diff:'提高',topic:'网络流'},
+    {id:'P1231',title:'教辅的组合',diff:'提高',topic:'网络流'},
+    {id:'P1402',title:'酒店之王',diff:'提高',topic:'网络流'},
+    {id:'P2764',title:'最小路径覆盖',diff:'提高',topic:'图论'},
+    {id:'P3385',title:'【模板】负环',diff:'提高',topic:'图论'},
+  ],
+  'dp': [
+    {id:'P1115',title:'最大子段和',diff:'普及',topic:'DP'},
+    {id:'P1048',title:'采药',diff:'普及',topic:'背包'},
+    {id:'P1064',title:'金明的预算方案',diff:'普及',topic:'背包'},
+    {id:'P1028',title:'数的计算',diff:'普及',topic:'DP'},
+    {id:'P1020',title:'[NOIP1999 提高组] 导弹拦截',diff:'普及',topic:'DP'},
+    {id:'P1091',title:'[NOIP2004 提高组] 合唱队形',diff:'普及',topic:'DP'},
+    {id:'P2679',title:'子串',diff:'提高',topic:'区间DP'},
+    {id:'P2014',title:'选课',diff:'提高',topic:'树形DP'},
+    {id:'P1220',title:'关路灯',diff:'提高',topic:'区间DP'},
+    {id:'P1613',title:'跑路',diff:'提高',topic:'DP'},
+    {id:'P1063',title:'能量项链',diff:'普及',topic:'区间DP'},
+    {id:'P1043',title:'数字游戏',diff:'普及',topic:'区间DP'},
+    {id:'P1006',title:'传纸条',diff:'普及',topic:'DP'},
+    {id:'P2758',title:'编辑距离',diff:'普及',topic:'DP'},
+    {id:'P1896',title:'[SCOI2005] 互不侵犯',diff:'提高',topic:'状压DP'},
+  ],
+  'graph': [
+    {id:'P4779',title:'单源最短路径',diff:'普及',topic:'最短路'},
+    {id:'P3366',title:'最小生成树',diff:'普及',topic:'最小生成树'},
+    {id:'P3387',title:'缩点',diff:'提高',topic:'强连通分量'},
+    {id:'P2341',title:'受欢迎的牛',diff:'提高',topic:'强连通分量'},
+    {id:'P1268',title:'树的重量',diff:'普及',topic:'图论'},
+    {id:'P3384',title:'轻重链剖分',diff:'提高',topic:'树链剖分'},
+    {id:'P3379',title:'LCA（最近公共祖先）',diff:'提高',topic:'倍增'},
+    {id:'P2853',title:'[USACO06DEC] Cow Picnic S',diff:'普及',topic:'图论'},
+    {id:'P1967',title:'货车运输',diff:'提高',topic:'最小生成树'},
+    {id:'P3376',title:'网络最大流',diff:'提高',topic:'网络流'},
+    {id:'P2168',title:'荷马史诗',diff:'提高',topic:'贪心'},
+    {id:'P1744',title:'采购特价商品',diff:'普及',topic:'最短路'},
+    {id:'P2661',title:'信息传递',diff:'普及',topic:'图论'},
+    {id:'P1119',title:'灾后重建',diff:'提高',topic:'Floyd'},
+    {id:'P2966',title:'马拦过河卒',diff:'普及',topic:'图论'},
+  ],
+  'ds': [
+    {id:'P3374',title:'树状数组 1',diff:'提高',topic:'树状数组'},
+    {id:'P3368',title:'树状数组 2',diff:'提高',topic:'树状数组'},
+    {id:'P3372',title:'线段树 1',diff:'提高',topic:'线段树'},
+    {id:'P3373',title:'线段树 2',diff:'提高',topic:'线段树'},
+    {id:'P1531',title:'I Hate It',diff:'提高',topic:'线段树'},
+    {id:'P2023',title:'维护序列',diff:'提高',topic:'线段树'},
+    {id:'P3865',title:'ST表',diff:'普及',topic:'数据结构'},
+    {id:'P3834',title:'可持久化线段树',diff:'提高',topic:'数据结构'},
+    {id:'P2234',title:'[HNOI2002] 营业额统计',diff:'提高',topic:'平衡树'},
+    {id:'P3369',title:'普通平衡树',diff:'提高',topic:'平衡树'},
+    {id:'P1972',title:'HH的项链',diff:'提高',topic:'莫队'},
+    {id:'P2617',title:'Dynamic Rankings',diff:'提高',topic:'数据结构'},
+    {id:'P3870',title:'开关',diff:'普及',topic:'线段树'},
+    {id:'P1198',title:'最大数',diff:'普及',topic:'线段树'},
+    {id:'P1903',title:'数颜色',diff:'提高',topic:'莫队'},
+  ],
+};
+
+function presetProblems(key){
+  const list = LUOGU_PRESETS[key] || [];
+  const ids = list.map(p=>p.id).join('\n');
+  document.getElementById('luogu-import-ids').value = ids;
+  const diff = key==='入门'?'入门':key==='普及'?'普及':key==='提高'?'提高':'';
+  if(diff) document.getElementById('luogu-import-diff').value = diff;
+  const topicMap = {dp:'DP',graph:'图论',ds:'数据结构'};
+  if(topicMap[key]) document.getElementById('luogu-import-topic').value = topicMap[key];
+  // 显示预览
+  const preview = document.getElementById('luogu-import-preview');
+  preview.style.display = 'block';
+  preview.innerHTML = `✅ 已填入 ${list.length} 道题：<br>` + list.map(p=>`<span style="color:var(--accent)">${p.id}</span> ${p.title}`).join(' &nbsp;·&nbsp; ');
+}
+
+// ── 洛谷批量导入 ───────────────────────────────────────────
+async function submitLuoguImport(){
+  if(!isCoach()){showToast('仅教练可操作','error');return;}
+  const raw = document.getElementById('luogu-import-ids').value;
+  const diff = document.getElementById('luogu-import-diff').value;
+  const topic= document.getElementById('luogu-import-topic').value.trim();
+  const ids = [...new Set(
+    raw.split(/[\s,，\n]+/)
+      .map(s=>s.trim().toUpperCase())
+      .filter(s=>/^[A-Z]?\d+$|^[A-Z]{1,3}\d+$/.test(s))
+      .map(s=>/^\d+$/.test(s)?'P'+s:s)
+  )];
+  if(!ids.length){showToast('未识别到有效题号','error');return;}
+
+  // 检查已存在
+  const{data:existing}=await sb.from('problem_archive').select('problem_id').in('problem_id',ids);
+  const existSet = new Set((existing||[]).map(p=>p.problem_id));
+  const toAdd = ids.filter(id=>!existSet.has(id));
+  if(!toAdd.length){showToast('所有题目已在题库中','success');return;}
+
+  const btn = document.getElementById('luogu-import-btn');
+  const status = document.getElementById('luogu-fetch-status');
+  btn.disabled=true; btn.textContent='导入中…';
+  status.style.display='block';
+
+  // 构建题目信息：优先从预置库查找题名
+  const allPreset = Object.values(LUOGU_PRESETS).flat();
+  const presetMap = {};
+  allPreset.forEach(p=>presetMap[p.id]=p);
+
+  const rows = toAdd.map(id=>{
+    const preset = presetMap[id];
+    return {
+      problem_id: id,
+      title: preset ? preset.title : id,
+      difficulty: diff || (preset ? preset.diff : null) || null,
+      topic: topic || (preset ? preset.topic : null) || null,
+      created_by: currentUser.id
+    };
+  });
+
+  status.textContent = `⏳ 正在写入 ${rows.length} 道题目…`;
+  const{error}=await sb.from('problem_archive').insert(rows);
+  btn.disabled=false; btn.textContent='导入题目';
+  status.style.display='none';
+  if(error){showToast('导入失败: '+error.message,'error');return;}
+  const named = rows.filter(r=>r.title!==r.problem_id).length;
+  showToast(`✅ 成功导入 ${toAdd.length} 道题（${named} 道已自动填名）${existSet.size?'，'+existSet.size+'道已存在跳过':''}`, 'success');
+  closeModal('luogu-import-modal');
+  document.getElementById('luogu-import-ids').value='';
+  document.getElementById('luogu-import-preview').style.display='none';
+  loadArchive();
 }
 function openProblemModal(){if(!isCoach())return;openModal('problem-modal');}
 async function submitProblem(){
@@ -5290,6 +5518,58 @@ async function showContestChart(contestId, preloaded, title){
   <div class="modal-footer" style="justify-content:flex-end;padding-top:12px">
     <button class="btn btn-ghost" onclick="closeNoteDrawer()">取消</button>
     <button class="btn btn-primary" onclick="submitNote()">发布题解</button>
+  </div>
+</div>
+
+<!-- LUOGU BATCH IMPORT MODAL -->
+<div class="modal-overlay" id="luogu-import-modal">
+  <div class="modal" style="width:620px;max-width:98vw">
+    <h2>📥 洛谷题目导入</h2>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.7">
+      输入题号导入，或一键预置经典题目集。系统会尝试自动获取题目名称。
+    </p>
+
+    <!-- 预置题目集 -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--text3);letter-spacing:0.1em;margin-bottom:8px">📚 一键预置题目集</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button class="btn btn-outline btn-sm" onclick="presetProblems('入门')">入门题单 (20题)</button>
+        <button class="btn btn-outline btn-sm" onclick="presetProblems('普及')">普及题单 (20题)</button>
+        <button class="btn btn-outline btn-sm" onclick="presetProblems('提高')">提高题单 (20题)</button>
+        <button class="btn btn-outline btn-sm" onclick="presetProblems('dp')">DP 专题 (15题)</button>
+        <button class="btn btn-outline btn-sm" onclick="presetProblems('graph')">图论专题 (15题)</button>
+        <button class="btn btn-outline btn-sm" onclick="presetProblems('ds')">数据结构 (15题)</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>题号列表（也可手动输入，支持空格/换行/逗号）</label>
+      <textarea id="luogu-import-ids" rows="5" placeholder="P1001&#10;P1002&#10;P3376&#10;P2763&#10;..."></textarea>
+    </div>
+    <div id="luogu-import-preview" style="display:none;margin-bottom:12px;max-height:120px;overflow-y:auto;padding:8px 12px;background:rgba(45,232,176,0.05);border:1px solid rgba(45,232,176,0.15);border-radius:8px;font-size:12px;color:var(--text2);font-family:var(--mono)"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>统一难度（可选）</label>
+        <select id="luogu-import-diff">
+          <option value="">不设置</option>
+          <option value="入门">入门</option>
+          <option value="普及">普及</option>
+          <option value="提高">提高</option>
+          <option value="省选">省选</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>统一知识点（可选）</label>
+        <input type="text" id="luogu-import-topic" placeholder="例：图论">
+      </div>
+    </div>
+    <div id="luogu-fetch-status" style="display:none;padding:10px 14px;background:rgba(108,142,245,0.06);border:1px solid rgba(108,142,245,0.15);border-radius:8px;font-size:12px;color:var(--accent);margin-bottom:12px">
+      🔄 正在获取题目名称…
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('luogu-import-modal')">取消</button>
+      <button class="btn btn-primary" id="luogu-import-btn" onclick="submitLuoguImport()">导入题目</button>
+    </div>
   </div>
 </div>
 
