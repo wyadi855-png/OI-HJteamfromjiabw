@@ -2064,19 +2064,6 @@ section:not(.active) {
 </div></div>
 
 <!-- NOTE MODAL -->
-<div class="modal-overlay" id="note-modal"><div class="modal" style="width:580px">
-  <h2>✍️ 写题解</h2>
-  <div class="form-group"><label>标题</label><input type="text" id="note-title" placeholder="例：P3376 最大流 Dinic 详解"></div>
-  <div class="form-row">
-    <div class="form-group"><label>洛谷题号</label><input type="text" id="note-problem" placeholder="P????"></div>
-    <div class="form-group"><label>知识点标签</label><input type="text" id="note-topic" placeholder="例：网络流"></div>
-  </div>
-  <div class="form-group"><label>解题思路</label><textarea id="note-content" placeholder="分析题意，描述算法思路…"></textarea></div>
-  <div class="form-group"><label>C++ 代码</label><textarea id="note-code" class="code-input" placeholder="#include &lt;bits/stdc++.h&gt;&#10;using namespace std;"></textarea></div>
-  <div class="form-group"><label>反思与总结</label><textarea id="note-reflection" placeholder="收获、易错点…"></textarea></div>
-  <div id="note-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('note-modal')">取消</button><button class="btn btn-primary" onclick="submitNote()">发布</button></div>
-</div></div>
 
 <!-- POST MODAL -->
 <div class="modal-overlay" id="post-modal"><div class="modal">
@@ -3416,9 +3403,9 @@ function openProblemModal(){if(!isCoach())return;openModal('problem-modal');}
 async function submitProblem(){
   const title=document.getElementById('p-title').value.trim(),problem_id=document.getElementById('p-id').value.trim();
   if(!title||!problem_id){document.getElementById('problem-error').textContent='请填写题目名称和题号';return;}
-  const{error}=await sb.from('problem_archive').insert({title,problem_id,difficulty:document.getElementById('p-diff').value,topic:document.getElementById('p-topic').value.trim(),created_by:currentUser.id});
+  const{error}=await sb.from('problem_archive').insert({title,problem_id,difficulty:document.getElementById('p-diff').value,topic:document.getElementById('p-tags').value.trim(),created_by:currentUser.id});
   if(error){document.getElementById('problem-error').textContent=error.message;return;}
-  closeModal('problem-modal');['p-title','p-id','p-topic'].forEach(id=>document.getElementById(id).value='');
+  closeModal('problem-modal');['p-title','p-id','p-tags'].forEach(id=>document.getElementById(id).value='');
   showToast('题目已添加 ✓','success');loadArchive();
 }
 async function deleteProblem(id){if(!confirm('确认删除？'))return;await sb.from('problem_archive').delete().eq('id',id);showToast('已删除','success');loadArchive();}
@@ -5260,6 +5247,49 @@ async function showContestChart(contestId, preloaded, title){
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- TOAST 提示 -->
+<div id="toast" class="toast"></div>
+
+<!-- NOTE DRAWER (写题解侧边抽屉) -->
+<div class="drawer-overlay" id="note-drawer-overlay" onclick="closeNoteDrawer()"></div>
+<div class="drawer" id="note-drawer">
+  <div class="drawer-header">
+    <h2 style="font-size:18px;font-weight:700">✍️ 写题解</h2>
+    <button class="drawer-close" onclick="closeNoteDrawer()">✕</button>
+  </div>
+  <div class="form-group">
+    <label>标题</label>
+    <input type="text" id="note-title" placeholder="例：P3376 最大流 Dinic 详解">
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>洛谷题号</label>
+      <input type="text" id="note-problem" placeholder="P????">
+    </div>
+    <div class="form-group">
+      <label>知识点标签</label>
+      <input type="text" id="note-topic" placeholder="例：网络流">
+    </div>
+  </div>
+  <div class="form-group">
+    <label>解题思路</label>
+    <textarea id="note-content" rows="5" placeholder="分析题意，描述算法思路…"></textarea>
+  </div>
+  <div class="form-group">
+    <label>C++ 代码</label>
+    <textarea id="note-code" class="code-input" rows="8" placeholder="#include &lt;bits/stdc++.h&gt;&#10;using namespace std;"></textarea>
+  </div>
+  <div class="form-group">
+    <label>反思与总结</label>
+    <textarea id="note-reflection" rows="3" placeholder="收获、易错点…"></textarea>
+  </div>
+  <div id="note-error" class="form-error"></div>
+  <div class="modal-footer" style="justify-content:flex-end;padding-top:12px">
+    <button class="btn btn-ghost" onclick="closeNoteDrawer()">取消</button>
+    <button class="btn btn-primary" onclick="submitNote()">发布题解</button>
   </div>
 </div>
 
