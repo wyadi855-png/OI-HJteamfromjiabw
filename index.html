@@ -812,6 +812,76 @@ mark.search-hl{
   border:1px solid rgba(108,142,245,0.12);color:var(--text2);
   cursor:pointer;transition:all 0.2s;}
 .follow-chip:hover{color:var(--accent);border-color:rgba(108,142,245,0.3);}
+
+/* ── DAILY PROBLEM ── */
+.daily-card{
+  background:var(--glass-bg);border:1px solid rgba(45,232,176,0.2);
+  border-radius:var(--radius);padding:28px 32px;margin-bottom:32px;
+  position:relative;overflow:hidden;}
+.daily-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.daily-card-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.daily-date-badge{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.08em;}
+.daily-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:12px;line-height:1.4;}
+.daily-pid{font-family:var(--mono);font-size:13px;color:var(--accent);margin-right:10px;
+  background:rgba(108,142,245,0.08);padding:2px 8px;border-radius:4px;}
+.daily-pid.small{font-size:11px;padding:1px 6px;}
+.daily-note{font-size:13px;color:var(--text2);margin-bottom:16px;
+  padding:10px 14px;background:rgba(108,142,245,0.05);border-radius:8px;
+  border-left:3px solid rgba(108,142,245,0.3);}
+.daily-link-btn{
+  display:inline-block;font-family:var(--mono);font-size:12px;
+  padding:7px 16px;border-radius:8px;
+  border:1px solid rgba(45,232,176,0.25);background:rgba(45,232,176,0.07);
+  color:var(--accent2);text-decoration:none;transition:all 0.2s;margin-bottom:20px;}
+.daily-link-btn:hover{background:rgba(45,232,176,0.14);}
+.daily-checkin-section{border-top:1px solid rgba(108,142,245,0.08);padding-top:20px;}
+.checkin-btn{
+  font-family:var(--mono);font-size:13px;font-weight:600;
+  padding:10px 24px;border-radius:10px;cursor:pointer;transition:all 0.3s;
+  border:2px solid rgba(45,232,176,0.3);background:rgba(45,232,176,0.08);color:var(--accent2);}
+.checkin-btn:hover{background:rgba(45,232,176,0.18);transform:translateY(-1px);}
+.checkin-btn.checked{border-color:rgba(108,142,245,0.3);background:rgba(108,142,245,0.08);color:var(--accent);}
+.checkin-count{font-family:var(--mono);font-size:12px;color:var(--text3);margin:12px 0 8px;}
+.checkin-avatars{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.checkin-avatar{
+  width:34px;height:34px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--bg);
+  border:2px solid var(--bg);transition:transform 0.2s;overflow:hidden;}
+.checkin-avatar:hover{transform:scale(1.15);z-index:1;}
+.checkin-avatar-more{
+  width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-family:var(--mono);color:var(--text3);
+  background:rgba(108,142,245,0.1);border:2px solid var(--border);}
+.daily-empty{
+  display:flex;flex-direction:column;align-items:center;
+  padding:60px 20px;gap:12px;color:var(--text3);}
+.daily-empty-icon{font-size:40px;opacity:0.5;}
+.daily-empty-text{font-family:var(--mono);font-size:13px;}
+.daily-past-section{margin-top:32px;}
+.daily-past-title{font-family:var(--mono);font-size:11px;color:var(--accent);
+  letter-spacing:0.12em;margin-bottom:14px;}
+.daily-past-list{display:flex;flex-direction:column;gap:8px;}
+.daily-past-item{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:10px 14px;border-radius:8px;
+  background:var(--glass-bg);border:1px solid var(--glass-border);
+  font-size:13px;color:var(--text2);}
+.daily-past-date{font-family:var(--mono);font-size:10px;color:var(--text3);min-width:80px;}
+.daily-past-title-text{flex:1;}
+.daily-past-link{font-family:var(--mono);font-size:10px;color:var(--accent2);text-decoration:none;}
+.daily-past-link:hover{text-decoration:underline;}
+.difficulty-badge{
+  font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;
+  background:rgba(255,179,71,0.12);color:var(--yellow);border:1px solid rgba(255,179,71,0.2);}
+.difficulty-badge.small{font-size:9px;padding:1px 6px;}
+.daily-recs-list{display:flex;flex-direction:column;gap:10px;}
+.daily-rec-item{
+  padding:12px 16px;border-radius:8px;
+  background:var(--glass-bg);border:1px solid var(--glass-border);font-size:13px;}
 </style>
 </head>
 <body>
@@ -850,6 +920,7 @@ mark.search-hl{
           <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
           <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">🏆 排行榜</a>
           <div class="nav-more-divider"></div>
+          <a onclick="closeMoreMenu();show('daily')" id="nav-daily">📅 每日一题</a>
           <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
           <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
         </div>
@@ -965,6 +1036,18 @@ mark.search-hl{
 </div></section>
 
 
+<!-- DAILY PROBLEM -->
+<section id="daily"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// daily_challenge</div><h1>每日一题</h1><p>每天一道题，持续进步。</p></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline btn-sm" onclick="openModal('rec-modal')">💡 推荐题目</button>
+      <button class="btn btn-yellow btn-sm" id="btn-set-daily" onclick="openModal('set-daily-modal')" style="display:none">+ 发布今日题</button>
+    </div>
+  </div>
+  <div id="daily-content"></div>
+</div></section>
+
 <!-- BOOKMARKS -->
 <section id="bookmarks"><div class="container">
   <div class="page-header"><div class="page-header-left"><div class="label">// bookmarks</div><h1>我的收藏</h1><p>收藏的题解。</p></div></div>
@@ -1072,6 +1155,55 @@ mark.search-hl{
   </div>
 </div></div>
 
+<!-- SET DAILY MODAL (coach) -->
+<div class="modal-overlay" id="set-daily-modal"><div class="modal" style="max-width:500px;width:100%">
+  <h2>📅 发布今日一题</h2>
+  <div class="form-group"><label>来源</label>
+    <select id="daily-source" onchange="toggleDailySource()">
+      <option value="manual">直接输入题号</option>
+      <option value="archive">从题库选择</option>
+    </select>
+  </div>
+  <div id="daily-manual-fields">
+    <div class="form-group"><label>洛谷题号</label><input type="text" id="daily-problem-id" placeholder="如 P3376"></div>
+    <div class="form-group"><label>题目名称</label><input type="text" id="daily-title" placeholder="如 网络最大流"></div>
+    <div class="form-group"><label>难度</label>
+      <select id="daily-difficulty">
+        <option value="">不标注</option>
+        <option value="入门">入门</option>
+        <option value="普及-">普及-</option>
+        <option value="普及">普及</option>
+        <option value="普及+提高-">普及+提高-</option>
+        <option value="提高">提高</option>
+        <option value="省选NOI">省选/NOI</option>
+      </select>
+    </div>
+  </div>
+  <div id="daily-archive-fields" style="display:none">
+    <div class="form-group"><label>从题库选题</label>
+      <select id="daily-archive-select"><option value="">加载中…</option></select>
+    </div>
+  </div>
+  <div class="form-group"><label>教练备注（可选）</label><textarea id="daily-note" placeholder="提示思路或考察知识点…" style="min-height:60px"></textarea></div>
+  <div class="form-group"><label>日期</label><input type="date" id="daily-date"></div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('set-daily-modal')">取消</button>
+    <button class="btn btn-primary" onclick="submitDaily()">发布</button>
+  </div>
+</div></div>
+
+<!-- RECOMMEND MODAL (all users) -->
+<div class="modal-overlay" id="rec-modal"><div class="modal" style="max-width:460px;width:100%">
+  <h2>💡 推荐题目</h2>
+  <div class="form-group"><label>洛谷题号</label><input type="text" id="rec-problem-id" placeholder="如 P1001"></div>
+  <div class="form-group"><label>题目名称</label><input type="text" id="rec-title" placeholder="题目名称"></div>
+  <div class="form-group"><label>推荐理由（可选）</label><textarea id="rec-reason" placeholder="为什么推荐这道题？" style="min-height:60px"></textarea></div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('rec-modal')">取消</button>
+    <button class="btn btn-primary" onclick="submitRec()">提交推荐</button>
+  </div>
+</div></div>
+
 <!-- NOTE MODAL -->
 <div class="modal-overlay" id="note-modal"><div class="modal" style="width:580px">
   <h2>✍️ 写题解</h2>
@@ -1130,68 +1262,7 @@ mark.search-hl{
     <div class="form-group"><label>作业题（洛谷题号，空格分隔）</label><input type="text" id="l-homework" placeholder="P3374 P3953"></div>
   </div>
   <div id="lecture-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('lecture-modal')">取消</button><button class="btn btn-primary" onclick="submitLecture()">保存</button></div>
-</div></div>
-
-<!-- PROBLEM MODAL -->
-<div class="modal-overlay" id="problem-modal"><div class="modal">
-  <h2>📚 添加题目</h2>
-  <div class="form-row">
-    <div class="form-group"><label>题目名称</label><input type="text" id="p-title" placeholder="最大流"></div>
-    <div class="form-group"><label>洛谷题号</label><input type="text" id="p-id" placeholder="P3376"></div>
-  </div>
-  <div class="form-row">
-    <div class="form-group"><label>难度</label><select id="p-diff"><option value="普及">普及</option><option value="提高">提高</option><option value="省选">省选</option><option value="NOI">NOI</option></select></div>
-    <div class="form-group"><label>知识点</label><input type="text" id="p-topic" placeholder="网络流"></div>
-  </div>
-  <div id="problem-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('problem-modal')">取消</button><button class="btn btn-primary" onclick="submitProblem()">保存</button></div>
-</div></div>
-
-
-<!-- PROFILE SETTINGS MODAL -->
-<div class="modal-overlay" id="settings-modal"><div class="modal" style="width:480px">
-  <h2>⚙️ 个人设置</h2>
-  <div style="display:flex;gap:10px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:14px;">
-    <button class="modal-tab active" onclick="switchSettingsTab('avatar')">头像 & 简介</button>
-    <button class="modal-tab" onclick="switchSettingsTab('password')">修改密码</button>
-  </div>
-  <div id="settings-avatar-tab">
-    <div class="form-group"><label>头像图片链接</label><input type="url" id="set-avatar" placeholder="https://example.com/avatar.jpg"></div>
-    <div class="form-group"><label>个人简介</label><textarea id="set-bio" placeholder="介绍一下自己…" style="min-height:70px"></textarea></div>
-    <div id="settings-avatar-error" class="form-error"></div>
-    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('settings-modal')">取消</button><button class="btn btn-primary" onclick="saveSettings()">保存</button></div>
-  </div>
-  <div id="settings-password-tab" style="display:none">
-    <div class="form-group"><label>新密码（至少6位）</label><input type="password" id="set-newpw" placeholder="新密码"></div>
-    <div class="form-group"><label>确认新密码</label><input type="password" id="set-newpw2" placeholder="再输一遍"></div>
-    <div id="settings-pw-error" class="form-error"></div>
-    <div id="settings-pw-success" class="form-success"></div>
-    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('settings-modal')">取消</button><button class="btn btn-primary" onclick="savePassword()">修改密码</button></div>
-  </div>
-</div></div>
-
-<!-- EDIT NOTE MODAL -->
-<div class="modal-overlay" id="edit-note-modal"><div class="modal" style="width:580px">
-  <h2>✏️ 编辑题解</h2>
-  <input type="hidden" id="edit-note-id">
-  <div class="form-group"><label>标题</label><input type="text" id="edit-note-title"></div>
-  <div class="form-row">
-    <div class="form-group"><label>洛谷题号</label><input type="text" id="edit-note-problem"></div>
-    <div class="form-group"><label>标签（逗号分隔）</label><input type="text" id="edit-note-topic" placeholder="网络流,图论"></div>
-  </div>
-  <div class="form-group"><label>解题思路</label>
-    <div class="md-editor-wrap">
-      <div><div class="md-pane-label">编辑</div><textarea id="edit-note-content" oninput="updatePreview('edit-note-content','edit-preview-content')" style="min-height:120px"></textarea></div>
-      <div><div class="md-pane-label">预览</div><div class="md-preview-pane md-body" id="edit-preview-content"></div></div>
-    </div>
-  </div>
-  <div class="form-group"><label>C++ 代码</label><textarea id="edit-note-code" class="code-input"></textarea></div>
-  <div class="form-group"><label>反思与总结</label><textarea id="edit-note-reflection" style="min-height:70px"></textarea></div>
-  <div id="edit-note-error" class="form-error"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('edit-note-modal')">取消<取消</button><button class="btn btn-primary" onclick="submitEditNote()">保存</button></div></div></div>
-
-<script>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('lecture-modal')">取消</button><button class="btn btn-primary" on
 function copyProblems(ids,btnId){
   navigator.clipboard.writeText(ids).then(()=>{
     const btn=document.getElementById(btnId);
@@ -1455,6 +1526,242 @@ function updateUnreadAnnBadge(anns){
     }
   }
 }
+
+// ── DAILY PROBLEM ────────────────────────────────────────
+async function loadDaily(){
+  try{
+  const el=document.getElementById('daily-content');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  const today=new Date().toISOString().slice(0,10);
+  const[{data:daily},{data:recs}]=await Promise.all([
+    sb.from('daily_problems').select('*,profiles(username)').eq('date',today).maybeSingle(),
+    sb.from('daily_recommendations').select('*,profiles(username)').eq('status','pending').order('created_at',{ascending:false}),
+  ]);
+
+  let html='';
+
+  // Today's problem card
+  if(daily){
+    const{data:checkins}=await sb.from('daily_checkins').select('user_id,profiles(username,avatar_url)').eq('daily_id',daily.id);
+    const myCheckin=currentUser&&(checkins||[]).find(c=>c.user_id===currentUser.id);
+    const luoguUrl=daily.problem_id?'https://www.luogu.com.cn/problem/'+daily.problem_id:'';
+
+    html+='<div class="daily-card">';
+    html+='<div class="daily-card-header">';
+    html+='<div class="daily-date-badge">'+today+' · 今日一题</div>';
+    if(daily.difficulty)html+='<span class="difficulty-badge">'+escHtml(daily.difficulty)+'</span>';
+    if(isCoach())html+='<button class="btn btn-danger btn-sm" onclick="deleteDaily('+daily.id+')">删除</button>';
+    html+='</div>';
+    html+='<div class="daily-title">';
+    if(daily.problem_id)html+='<span class="daily-pid">'+escHtml(daily.problem_id)+'</span>';
+    html+=escHtml(daily.title);
+    html+='</div>';
+    if(daily.note)html+='<div class="daily-note">💬 '+escHtml(daily.note)+'</div>';
+    if(luoguUrl)html+='<a href="'+luoguUrl+'" target="_blank" class="daily-link-btn">在洛谷上查看 →</a>';
+
+    // Checkin section
+    html+='<div class="daily-checkin-section">';
+    if(currentUser){
+      if(myCheckin){
+        html+='<button class="checkin-btn checked" onclick="undoCheckin('+daily.id+')">✓ 已打卡 · 取消</button>';
+      } else {
+        html+='<button class="checkin-btn" onclick="doCheckin('+daily.id+')">我做出来了 ✓</button>';
+      }
+    } else {
+      html+='<button class="checkin-btn" onclick="openModal(\'auth-modal\')">登录后打卡</button>';
+    }
+    html+='<div class="checkin-count">'+(checkins?checkins.length:0)+' 人已打卡</div>';
+    // Avatar wall
+    if(checkins&&checkins.length){
+      html+='<div class="checkin-avatars">';
+      checkins.slice(0,20).forEach(c=>{
+        const u=c.profiles?.username||'?';
+        html+='<div class="checkin-avatar" title="@'+escHtml(u)+'" onclick="showProfile(\''+escHtml(u)+'\')" style="background:'+avatarGradient(u)+'">';
+        if(c.profiles?.avatar_url)html+='<img src="'+escHtml(c.profiles.avatar_url)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+        else html+=u.charAt(0).toUpperCase();
+        html+='</div>';
+      });
+      if(checkins.length>20)html+='<div class="checkin-avatar-more">+'+( checkins.length-20)+'</div>';
+      html+='</div>';
+    }
+    html+='</div></div>';
+  } else {
+    html+='<div class="daily-empty">';
+    html+='<div class="daily-empty-icon">📭</div>';
+    html+='<div class="daily-empty-text">今天还没有题目</div>';
+    if(isCoach())html+='<button class="btn btn-primary" onclick="openSetDailyModal()">发布今日一题</button>';
+    else html+='<div style="font-size:12px;color:var(--text3);margin-top:8px">教练还没发布，或者你可以先推荐一道</div>';
+    html+='</div>';
+  }
+
+  // Past problems (last 7 days)
+  const{data:past}=await sb.from('daily_problems').select('*').lt('date',today).order('date',{ascending:false}).limit(7);
+  if(past&&past.length){
+    html+='<div class="daily-past-section"><div class="daily-past-title">// 近期题目</div>';
+    html+='<div class="daily-past-list">';
+    past.forEach(p=>{
+      html+='<div class="daily-past-item">';
+      html+='<span class="daily-past-date">'+p.date+'</span>';
+      if(p.problem_id)html+='<span class="daily-pid small">'+escHtml(p.problem_id)+'</span>';
+      html+='<span class="daily-past-title-text">'+escHtml(p.title)+'</span>';
+      if(p.difficulty)html+='<span class="difficulty-badge small">'+escHtml(p.difficulty)+'</span>';
+      if(p.problem_id)html+='<a href="https://www.luogu.com.cn/problem/'+escHtml(p.problem_id)+'" target="_blank" class="daily-past-link">洛谷 →</a>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  }
+
+  // Pending recommendations (coach sees all, others see their own)
+  const myRecs=isCoach()?recs:(recs||[]).filter(r=>r.recommended_by===currentUser?.id);
+  if(myRecs&&myRecs.length){
+    html+='<div class="daily-past-section"><div class="daily-past-title">'+( isCoach()?'// 待审核推荐 ('+myRecs.length+')':'// 我的推荐')+'</div>';
+    html+='<div class="daily-recs-list">';
+    myRecs.forEach(r=>{
+      html+='<div class="daily-rec-item">';
+      html+='<div><span class="daily-pid small">'+escHtml(r.problem_id||'')+'</span> '+escHtml(r.title)+'</div>';
+      if(r.reason)html+='<div style="font-size:11px;color:var(--text3)">「'+escHtml(r.reason)+'」</div>';
+      html+='<div style="font-size:11px;color:var(--text3)">by @'+escHtml(r.profiles?.username||'?')+'</div>';
+      if(isCoach()){
+        html+='<div style="display:flex;gap:6px;margin-top:6px">';
+        html+='<button class="btn btn-primary btn-sm" onclick="approveRec('+r.id+',\''+escHtml(r.problem_id||'')+'\',\''+escHtml(r.title)+'\')">✓ 采用</button>';
+        html+='<button class="btn btn-danger btn-sm" onclick="rejectRec('+r.id+')">✗ 拒绝</button>';
+        html+='</div>';
+      }
+      html+='</div>';
+    });
+    html+='</div></div>';
+  }
+
+  el.innerHTML=html;
+  } catch(e){ console.error("loadDaily:", e); showToast("加载失败，请刷新重试", "error"); }
+}
+
+async function doCheckin(dailyId){
+  if(!currentUser){showToast('请先登录','error');return;}
+  const{error}=await sb.from('daily_checkins').insert({daily_id:dailyId,user_id:currentUser.id});
+  if(error){showToast('打卡失败: '+error.message,'error');return;}
+  showToast('打卡成功 🎉','success');
+  triggerCheckinEffect();
+  loadDaily();
+}
+
+async function undoCheckin(dailyId){
+  await sb.from('daily_checkins').delete().eq('daily_id',dailyId).eq('user_id',currentUser.id);
+  loadDaily();
+}
+
+async function deleteDaily(id){
+  if(!confirm('确认删除今日题目？'))return;
+  await sb.from('daily_problems').delete().eq('id',id);
+  showToast('已删除','success');loadDaily();
+}
+
+function triggerCheckinEffect(){
+  // Burst celebration particles
+  const colors=['#2de8b0','#6c8ef5','#ffb347','#f06292'];
+  for(let i=0;i<20;i++){
+    const p=document.createElement('div');p.className='code-particle';
+    p.textContent=['AC!','✓','100分','通过','Accepted'][Math.floor(Math.random()*5)];
+    p.style.setProperty('--c',colors[Math.floor(Math.random()*colors.length)]);
+    const angle=(Math.random()*360)*(Math.PI/180);
+    const dist=60+Math.random()*120;
+    p.style.setProperty('--tx',Math.cos(angle)*dist+'px');
+    p.style.setProperty('--ty',Math.sin(angle)*dist-40+'px');
+    p.style.setProperty('--rot',(Math.random()-0.5)*60+'deg');
+    p.style.setProperty('--delay',Math.random()*200+'ms');
+    p.style.left='50%';p.style.top='50%';
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),1200);
+  }
+}
+
+function openSetDailyModal(){
+  const d=new Date().toISOString().slice(0,10);
+  document.getElementById('daily-date').value=d;
+  document.getElementById('daily-problem-id').value='';
+  document.getElementById('daily-title').value='';
+  document.getElementById('daily-note').value='';
+  loadArchiveForDaily();
+  openModal('set-daily-modal');
+}
+
+function toggleDailySource(){
+  const src=document.getElementById('daily-source').value;
+  document.getElementById('daily-manual-fields').style.display=src==='manual'?'':'none';
+  document.getElementById('daily-archive-fields').style.display=src==='archive'?'':'none';
+}
+
+async function loadArchiveForDaily(){
+  const{data}=await sb.from('problem_archive').select('id,problem_id,title').order('created_at',{ascending:false});
+  const sel=document.getElementById('daily-archive-select');
+  sel.innerHTML='<option value="">-- 选择题目 --</option>';
+  (data||[]).forEach(p=>{
+    const o=document.createElement('option');
+    o.value=p.id;
+    o.textContent=(p.problem_id?p.problem_id+' · ':'')+p.title;
+    o.dataset.pid=p.problem_id||'';
+    o.dataset.title=p.title;
+    sel.appendChild(o);
+  });
+  sel.onchange=()=>{
+    const opt=sel.selectedOptions[0];
+    if(opt&&opt.value){
+      document.getElementById('daily-problem-id').value=opt.dataset.pid;
+      document.getElementById('daily-title').value=opt.dataset.title;
+    }
+  };
+}
+
+async function submitDaily(){
+  const src=document.getElementById('daily-source').value;
+  const pid=document.getElementById('daily-problem-id').value.trim();
+  const title=document.getElementById('daily-title').value.trim();
+  const note=document.getElementById('daily-note').value.trim();
+  const date=document.getElementById('daily-date').value;
+  const diff=document.getElementById('daily-difficulty').value;
+  if(!title){showToast('请填写题目名称','error');return;}
+  if(!date){showToast('请选择日期','error');return;}
+  const archiveId=src==='archive'?parseInt(document.getElementById('daily-archive-select').value)||null:null;
+  const{error}=await sb.from('daily_problems').upsert({
+    problem_id:pid||null,title,note:note||null,date,
+    difficulty:diff||null,source:src,archive_id:archiveId,
+    created_by:currentUser.id
+  },{onConflict:'date'});
+  if(error){showToast('发布失败: '+error.message,'error');return;}
+  showToast('今日一题已发布 ✓','success');
+  closeModal('set-daily-modal');loadDaily();
+}
+
+async function submitRec(){
+  if(!currentUser){showToast('请先登录','error');return;}
+  const pid=document.getElementById('rec-problem-id').value.trim();
+  const title=document.getElementById('rec-title').value.trim();
+  const reason=document.getElementById('rec-reason').value.trim();
+  if(!title){showToast('请填写题目名称','error');return;}
+  const{error}=await sb.from('daily_recommendations').insert({
+    problem_id:pid||null,title,reason:reason||null,
+    recommended_by:currentUser.id
+  });
+  if(error){showToast('提交失败: '+error.message,'error');return;}
+  showToast('推荐已提交，等待教练审核 ✓','success');
+  closeModal('rec-modal');loadDaily();
+}
+
+async function approveRec(recId,pid,title){
+  const d=new Date().toISOString().slice(0,10);
+  const{error}=await sb.from('daily_problems').upsert({
+    problem_id:pid||null,title,date:d,source:'rec',created_by:currentUser.id
+  },{onConflict:'date'});
+  if(error){showToast('发布失败: '+error.message,'error');return;}
+  await sb.from('daily_recommendations').update({status:'approved'}).eq('id',recId);
+  showToast('已采用该推荐作为今日题目 ✓','success');loadDaily();
+}
+
+async function rejectRec(recId){
+  await sb.from('daily_recommendations').update({status:'rejected'}).eq('id',recId);
+  showToast('已拒绝','success');loadDaily();
+}
+
 function openAnnModal(){if(!isCoach())return;openModal('ann-modal');}
 async function submitAnn(){
   const title=document.getElementById('ann-title').value.trim(),content=document.getElementById('ann-content').value.trim();
@@ -2738,6 +3045,51 @@ async function showContestChart(contestId, preloaded, title){
     }
   });
 }
-</script>
+
+// ── Edit Note ──────────────────────────────────────────────
+async function openEditNote(id){
+  const{data:n}=await sb.from('notes').select('*').eq('id',id).single();
+  document.getElementById('edit-note-id').value=id;
+  document.getElementById('edit-note-title').value=n.title||'';
+  document.getElementById('edit-note-problem').value=n.problem_id||'';
+  document.getElementById('edit-note-topic').value=n.topic||'';
+  document.getElementById('edit-note-content').value=n.content||'';
+  document.getElementById('edit-note-code').value=n.code||'';
+  document.getElementById('edit-note-reflection').value=n.reflection||'';
+  updatePreview('edit-note-content','edit-preview-content');
+  openModal('edit-note-modal');
+  setTimeout(()=>initTopicAutocomplete('edit-note-topic'),100);
+}
+
+// ── Edit Post ──────────────────────────────────────────────
+function openEditPost(id,postContent){
+  document.getElementById('edit-post-id').value=id;
+  document.getElementById('edit-post-content').value=postContent;
+  openModal('edit-post-modal');
+}
+
+// ── checkNotifDot ──────────────────────────────────────────
+async function checkNotifDot(){
+  if(!currentUser)return;
+  const{data:myNotes}=await sb.from('notes').select('id').eq('author_id',currentUser.id);
+  if(!myNotes||!myNotes.length)return;
+  const{data:comments}=await sb.from('comments').select('id').in('note_id',myNotes.map(n=>n.id)).neq('author_id',currentUser.id);
+  const hasUnread=(comments||[]).some(c=>!readIds.has(c.id));
+  document.getElementById('notif-dot').classList.toggle('show',hasUnread);
+}
+
+
+// ── Session persistence ────────────────────────────────────
+document.addEventListener('visibilitychange',async()=>{
+  if(document.visibilityState==='visible'){
+    const{data:{session}}=await sb.auth.getSession();
+    if(session&&!currentUser){
+      currentUser=session.user;
+      const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+      currentProfile=data;
+      renderAuthArea();
+    }
+  }
+});</script>
 </body>
 </html>
