@@ -80,8 +80,8 @@ section.active.visible{opacity:1;transform:translateY(0);}
 @keyframes heroGlow{0%{opacity:0.7;transform:translateX(-50%) scale(1);}100%{opacity:1;transform:translateX(-50%) scale(1.12);}}
 .hero-tag{font-family:var(--mono);font-size:12px;color:var(--accent2);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:12px;opacity:0;animation:fadeSlideUp 0.7s 0.1s forwards;}
 .hero-tag::before{content:'';width:32px;height:1px;background:linear-gradient(90deg,var(--accent2),transparent);}
-.hero h1{font-size:clamp(34px,5.5vw,68px);font-weight:800;line-height:1.08;letter-spacing:-0.025em;margin-bottom:24px;opacity:0;animation:fadeSlideUp 0.7s 0.2s forwards;}
-.hero h1 span{background:linear-gradient(135deg,#6c8ef5 0%,#2de8b0 40%,#c792ea 75%,#6c8ef5 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 5s linear infinite;}
+.hero h1{font-size:clamp(34px,5.5vw,68px);font-weight:800;line-height:1.12;letter-spacing:-0.02em;margin-bottom:24px;opacity:0;animation:fadeSlideUp 0.7s 0.2s forwards;}
+.hero h1 span{background:linear-gradient(135deg,#40e0c8 0%,#a0f0e0 30%,#fff 50%,#60c8e8 70%,#2090c0 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:metalShift 4s linear infinite;}
 @keyframes gradientShift{0%{background-position:0% center;}100%{background-position:200% center;}}
 .hero-desc{font-size:15px;color:var(--text2);max-width:500px;line-height:1.85;margin-bottom:32px;opacity:0;animation:fadeSlideUp 0.7s 0.3s forwards;}
 @keyframes fadeSlideUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
@@ -1396,23 +1396,64 @@ body::after {
 }
 
 /* 4. Hero title depth */
-.hero h1 {
+#hero-main-title {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  background: none;
+  -webkit-text-fill-color: unset;
+  filter: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+/* 主题词：强制一行，字号自适应不换行 */
+.hero-topic {
+  display: block;
+  color: rgba(225, 240, 255, 0.95);
+  font-size: inherit;
+  font-weight: 800;
+  white-space: nowrap;
+  letter-spacing: -0.03em;
   text-shadow:
-    0 0  60px rgba(108,142,245,0.22),
-    0 0 120px rgba(45,232,176,0.10),
-    0  2px 4px rgba(0,0,0,0.80);
+    0 1px 0   rgba(255,255,255,0.06),
+    0 4px 24px rgba(0,0,0,0.7);
 }
-#typewriter-text {
-  background: linear-gradient(135deg, #2de8b0 0%, #6c8ef5 55%, #c792ea 100%);
+/* 说明小字块 */
+.hero-phrases-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+/* 每条说明：边缘呼吸闪光，静态显示 */
+.hero-phrase {
+  display: block;
+  font-size: 0.3em;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  color: transparent;
+  background: linear-gradient(90deg,
+    rgba(45,232,176,0.0)   0%,
+    rgba(45,232,176,0.35) 15%,
+    rgba(180,240,255,0.75) 50%,
+    rgba(45,232,176,0.35) 85%,
+    rgba(45,232,176,0.0)  100%
+  );
+  background-size: 300% auto;
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 18px rgba(45,232,176,0.40));
+  animation: phraseShimmer 4s ease-in-out infinite;
 }
-.typewriter-cursor {
-  color: var(--accent2);
-  text-shadow: 0 0 10px rgba(45,232,176,0.7);
+@keyframes phraseShimmer {
+  0%   { background-position: 100% center; }
+  50%  { background-position:   0% center; }
+  100% { background-position: 100% center; }
 }
+/* 旧的 typewriter 隐藏 */
+.typewriter-cursor { display: none; }
+#typewriter-text   { display: none; }
 
 /* 5. Nav — deeper frost + glow border */
 nav {
@@ -2486,7 +2527,7 @@ section:not(.active) {
             <!-- 文字区域 -->
       <div class="hero-text">
         <div class="hero-tag">算法竞赛训练队</div>
-        <h1>在代码里<br>寻找<span id="typewriter-text">思维的边界</span><span class="typewriter-cursor">_</span></h1>
+        <h1 id="hero-main-title"></h1>
         <p class="hero-desc">我们是一支专注于信息学竞赛的训练团队。从图论到动态规划，每一道题都是一次与自己的对话。</p>
       </div>
     </div>
@@ -5122,35 +5163,181 @@ function initTopicAutocomplete(inputId){
   document.body.appendChild(dl);
 }
 
-// ── Typewriter ───────────────────────────────────────────
+// ── Hero Daily Copy ─────────────────────────────────────
 (function(){
-  const phrases=['思维的边界','算法的极限','逻辑丈量世界'];
-  let pi=0,ci=0,deleting=false;
-  const el=document.getElementById('typewriter-text');
-  if(!el)return;
-  function tick(){
-    const phrase=phrases[pi];
-    if(!deleting){
-      el.textContent=phrase.slice(0,ci+1);
-      ci++;
-      if(ci===phrase.length){
-        setTimeout(()=>{deleting=true;tick();},2000);
-        return;
-      }
-      setTimeout(tick,80+Math.random()*40);
-    } else {
-      el.textContent=phrase.slice(0,ci-1);
-      ci--;
-      if(ci===0){
-        deleting=false;
-        pi=(pi+1)%phrases.length;
-        setTimeout(tick,300);
-        return;
-      }
-      setTimeout(tick,40);
-    }
+  // 每天一套文案：数学公式 + 算法 + 数据结构，30条轮换
+  const DAILY = [
+    // ── 数学公式 ──
+    {
+      line1: 'a² + b² = c²',
+      line2: '勾股定理',
+      phrases: ['直角三角形的永恒契约','欧几里得几何的基石','距离计算的第一性原理'],
+    },
+    {
+      line1: 'eⁱᵖ + 1 = 0',
+      line2: '欧拉恒等式',
+      phrases: ['五个最美常数合而为一','复数平面上的完美轮回','数学中最优雅的等式'],
+    },
+    {
+      line1: 'gcd(a,b) · lcm(a,b)',
+      line2: '= a · b',
+      phrases: ['最大公因数与最小公倍数的契约','辗转相除法的核心推论','数论的入门钥匙'],
+    },
+    {
+      line1: 'aᵖ⁻¹ ≡ 1 (mod p)',
+      line2: '费马小定理',
+      phrases: ['p为质数时的模运算魔法','求模逆元的最优路径','快速幂的理论基础'],
+    },
+    {
+      line1: 'C(n,k) = n! / k!(n-k)!',
+      line2: '组合数公式',
+      phrases: ['从n个中选k个的方案数','帕斯卡三角的每一格','计数问题的核武器'],
+    },
+    {
+      line1: '∑φ(d) = n',
+      line2: 'd|n',
+      phrases: ['欧拉函数的整除性质','莫比乌斯反演的基础','积性函数的优美结构'],
+    },
+    {
+      line1: 'f(n) = f(n-1) + f(n-2)',
+      line2: 'Fibonacci 递推',
+      phrases: ['自然界中隐藏的黄金比例','矩阵快速幂O(log n)求解','兔子问题的数学永恒'],
+    },
+    {
+      line1: '|A∪B| = |A| + |B|',
+      line2: '- |A∩B|',
+      phrases: ['容斥原理最基础的形式','扩展到n个集合依然成立','计数去重的万能公式'],
+    },
+    {
+      line1: 'S = n(n+1) / 2',
+      line2: '等差数列求和',
+      phrases: ['高斯8岁时的答案','前n个正整数之和','暴力O(n)变O(1)的第一课'],
+    },
+    {
+      line1: 'p(n) ≡ p(n-1) + p(n-2)',
+      line2: '分拆数递推',
+      phrases: ['整数拆分的组合学','五边形数定理的推论','生成函数的经典应用'],
+    },
+    // ── 算法 ──
+    {
+      line1: 'Dijkstra',
+      line2: '单源最短路径',
+      phrases: ['优先队列优化至O((V+E)logV)','非负权图的最优解','贪心与图论的完美结合'],
+    },
+    {
+      line1: 'KMP',
+      line2: '字符串匹配',
+      phrases: ['O(n+m) 击败暴力O(nm)','失配函数是算法灵魂','前缀即后缀的艺术'],
+    },
+    {
+      line1: 'Tarjan',
+      line2: '强连通分量',
+      phrases: ['DFS序上的时间戳魔法','low值揭示图的深层结构','缩点后变为有向无环图'],
+    },
+    {
+      line1: 'FFT / NTT',
+      line2: '快速傅里叶变换',
+      phrases: ['O(n log n) 多项式乘法','蝴蝶操作分治的极致','NTT在模意义下更纯粹'],
+    },
+    {
+      line1: 'LCA',
+      line2: '最近公共祖先',
+      phrases: ['倍增预处理O(n log n)','Tarjan离线O(n·α(n))','树上路径问题的关键桥梁'],
+    },
+    {
+      line1: 'Bellman-Ford',
+      line2: '负权最短路',
+      phrases: ['允许负权边的代价','SPFA是队列优化版本','O(VE) 但能检测负环'],
+    },
+    {
+      line1: 'Manacher',
+      line2: '回文子串',
+      phrases: ['O(n) 找所有回文子串','回文半径数组是核心','#插入让奇偶统一处理'],
+    },
+    {
+      line1: '二分答案',
+      line2: '单调性的极致利用',
+      phrases: ['答案具有单调性则可二分','check函数设计是关键','O(log n) 压缩搜索空间'],
+    },
+    {
+      line1: '莫队算法',
+      line2: '离线区间询问',
+      phrases: ['O(n√n) 的优雅暴力','分块排序减少移动次数','不修改时的区间统计利器'],
+    },
+    {
+      line1: 'Prim / Kruskal',
+      line2: '最小生成树',
+      phrases: ['贪心在图论中的体现','Kruskal需要并查集加速','稠密图选Prim稀疏选Kruskal'],
+    },
+    // ── 数据结构 ──
+    {
+      line1: '线段树',
+      line2: 'Segment Tree',
+      phrases: ['区间查询O(log n)','懒标记让区间修改高效','动态开点处理大值域'],
+    },
+    {
+      line1: '树状数组',
+      line2: 'Binary Indexed Tree',
+      phrases: ['lowbit(x) = x & (-x)','前缀和的动态维护','代码极短威力极大'],
+    },
+    {
+      line1: '并查集',
+      line2: 'Union-Find',
+      phrases: ['路径压缩+按秩合并','近乎O(1)的合并查询','图连通性判断的终极武器'],
+    },
+    {
+      line1: 'Trie 字典树',
+      line2: '前缀的艺术',
+      phrases: ['O(L) 插入与查询','异或最大值在Trie上二分','AC自动机建立在Trie之上'],
+    },
+    {
+      line1: '左偏树 / 斜堆',
+      line2: '可并堆',
+      phrases: ['O(log n) 合并两个堆','左偏性质保证效率','启发式合并的替代方案'],
+    },
+    {
+      line1: 'Link-Cut Tree',
+      line2: '动态树',
+      phrases: ['Splay维护辅助树','access操作是核心','动态维护树的连通与路径'],
+    },
+    {
+      line1: '主席树',
+      line2: '可持久化线段树',
+      phrases: ['每次修改新增O(log n)节点','历史版本完整保留','区间第k小的标准解法'],
+    },
+    {
+      line1: 'Splay Tree',
+      line2: '伸展树',
+      phrases: ['旋转到根均摊O(log n)','区间操作靠打标记','文艺平衡树的经典实现'],
+    },
+    {
+      line1: '后缀自动机',
+      line2: 'SAM',
+      phrases: ['O(n) 构建所有子串信息','状态数不超过2n-1','字符串问题的终极数据结构'],
+    },
+    {
+      line1: 'K-D Tree',
+      line2: '多维空间划分',
+      phrases: ['二维最近点对O(n log n)','交替按维度切割空间','启发式剪枝保证实际效率'],
+    },
+  ];
+
+  // 以日期为种子选今天的文案
+  const today = new Date();
+  const seed = today.getFullYear()*10000 + (today.getMonth()+1)*100 + today.getDate();
+  const idx = seed % DAILY.length;
+  const daily = DAILY[idx];
+
+  // 渲染主标题：topic 一行，phrases 全部静态列在下方
+  const titleEl = document.getElementById('hero-main-title');
+  if(titleEl){
+    const phrasesHtml = daily.phrases.map((p,i) =>
+      `<span class="hero-phrase" style="animation-delay:${i*0.6}s">${p}</span>`
+    ).join('');
+    titleEl.innerHTML =
+      `<span class="hero-topic">${daily.line1}${daily.line2 ? '&nbsp;' + daily.line2 : ''}</span>` +
+      `<span class="hero-phrases-block">${phrasesHtml}</span>`;
   }
-  setTimeout(tick,1200);
 })();
 
 // ── Global Error Handling ────────────────────────────────
