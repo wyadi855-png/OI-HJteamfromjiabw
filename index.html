@@ -4057,6 +4057,11 @@ function renderAuthArea(){
   }
 }
 
+// 本地日期（避免 UTC 时区偏差）
+function getLocalToday(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
 async function loadSession(){
   // 页面初始化：直接从 getSession 获取，避免与 onAuthStateChange 竞争
   const{data:{session}}=await sb.auth.getSession();
@@ -4448,7 +4453,7 @@ async function loadDaily(){
       <div class="skel skel-line w-60" style="height:13px;margin-bottom:8px"></div>
       <div class="skel skel-line w-40 h-sm"></div>
     </div>`).join('');
-  const today=new Date().toISOString().slice(0,10);
+  const today=getLocalToday();
   const[{data:daily},{data:recs}]=await Promise.all([
     sb.from('daily_problems').select('*,profiles(username)').eq('date',today).maybeSingle(),
     sb.from('daily_recommendations').select('*,profiles(username)').eq('status','pending').order('created_at',{ascending:false}),
@@ -4558,7 +4563,7 @@ async function loadHomeDailyCard(){
   const el=document.getElementById('home-daily-card');
   if(!el)return;
   try{
-    const today=new Date().toISOString().slice(0,10);
+    const today=getLocalToday();
     const{data:daily}=await sb.from('daily_problems').select('*').eq('date',today).maybeSingle();
     if(!daily){
       el.innerHTML=`<div class="home-daily-card">
@@ -4651,7 +4656,7 @@ function triggerCheckinEffect(){
 }
 
 function openSetDailyModal(){
-  const d=new Date().toISOString().slice(0,10);
+  const d=getLocalToday();
   document.getElementById('daily-date').value=d;
   document.getElementById('daily-problem-id').value='';
   document.getElementById('daily-title').value='';
@@ -4723,7 +4728,7 @@ async function submitRec(){
 }
 
 async function approveRec(recId,pid,title){
-  const d=new Date().toISOString().slice(0,10);
+  const d=getLocalToday();
   const{error}=await sb.from('daily_problems').upsert({
     problem_id:pid||null,title,date:d,source:'rec',created_by:currentUser.id
   },{onConflict:'date'});
@@ -6587,7 +6592,7 @@ async function doCheckin(e){
   const btn=document.getElementById('checkin-btn');
   if(btn.classList.contains('checked'))return;
 
-  const today=new Date().toISOString().slice(0,10);
+  const today=getLocalToday();
   const{error}=await sb.from('hero_checkins').insert({user_id:currentUser.id,date:today});
   if(error&&error.code!=='23505'){// 23505 = unique violation (already checked in)
     showToast('打卡失败','error');return;
@@ -6619,7 +6624,7 @@ async function doCheckin(e){
 async function initCheckinState(){
   const btn=document.getElementById('checkin-btn');
   if(!btn||!currentUser)return;
-  const today=new Date().toISOString().slice(0,10);
+  const today=getLocalToday();
   const{data}=await sb.from('hero_checkins').select('id').eq('user_id',currentUser.id).eq('date',today).maybeSingle();
   if(data){
     btn.classList.add('checked');
