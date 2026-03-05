@@ -638,6 +638,27 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .profile-stat .lbl{font-size:12px;color:var(--text3);}
 .profile-edit-btn{font-family:var(--mono);font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid rgba(108,142,245,0.2);background:rgba(108,142,245,0.08);color:var(--accent);cursor:pointer;margin-top:12px;display:inline-block;transition:all 0.2s;}
 .profile-edit-btn:hover{background:rgba(108,142,245,0.15);}
+.profile-motto{
+  font-size:13px;color:rgba(108,142,245,0.85);
+  font-style:italic;margin-bottom:6px;
+  font-family:var(--space);letter-spacing:0.01em;
+}
+.profile-bio{font-size:13px;color:var(--text2);margin-bottom:8px;max-width:400px;line-height:1.6;}
+
+/* 头像上传控件 */
+.avatar-upload-wrap{display:flex;align-items:center;gap:18px;}
+.avatar-upload-preview{
+  width:72px;height:72px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#6c8ef5,#2de8b0);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;border:2px solid rgba(108,142,245,0.2);
+  transition:border-color 0.2s;
+}
+.avatar-upload-preview:hover{border-color:rgba(108,142,245,0.5);}
+.avatar-upload-right{display:flex;flex-direction:column;align-items:flex-start;}
+.avatar-file-label{cursor:pointer;}
+.avatar-upload-bar{height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;width:160px;}
+#avatar-upload-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.4s ease;width:0%;}
 .profile-section{margin-bottom:24px;}
 .profile-section h3{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(30,37,64,0.5);}
 .profile-note-item{padding:12px;background:rgba(15,19,32,0.5);border:1px solid rgba(30,37,64,0.5);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;}
@@ -3900,6 +3921,57 @@ async function doRegister(){
 }
 async function doLogout(){await sb.auth.signOut();showToast('已退出登录','success');loadHomeFeed();}
 
+
+// ══════════════════════════════════════════════════════
+// Streak 计算：从 daily_checkins 算连续打卡天数
+// ══════════════════════════════════════════════════════
+async function calcStreak(userId){
+  // 获取该用户所有打卡日期（通过 daily_problems join）
+  const{data}=await sb.from('daily_checkins')
+    .select('daily_id,daily_problems(date)')
+    .eq('user_id',userId);
+  if(!data||!data.length) return {current:0,longest:0,total:0};
+
+  // 提取并去重日期
+  const dates=[...new Set(
+    data.map(d=>d.daily_problems?.date).filter(Boolean)
+  )].sort();
+
+  const total = dates.length;
+  if(!total) return {current:0,longest:0,total:0};
+
+  // 计算最长连续
+  let longest=1,cur=1;
+  for(let i=1;i<dates.length;i++){
+    const prev=new Date(dates[i-1]), curr=new Date(dates[i]);
+    const diff=(curr-prev)/(1000*60*60*24);
+    if(diff===1){ cur++; longest=Math.max(longest,cur); }
+    else cur=1;
+  }
+
+  // 计算当前连续（从今天往前数）
+  const today=new Date(); today.setHours(0,0,0,0);
+  let current=0;
+  const sortedDesc=[...dates].reverse();
+  for(let i=0;i<sortedDesc.length;i++){
+    const d=new Date(sortedDesc[i]);
+    const expected=new Date(today); expected.setDate(today.getDate()-i);
+    if(d.getTime()===expected.getTime()) current++;
+    else break;
+  }
+  // 如果今天还没打卡，从昨天开始数
+  if(current===0 && sortedDesc.length){
+    const yesterday=new Date(today); yesterday.setDate(today.getDate()-1);
+    for(let i=0;i<sortedDesc.length;i++){
+      const d=new Date(sortedDesc[i]);
+      const expected=new Date(yesterday); expected.setDate(yesterday.getDate()-i);
+      if(d.getTime()===expected.getTime()) current++;
+      else break;
+    }
+  }
+
+  return {current, longest, total};
+}
 // ══════════════════════════════════════════════════════
 // 1. 实时新内容提示
 // ══════════════════════════════════════════════════════
@@ -5638,13 +5710,22 @@ async function showProfile(username){
   html+='<div>';
   html+='<div class="profile-name">@'+escHtml(username)+'</div>';
   html+='<div class="profile-role-tag">'+(profile.role==='coach'?'🎓 教练':'🧑‍💻 学生')+'</div>';
-  if(profile.bio)html+='<div style="font-size:13px;color:var(--text2);margin-top:6px;max-width:400px">'+escHtml(profile.bio)+'</div>';
+  if(profile.motto)html+='<div class="profile-motto">「'+escHtml(profile.motto)+'」</div>';
+  if(profile.bio)html+='<div class="profile-bio">'+escHtml(profile.bio)+'</div>';
   if(isSelf)html+='<button class="profile-edit-btn" onclick="openModal(&apos;settings-modal&apos;);loadSettingsData()">编辑资料</button>';
   html+='<div class="profile-stats">';
   html+='<div class="profile-stat"><div class="num">'+(notes?notes.length:0)+'</div><div class="lbl">题解</div></div>';
   html+='<div class="profile-stat"><div class="num">'+(posts?posts.length:0)+'</div><div class="lbl">随笔</div></div>';
-  html+='<div class="profile-stat"><div class="num">'+fmtDate(profile.created_at).slice(0,7)+'</div><div class="lbl">加入</div></div>';
+  html+='<div class="profile-stat"><div class="num" id="streak-current-'+escHtml(profile.id)+'">…</div><div class="lbl">连续打卡</div></div>';
+  html+='<div class="profile-stat"><div class="num" id="streak-longest-'+escHtml(profile.id)+'">…</div><div class="lbl">最长连续</div></div>';
   html+='</div></div></div>';
+  // 异步加载 streak
+  calcStreak(profile.id).then(s=>{
+    const ce=document.getElementById('streak-current-'+profile.id);
+    const le=document.getElementById('streak-longest-'+profile.id);
+    if(ce) ce.innerHTML=s.current+'<span style="font-size:12px;font-family:var(--mono);color:var(--text3)"> 天</span>';
+    if(le) le.innerHTML=s.longest+'<span style="font-size:12px;font-family:var(--mono);color:var(--text3)"> 天</span>';
+  });
   // Heatmap placeholder
   html+='<div class="profile-section"><div class="profile-section-title">能力雷达</div><canvas id="radar-'+escHtml(username)+'" width="340" height="280" style="display:block;margin:0 auto"></canvas></div>';
   html+='<div class="profile-section"><div class="profile-section-title">活跃度</div><div id="heatmap-'+escHtml(username)+'">加载中…</div></div>';
@@ -6370,20 +6451,76 @@ function switchSettingsTab(tab){
 }
 async function loadSettingsData(){
   if(!currentProfile)return;
-  document.getElementById('set-avatar').value=currentProfile.avatar_url||'';
+  // 渲染当前头像预览
+  const inner = document.getElementById('avatar-preview-inner');
+  if(inner){
+    if(currentProfile.avatar_url){
+      inner.innerHTML = '<img src="'+escHtml(currentProfile.avatar_url)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    } else {
+      inner.innerHTML = '<span style="font-size:24px;font-weight:700;color:var(--bg)">'+currentProfile.username.charAt(0).toUpperCase()+'</span>';
+      inner.closest('.avatar-upload-preview').style.background = avatarGradient(currentProfile.username);
+    }
+  }
+  const motto = document.getElementById('set-motto');
+  if(motto){
+    motto.value = currentProfile.motto||'';
+    document.getElementById('motto-count').textContent = (currentProfile.motto||'').length;
+    motto.addEventListener('input',()=>document.getElementById('motto-count').textContent=motto.value.length);
+  }
   document.getElementById('set-bio').value=currentProfile.bio||'';
   document.getElementById('set-luogu-uid').value=currentProfile.luogu_uid||'';
 }
+
+function previewAvatar(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(file.size > 2*1024*1024){ showToast('图片不能超过 2MB','error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const inner = document.getElementById('avatar-preview-inner');
+    inner.innerHTML = '<img src="'+e.target.result+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    inner.closest('.avatar-upload-preview').style.background = 'transparent';
+  };
+  reader.readAsDataURL(file);
+}
 async function saveSettings(){
-  const avatar_url=document.getElementById('set-avatar').value.trim();
   const bio=document.getElementById('set-bio').value.trim();
+  const motto=(document.getElementById('set-motto')?.value||'').trim();
   const luogu_uid=document.getElementById('set-luogu-uid').value.trim();
   const gv=document.getElementById('set-group')?.value;
   const group_id=gv?parseInt(gv):null;
-  const{error}=await sb.from('profiles').update({avatar_url,bio,group_id,luogu_uid}).eq('id',currentUser.id);
-  if(error){document.getElementById('settings-avatar-error').textContent=error.message;return;}
-  currentProfile={...currentProfile,avatar_url,bio,group_id,luogu_uid};
+  const errEl=document.getElementById('settings-avatar-error');
+  errEl.textContent='';
+
+  // 检查是否有新头像文件
+  const fileInput=document.getElementById('set-avatar-file');
+  let avatar_url=currentProfile.avatar_url||'';
+
+  if(fileInput?.files?.length){
+    const file=fileInput.files[0];
+    // 显示进度条
+    const prog=document.getElementById('avatar-upload-progress');
+    const fill=document.getElementById('avatar-upload-fill');
+    const lbl=document.getElementById('avatar-upload-label');
+    prog.style.display='block'; fill.style.width='30%'; lbl.textContent='上传中…';
+    const ext=file.name.split('.').pop();
+    const path=`avatars/${currentUser.id}.${ext}`;
+    const{error:upErr}=await sb.storage.from('note-images').upload(path,file,{upsert:true,contentType:file.type});
+    if(upErr){errEl.textContent='头像上传失败: '+upErr.message;prog.style.display='none';return;}
+    fill.style.width='100%'; lbl.textContent='完成 ✓';
+    const{data:urlData}=sb.storage.from('note-images').getPublicUrl(path);
+    avatar_url=urlData.publicUrl+'?t='+Date.now();
+    setTimeout(()=>prog.style.display='none',600);
+  }
+
+  const{error}=await sb.from('profiles').update({avatar_url,bio,motto,group_id,luogu_uid}).eq('id',currentUser.id);
+  if(error){errEl.textContent=error.message;return;}
+  currentProfile={...currentProfile,avatar_url,bio,motto,group_id,luogu_uid};
   closeModal('settings-modal');showToast('设置已保存 ✓','success');
+  // 刷新个人主页（如果正在看）
+  if(document.getElementById('profile-section')?.classList.contains('active')){
+    showProfile(currentProfile.username);
+  }
 }
 async function savePassword(){
   const pw=document.getElementById('set-newpw').value;
@@ -8212,9 +8349,30 @@ async function showContestChart(contestId, preloaded, title){
     <button class="modal-close" onclick="closeModal('settings-modal')" style="position:absolute;top:16px;right:16px">✕</button>
 
     <div id="settings-avatar-tab">
+      <!-- 头像上传 -->
       <div class="form-group">
-        <label>头像 URL</label>
-        <input type="text" id="set-avatar" placeholder="https://example.com/avatar.jpg">
+        <label>头像</label>
+        <div class="avatar-upload-wrap">
+          <div class="avatar-upload-preview" id="avatar-preview-wrap">
+            <div id="avatar-preview-inner"></div>
+          </div>
+          <div class="avatar-upload-right">
+            <label class="btn btn-outline btn-sm avatar-file-label" for="set-avatar-file">
+              📷 选择图片
+            </label>
+            <input type="file" id="set-avatar-file" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+            <div style="font-size:11px;color:var(--text3);margin-top:6px">JPG/PNG，建议正方形，≤ 2MB</div>
+            <div id="avatar-upload-progress" style="display:none;margin-top:8px">
+              <div class="avatar-upload-bar"><div id="avatar-upload-fill"></div></div>
+              <div id="avatar-upload-label" style="font-size:11px;color:var(--text3);margin-top:4px">上传中…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>座右铭 <span style="font-size:11px;color:var(--text3);font-weight:400">（展示在个人主页）</span></label>
+        <input type="text" id="set-motto" placeholder="一句话激励自己…" maxlength="50">
+        <div style="text-align:right;font-size:11px;color:var(--text3);margin-top:4px"><span id="motto-count">0</span>/50</div>
       </div>
       <div class="form-group">
         <label>个人简介</label>
