@@ -1154,8 +1154,6 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* 14. Section entry animation */
-section { opacity:0; transform:translateY(18px); transition: opacity 0.4s ease, transform 0.4s ease; }
-section.visible { opacity:1; transform:translateY(0); }
 
 /* 15. Daily card top border — iridescent */
 .daily-card {
@@ -1168,6 +1166,208 @@ section.visible { opacity:1; transform:translateY(0); }
   box-shadow: 0 0 12px rgba(45,232,176,0.4);
 }
 
+
+/* ══════════════════════════════════════════════
+   INTERACTION UPGRADE — Spring · Stagger · Touch
+   ══════════════════════════════════════════════ */
+
+/* ── 1. Global easing tokens ── */
+:root {
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);      /* overshoot bounce */
+  --snap:   cubic-bezier(0.25, 0.46, 0.45, 0.94);   /* snappy decel */
+  --smooth: cubic-bezier(0.4,  0,    0.2,  1);       /* material standard */
+  --enter:  cubic-bezier(0.22, 1,    0.36, 1);       /* fast enter */
+  --exit:   cubic-bezier(0.55, 0,    1,    0.45);    /* fast exit */
+}
+
+/* ── 2. Replace all generic transitions with spring/snap ── */
+.bento-card          { transition: border-color 0.3s var(--smooth), box-shadow 0.3s var(--smooth), transform 0.35s var(--spring) !important; }
+.blog-card,
+.contest-card        { transition: border-color 0.25s var(--smooth), box-shadow 0.25s var(--smooth), transform 0.35s var(--spring) !important; }
+.member-card         { transition: border-color 0.25s var(--smooth), box-shadow 0.3s var(--smooth), transform 0.4s var(--spring) !important; }
+.btn-primary         { transition: background 0.18s var(--smooth), box-shadow 0.2s var(--smooth), transform 0.25s var(--spring) !important; }
+.btn                 { transition: background 0.18s var(--smooth), box-shadow 0.2s var(--smooth), transform 0.2s var(--spring) !important; }
+.nav-links a         { transition: color 0.18s var(--smooth), background 0.18s var(--smooth), transform 0.2s var(--spring) !important; }
+.nav-links a:hover   { transform: translateY(-1px); }
+.skill-tag           { transition: background 0.2s var(--smooth), color 0.2s var(--smooth), transform 0.25s var(--spring) !important; }
+.skill-tag:hover     { transform: translateY(-2px) scale(1.05); }
+.lb-row              { transition: background 0.2s var(--smooth), transform 0.25s var(--spring) !important; }
+.lb-row:hover        { transform: translateX(4px); }
+
+/* ── 3. Modal — spring open/close ── */
+.modal-overlay {
+  transition: opacity 0.28s var(--smooth), backdrop-filter 0.28s var(--smooth);
+  opacity: 0;
+  pointer-events: none;
+  backdrop-filter: blur(0px);
+}
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+  backdrop-filter: blur(8px);
+}
+.modal {
+  transform: translateY(24px) scale(0.97);
+  transition: transform 0.4s var(--spring), opacity 0.3s var(--smooth);
+  opacity: 0;
+}
+.modal-overlay.open .modal {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+/* Mobile modal: slides up from bottom */
+@media (max-width: 600px) {
+  .modal {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    transform: translateY(100%) !important;
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 92vh !important;
+    overflow-y: auto !important;
+    transition: transform 0.45s var(--spring), opacity 0.3s var(--smooth) !important;
+  }
+  .modal-overlay.open .modal {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+  }
+  /* Drag handle */
+  .modal::before {
+    content: '';
+    display: block;
+    width: 40px; height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    margin: 12px auto 4px;
+  }
+}
+
+/* ── 4. Stagger reveal — cards enter in sequence ── */
+.stagger-item {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s var(--enter), transform 0.5s var(--enter);
+}
+.stagger-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Stagger delays 1-12 */
+.stagger-item:nth-child(1)  { transition-delay: 0.00s; }
+.stagger-item:nth-child(2)  { transition-delay: 0.06s; }
+.stagger-item:nth-child(3)  { transition-delay: 0.12s; }
+.stagger-item:nth-child(4)  { transition-delay: 0.18s; }
+.stagger-item:nth-child(5)  { transition-delay: 0.24s; }
+.stagger-item:nth-child(6)  { transition-delay: 0.30s; }
+.stagger-item:nth-child(7)  { transition-delay: 0.36s; }
+.stagger-item:nth-child(8)  { transition-delay: 0.42s; }
+.stagger-item:nth-child(9)  { transition-delay: 0.48s; }
+.stagger-item:nth-child(10) { transition-delay: 0.54s; }
+.stagger-item:nth-child(11) { transition-delay: 0.60s; }
+.stagger-item:nth-child(12) { transition-delay: 0.66s; }
+
+/* ── 5. Button ripple ── */
+.btn-primary, .btn {
+  position: relative;
+  overflow: hidden;
+}
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  transform: scale(0);
+  animation: rippleAnim 0.55s var(--smooth) forwards;
+  pointer-events: none;
+}
+@keyframes rippleAnim {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ── 6. Focus visible — keyboard nav ── */
+:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 3px;
+}
+
+/* ── 7. will-change hints for GPU compositing ── */
+.bento-card, .modal, .modal-overlay,
+.blog-card, .member-card, .contest-card {
+  will-change: transform;
+}
+.bento-card:not(:hover), .blog-card:not(:hover),
+.member-card:not(:hover), .modal-overlay:not(.open) {
+  will-change: auto;
+}
+
+/* ── 8. Fluid typography with clamp ── */
+.hero h1         { font-size: clamp(2rem, 5.5vw, 4.8rem) !important; }
+.hero-desc       { font-size: clamp(13px, 1.4vw, 15px) !important; }
+.page-header h1  { font-size: clamp(1.4rem, 3vw, 2.2rem) !important; }
+.bento-label     { font-size: clamp(11px, 1vw, 12px) !important; }
+
+/* ── 9. Scroll snap for contest/note card rows ── */
+.contests-grid,
+.notes-grid {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.contest-card,
+.blog-card {
+  scroll-snap-align: start;
+}
+
+/* ── 10. Reduced motion — respect user preferences ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  #bg-canvas { display: none; }
+  .stagger-item { opacity: 1; transform: none; }
+}
+
+/* ── 11. Active press states — tactile feedback ── */
+.btn-primary:active  { transform: scale(0.97) !important; }
+.bento-card:active   { transform: scale(0.99) !important; }
+.member-card:active  { transform: scale(0.98) !important; }
+.nav-links a:active  { transform: scale(0.95) translateY(0) !important; }
+
+/* ── 12. Section page transition ── */
+section {
+  transition: opacity 0.35s var(--smooth), transform 0.4s var(--enter);
+}
+section.active {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+section:not(.active) {
+  opacity: 0 !important;
+  transform: translateY(12px) !important;
+  pointer-events: none;
+}
+
+/* ── 13. Toast spring entrance ── */
+.toast {
+  transform: translateX(calc(100% + 24px));
+  transition: transform 0.4s var(--spring), opacity 0.3s var(--smooth);
+}
+.toast.show {
+  transform: translateX(0);
+}
+
+/* ── 14. Number counter animation base ── */
+.count-up {
+  display: inline-block;
+  transition: transform 0.3s var(--spring);
+}
 </style>
 </head>
 <body>
@@ -3045,6 +3245,185 @@ async function safeLoad(fn, fallbackEl, label){
     }
   }
 }
+
+// ══════════════════════════════════════════════
+//  INTERACTION UPGRADE — Observer · Ripple · Touch
+// ══════════════════════════════════════════════
+
+// ── 1. IntersectionObserver — stagger reveal ──
+const staggerObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      staggerObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+function initStagger(container) {
+  const selector = '.blog-card,.contest-card,.lecture-item,.ann-card,.member-card,.lb-row,.daily-past-item,.archive-row,.bento-card,.emotion-post';
+  const items = (container || document).querySelectorAll(selector);
+  items.forEach(el => {
+    if (!el.classList.contains('stagger-item')) {
+      el.classList.add('stagger-item');
+      staggerObserver.observe(el);
+    }
+  });
+}
+
+// Re-run stagger whenever new content loads
+const _origShow = window.show;
+window.show = function(id) {
+  _origShow && _origShow(id);
+  setTimeout(() => initStagger(), 120);
+};
+setTimeout(() => initStagger(), 300);
+
+// ── 2. Button ripple effect ──
+function addRipple(e) {
+  const btn = e.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const x = (e.clientX || rect.left + rect.width/2) - rect.left - size/2;
+  const y = (e.clientY || rect.top  + rect.height/2) - rect.top  - size/2;
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  ripple.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px`;
+  btn.appendChild(ripple);
+  ripple.addEventListener('animationend', () => ripple.remove());
+}
+function initRipples() {
+  document.querySelectorAll('.btn-primary,.btn').forEach(btn => {
+    if (!btn._rippleInit) {
+      btn.addEventListener('click', addRipple);
+      btn._rippleInit = true;
+    }
+  });
+}
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.btn-primary,.btn');
+  if (btn && !btn._rippleInit) { btn.addEventListener('click', addRipple); btn._rippleInit = true; addRipple({currentTarget:btn,...e}); }
+});
+setTimeout(initRipples, 500);
+
+// ── 3. Modal spring + mobile swipe-to-close ──
+const _origOpenModal = window.openModal;
+window.openModal = function(id) {
+  const overlay = document.getElementById(id);
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => overlay.classList.add('open'));
+  });
+};
+const _origCloseModal = window.closeModal;
+window.closeModal = function(id) {
+  const overlay = document.getElementById(id);
+  if (!overlay) return;
+  overlay.classList.remove('open');
+  setTimeout(() => { overlay.style.display = 'none'; }, 420);
+};
+
+// Mobile swipe-down to close modals
+function initSwipeClose(overlay) {
+  const modal = overlay.querySelector('.modal');
+  if (!modal || modal._swipeInit) return;
+  modal._swipeInit = true;
+  let startY = 0, currentY = 0, isDragging = false;
+
+  modal.addEventListener('touchstart', e => {
+    if (modal.scrollTop > 0) return;
+    startY = e.touches[0].clientY;
+    isDragging = true;
+    modal.style.transition = 'none';
+  }, { passive: true });
+
+  modal.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    currentY = e.touches[0].clientY;
+    const delta = Math.max(0, currentY - startY);
+    modal.style.transform = `translateY(${delta}px)`;
+  }, { passive: true });
+
+  modal.addEventListener('touchend', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    modal.style.transition = '';
+    const delta = currentY - startY;
+    if (delta > 120) {
+      // Close
+      const id = overlay.id;
+      closeModal(id);
+    } else {
+      modal.style.transform = '';
+    }
+    startY = 0; currentY = 0;
+  });
+}
+
+// Watch for modals being opened
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  initSwipeClose(overlay);
+});
+
+// ── 4. Animated number counters ──
+function animateCount(el, target, duration = 800) {
+  const start = performance.now();
+  const from = parseInt(el.textContent) || 0;
+  function tick(now) {
+    const p = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3); // ease-out cubic
+    el.textContent = Math.round(from + (target - from) * ease);
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// Hook into hero stats to animate numbers
+const _origLoadHeroStats = window.loadHeroStats;
+window.loadHeroStats = async function() {
+  await (_origLoadHeroStats && _origLoadHeroStats());
+  // Animate all stat numbers after load
+  setTimeout(() => {
+    document.querySelectorAll('.hero-stat-num').forEach(el => {
+      const val = parseInt(el.textContent);
+      if (!isNaN(val)) { el.textContent = '0'; animateCount(el, val); }
+    });
+  }, 200);
+};
+
+// ── 5. Section transition ──
+const _origShowFn = window.show;
+window.show = function(id) {
+  // Remove active from all
+  document.querySelectorAll('section').forEach(s => {
+    if (s.id !== id) s.classList.remove('active');
+  });
+  const target = document.getElementById(id);
+  if (target) {
+    target.style.display = '';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => target.classList.add('active'));
+    });
+  }
+  _origShowFn && _origShowFn(id);
+};
+
+// ── 6. Keyboard shortcut: Esc closes modals ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(o => closeModal(o.id));
+  }
+});
+
+// ── 7. matchMedia — mobile adjustments ──
+const isMobile = window.matchMedia('(max-width: 600px)').matches;
+if (isMobile) {
+  // Reduce background canvas opacity on mobile for performance
+  const canvas = document.getElementById('bg-canvas');
+  if (canvas) canvas.style.opacity = '0.35';
+}
+
 
 loadSession();
 
