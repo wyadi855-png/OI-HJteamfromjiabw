@@ -1339,81 +1339,71 @@ function avatarEl(username,avatarUrl,size,fontSize){
   resize(); window.addEventListener('resize', resize);
 
   const words = [
-    // 图论
     'DFS','BFS','Dijkstra','Floyd','Bellman-Ford','SPFA','Prim','Kruskal',
     'Tarjan','拓扑排序','强连通分量','二分图','最大匹配','匈牙利','KM算法',
-    'LCA','树的直径','虚树','点分治','边分治','DSU on Tree',
-    // 数据结构
-    '线段树','树状数组','平衡树','Splay','Treap','AVL','红黑树','跳表',
-    '堆','左偏树','可并堆','单调栈','单调队列','ST表','稀疏表',
-    '主席树','可持久化','Link-Cut Tree','动态树','K-D Tree','珂朵莉树',
-    '分块','根号分治','莫队','带修莫队','树上莫队',
-    // 动态规划
-    'DP','背包','01背包','完全背包','分组背包','树形DP','区间DP',
-    '状压DP','数位DP','概率DP','期望DP','斜率优化','四边形不等式',
-    '单调队列优化DP','插头DP','轮廓线DP','记忆化搜索',
-    // 字符串
+    'LCA','树的直径','虚树','点分治','边分治','DSU on Tree','2-SAT','圆方树',
+    '线段树','树状数组','平衡树','Splay','Treap','AVL','跳表','左偏树','可并堆',
+    '单调栈','单调队列','ST表','稀疏表','主席树','可持久化','Link-Cut Tree',
+    'K-D Tree','珂朵莉树','分块','根号分治','莫队','带修莫队','树上莫队',
+    'DP','背包','01背包','完全背包','分组背包','树形DP','区间DP','状压DP',
+    '数位DP','概率DP','期望DP','斜率优化','四边形不等式','单调队列优化DP',
+    '插头DP','轮廓线DP','记忆化搜索','最长公共子序列','最长上升子序列',
     'KMP','Z函数','Manacher','Trie','AC自动机','后缀数组','后缀自动机',
-    'SAM','PAM','回文自动机','哈希','字符串哈希','最长公共子序列',
-    // 数论
-    '欧拉函数','莫比乌斯','筛法','线性筛','埃氏筛','欧拉筛',
-    '快速幂','矩阵乘法','矩阵快速幂','中国剩余定理','扩展欧几里得',
-    '费马小定理','威尔逊定理','二次剩余','原根','离散对数','BSGS',
-    // 多项式/数学
+    'SAM','PAM','回文自动机','哈希','字符串哈希','最小表示法',
+    '欧拉函数','莫比乌斯','线性筛','埃氏筛','快速幂','矩阵乘法','矩阵快速幂',
+    'CRT','扩展欧几里得','费马小定理','二次剩余','原根','离散对数','BSGS',
     'FFT','NTT','FWT','多项式求逆','多项式开根','拉格朗日插值',
-    '生成函数','普通生成函数','指数生成函数','Polya','Burnside',
-    '斯特林数','贝尔数','卡特兰数','容斥原理','二项式定理',
-    // 图论高级
+    '生成函数','指数生成函数','Polya','Burnside','斯特林数','贝尔数','卡特兰数',
+    '容斥原理','二项式定理','组合数','鸽巢原理','抽屉原理',
     '最大流','最小割','费用流','网络流','Hall定理','最小路径覆盖',
-    '2-SAT','圆方树','仙人掌','支配树','虚点',
-    // 计算几何
-    '凸包','半平面交','旋转卡壳','最近点对','扫描线','李超树',
-    '闵可夫斯基和','计算几何','极角排序','Pick定理',
-    // 博弈/其他
-    'SG函数','Sprague-Grundy','Nim','威佐夫','博弈论',
-    '随机化','模拟退火','爬山','遗传算法',
-    '线性基','异或基','高斯消元','线性代数',
+    '凸包','半平面交','旋转卡壳','最近点对','扫描线','李超树','Pick定理',
+    'SG函数','Sprague-Grundy','Nim','博弈论','线性基','高斯消元',
     '二分答案','三分法','倍增','并查集','启发式合并',
-    // 竞赛术语
     'AC','WA','TLE','MLE','RE','CE','100pts','AK','AKIOI',
-    'O(1)','O(log n)','O(n)','O(n log n)','O(n²)','O(n³)',
-    'NOI','NOIP','CSP','IOI','ICPC','CF','洛谷',
-    '手玩样例','找规律','构造','贪心','分治','递推','归纳',
-    'long long','int','__int128','pb_ds','rope',
-    '#define','priority_queue','map','set','multiset',
-    'lower_bound','upper_bound','sort','unique','reverse',
+    'O(1)','O(log n)','O(n)','O(n log n)','O(n²)','O(n³)','O(2ⁿ)',
+    'NOI','NOIP','CSP','IOI','ICPC','CF','洛谷','AtCoder',
+    '手玩样例','找规律','构造','贪心','分治','递推','归纳','暴力',
+    'long long','int','__int128','pb_ds','rope','bitset',
+    '#define','priority_queue','map','set','multiset','unordered_map',
+    'lower_bound','upper_bound','sort','unique','reverse','nth_element',
+    'memset','fill','accumulate','__gcd','__builtin_popcount',
+    'dfs序','欧拉序','括号序','重链剖分','轻重链','树链剖分',
+    '势能分析','摊还分析','均摊复杂度','启发式','随机化',
+    '模拟退火','爬山算法','随机增量','期望线性',
   ];
 
   const colors = [
-    'rgba(108,142,245,', // blue
-    'rgba(45,232,176,',  // green
-    'rgba(200,114,234,', // purple
-    'rgba(255,179,71,',  // yellow
-    'rgba(255,83,112,',  // red
-    'rgba(122,134,168,', // grey
+    'rgba(108,142,245,',
+    'rgba(45,232,176,',
+    'rgba(200,114,234,',
+    'rgba(255,179,71,',
+    'rgba(255,83,112,',
+    'rgba(122,134,168,',
   ];
 
-  // Multiple horizontal lanes at different speeds and heights
-  const LANES = 6;
+  // Many lanes spread evenly across FULL screen height
+  const LANES = 18;
   const streams = [];
 
-  function spawnStream(laneIdx, offsetX) {
-    const lane = laneIdx / LANES;
-    const y = (0.08 + lane * 0.16) * H + (Math.random() - 0.5) * H * 0.06;
-    const speed = 0.25 + Math.random() * 0.7 + lane * 0.15;
-    const size = 11 + Math.random() * 9;
-    const opacity = 0.18 + Math.random() * 0.32;
+  function spawnStream(laneIdx, startX) {
+    // Divide full screen height evenly, slight random jitter per lane
+    const baseY = ((laneIdx + 0.5) / LANES) * H;
+    const y = baseY + (Math.random() - 0.5) * (H / LANES) * 0.6;
+    const speed = 0.22 + Math.random() * 0.65;
+    const size = 10 + Math.random() * 8;
+    const opacity = 0.15 + Math.random() * 0.35;
     const color = colors[Math.floor(Math.random() * colors.length)];
     const word = words[Math.floor(Math.random() * words.length)];
-    return { word, color, x: offsetX !== undefined ? offsetX : W + 60 + Math.random() * 400, y, speed, size, opacity, laneIdx };
+    const x = startX !== undefined ? startX : W + 60 + Math.random() * 600;
+    return { word, color, x, y, speed, size, opacity, laneIdx };
   }
 
-  // Pre-populate streams spread across screen
+  // Pre-populate all lanes with words spread across screen
   for (let l = 0; l < LANES; l++) {
-    const count = 8 + Math.floor(Math.random() * 6);
+    const count = 5 + Math.floor(Math.random() * 5);
     for (let i = 0; i < count; i++) {
       const s = spawnStream(l);
-      s.x = Math.random() * W * 1.4 - W * 0.2; // spread initially
+      s.x = Math.random() * W * 1.5 - W * 0.1; // spread across screen initially
       streams.push(s);
     }
   }
@@ -1422,10 +1412,10 @@ function avatarEl(username,avatarUrl,size,fontSize){
   function draw() {
     ctx.clearRect(0, 0, W, H);
 
-    // Spawn new streams from right edge occasionally
-    if (frame % 18 === 0) {
+    // Spawn new words from right
+    if (frame % 14 === 0) {
       const l = Math.floor(Math.random() * LANES);
-      streams.push(spawnStream(l, W + 80));
+      streams.push(spawnStream(l, W + 60 + Math.random() * 300));
     }
 
     for (let i = streams.length - 1; i >= 0; i--) {
@@ -1438,10 +1428,8 @@ function avatarEl(username,avatarUrl,size,fontSize){
       ctx.fillText(s.word, s.x, s.y);
       ctx.restore();
 
-      if (s.x < -300) {
-        // Recycle: new word, same lane, re-enter from right
-        const ns = spawnStream(s.laneIdx, W + 60 + Math.random() * 200);
-        streams.splice(i, 1, ns);
+      if (s.x < -320) {
+        streams.splice(i, 1, spawnStream(s.laneIdx, W + 60 + Math.random() * 400));
       }
     }
 
