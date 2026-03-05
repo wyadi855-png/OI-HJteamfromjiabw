@@ -888,15 +888,23 @@ async function doRegister() {
     });
     if (signUpError) { showError('register-error', signUpError.message); setLoading('btn-register', false); return; }
     // 等一下再登录确保 trigger 执行
-    await new Promise(r => setTimeout(r, 800));
+    await new Promise(r => setTimeout(r, 1200));
     const { error: loginError } = await sb.auth.signInWithPassword({
       email: usernameToEmail(username), password
     });
     if (loginError) { showError('register-error', '注册成功，请手动登录'); setLoading('btn-register', false); switchTab('login'); return; }
-    // 保存 luogu_uid 和 group_id
-    if (luogu_uid || group_id) {
-      const { data: { user } } = await sb.auth.getUser();
-      if (user) await sb.from('profiles').update({ luogu_uid: luogu_uid||'', group_id }).eq('id', user.id);
+    // upsert profile：确保 username、group_id、luogu_uid 都写入
+    const { data: { user } } = await sb.auth.getUser();
+    if (user) {
+      // 先检查 trigger 是否已创建 profile
+      const { data: existingProfile } = await sb.from('profiles').select('id').eq('id', user.id).maybeSingle();
+      if (existingProfile) {
+        // profile 已存在，update 附加字段
+        await sb.from('profiles').update({ username, group_id, luogu_uid: luogu_uid||'' }).eq('id', user.id);
+      } else {
+        // trigger 未创建，手动 insert
+        await sb.from('profiles').insert({ id: user.id, username, group_id, luogu_uid: luogu_uid||'' });
+      }
     }
     showSuccess(username);
   } catch(e) {
