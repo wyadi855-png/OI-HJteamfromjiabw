@@ -1605,6 +1605,137 @@ section:not(.active) {
 /* ── Student submit problem form ── */
 .student-submit-banner{ background:linear-gradient(135deg,rgba(45,232,176,0.06),rgba(108,142,245,0.04)); border:1px solid rgba(45,232,176,0.15); border-radius:var(--radius); padding:14px 20px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .student-submit-banner p{ font-size:13px; color:var(--text2); margin:0; }
+
+/* ══════════════════════════════════════════════
+   SYLLABUS — 教学计划
+   ══════════════════════════════════════════════ */
+
+/* ── Class tabs ── */
+.syllabus-tabs {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.syllabus-tab {
+  font-family: var(--mono); font-size: 12px;
+  padding: 6px 16px; border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer;
+  transition: all 0.2s var(--spring);
+}
+.syllabus-tab:hover { background: rgba(108,142,245,0.1); color: var(--accent); }
+.syllabus-tab.active {
+  background: rgba(108,142,245,0.15);
+  border-color: rgba(108,142,245,0.4);
+  color: var(--accent); font-weight: 600;
+}
+
+/* ── Week cards ── */
+.syllabus-week-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+.syllabus-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color 0.25s var(--smooth), transform 0.35s var(--spring);
+  position: relative;
+}
+.syllabus-card:hover {
+  border-color: rgba(108,142,245,0.3);
+  transform: translateY(-3px);
+}
+.syllabus-card-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.syllabus-week-badge {
+  font-family: var(--mono); font-weight: 700;
+  font-size: 22px; color: var(--accent);
+  line-height: 1;
+}
+.syllabus-week-label {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3); letter-spacing: 0.08em;
+}
+.syllabus-card-actions { display: flex; gap: 6px; }
+
+/* ── Content sections inside card ── */
+.syllabus-section { margin-bottom: 14px; }
+.syllabus-section:last-child { margin-bottom: 0; }
+.syllabus-section-title {
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.1em; color: var(--accent2);
+  text-transform: uppercase; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.syllabus-content-text {
+  font-size: 13px; color: var(--text2);
+  line-height: 1.7; white-space: pre-wrap;
+}
+.syllabus-tag { display: inline-block; font-size: 11px;
+  padding: 1px 8px; border-radius: 10px; margin: 2px 3px 2px 0;
+  background: rgba(108,142,245,0.1); color: var(--accent);
+  border: 1px solid rgba(108,142,245,0.15); font-family: var(--mono);
+}
+
+/* ── Problem list inside card ── */
+.syllabus-prob-list { list-style: none; padding: 0; margin: 0; }
+.syllabus-prob-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 13px; color: var(--text2);
+}
+.syllabus-prob-item:last-child { border-bottom: none; }
+.syllabus-prob-item::before {
+  content: '›'; color: var(--accent); font-weight: 700; flex-shrink: 0;
+}
+.syllabus-prob-item a {
+  color: var(--accent2); text-decoration: none; font-family: var(--mono); font-size: 12px;
+}
+.syllabus-prob-item a:hover { text-decoration: underline; }
+.syllabus-ref-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; color: var(--accent); font-family: var(--mono);
+  text-decoration: none;
+}
+.syllabus-ref-link:hover { text-decoration: underline; }
+
+/* ── Empty state ── */
+.syllabus-empty {
+  text-align: center; padding: 60px 20px;
+  color: var(--text3); font-family: var(--mono); font-size: 13px;
+}
+.syllabus-empty-icon { font-size: 36px; margin-bottom: 12px; }
+
+/* ── Modal item list ── */
+.sl-item-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }
+.sl-item {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px 10px; font-size: 13px; color: var(--text2);
+}
+.sl-item span { flex: 1; }
+.sl-item-del {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; font-size: 14px; padding: 0 2px;
+  transition: color 0.15s;
+}
+.sl-item-del:hover { color: #ff5370; }
+.sl-add-row { display: flex; gap: 8px; margin-top: 6px; }
+.sl-add-row input { flex: 1; }
+
+@media (max-width: 600px) {
+  .syllabus-week-grid { grid-template-columns: 1fr; }
+  .syllabus-tabs { gap: 4px; }
+  .syllabus-tab { font-size: 11px; padding: 5px 10px; }
+}
 </style>
 
 <!-- CodeMirror -->
@@ -1648,6 +1779,9 @@ section:not(.active) {
           <div class="nav-more-group-label">社区</div>
           <a onclick="closeMoreMenu();show('members')" id="nav-members">👥 成员</a>
           <a onclick="closeMoreMenu();show('emotions')" id="nav-emotions-m">✍️ 随笔</a>
+          <div class="nav-more-divider"></div>
+          <div class="nav-more-group-label">教学</div>
+          <a onclick="closeMoreMenu();show('syllabus')" id="nav-syllabus">📅 教学计划</a>
           <div class="nav-more-divider"></div>
           <div class="nav-more-group-label">工具</div>
           <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
@@ -1885,7 +2019,8 @@ section:not(.active) {
         <option value="4">周六午三</option>
         <option value="5">周六晚八</option>
         <option value="6">周天早八</option>
-        <option value="7">抖音</option>
+        <option value="7">NOIP班</option>
+        <option value="8">抖音</option>
       </select>
     </div>
     <div id="reg-error" class="form-error"></div><div id="reg-success" class="form-success"></div>
@@ -2180,7 +2315,7 @@ function show(id){
   const navEl=document.getElementById('nav-'+id);
   if(navEl)navEl.classList.add('active');
   window.scrollTo(0,0);
-  const loaders={judge:initJudge,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks};
+  const loaders={syllabus:loadSyllabus,judge:initJudge,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks};
   if(loaders[id])loaders[id]();
 }
 
@@ -3432,6 +3567,9 @@ function toggleArchiveJudge(id, title){
           <a onclick="closeMoreMenu();show('members')" id="nav-members">👥 成员</a>
           <a onclick="closeMoreMenu();show('emotions')" id="nav-emotions-m">✍️ 随笔</a>
           <div class="nav-more-divider"></div>
+          <div class="nav-more-group-label">教学</div>
+          <a onclick="closeMoreMenu();show('syllabus')" id="nav-syllabus">📅 教学计划</a>
+          <div class="nav-more-divider"></div>
           <div class="nav-more-group-label">工具</div>
           <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
           <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
@@ -3668,7 +3806,8 @@ function toggleArchiveJudge(id, title){
         <option value="4">周六午三</option>
         <option value="5">周六晚八</option>
         <option value="6">周天早八</option>
-        <option value="7">抖音</option>
+        <option value="7">NOIP班</option>
+        <option value="8">抖音</option>
       </select>
     </div>
     <div id="reg-error" class="form-error"></div><div id="reg-success" class="form-success"></div>
@@ -3963,7 +4102,7 @@ function show(id){
   const navEl=document.getElementById('nav-'+id);
   if(navEl)navEl.classList.add('active');
   window.scrollTo(0,0);
-  const loaders={judge:initJudge,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks};
+  const loaders={syllabus:loadSyllabus,judge:initJudge,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:loadLectures,archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks};
   if(loaders[id])loaders[id]();
 }
 
@@ -5961,6 +6100,224 @@ async function runArchiveCode(problemId, editor){
   }
 }
 
+// ── 教学计划 ──────────────────────────────────────────────────
+const CLASS_NAMES = {1:'周六早八',2:'周六早十',3:'周六午一',4:'周六午三',5:'周六晚八',6:'周天早八',7:'NOIP班'};
+let currentSyllabusClass = 1;
+let syllabusExamples = [];  // [{text, url}]
+let syllabusHomework = [];
+let syllabusEditId = null;
+
+async function loadSyllabus(){
+  // Show add button only for coach
+  const btn = document.getElementById('btn-add-syllabus');
+  if (btn) btn.style.display = isCoach() ? '' : 'none';
+  switchSyllabusClass(currentSyllabusClass);
+}
+
+async function switchSyllabusClass(classId){
+  currentSyllabusClass = classId;
+  // Update tabs
+  document.querySelectorAll('.syllabus-tab').forEach(t => {
+    t.classList.toggle('active', parseInt(t.dataset.class) === classId);
+  });
+  const el = document.getElementById('syllabus-content');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>加载中…</div>';
+
+  const { data, error } = await sb.from('syllabus')
+    .select('*').eq('class_id', classId).order('week', {ascending: false});
+
+  if (error){ el.innerHTML = `<div class="empty">加载失败: ${error.message}</div>`; return; }
+  if (!data || !data.length){
+    el.innerHTML = `
+      <div class="syllabus-empty">
+        <div class="syllabus-empty-icon">📋</div>
+        <div>${CLASS_NAMES[classId]} 暂无教学计划</div>
+        ${isCoach() ? '<div style="margin-top:8px;font-size:12px">点击右上角「+ 添加本周计划」开始</div>' : ''}
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="syllabus-week-grid">${data.map(w => renderWeekCard(w)).join('')}</div>`;
+  initStagger(el);
+}
+
+function renderWeekCard(w){
+  const examples = Array.isArray(w.examples) ? w.examples : [];
+  const homework = Array.isArray(w.homework) ? w.homework : [];
+  const tags     = Array.isArray(w.tags)     ? w.tags     : [];
+
+  const renderItems = (items) => items.length
+    ? `<ul class="syllabus-prob-list">${items.map(item => {
+        const isLink = item.url || (item.text && item.text.startsWith('http'));
+        const url    = item.url || (isLink ? item.text : null);
+        const label  = item.text || item;
+        return `<li class="syllabus-prob-item">
+          ${url ? `<a href="${escHtml(url)}" target="_blank">${escHtml(label)}</a>` : `<span>${escHtml(label)}</span>`}
+        </li>`;
+      }).join('')}</ul>`
+    : `<div style="font-size:12px;color:var(--text3)">暂无</div>`;
+
+  return `
+    <div class="syllabus-card stagger-item">
+      <div class="syllabus-card-header">
+        <div>
+          <div class="syllabus-week-badge">第 ${w.week} 周</div>
+          <div class="syllabus-week-label">// week_${String(w.week).padStart(2,'0')}</div>
+        </div>
+        ${isCoach() ? `
+          <div class="syllabus-card-actions">
+            <button class="btn-icon" onclick="editSyllabus(${w.id})" title="编辑">✏️</button>
+            <button class="btn-icon" onclick="deleteSyllabus(${w.id})" title="删除">🗑</button>
+          </div>` : ''}
+      </div>
+
+      ${tags.length ? `
+        <div class="syllabus-section">
+          ${tags.map(t => `<span class="syllabus-tag">${escHtml(t)}</span>`).join('')}
+        </div>` : ''}
+
+      ${w.content ? `
+        <div class="syllabus-section">
+          <div class="syllabus-section-title">📖 教学内容</div>
+          <div class="syllabus-content-text">${escHtml(w.content)}</div>
+        </div>` : ''}
+
+      <div class="syllabus-section">
+        <div class="syllabus-section-title">💡 课上例题</div>
+        ${renderItems(examples)}
+      </div>
+
+      <div class="syllabus-section">
+        <div class="syllabus-section-title">📝 课后习题</div>
+        ${renderItems(homework)}
+      </div>
+
+      ${w.reference_url ? `
+        <div class="syllabus-section">
+          <div class="syllabus-section-title">📎 参考资料</div>
+          <a href="${escHtml(w.reference_url)}" target="_blank" class="syllabus-ref-link">🔗 ${escHtml(w.reference_url)}</a>
+        </div>` : ''}
+    </div>`;
+}
+
+// ── Modal ──
+function openSyllabusModal(editId = null){
+  if (!isCoach()){ showToast('仅教练可操作','error'); return; }
+  syllabusExamples = [];
+  syllabusHomework = [];
+  syllabusEditId   = editId;
+  document.getElementById('syllabus-error').textContent = '';
+  document.getElementById('syllabus-modal-title').textContent = editId ? '编辑教学计划' : '添加教学计划';
+  document.getElementById('sl-class').value   = currentSyllabusClass;
+  document.getElementById('sl-week').value    = '';
+  document.getElementById('sl-content').value = '';
+  document.getElementById('sl-tags').value    = '';
+  document.getElementById('sl-ref').value     = '';
+  renderSyllabusItems();
+
+  if (editId){
+    sb.from('syllabus').select('*').eq('id', editId).single().then(({data:w}) => {
+      if (!w) return;
+      document.getElementById('sl-class').value   = w.class_id;
+      document.getElementById('sl-week').value    = w.week;
+      document.getElementById('sl-content').value = w.content || '';
+      document.getElementById('sl-tags').value    = (w.tags||[]).join(', ');
+      document.getElementById('sl-ref').value     = w.reference_url || '';
+      syllabusExamples = Array.isArray(w.examples) ? w.examples : [];
+      syllabusHomework = Array.isArray(w.homework)  ? w.homework  : [];
+      renderSyllabusItems();
+    });
+  }
+  openModal('syllabus-modal');
+}
+
+function addSyllabusItem(type){
+  const inputId = type === 'examples' ? 'sl-ex-input' : 'sl-hw-input';
+  const val = document.getElementById(inputId).value.trim();
+  if (!val) return;
+  const isUrl = val.startsWith('http');
+  const item  = isUrl ? { text: val, url: val } : { text: val, url: null };
+  if (type === 'examples') syllabusExamples.push(item);
+  else                      syllabusHomework.push(item);
+  document.getElementById(inputId).value = '';
+  renderSyllabusItems();
+}
+
+function removeSyllabusItem(type, idx){
+  if (type === 'examples') syllabusExamples.splice(idx, 1);
+  else                      syllabusHomework.splice(idx, 1);
+  renderSyllabusItems();
+}
+
+function renderSyllabusItems(){
+  ['examples','homework'].forEach(type => {
+    const items = type === 'examples' ? syllabusExamples : syllabusHomework;
+    const listId = type === 'examples' ? 'sl-examples-list' : 'sl-homework-list';
+    const el = document.getElementById(listId);
+    if (!el) return;
+    el.innerHTML = items.map((item, i) => `
+      <div class="sl-item">
+        <span>${escHtml(item.text)}</span>
+        ${item.url ? `<a href="${escHtml(item.url)}" target="_blank" style="font-size:11px;color:var(--accent2)">↗</a>` : ''}
+        <button class="sl-item-del" onclick="removeSyllabusItem('${type}',${i})">✕</button>
+      </div>`).join('');
+  });
+}
+
+async function submitSyllabus(){
+  if (!isCoach()) return;
+  const week    = parseInt(document.getElementById('sl-week').value);
+  const classId = parseInt(document.getElementById('sl-class').value);
+  const content = document.getElementById('sl-content').value.trim();
+  const errEl   = document.getElementById('syllabus-error');
+
+  if (!week || week < 1){ errEl.textContent = '请填写周次'; return; }
+  if (!content){ errEl.textContent = '请填写教学内容'; return; }
+  errEl.textContent = '';
+
+  const tags = document.getElementById('sl-tags').value
+    .split(',').map(t => t.trim()).filter(Boolean);
+
+  const payload = {
+    class_id: classId,
+    week,
+    content,
+    tags,
+    examples: syllabusExamples,
+    homework: syllabusHomework,
+    reference_url: document.getElementById('sl-ref').value.trim() || null,
+    created_by: currentUser.id,
+  };
+
+  const btn = document.getElementById('sl-submit-btn');
+  btn.disabled = true; btn.textContent = '保存中…';
+
+  let error;
+  if (syllabusEditId){
+    ({ error } = await sb.from('syllabus').update(payload).eq('id', syllabusEditId));
+  } else {
+    ({ error } = await sb.from('syllabus').insert(payload));
+  }
+
+  btn.disabled = false; btn.textContent = '保存';
+  if (error){ errEl.textContent = error.message; return; }
+
+  closeModal('syllabus-modal');
+  showToast(syllabusEditId ? '已更新' : '已添加', 'success');
+  switchSyllabusClass(classId);
+}
+
+async function editSyllabus(id){ openSyllabusModal(id); }
+
+async function deleteSyllabus(id){
+  if (!confirm('确认删除这周的计划？')) return;
+  const { error } = await sb.from('syllabus').delete().eq('id', id);
+  if (error){ showToast(error.message,'error'); return; }
+  showToast('已删除','success');
+  switchSyllabusClass(currentSyllabusClass);
+}
+
+
 loadSession();
 
 // ── Nav scroll shrink ────────────────────────────────────
@@ -6432,5 +6789,91 @@ async function showContestChart(contestId, preloaded, title){
 </section>
 
 
+
+<section id="syllabus"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="label">// teaching_plan</div>
+      <h1>教学计划</h1>
+      <p>各班级每周教学内容、例题与作业。</p>
+    </div>
+    <button id="btn-add-syllabus" class="btn btn-primary btn-sm" onclick="openSyllabusModal()" style="display:none">+ 添加本周计划</button>
+  </div>
+
+  <div class="syllabus-tabs" id="syllabus-tabs">
+    <button class="syllabus-tab active" data-class="1" onclick="switchSyllabusClass(1)">周六早八</button>
+    <button class="syllabus-tab" data-class="2" onclick="switchSyllabusClass(2)">周六早十</button>
+    <button class="syllabus-tab" data-class="3" onclick="switchSyllabusClass(3)">周六午一</button>
+    <button class="syllabus-tab" data-class="4" onclick="switchSyllabusClass(4)">周六午三</button>
+    <button class="syllabus-tab" data-class="5" onclick="switchSyllabusClass(5)">周六晚八</button>
+    <button class="syllabus-tab" data-class="6" onclick="switchSyllabusClass(6)">周天早八</button>
+    <button class="syllabus-tab" data-class="7" onclick="switchSyllabusClass(7)">NOIP班</button>
+  </div>
+
+  <div id="syllabus-content"></div>
+</div></section>
+
+<!-- SYLLABUS MODAL -->
+<div class="modal-overlay" id="syllabus-modal">
+  <div class="modal" style="width:700px;max-width:96vw;max-height:92vh;overflow-y:auto">
+    <div class="modal-header">
+      <h2 id="syllabus-modal-title">添加教学计划</h2>
+      <button class="modal-close" onclick="closeModal('syllabus-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="syllabus-error" class="error-msg"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group">
+          <label>班级</label>
+          <select id="sl-class">
+            <option value="1">周六早八</option>
+            <option value="2">周六早十</option>
+            <option value="3">周六午一</option>
+            <option value="4">周六午三</option>
+            <option value="5">周六晚八</option>
+            <option value="6">周天早八</option>
+            <option value="7">NOIP班</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>第几周</label>
+          <input id="sl-week" type="number" min="1" max="52" placeholder="1" value="1">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>本周教学内容</label>
+          <textarea id="sl-content" rows="4" placeholder="本周讲解的知识点、学习目标…"></textarea>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>知识点标签（逗号分隔）</label>
+          <input id="sl-tags" type="text" placeholder="DP, 线段树, 贪心">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>课上例题</label>
+          <div id="sl-examples-list" class="sl-item-list"></div>
+          <div class="sl-add-row">
+            <input id="sl-ex-input" type="text" placeholder="题目名称 或 洛谷链接 https://…" onkeydown="if(event.key==='Enter')addSyllabusItem('examples')">
+            <button class="btn btn-sm btn-ghost" onclick="addSyllabusItem('examples')">+ 添加</button>
+          </div>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>课后习题</label>
+          <div id="sl-homework-list" class="sl-item-list"></div>
+          <div class="sl-add-row">
+            <input id="sl-hw-input" type="text" placeholder="题目名称 或 洛谷链接 https://…" onkeydown="if(event.key==='Enter')addSyllabusItem('homework')">
+            <button class="btn btn-sm btn-ghost" onclick="addSyllabusItem('homework')">+ 添加</button>
+          </div>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>参考资料 / 讲义链接（可选）</label>
+          <input id="sl-ref" type="text" placeholder="https://…">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('syllabus-modal')">取消</button>
+      <button class="btn btn-primary" onclick="submitSyllabus()" id="sl-submit-btn">保存</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
