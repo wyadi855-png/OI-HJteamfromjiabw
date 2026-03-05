@@ -97,8 +97,8 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .hero-stat-item+.hero-stat-item::before{content:'';position:absolute;left:0;top:20%;height:60%;width:1px;background:rgba(108,142,245,0.12);}
 .hero-stat-item:hover{background:rgba(108,142,245,0.06);}
 .hero-stat-num{font-family:var(--space);font-size:32px;font-weight:700;color:var(--accent2);line-height:1;}
-.hero-stat-label{font-size:11px;color:var(--text3);letter-spacing:0.1em;margin-top:2px;}
-.hero-stat-icon{font-size:22px;opacity:0.6;flex-shrink:0;}
+.hero-stat-label{font-size:12px;color:rgba(180,195,255,0.85);letter-spacing:0.1em;margin-top:2px;}
+.hero-stat-icon{font-size:22px;opacity:0.9;flex-shrink:0;}
 
 /* ── PAGE HEADER ── */
 .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid rgba(108,142,245,0.08);}
@@ -1146,7 +1146,7 @@ footer span{color:var(--accent2);}
   background:linear-gradient(90deg,transparent,rgba(108,142,245,0.15),transparent);
 }
 .bento-card:hover{border-color:rgba(108,142,245,0.22);}
-.bento-label{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:0.14em;margin-bottom:14px;opacity:0.8;}
+.bento-label{font-family:var(--mono);font-size:12px;color:rgba(180,195,255,0.9);letter-spacing:0.14em;margin-bottom:14px;}
 
 /* coach card */
 .bento-coach-row{display:flex;gap:14px;align-items:flex-start;}
@@ -1414,7 +1414,7 @@ mark.search-hl{
   color:var(--accent2);text-decoration:none;transition:all 0.2s;margin-bottom:20px;}
 .daily-link-btn:hover{background:rgba(45,232,176,0.14);}
 /* ── Home Daily Card redesign ── */
-.home-daily-empty{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:13px;color:var(--text3);padding:20px 24px;border:1px dashed rgba(108,142,245,0.15);border-radius:12px;}
+.home-daily-empty{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:13px;color:rgba(180,195,255,0.8);padding:20px 24px;border:1px dashed rgba(108,142,245,0.25);border-radius:12px;}
 .home-daily-card{
   display:flex;align-items:center;justify-content:space-between;gap:24px;
   background:linear-gradient(135deg,rgba(12,16,32,0.95) 0%,rgba(18,24,48,0.9) 100%);
@@ -2747,44 +2747,14 @@ section:not(.active) {
       </div>
     </div>
   </div>
-  <div id="hero-stats-bar" style="margin-bottom:48px"></div>
+  <div id="hero-stats-bar" style="margin-bottom:32px"></div>
 
   <div id="home-daily-card" style="margin-bottom:32px"></div>
-  <div class="home-bento">
-    <!-- Left column: coach + skills -->
-    <div class="home-bento-left">
-      <div class="bento-card bento-coach">
-        <div class="bento-label">// 指导教练</div>
-        <div class="bento-coach-row">
-          <div class="bento-coach-avatar">万</div>
-          <div>
-            <div class="bento-coach-name">万家宝 老师</div>
-            <div class="bento-coach-quote">「面对难题时沉下心来的能力，比比赛名次更重要。」</div>
-          </div>
-        </div>
-      </div>
-      <div class="bento-card bento-skills">
-        <div class="bento-label">// 核心技能树</div>
-        <div class="skill-tags">
-          <span class="skill-tag">图论</span><span class="skill-tag">动态规划</span><span class="skill-tag">数据结构</span><span class="skill-tag">数论</span><span class="skill-tag">字符串</span><span class="skill-tag">网络流</span><span class="skill-tag">计算几何</span><span class="skill-tag">博弈论</span>
-        </div>
-      </div>
-      <div class="bento-card bento-goal">
-        <div class="bento-label">// 赛季目标</div>
-        <div class="bento-goal-items">
-          <div class="bento-goal-item"><span class="goal-dot dot-green"></span>冲刺 CSP-S 提高组</div>
-          <div class="bento-goal-item"><span class="goal-dot dot-blue"></span>部分成员备战 NOI 联赛</div>
-          <div class="bento-goal-item"><span class="goal-dot dot-yellow"></span>每周训练 · 月度模拟赛</div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Right column: activity feed -->
-    <div class="bento-card bento-feed">
-      <div class="bento-label">// recent activity</div>
-      <div id="home-feed"><div class="loading"><div class="spinner"></div>加载中…</div></div>
-      <button class="bento-more-btn" onclick="show('notes')">查看全部动态 →</button>
-    </div>
+  <div class="bento-card bento-feed">
+    <div class="bento-label">// recent activity</div>
+    <div id="home-feed"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+    <button class="bento-more-btn" onclick="show('notes')">查看全部动态 →</button>
   </div>
 </div></section>
 
