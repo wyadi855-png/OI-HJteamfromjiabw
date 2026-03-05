@@ -1621,6 +1621,15 @@ mark.search-hl{
 .member-bio{
   font-size:12px;color:var(--text3);margin-top:3px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+.member-group-tag{
+  display:inline-block;margin-top:5px;
+  font-family:var(--mono);font-size:10px;
+  padding:2px 8px;border-radius:100px;
+  background:rgba(108,142,245,0.1);
+  border:1px solid rgba(108,142,245,0.18);
+  color:rgba(180,195,255,0.8);
+  letter-spacing:0.05em;
+}
 
 /* ── PROFILE SOCIAL ── */
 .profile-social{margin-bottom:8px;}
@@ -2851,7 +2860,6 @@ section:not(.active) {
   <div class="notif-badge" id="notif-dot"></div>
 </button>
       <div id="nav-auth-area"><button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button></div>
-      <a href="login.html" class="nav-invite-btn" title="邀请新队员注册">邀请 +</a>
     </div>
   </div>
   <div class="nav-bottom">
@@ -7854,35 +7862,37 @@ async function loadMembers(){
   if(coaches.length){
     const sec=document.createElement('div');sec.className='members-section';
     sec.innerHTML='<div class="members-section-title">🎓 教练</div><div class="members-grid" id="mg-coach"></div>';
-    el.appendChild(sec);coaches.forEach(p=>sec.querySelector('#mg-coach').appendChild(makeMemberCard(p,myFollowing,myFollowers)));
+    el.appendChild(sec);coaches.forEach(p=>sec.querySelector('#mg-coach').appendChild(makeMemberCard(p,myFollowing,myFollowers,grps)));
   }
   (grps||[]).forEach(g=>{
     const members=(profiles||[]).filter(p=>p.role!=='coach'&&p.group_id===g.id);
     if(!members.length)return;
     const sec=document.createElement('div');sec.className='members-section';
     sec.innerHTML='<div class="members-section-title">'+escHtml(g.name)+'<span class="members-section-count">'+members.length+' 人</span></div><div class="members-grid" id="mg-g'+g.id+'"></div>';
-    el.appendChild(sec);members.forEach(p=>sec.querySelector('#mg-g'+g.id).appendChild(makeMemberCard(p,myFollowing,myFollowers)));
+    el.appendChild(sec);members.forEach(p=>sec.querySelector('#mg-g'+g.id).appendChild(makeMemberCard(p,myFollowing,myFollowers,grps)));
   });
   const ungrouped=(profiles||[]).filter(p=>p.role!=='coach'&&!p.group_id);
   if(ungrouped.length){
     const sec=document.createElement('div');sec.className='members-section';
     sec.innerHTML='<div class="members-section-title">其他成员<span class="members-section-count">'+ungrouped.length+' 人</span></div><div class="members-grid" id="mg-none"></div>';
-    el.appendChild(sec);ungrouped.forEach(p=>sec.querySelector('#mg-none').appendChild(makeMemberCard(p,myFollowing,myFollowers)));
+    el.appendChild(sec);ungrouped.forEach(p=>sec.querySelector('#mg-none').appendChild(makeMemberCard(p,myFollowing,myFollowers,grps)));
   }
   } catch(e){ console.error("loadMembers:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 
-function makeMemberCard(p,myFollowing,myFollowers){
+function makeMemberCard(p,myFollowing,myFollowers,grps){
   const card=document.createElement('div');card.className='member-card';
   const isSelf=currentUser&&p.id===currentUser.id;
   const isFollowing=myFollowing.has(p.id);
   const isMutual=isFollowing&&myFollowers.has(p.id);
+  const grp=grps&&p.group_id?(grps.find(g=>g.id===p.group_id)||null):null;
   card.innerHTML=
     '<div class="member-avatar" style="background:'+avatarGradient(p.username)+'">'+(p.avatar_url?'<img src="'+escHtml(p.avatar_url)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':p.username.charAt(0).toUpperCase())+'</div>'
     +'<div class="member-name">@'+escHtml(p.username)+'</div>'
+    +(grp?'<div class="member-group-tag">'+escHtml(grp.name)+'</div>':'')
     +(p.bio?'<div class="member-bio">'+escHtml(p.bio.slice(0,20))+'</div>':'')
     +(isMutual?'<div class="mutual-badge">互关</div>':'')
-    +(!isSelf&&currentUser?'<button class="follow-btn'+(isFollowing?' following':'')+'" data-uid="'+p.id+'" data-following="'+isFollowing+'">'+(isFollowing?'已关注':'+ 关注')+'</button>':'');
+    +(!isSelf&&currentUser?'<button class="follow-btn"'+(isFollowing?' class="follow-btn following"':'')+' data-uid="'+p.id+'" data-following="'+isFollowing+'">'+(isFollowing?'已关注':'+ 关注')+'</button>':'');
   card.addEventListener('click',e=>{if(e.target.classList.contains('follow-btn'))return;showProfile(p.username);});
   const fbtn=card.querySelector('.follow-btn');
   if(fbtn)fbtn.addEventListener('click',e=>{e.stopPropagation();toggleFollow(p.id,fbtn.dataset.following==='true',fbtn);});
