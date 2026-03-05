@@ -32,7 +32,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1.75;font-size:15px;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1.75;font-size:15px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
 #bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.6;}
 .container{max-width:1160px;margin:0 auto;padding:0 40px;position:relative;z-index:1;}
 
@@ -825,7 +825,7 @@ section.active.visible{opacity:1;transform:translateY(0);}
 }
 
 /* note images */
-.note-images{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;}
+.note-images{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:16px 0;}
 .note-img{max-width:100%;max-height:360px;border-radius:8px;border:1px solid rgba(108,142,245,0.2);cursor:zoom-in;transition:transform 0.2s;object-fit:contain;background:#050810;}
 .note-img:hover{transform:scale(1.02);}
 /* code block enhancements */
@@ -1122,6 +1122,175 @@ footer span{color:var(--accent2);}
   .bento-coach-row{flex-direction:column;align-items:flex-start;}
   .lb-div-scores{flex-direction:column;gap:2px;}
   .contest-tabs{flex-wrap:wrap;}
+}
+
+/* ══════════════════════════════════════════
+   MOBILE OVERHAUL — 全新移动端适配
+   ══════════════════════════════════════════ */
+@media(max-width:768px){
+
+  /* ── 基础容器 ── */
+  .container{padding:0 16px;}
+  section{padding:110px 0 56px;}
+
+  /* ── 导航优化 ── */
+  nav{backdrop-filter:blur(32px) saturate(180%);}
+  .nav-top{padding:10px 16px;}
+  .nav-links{padding:0 8px 8px;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .nav-links::-webkit-scrollbar{display:none;}
+  .nav-links a{font-size:12px;padding:5px 11px;white-space:nowrap;border-radius:100px;}
+
+  /* ── 首页英雄区 ── */
+  .hero{padding:72px 0 40px;}
+  .hero h1{font-size:clamp(26px,7vw,40px);letter-spacing:-0.02em;}
+  .hero-desc{font-size:14px;line-height:1.7;}
+  .hero-stats-bar{border-radius:12px;margin-top:24px;}
+  .hero-stat-item{padding:16px 18px;gap:12px;}
+  .hero-stat-num{font-size:26px;}
+  .hero-stat-icon{font-size:20px;}
+  .hero-stat-label{font-size:11px;}
+
+  /* ── 每日一题卡片 ── */
+  .home-daily-card{
+    flex-direction:column;gap:20px;
+    padding:22px 20px;border-radius:18px;
+    margin-bottom:24px;
+  }
+  .hd-right{
+    display:flex;align-items:center;gap:20px;
+    text-align:left;border-top:1px solid rgba(255,255,255,0.07);
+    padding-top:16px;width:100%;
+  }
+  .hd-count{font-size:38px;}
+  .hd-count-label{margin-top:0;}
+  .hd-avatars{justify-content:flex-start;margin-top:0;}
+  .hd-title{font-size:17px;}
+  .hd-actions{gap:8px;}
+  .hd-btn{font-size:11px;padding:8px 14px;}
+
+  /* ── 页面标题 ── */
+  .page-header{flex-direction:column;gap:12px;margin-bottom:28px;}
+  .page-header-left h1{font-size:22px;letter-spacing:-0.02em;}
+  .page-header-left p{font-size:13px;}
+  .page-header-right{width:100%;}
+  .page-header-right .btn-primary{width:100%;justify-content:center;}
+
+  /* ── 题解卡片网格 ── */
+  .blog-grid,.blog-grid-small{grid-template-columns:1fr;gap:12px;}
+  .blog-card{padding:18px;}
+  .blog-card-top h3{font-size:14px;}
+
+  /* ── 题解详情 ── */
+  .note-detail-header{margin-bottom:20px;padding-bottom:16px;}
+  .note-meta-block{gap:8px;margin:10px 0 16px;}
+  .note-meta-info{font-size:11px;gap:6px;}
+  .note-meta-actions{gap:6px;flex-wrap:wrap;}
+  .note-meta-actions .like-btn,
+  .note-meta-actions .bookmark-btn{padding:5px 10px;font-size:11px;}
+  .note-section{margin-bottom:22px;}
+  .note-images{grid-template-columns:repeat(2,1fr);}
+  .note-img{max-height:160px;}
+  .code-block-wrap pre{font-size:12px;padding:14px 12px;border-radius:8px;}
+  .code-lang-tag{font-size:10px;padding:2px 7px;}
+  .code-copy-btn{font-size:10px;padding:3px 8px;}
+
+  /* ── 个人主页 ── */
+  .profile-hero{
+    flex-direction:column;align-items:center;
+    text-align:center;padding:20px 16px;gap:16px;
+  }
+  .profile-avatar{width:72px;height:72px;font-size:28px;}
+  .profile-stats{justify-content:center;gap:16px;}
+  .profile-stat-num{font-size:20px;}
+  .heatmap-grid{grid-template-columns:repeat(26,1fr);gap:2px;}
+  .profile-section-title{font-size:10px;}
+
+  /* ── 帖子 ── */
+  .post-card{padding:16px;}
+  .post-card-header{flex-wrap:wrap;gap:6px;}
+  .post-card-body{font-size:13px;}
+  .post-card-footer{flex-wrap:wrap;gap:8px;}
+
+  /* ── 排行榜 ── */
+  .lb-row{padding:10px 12px;gap:10px;}
+  .lb-name{font-size:13px;}
+  .lb-score{font-size:14px;}
+  .lb-rank{font-size:14px;min-width:22px;}
+
+  /* ── 比赛 ── */
+  .contest-header{padding:14px 16px;}
+  .contest-body{padding:0 16px 16px;}
+  .contest-tabs{flex-wrap:wrap;gap:4px;}
+  .contest-tab{font-size:11px;padding:5px 12px;}
+
+  /* ── 模态框/抽屉 ── */
+  .modal{padding:16px;border-radius:14px;margin:8px;}
+  .modal-overlay{padding:8px;align-items:flex-end;}
+  .drawer{width:100vw;border-radius:18px 18px 0 0;}
+  .drawer-header{padding:16px 20px 12px;}
+  .form-group{margin-bottom:14px;}
+  .form-group label{font-size:12px;}
+  .form-group input,
+  .form-group textarea,
+  .form-group select{font-size:14px;padding:10px 12px;}
+
+  /* ── 通知面板 ── */
+  #notif-panel{width:calc(100vw - 20px);right:10px;top:56px;max-height:70vh;}
+
+  /* ── 成员网格 ── */
+  .members-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;}
+
+  /* ── 讲座 ── */
+  .lecture-item{flex-direction:column;gap:8px;}
+  .lecture-date-block{display:flex;gap:8px;align-items:baseline;}
+
+  /* ── 资源 ── */
+  .resource-grid{grid-template-columns:1fr 1fr;}
+}
+
+@media(max-width:480px){
+
+  /* ── 英雄区 ── */
+  .hero h1{font-size:24px;}
+  .hero-stats-bar{flex-direction:column;gap:0;border-radius:12px;}
+  .hero-stat-item{width:100%;border-right:none !important;}
+  .hero-stat-item+.hero-stat-item{border-top:1px solid rgba(255,255,255,0.07);}
+  .hero-stat-item+.hero-stat-item::before{display:none;}
+
+  /* ── 每日一题 ── */
+  .home-daily-card{padding:18px 16px;border-radius:14px;}
+  .hd-title{font-size:15px;}
+  .hd-btn{font-size:11px;padding:7px 12px;}
+
+  /* ── 题解图片 ── */
+  .note-images{grid-template-columns:1fr 1fr;}
+
+  /* ── 热力图：手机上缩为26列（半年） ── */
+  .heatmap-grid{grid-template-columns:repeat(18,1fr);gap:2px;}
+  .heatmap-cell{border-radius:1px;}
+
+  /* ── 标签栏 ── */
+  .notes-tag-bar{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:4px;}
+  .notes-tag-bar::-webkit-scrollbar{display:none;}
+  .tag-chip{white-space:nowrap;flex-shrink:0;}
+
+  /* ── 资源 ── */
+  .resource-grid{grid-template-columns:1fr;}
+
+  /* ── 排行榜分数 ── */
+  .lb-div-scores{flex-direction:column;gap:2px;}
+
+  /* ── 比赛标签页 ── */
+  .contest-tabs{flex-wrap:wrap;}
+}
+
+/* ── 超小屏 320px ── */
+@media(max-width:360px){
+  .container{padding:0 12px;}
+  .hero h1{font-size:22px;}
+  .nav-links a{font-size:11px;padding:4px 9px;}
+  .heatmap-grid{grid-template-columns:repeat(13,1fr);}
+  .page-header-left h1{font-size:19px;}
 }
 
 /* ── LECTURE UPGRADES ── */
