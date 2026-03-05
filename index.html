@@ -54,6 +54,23 @@ nav.scrolled{
   border-bottom-color:rgba(255,255,255,0.14);
   box-shadow:inset 0 -1px 0 rgba(0,0,0,0.1),0 8px 40px rgba(0,0,0,0.5);}
 .nav-top{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;}
+.nav-invite-btn{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  padding:5px 11px;border-radius:100px;
+  border:1px solid rgba(45,232,176,0.25);
+  background:rgba(45,232,176,0.07);
+  color:var(--accent2);
+  text-decoration:none;
+  letter-spacing:0.05em;
+  transition:all 0.2s;
+  white-space:nowrap;
+  margin-left:8px;
+}
+.nav-invite-btn:hover{
+  background:rgba(45,232,176,0.14);
+  border-color:rgba(45,232,176,0.45);
+  color:#fff;
+}
 .nav-logo{font-family:var(--pixel);font-size:11px;font-weight:400;color:var(--accent2);letter-spacing:0.08em;cursor:pointer;display:flex;align-items:center;gap:8px;text-shadow:0 0 10px rgba(45,232,176,0.5);}
 .nav-logo span{color:var(--text3);}
 .nav-hjoi-svg{width:88px;height:32px;display:block;overflow:visible;transition:filter 0.3s;}
@@ -2834,6 +2851,7 @@ section:not(.active) {
   <div class="notif-badge" id="notif-dot"></div>
 </button>
       <div id="nav-auth-area"><button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button></div>
+      <a href="login.html" class="nav-invite-btn" title="邀请新队员注册">邀请 +</a>
     </div>
   </div>
   <div class="nav-bottom">
@@ -3851,14 +3869,17 @@ function renderAuthArea(){
 async function loadSession(){
   // 页面初始化：直接从 getSession 获取，避免与 onAuthStateChange 竞争
   const{data:{session}}=await sb.auth.getSession();
-  if(session){
-    currentUser=session.user;
-    const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
-    currentProfile=data;
+  if(!session){
+    // 未登录 → 跳转到登录页
+    window.location.href='login.html';
+    return;
   }
+  currentUser=session.user;
+  const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  currentProfile=data;
   renderAuthArea();
   loadHomeFeed();
-  if(currentUser){ checkNotifDot(); initCheckinState(); }
+  checkNotifDot(); initCheckinState();
   initRealtime();
 }
 
@@ -3919,7 +3940,7 @@ async function doRegister(){
   document.getElementById('reg-success').textContent='注册成功，正在登录…';
   setTimeout(async()=>{const{error:le}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});if(!le){closeModal('auth-modal');showToast('注册并登录成功 ✓','success');loadHomeFeed();}},800);
 }
-async function doLogout(){await sb.auth.signOut();showToast('已退出登录','success');loadHomeFeed();}
+async function doLogout(){await sb.auth.signOut();window.location.href='login.html';}
 
 
 // ══════════════════════════════════════════════════════
