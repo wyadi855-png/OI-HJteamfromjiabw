@@ -740,6 +740,48 @@ section.active.visible{opacity:1;transform:translateY(0);}
   0%  {opacity:1;transform:translate(0,0) scale(1);}
   100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0.6);}
 }
+/* profile post feed */
+.profile-post-feed{display:flex;flex-direction:column;gap:10px;}
+.profile-post-card{
+  background:rgba(108,142,245,0.04);
+  border:1px solid rgba(108,142,245,0.12);
+  border-left:2px solid rgba(108,142,245,0.35);
+  border-radius:6px;
+  padding:14px 16px;
+  transition:border-color 0.2s, background 0.2s, transform 0.18s;
+  cursor:default;
+}
+.profile-post-card:hover{
+  border-color:rgba(108,142,245,0.3);
+  border-left-color:rgba(45,232,176,0.7);
+  background:rgba(108,142,245,0.07);
+  transform:translateX(3px);
+}
+.profile-post-header{
+  display:flex;align-items:center;gap:8px;margin-bottom:8px;
+}
+.profile-post-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(108,142,245,0.6);
+  flex-shrink:0;
+  transition:background 0.2s;
+}
+.profile-post-card:hover .profile-post-dot{background:#2de8b0;}
+.profile-post-date{
+  font-family:var(--mono);font-size:11px;
+  color:rgba(120,130,160,0.7);letter-spacing:0.06em;
+}
+.profile-post-preview{
+  font-size:14px;color:rgba(210,220,240,0.9);
+  line-height:1.6;font-weight:500;
+}
+.profile-post-rest{
+  font-size:13px;color:rgba(160,175,200,0.65);
+  line-height:1.7;margin-top:6px;
+  border-top:1px solid rgba(108,142,245,0.08);
+  padding-top:8px;
+}
+
 /* ── LECTURES ── */
 .lecture-item{display:flex;gap:20px;padding:18px 0;border-bottom:1px solid rgba(30,37,64,0.4);}
 .lecture-item:last-child{border-bottom:none;}
@@ -4824,11 +4866,19 @@ async function showProfile(username){
   }
   // Posts
   if(posts&&posts.length){
-    html+='<div class="profile-section"><div class="profile-section-title">随笔日志</div><div class="emotion-feed">';
+    html+='<div class="profile-section"><div class="profile-section-title">随笔日志</div><div class="profile-post-feed">';
     posts.forEach(p=>{
-      html+='<div class="emotion-post"><div class="emotion-dot"></div>';
-      html+='<div class="emotion-date"><span>'+fmtDate(p.created_at)+'</span></div>';
-      html+='<div class="emotion-text">'+escHtml(p.content).replace(/\n/g,'<br>')+'</div></div>';
+      const lines = escHtml(p.content).split('\n').filter(Boolean);
+      const preview = lines[0]||'';
+      const rest = lines.slice(1).join('<br>');
+      html+=`<div class="profile-post-card">
+        <div class="profile-post-header">
+          <span class="profile-post-dot"></span>
+          <span class="profile-post-date">${fmtDate(p.created_at)}</span>
+        </div>
+        <div class="profile-post-preview">${preview}</div>
+        ${rest?`<div class="profile-post-rest">${rest}</div>`:''}
+      </div>`;
     });
     html+='</div></div>';
   }
