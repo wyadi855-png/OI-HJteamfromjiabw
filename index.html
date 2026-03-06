@@ -478,6 +478,82 @@ section.active.visible{opacity:1;transform:translateY(0);}
   opacity: 0;
   animation: logoFadeIn 0.5s ease forwards 0.95s;
 }
+
+/* ── 字母交互效果 ── */
+.letter-h, .letter-j {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* H字母hover效果 */
+.letter-h:hover {
+  filter: drop-shadow(0 0 25px rgba(108, 142, 245, 0.8)) 
+          drop-shadow(0 0 45px rgba(108, 142, 245, 0.5));
+  transform: scale(1.05);
+}
+
+/* J字母hover效果 */
+.letter-j:hover {
+  filter: drop-shadow(0 0 25px rgba(45, 232, 176, 0.8)) 
+          drop-shadow(0 0 45px rgba(45, 232, 176, 0.5));
+  transform: scale(1.05);
+}
+
+/* 点击激活状态 */
+.letter-active {
+  animation: letterActivate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes letterActivate {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.15) rotate(2deg); }
+  60% { transform: scale(0.95) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* 能量波纹效果 */
+.energy-ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid;
+  opacity: 0;
+  pointer-events: none;
+  animation: rippleExpand 1s ease-out forwards;
+}
+
+@keyframes rippleExpand {
+  0% {
+    width: 10px;
+    height: 10px;
+    opacity: 1;
+  }
+  100% {
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+  }
+}
+
+/* 粒子爆发效果 */
+.particle-burst {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particleBurst 0.8s ease-out forwards;
+}
+
+@keyframes particleBurst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(0);
+    opacity: 0;
+  }
+}
 @keyframes logoFadeIn { to { opacity: 1; } }
 
 /* ── 粒子流（沿边运动）── */
@@ -3394,19 +3470,16 @@ section:not(.active) {
             </g>
 
             <!-- ══ H字母本体 ══ -->
-            <g class="hjoi-letters" filter="url(#glow-letter)">
+            <g class="hjoi-letters letter-h" filter="url(#glow-letter)" data-letter="H">
               <rect x="112" y="28" width="14" height="100" rx="3.5" fill="url(#hg)"/>
               <rect x="152" y="28" width="14" height="100" rx="3.5" fill="url(#hg)"/>
               <rect x="112" y="68" width="54" height="13"  rx="2.5" fill="url(#hg)"/>
-              <!-- J - 改进版：连贯的大写J，去掉圆球 -->
-              <g>
-                <!-- J完整路径 - 一笔成型，无断点 -->
+              <!-- J - 改进版：连贯的大写J，去掉圆球和顶部横线 -->
+              <g class="letter-j" data-letter="J">
+                <!-- J完整路径 - 一笔成型，无断点，无顶部横线 -->
                 <path d="M 199 28 L 199 118 L 199 135 Q 199 158 178 162 Q 158 166 148 154 Q 145 150 145 145"
                       fill="none" stroke="url(#jg)" stroke-width="14"
                       stroke-linecap="round" stroke-linejoin="round"/>
-                
-                <!-- J顶部装饰横线 -->
-                <rect x="192" y="28" width="24" height="4" rx="2" fill="url(#jg)" opacity="0.9"/>
                 
                 <!-- J高光层 - 提升质感 -->
                 <path d="M 199 28 L 199 118 L 199 135 Q 199 158 178 162 Q 158 166 148 154 Q 145 150 145 145"
@@ -9252,6 +9325,173 @@ window.addEventListener('scroll',()=>{
   const active = document.querySelector('section.active');
   if(active) requestAnimationFrame(()=>requestAnimationFrame(()=>active.classList.add('visible')));
 })();
+
+// ── HJ Logo 交互效果 ───────────────────────────────────────
+(function() {
+  const letterH = document.querySelector('.letter-h');
+  const letterJ = document.querySelector('.letter-j');
+  const logoWrap = document.querySelector('.hjoi-logo-wrap');
+  
+  if (!letterH || !letterJ || !logoWrap) return;
+  
+  // 音效数据（Base64编码的短音效，可选）
+  const playSound = (freq, duration) => {
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = freq;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + duration);
+    } catch(e) {
+      // 静默失败，不影响用户体验
+    }
+  };
+  
+  // 创建能量波纹
+  const createRipple = (x, y, color) => {
+    const ripple = document.createElement('div');
+    ripple.className = 'energy-ripple';
+    ripple.style.borderColor = color;
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    logoWrap.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 1000);
+  };
+  
+  // 创建粒子爆发
+  const createParticleBurst = (x, y, color, count = 12) => {
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle-burst';
+      particle.style.backgroundColor = color;
+      
+      const angle = (i / count) * Math.PI * 2;
+      const distance = 40 + Math.random() * 40;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance;
+      
+      particle.style.setProperty('--tx', tx + 'px');
+      particle.style.setProperty('--ty', ty + 'px');
+      particle.style.left = x + 'px';
+      particle.style.top = y + 'px';
+      
+      logoWrap.appendChild(particle);
+      setTimeout(() => particle.remove(), 800);
+    }
+  };
+  
+  // H字母点击效果
+  letterH.addEventListener('click', function(e) {
+    const rect = logoWrap.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // 添加激活动画
+    this.classList.add('letter-active');
+    setTimeout(() => this.classList.remove('letter-active'), 600);
+    
+    // 音效
+    playSound(523.25, 0.2); // C5
+    
+    // 视觉效果
+    createRipple(x, y, 'rgba(108, 142, 245, 0.8)');
+    createParticleBurst(x, y, '#6c8ef5', 15);
+    
+    // 控制台消息（彩蛋）
+    console.log('%c⚡ H Power Activated! ⚡', 'color: #6c8ef5; font-size: 16px; font-weight: bold;');
+  });
+  
+  // J字母点击效果
+  letterJ.addEventListener('click', function(e) {
+    const rect = logoWrap.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // 添加激活动画
+    this.classList.add('letter-active');
+    setTimeout(() => this.classList.remove('letter-active'), 600);
+    
+    // 音效（稍高音调）
+    playSound(659.25, 0.2); // E5
+    
+    // 视觉效果
+    createRipple(x, y, 'rgba(45, 232, 176, 0.8)');
+    createParticleBurst(x, y, '#2de8b0', 15);
+    
+    // 控制台消息（彩蛋）
+    console.log('%c✨ J Power Activated! ✨', 'color: #2de8b0; font-size: 16px; font-weight: bold;');
+  });
+  
+  // 连击检测
+  let hClicks = 0, jClicks = 0;
+  const resetCombo = () => { hClicks = 0; jClicks = 0; };
+  let comboTimer;
+  
+  letterH.addEventListener('click', () => {
+    hClicks++;
+    clearTimeout(comboTimer);
+    comboTimer = setTimeout(resetCombo, 2000);
+    
+    if (hClicks === 5) {
+      console.log('%c🎯 H Combo x5! 算法大师！', 'color: #6c8ef5; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px #6c8ef5;');
+      // 可以触发特殊效果，比如显示隐藏信息
+    }
+  });
+  
+  letterJ.addEventListener('click', () => {
+    jClicks++;
+    clearTimeout(comboTimer);
+    comboTimer = setTimeout(resetCombo, 2000);
+    
+    if (jClicks === 5) {
+      console.log('%c🚀 J Combo x5! 竞赛之神！', 'color: #2de8b0; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px #2de8b0;');
+    }
+  });
+  
+  // HJ连击彩蛋
+  let sequence = '';
+  const secretCode = 'HJHJHJ';
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.letter-h')) {
+      sequence += 'H';
+    } else if (e.target.closest('.letter-j')) {
+      sequence += 'J';
+    } else {
+      sequence = '';
+      return;
+    }
+    
+    if (sequence.length > secretCode.length) {
+      sequence = sequence.slice(-secretCode.length);
+    }
+    
+    if (sequence === secretCode) {
+      console.log('%c🎉 SECRET CODE UNLOCKED! 🎉\n你发现了隐藏彩蛋！\n继续加油，算法竞赛之路等你征服！', 
+        'color: #ff6b9d; font-size: 18px; font-weight: bold; background: linear-gradient(90deg, #6c8ef5, #2de8b0); padding: 10px; border-radius: 5px;');
+      sequence = '';
+      
+      // 全屏特效
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;';
+      overlay.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px;font-weight:bold;background:linear-gradient(90deg,#6c8ef5,#2de8b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:pulse 1s ease-in-out;">🎊 SECRET UNLOCKED! 🎊</div>';
+      document.body.appendChild(overlay);
+      setTimeout(() => overlay.remove(), 2000);
+    }
+  });
+  
+  console.log('%c💡 提示：试试点击 H 和 J 字母！', 'color: #888; font-size: 12px;');
+})();
+
 
 // ── Admin ──────────────────────────────────────────────────
 async function loadAdmin(){
