@@ -3130,6 +3130,377 @@ section:not(.active) {
   .syllabus-tabs { gap: 4px; }
   .syllabus-tab { font-size: 11px; padding: 5px 10px; }
 }
+
+/* ══════════════════════════════════════════════
+   MOBILE OVERHAUL v2 — 汉堡菜单 + 全面移动端修复
+   ══════════════════════════════════════════════ */
+
+/* ── 汉堡按钮 ── */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 8px 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.nav-hamburger:hover { background: rgba(255,255,255,0.1); }
+.nav-hamburger span {
+  display: block;
+  width: 100%;
+  height: 1.5px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  transform-origin: center;
+}
+.nav-hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* ── 移动抽屉菜单 ── */
+.nav-drawer {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 99;
+}
+.nav-drawer-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.nav-drawer-panel {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 280px;
+  background: rgba(10,14,26,0.98);
+  border-left: 1px solid rgba(108,142,245,0.15);
+  padding: 0;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+  display: flex;
+  flex-direction: column;
+}
+.nav-drawer.open { display: block; }
+.nav-drawer.open .nav-drawer-overlay { opacity: 1; }
+.nav-drawer.open .nav-drawer-panel { transform: translateX(0); }
+
+.nav-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(108,142,245,0.1);
+  flex-shrink: 0;
+}
+.nav-drawer-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.nav-drawer-close {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+.nav-drawer-close:hover { background: rgba(255,255,255,0.12); }
+
+.nav-drawer-links {
+  flex: 1;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.nav-drawer-links a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-drawer-links a:hover,
+.nav-drawer-links a.active {
+  background: rgba(108,142,245,0.1);
+  color: rgba(255,255,255,0.95);
+}
+.nav-drawer-links a.active {
+  background: rgba(108,142,245,0.15);
+  color: var(--accent);
+}
+.nav-drawer-links .drawer-group-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 10px 14px 4px;
+  pointer-events: none;
+}
+.nav-drawer-links .drawer-divider {
+  height: 1px;
+  background: rgba(108,142,245,0.08);
+  margin: 4px 6px;
+}
+
+@media (max-width: 768px) {
+
+  /* 隐藏桌面导航链接栏，显示汉堡 */
+  .nav-bottom { display: none !important; }
+  .nav-hamburger { display: flex; }
+
+  /* nav-top 布局调整 */
+  .nav-top { padding: 10px 14px; gap: 8px; }
+  .nav-actions { gap: 6px; }
+
+  /* 登录按钮缩小 */
+  #nav-auth-area .btn { font-size: 11px; padding: 5px 10px; }
+
+  /* section 顶部间距 — 去掉底部导航栏后更紧凑 */
+  section { padding: 62px 0 56px; }
+  .container { padding: 0 16px; }
+
+  /* hero */
+  .hero { padding: 20px 0 0; }
+  .hero-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .hjoi-logo-svg-standalone { width: 140px; height: 108px; }
+  .hero h1 { font-size: clamp(22px, 7vw, 36px) !important; }
+  .hero-desc { font-size: 13px; }
+  .hero-tag-row { margin-bottom: 12px; }
+
+  /* hero stats bar */
+  .hero-stats-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0;
+    margin-top: 16px;
+  }
+  .hero-stat-item { padding: 14px 16px; flex: 1; min-width: 90px; }
+  .hero-stat-num { font-size: 22px; }
+  .hero-stat-icon { font-size: 18px; }
+  .hero-stat-label { font-size: 10px; }
+
+  /* 每日一题卡 */
+  .home-daily-card {
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 18px;
+    border-radius: 16px;
+  }
+  .hd-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-align: left;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding-top: 14px;
+    width: 100%;
+  }
+  .hd-count { font-size: 36px; }
+  .hd-count-label { margin-top: 0; }
+  .hd-title { font-size: 16px; }
+  .hd-actions { gap: 8px; }
+  .hd-btn { font-size: 11px; padding: 8px 14px; }
+  .hd-note { font-size: 12px; }
+
+  /* bento */
+  .home-bento { grid-template-columns: 1fr; gap: 12px; margin-bottom: 28px; }
+  .bento-feed #home-feed { max-height: 240px; }
+
+  /* 页面标题 */
+  .page-header { flex-direction: column; gap: 10px; margin-bottom: 24px; padding-bottom: 20px; }
+  .page-header-left h1 { font-size: 20px !important; letter-spacing: -0.02em; }
+  .page-header-left p { font-size: 13px; }
+  .page-header-right { width: 100%; }
+  .page-header-right .btn-primary { width: 100%; justify-content: center; }
+
+  /* 网格 */
+  .home-grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .blog-grid, .blog-grid-small { grid-template-columns: 1fr; gap: 12px; }
+  .members-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  .resource-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* 卡片 */
+  .blog-card { padding: 16px; }
+  .blog-card-top h3 { font-size: 13px; }
+  .blog-meta { font-size: 11px; gap: 6px; }
+  .blog-excerpt { font-size: 11px; }
+  .home-card { padding: 18px; }
+  .home-card-title { font-size: 15px; }
+  .home-card-body { font-size: 12px; }
+
+  /* 题解详情 */
+  #note-detail { padding: 18px 16px; }
+  .note-title-main { font-size: 18px; }
+  .note-meta-info { font-size: 11px; gap: 5px; }
+  .note-meta-actions { gap: 6px; flex-wrap: wrap; }
+  .note-images { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .note-img { max-height: 140px; }
+  .code-block-wrap pre { font-size: 12px; padding: 12px; }
+  .code-copy-btn { font-size: 10px; padding: 2px 7px; }
+  .code-lang-tag { font-size: 9px; }
+
+  /* 个人主页 */
+  .profile-hero { flex-direction: column; align-items: center; text-align: center; padding: 18px 16px; gap: 12px; }
+  .profile-avatar { width: 68px; height: 68px; font-size: 26px; }
+  .profile-stats { justify-content: center; gap: 12px; }
+  .heatmap-grid { grid-template-columns: repeat(26, 1fr); gap: 2px; }
+
+  /* 帖子 */
+  .post-card { padding: 14px 16px; }
+  .post-card-body { font-size: 13px; }
+  .post-card-footer { flex-wrap: wrap; gap: 8px; }
+  .post-card-header { flex-wrap: wrap; gap: 6px; }
+
+  /* 排行榜 */
+  .lb-tabs { flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .lb-tab { font-size: 11px; padding: 5px 12px; }
+  .lb-row { padding: 10px 12px; gap: 10px; }
+  .lb-name { font-size: 13px; }
+  .lb-score { font-size: 14px; }
+  .lb-avatar { width: 32px; height: 32px; font-size: 12px; }
+
+  /* 模拟赛 */
+  .contest-header { padding: 14px 16px; }
+  .contest-body { padding: 0 14px 14px; }
+  .contest-tabs { flex-wrap: wrap; gap: 4px; }
+  .contest-tab { font-size: 11px; padding: 5px 10px; }
+  .rank-table-wrap { font-size: 12px; overflow-x: auto; }
+  .rank-table th, .rank-table td { padding: 8px 10px; }
+
+  /* 讲座 */
+  .lecture-item { flex-direction: column; gap: 8px; }
+  .lecture-date-block { display: flex; gap: 8px; align-items: baseline; }
+  .lecture-day { font-size: 20px; }
+  .lecture-title { font-size: 14px; }
+  .lecture-desc { font-size: 12px; }
+
+  /* 表格溢出保护 */
+  .archive-table-wrap, .rank-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .archive-table { font-size: 12px; }
+  .archive-table th, .archive-table td { padding: 8px 10px; white-space: nowrap; }
+
+  /* 搜索栏 */
+  .search-bar { flex-direction: column; gap: 8px; }
+  .filter-bar { flex-wrap: wrap; gap: 6px; }
+  .filter-btn { font-size: 11px; padding: 4px 10px; }
+
+  /* 标签筛选栏 — 可滚动 */
+  .notes-tag-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    margin-bottom: 16px;
+  }
+  .notes-tag-bar::-webkit-scrollbar { display: none; }
+  .notes-tag-bar button, .tag-chip { white-space: nowrap; flex-shrink: 0; }
+
+  /* 模态框底部弹出 */
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .modal {
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  .modal::before {
+    content: '';
+    display: block;
+    width: 36px; height: 4px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 2px;
+    margin: 10px auto 6px;
+  }
+  .form-row { flex-direction: column; gap: 0; }
+  .form-group { margin-bottom: 12px; }
+  .form-group input,
+  .form-group textarea,
+  .form-group select { font-size: 16px; } /* 防止iOS自动放大 */
+  .modal-footer { flex-direction: column; gap: 8px; }
+  .modal-footer .btn { width: 100%; justify-content: center; }
+
+  /* 通知面板 */
+  #notif-panel { width: calc(100vw - 20px); right: 10px; top: 56px; max-height: 70vh; }
+
+  /* 在线评测 */
+  .judge-layout { grid-template-columns: 1fr; gap: 12px; }
+  .judge-editor .CodeMirror { height: 280px !important; }
+  .judge-io-textarea { height: 90px; }
+  .judge-shortcut { display: none; }
+
+  /* 题目详情 */
+  .prob-detail-body { flex-direction: column; }
+  .prob-statement { border-right: none; border-bottom: 1px solid var(--border); max-height: 35vh; }
+  .prob-editor-panel { width: 100%; }
+
+  /* 统计图表 */
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .stat-num { font-size: 24px; }
+
+  /* 底部安全区（iPhone 刘海屏）*/
+  section { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+}
+
+@media (max-width: 480px) {
+  section { padding: 58px 0 40px; }
+  .hero h1 { font-size: 20px !important; }
+  .hero-stats-bar { flex-direction: column; }
+  .hero-stat-item { flex: none; width: 100%; border-right: none !important; }
+  .hero-stat-item + .hero-stat-item { border-top: 1px solid rgba(255,255,255,0.07); }
+  .hero-stat-item + .hero-stat-item::before { display: none; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .resource-grid { grid-template-columns: 1fr; }
+  .lb-div-scores { flex-direction: column; gap: 2px; }
+  .heatmap-grid { grid-template-columns: repeat(18, 1fr); gap: 2px; }
+  .home-daily-card { padding: 16px 14px; }
+  .hd-title { font-size: 14px; }
+  .member-card { padding: 16px 12px; }
+  .note-images { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 360px) {
+  .container { padding: 0 12px; }
+  .hero h1 { font-size: 18px !important; }
+  .heatmap-grid { grid-template-columns: repeat(13, 1fr); }
+  .page-header-left h1 { font-size: 17px !important; }
+  .stats-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -3253,6 +3624,10 @@ section:not(.active) {
   <div class="notif-badge" id="notif-dot"></div>
 </button>
       <div id="nav-auth-area"><button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button></div>
+      <!-- 汉堡菜单按钮（仅移动端显示） -->
+      <button class="nav-hamburger" id="nav-hamburger" onclick="toggleNavDrawer()" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
   <div class="nav-bottom">
@@ -3292,6 +3667,43 @@ section:not(.active) {
     </ul>
   </div>
 </nav>
+
+<!-- 移动端抽屉导航 -->
+<div class="nav-drawer" id="nav-drawer">
+  <div class="nav-drawer-overlay" onclick="closeNavDrawer()"></div>
+  <div class="nav-drawer-panel">
+    <div class="nav-drawer-header">
+      <span class="nav-drawer-title">// 导航</span>
+      <button class="nav-drawer-close" onclick="closeNavDrawer()">✕</button>
+    </div>
+    <div class="nav-drawer-links">
+      <a onclick="closeNavDrawer();show('home')" id="drawer-home">🏠 首页</a>
+      <a onclick="closeNavDrawer();show('announcements')" id="drawer-announcements">📢 公告</a>
+      <a onclick="closeNavDrawer();show('contests')" id="drawer-contests">🏅 模拟赛</a>
+      <a onclick="closeNavDrawer();show('notes')" id="drawer-notes">📝 题解</a>
+      <a onclick="closeNavDrawer();show('emotions')" id="drawer-emotions">✍️ 随笔</a>
+      <a onclick="closeNavDrawer();show('lectures')" id="drawer-lectures">🎓 课程</a>
+      <a onclick="closeNavDrawer();show('archive')" id="drawer-archive">📚 题库</a>
+      <a onclick="closeNavDrawer();show('leaderboard')" id="drawer-leaderboard">🏆 排行榜</a>
+      <div class="drawer-divider"></div>
+      <div class="drawer-group-label">社区</div>
+      <a onclick="closeNavDrawer();show('members')" id="drawer-members">👥 成员</a>
+      <div class="drawer-divider"></div>
+      <div class="drawer-group-label">工具</div>
+      <a onclick="closeNavDrawer();show('search')" id="drawer-search">🔍 搜索</a>
+      <a onclick="closeNavDrawer();show('bookmarks')" id="drawer-bookmarks">🔖 收藏</a>
+      <a onclick="closeNavDrawer();show('judge')" id="drawer-judge">⚡ 在线评测</a>
+      <a onclick="closeNavDrawer();show('quiz')" id="drawer-quiz">🧠 判断题练习</a>
+      <div class="drawer-divider"></div>
+      <div class="drawer-group-label">数据</div>
+      <a onclick="closeNavDrawer();show('stats')" id="drawer-stats">📊 统计</a>
+      <a onclick="closeNavDrawer();show('daily')" id="drawer-daily">📅 每日一题</a>
+      <a onclick="closeNavDrawer();show('resources')" id="drawer-resources">📖 资料</a>
+      <a onclick="closeNavDrawer();show('admin')" id="drawer-admin" style="display:none">⚙️ 后台</a>
+    </div>
+  </div>
+</div>
+
 <div class="notif-panel" id="notif-panel"><div class="notif-header"><h3>通知</h3><button class="btn btn-outline btn-sm" onclick="markAllRead()">全部已读</button></div><div id="notif-list"><div class="notif-empty">// 暂无通知</div></div></div>
 
 <!-- DM PANEL -->
@@ -4459,6 +4871,8 @@ function show(id){
   requestAnimationFrame(()=>requestAnimationFrame(()=>sec.classList.add('visible')));
   const navEl=document.getElementById('nav-'+id);
   if(navEl)navEl.classList.add('active');
+  // 同步移动端抽屉 active 状态
+  syncDrawerActive(id);
   window.scrollTo(0,0);
   const loaders={syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,quiz:initQuiz,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks};
   if(loaders[id])loaders[id]();
@@ -4470,12 +4884,12 @@ function renderAuthArea(){
   const coachNav=document.getElementById('nav-admin');
   if(currentUser&&currentProfile){
     area.innerHTML=`<span class="nav-user" style="cursor:pointer" onclick="showProfile('${currentProfile.username}')">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}<button class="btn btn-outline btn-sm" onclick="openModal('settings-modal');loadSettingsData()">设置</button><button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
-    if(isCoach())coachNav.style.display='';
+    if(isCoach()){coachNav.style.display='';const da=document.getElementById('drawer-admin');if(da)da.style.display='';}
     ['btn-new-note','btn-new-post'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
     if(isCoach())['btn-new-contest','btn-new-problem','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
   }else{
     area.innerHTML=`<button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button>`;
-    coachNav.style.display='none';
+    coachNav.style.display='none';const da2=document.getElementById('drawer-admin');if(da2)da2.style.display='none';
     ['btn-new-note','btn-new-post','btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   }
 }
@@ -5568,6 +5982,46 @@ function copyCode(btn){
 async function toggleLike(noteId,isLiked){if(!currentUser){showToast('请先登录','error');return;}if(isLiked)await sb.from('likes').delete().eq('note_id',noteId).eq('user_id',currentUser.id);else await sb.from('likes').insert({note_id:noteId,user_id:currentUser.id});showNote(noteId);}
 async function submitComment(noteId){const input=document.getElementById(`ci-${noteId}`);const content=input.value.trim();if(!content)return;const{error}=await sb.from('comments').insert({note_id:noteId,author_id:currentUser.id,content});if(error){showToast('评论失败','error');return;}input.value='';showNote(noteId);showToast('评论成功 ✓','success');}
 async function deleteNote(id){if(!confirm('确认删除这篇题解？'))return;await sb.from('notes').delete().eq('id',id);showToast('已删除','success');loadNotes();}
+
+// ── Mobile Drawer Navigation ─────────────────────────────────
+function toggleNavDrawer(){
+  const drawer=document.getElementById('nav-drawer');
+  const btn=document.getElementById('nav-hamburger');
+  const isOpen=drawer.classList.contains('open');
+  if(isOpen){ closeNavDrawer(); } else { openNavDrawer(); }
+}
+function openNavDrawer(){
+  const drawer=document.getElementById('nav-drawer');
+  const btn=document.getElementById('nav-hamburger');
+  drawer.classList.add('open');
+  btn.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeNavDrawer(){
+  const drawer=document.getElementById('nav-drawer');
+  const btn=document.getElementById('nav-hamburger');
+  drawer.classList.remove('open');
+  btn.classList.remove('open');
+  document.body.style.overflow='';
+}
+// 同步抽屉菜单的 active 状态
+function syncDrawerActive(id){
+  document.querySelectorAll('.nav-drawer-links a').forEach(a=>a.classList.remove('active'));
+  const el=document.getElementById('drawer-'+id);
+  if(el) el.classList.add('active');
+  // 同步后台按钮显示
+  const adminBtn=document.getElementById('drawer-admin');
+  const navAdminBtn=document.getElementById('nav-admin');
+  if(adminBtn && navAdminBtn){
+    adminBtn.style.display=navAdminBtn.style.display;
+  }
+}
+// admin 可见性同步
+const _origShowAdmin=window.showAdminNav;
+// 关闭抽屉时 ESC 键
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') closeNavDrawer();
+});
 
 // ── Nav More Menu ──────────────────────────────────────────
 function toggleMoreMenu(e){
