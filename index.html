@@ -3341,9 +3341,8 @@ section:not(.active) {
               <rect x="112" y="68" width="54" height="13"  rx="2.5"/>
             </clipPath>
             <clipPath id="clip-J">
-              <!-- 更新为新的J形状 -->
-              <rect x="192" y="28" width="14" height="90" rx="3"/>
-              <path d="M 206 118 L 206 135 Q 206 158 185 162 Q 165 166 155 154 Q 152 150 152 145"
+              <!-- 连贯的J形状 -->
+              <path d="M 199 28 L 199 118 L 199 135 Q 199 158 178 162 Q 158 166 148 154 Q 145 150 145 145"
                     fill="none" stroke="white" stroke-width="16" stroke-linecap="round"/>
             </clipPath>
             <!-- 粒子路径 -->
@@ -3352,8 +3351,8 @@ section:not(.active) {
             <path id="h-bar"     d="M 112 74  L 166 74"/>
             <path id="h-left-r"  d="M 119 128 L 119 28"/>
             <path id="h-right-r" d="M 159 128 L 159 28"/>
-            <path id="j-full"    d="M 199 28 L 199 118 L 206 135 Q 206 158 185 162 Q 165 166 155 154 Q 152 150 152 145"/>
-            <path id="j-full-r"  d="M 152 145 Q 152 150 155 154 Q 165 166 185 162 Q 206 158 206 135 L 199 118 L 199 28"/>
+            <path id="j-full"    d="M 199 28 L 199 118 L 199 135 Q 199 158 178 162 Q 158 166 148 154 Q 145 150 145 145"/>
+            <path id="j-full-r"  d="M 145 145 Q 145 150 148 154 Q 158 166 178 162 Q 199 158 199 135 L 199 118 L 199 28"/>
           </defs>
 
           <!-- ══════════════════════════════════════
@@ -3399,27 +3398,28 @@ section:not(.active) {
               <rect x="112" y="28" width="14" height="100" rx="3.5" fill="url(#hg)"/>
               <rect x="152" y="28" width="14" height="100" rx="3.5" fill="url(#hg)"/>
               <rect x="112" y="68" width="54" height="13"  rx="2.5" fill="url(#hg)"/>
-              <!-- J - 改进版：去掉圆球，改为标准大写J -->
+              <!-- J - 改进版：连贯的大写J，去掉圆球 -->
               <g>
-                <!-- J竖杆 - 从顶部延伸 -->
-                <rect x="192" y="28" width="14" height="90" rx="3" fill="url(#jg)"/>
-                <!-- J底部弯钩 - 使用path实现优雅曲线 -->
-                <path d="M 206 118 L 206 135 Q 206 158 185 162 Q 165 166 155 154 Q 152 150 152 145"
+                <!-- J完整路径 - 一笔成型，无断点 -->
+                <path d="M 199 28 L 199 118 L 199 135 Q 199 158 178 162 Q 158 166 148 154 Q 145 150 145 145"
                       fill="none" stroke="url(#jg)" stroke-width="14"
                       stroke-linecap="round" stroke-linejoin="round"/>
-                <!-- J顶部横线装饰 - 增加现代感 -->
+                
+                <!-- J顶部装饰横线 -->
                 <rect x="192" y="28" width="24" height="4" rx="2" fill="url(#jg)" opacity="0.9"/>
                 
                 <!-- J高光层 - 提升质感 -->
-                <rect x="192" y="28" width="14" height="90" rx="3" 
-                      fill="url(#jg-highlight)" opacity="0.5">
-                  <animate attributeName="opacity" values="0.3;0.6;0.3" dur="3.5s" repeatCount="indefinite"/>
-                </rect>
-                <!-- J弯钩高光 -->
-                <path d="M 206 118 L 206 135 Q 206 158 185 162 Q 165 166 155 154 Q 152 150 152 145"
-                      fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="3"
+                <path d="M 199 28 L 199 118 L 199 135 Q 199 158 178 162 Q 158 166 148 154 Q 145 150 145 145"
+                      fill="none" stroke="url(#jg-highlight)" stroke-width="6"
                       stroke-linecap="round" opacity="0.5">
-                  <animate attributeName="opacity" values="0.3;0.55;0.3" dur="3.8s" repeatCount="indefinite" begin="0.3s"/>
+                  <animate attributeName="opacity" values="0.3;0.6;0.3" dur="3.5s" repeatCount="indefinite"/>
+                </path>
+                
+                <!-- J内侧高光 - 增强立体感 -->
+                <path d="M 196 32 L 196 118 L 196 135 Q 196 155 178 159 Q 160 163 150 152"
+                      fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"
+                      stroke-linecap="round" opacity="0.6">
+                  <animate attributeName="opacity" values="0.4;0.7;0.4" dur="3.8s" repeatCount="indefinite" begin="0.3s"/>
                 </path>
               </g>
             </g>
@@ -3439,14 +3439,11 @@ section:not(.active) {
                     stroke="url(#neon-stroke)" stroke-width="1.2">
                 <animate attributeName="stroke-opacity" values="0.15;0.65;0.15" dur="2.1s" repeatCount="indefinite" begin="0.6s"/>
               </rect>
-              <!-- J描边 - 更新为新设计 -->
-              <rect x="192" y="28" width="14" height="90" rx="3"
-                    stroke="url(#neon-stroke)" stroke-width="1.2">
-                <animate attributeName="stroke-opacity" values="0.1;0.7;0.1" dur="2.9s" repeatCount="indefinite" begin="0.2s"/>
-              </rect>
-              <path d="M 206 118 L 206 135 Q 206 158 185 162 Q 165 166 155 154 Q 152 150 152 145"
-                    stroke="#00cfff" stroke-width="1.5" stroke-linecap="round">
-                <animate attributeName="stroke-opacity" values="0.1;0.65;0.1" dur="3.1s" repeatCount="indefinite" begin="0.4s"/>
+              <!-- J描边 - 连贯路径 -->
+              <path d="M 199 28 L 199 118 L 199 135 Q 199 158 178 162 Q 158 166 148 154 Q 145 150 145 145"
+                    stroke="url(#neon-stroke)" stroke-width="1.5" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round">
+                <animate attributeName="stroke-opacity" values="0.1;0.7;0.1" dur="3.1s" repeatCount="indefinite" begin="0.4s"/>
               </path>
             </g>
 
