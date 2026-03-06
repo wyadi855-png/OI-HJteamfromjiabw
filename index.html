@@ -4055,19 +4055,48 @@ section:not(.active) {
 </div>
 
 
-<!-- CodeMirror -->
+<!-- CodeMirror CSS（轻量，提前加载避免编辑器闪烁） -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/ruby/ruby.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/go/go.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/php/php.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+<!-- CodeMirror JS：懒加载，仅在首次需要时动态注入 -->
+<script>
+(function(){
+  const CDN = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/';
+  const CM_SCRIPTS = [
+    CDN + 'codemirror.min.js',
+    CDN + 'mode/clike/clike.min.js',
+    CDN + 'mode/python/python.min.js',
+    CDN + 'mode/javascript/javascript.min.js',
+    CDN + 'mode/ruby/ruby.min.js',
+    CDN + 'mode/go/go.min.js',
+    CDN + 'mode/php/php.min.js',
+    CDN + 'addon/edit/matchbrackets.min.js',
+    CDN + 'addon/edit/closebrackets.min.js',
+    CDN + 'addon/comment/comment.min.js',
+  ];
+  let _loaded = false, _loading = false, _callbacks = [];
+  window.loadCodeMirror = function(cb) {
+    if (_loaded) { cb && cb(); return; }
+    if (cb) _callbacks.push(cb);
+    if (_loading) return;
+    _loading = true;
+    let idx = 0;
+    function loadNext() {
+      if (idx >= CM_SCRIPTS.length) {
+        _loaded = true;
+        _callbacks.forEach(fn => fn());
+        _callbacks = [];
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = CM_SCRIPTS[idx++];
+      s.onload = loadNext;
+      document.head.appendChild(s);
+    }
+    loadNext();
+  };
+})();
+</script>
 
 <script>
 function copyProblems(ids,btnId){
@@ -7664,7 +7693,7 @@ int main(){
 function initJudge(){
   if(judgeInited) return;
   judgeInited = true;
-  setTimeout(()=>{
+  loadCodeMirror(()=>{
     const el = document.getElementById('judge-editor');
     if(!el || judgeEditor) return;
     judgeEditor = CodeMirror(el, {
@@ -7686,7 +7715,7 @@ function initJudge(){
       lineWrapping: false,
     });
     judgeEditor.setSize('100%', '420px');
-  }, 100);
+  });
 }
 
 function onLangChange(){
@@ -7880,6 +7909,7 @@ function toggleArchiveJudge(problemId, title){
   wrap.classList.toggle('open');
   if(wrap.classList.contains('open') && !wrap._inited){
     wrap._inited = true;
+    loadCodeMirror(()=>{
     const edEl = wrap.querySelector('.archive-judge-editor');
     const editor = CodeMirror(edEl, {
       value: TEMPLATES.io,
@@ -7897,6 +7927,7 @@ function toggleArchiveJudge(problemId, title){
     });
     editor.setSize('100%', '280px');
     wrap._editor = editor;
+    }); // end loadCodeMirror
   }
 }
 
