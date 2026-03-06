@@ -36,33 +36,10 @@
   --glass-bg:rgba(15,19,32,0.7);
   --glass-border:rgba(108,142,245,0.12);
   --radius:14px;
-
-  /* ── 字体层级系统 ── */
-  --fs-display: clamp(34px,5.5vw,68px); /* 大标题 hero */
-  --fs-title:   24px;   /* 页面/详情标题  weight 700 */
-  --fs-h2:      20px;   /* 二级标题       weight 700 */
-  --fs-headline:16px;   /* 卡片标题       weight 600 */
-  --fs-body:    15px;   /* 正文           weight 400 */
-  --fs-callout: 13px;   /* 次级说明       weight 400 */
-  --fs-caption: 11px;   /* 元信息/标签   weight 400 */
-  --fs-micro:   10px;   /* 角标/极小     weight 400 */
-
-  /* ── 行高配套 ── */
-  --lh-tight:   1.2;
-  --lh-heading: 1.35;
-  --lh-body:    1.75;
-  --lh-relaxed: 1.9;
-
-  /* ── 字重 ── */
-  --fw-regular: 400;
-  --fw-medium:  500;
-  --fw-semibold:600;
-  --fw-bold:    700;
-  --fw-black:   800;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:var(--lh-body);font-size:var(--fs-body);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1.75;font-size:15px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
 #bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.6;}
 .container{max-width:1160px;margin:0 auto;padding:0 40px;position:relative;z-index:1;}
 
@@ -223,8 +200,8 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .contest-header{padding:20px 24px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;transition:background 0.2s;}
 .contest-header:hover{background:rgba(108,142,245,0.04);}
 .contest-header:hover .contest-title{color:var(--accent);}
-.contest-title{font-size:16px;font-weight:600;letter-spacing:-0.01em;transition:color 0.2s;}
-.contest-date{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.contest-title{font-size:15px;font-weight:600;letter-spacing:-0.01em;transition:color 0.2s;}
+.contest-date{font-family:var(--mono);font-size:12px;color:var(--text3);}
 .contest-toggle{font-size:12px;color:var(--text3);margin-left:8px;transition:transform 0.3s;}
 .contest-card[data-open="1"] .contest-toggle{transform:rotate(180deg);}
 .contest-body{padding:0 24px 20px;border-top:1px solid rgba(108,142,245,0.08);}
@@ -238,7 +215,7 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .rank-table-wrap{overflow-x:auto;border-radius:10px;border:1px solid rgba(108,142,245,0.08);margin-top:14px;}
 .rank-table{width:100%;border-collapse:collapse;font-size:13px;}
 .rank-table thead tr{background:rgba(108,142,245,0.06);border-bottom:1px solid rgba(108,142,245,0.1);}
-.rank-table th{padding:10px 16px;text-align:left;font-size:11px;color:var(--text3);letter-spacing:0.08em;font-weight:400;}
+.rank-table th{padding:10px 16px;text-align:left;font-size:12px;color:var(--text3);letter-spacing:0.08em;font-weight:400;}
 .rank-table td{padding:11px 16px;border-bottom:1px solid rgba(30,37,64,0.6);}
 .rank-table tr:last-child td{border-bottom:none;}
 .rank-table tr:hover td{background:rgba(108,142,245,0.04);}
@@ -251,14 +228,14 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .home-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:32px;}
 .home-card{background:var(--glass-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;transition:all 0.3s;}
 .home-card:hover{border-color:rgba(108,142,245,0.25);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.3);}
-.home-card-label{font-size:11px;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;}
-.home-card-title{font-size:17px;font-weight:600;margin-bottom:8px;}
+.home-card-label{font-size:12px;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;}
+.home-card-title{font-size:16px;font-weight:600;margin-bottom:8px;}
 .home-card-body{font-size:13px;color:var(--text2);line-height:1.7;}
 
 /* ── FEED ── */
 .feed-item{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid rgba(30,37,64,0.5);}
 .feed-item:last-child{border-bottom:none;}
-.feed-date{font-size:11px;color:var(--text3);font-family:var(--mono);white-space:nowrap;margin-top:2px;min-width:72px;}
+.feed-date{font-size:12px;color:var(--text3);font-family:var(--mono);white-space:nowrap;margin-top:2px;min-width:72px;}
 .feed-content{font-size:13px;color:var(--text2);line-height:1.6;flex:1;}
 .update-tag{font-size:12px;padding:1px 7px;border-radius:3px;margin-left:6px;font-family:var(--mono);}
 .tag-note{background:rgba(108,142,245,0.1);color:var(--accent);}
@@ -273,14 +250,14 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .ann-card{background:var(--glass-bg);backdrop-filter:blur(8px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px 24px;margin-bottom:12px;transition:all 0.25s;}
 .ann-card:hover{border-color:rgba(108,142,245,0.25);}
 .ann-card.pinned{border-left:2px solid var(--accent2);}
-.ann-title{font-size:17px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
-.ann-meta{font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:10px;}
+.ann-title{font-size:15px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.ann-meta{font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:10px;}
 .ann-content{font-size:13px;color:var(--text2);line-height:1.7;}
 
 /* ── NOTES ── */
 .blog-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;}
-.blog-card-top h3{font-size:16px;font-weight:600;line-height:1.4;}
-.blog-meta{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--text3);flex-wrap:wrap;margin-bottom:10px;}
+.blog-card-top h3{font-size:14px;font-weight:600;line-height:1.4;}
+.blog-meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--text3);flex-wrap:wrap;margin-bottom:10px;}
 .blog-excerpt{font-size:12px;color:var(--text3);line-height:1.6;}
 .author{color:var(--accent2);cursor:pointer;font-family:var(--mono);}
 .author:hover{text-decoration:underline;}
@@ -333,9 +310,9 @@ section.active.visible{opacity:1;transform:translateY(0);}
 /* ── NOTE DETAIL ── */
 #note-detail{background:var(--glass-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:32px;}
 .note-detail-header{margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid rgba(108,142,245,0.08);}
-.note-title-main{font-size:24px;font-weight:700;margin:12px 0;}
+.note-title-main{font-size:22px;font-weight:700;margin:12px 0;}
 .note-section{margin-bottom:28px;}
-.note-section h3{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(30,37,64,0.6);}
+.note-section h3{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(30,37,64,0.6);}
 .note-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
 /* ── PIXEL / MC STYLE ─────────────────────────────────────────
    像素风点缀：返回键、标签徽章、特殊按钮、页面标题装饰
@@ -676,7 +653,7 @@ section.active.visible{opacity:1;transform:translateY(0);}
 }
 
 /* ── MARKDOWN ── */
-.prose{font-size:15px;line-height:1.9;color:var(--text2);}
+.prose{font-size:14px;line-height:1.85;color:var(--text2);}
 .prose h1,.prose h2,.prose h3{color:var(--text);margin:20px 0 10px;font-weight:600;}
 .prose p{margin-bottom:14px;}
 .prose code{background:rgba(108,142,245,0.1);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px;color:var(--accent);}
@@ -692,8 +669,8 @@ section.active.visible{opacity:1;transform:translateY(0);}
 
 /* ── COMMENTS ── */
 .comment-item{padding:14px 0;border-bottom:1px solid rgba(30,37,64,0.5);}
-.comment-meta{font-size:11px;color:var(--text3);margin-bottom:6px;display:flex;gap:8px;}
-.comment-content{font-size:14px;color:var(--text2);}
+.comment-meta{font-size:12px;color:var(--text3);margin-bottom:6px;display:flex;gap:8px;}
+.comment-content{font-size:13px;color:var(--text2);}
 .comment-input-row{display:flex;gap:8px;margin-top:14px;}
 .comment-input-row input{flex:1;}
 
@@ -714,24 +691,24 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .lb-rank-1{color:#ffd700;}.lb-rank-2{color:#c0c0c0;}.lb-rank-3{color:#cd7f32;}
 .lb-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:14px;font-weight:700;color:var(--bg);flex-shrink:0;}
 .lb-info{flex:1;}
-.lb-name{font-size:15px;font-weight:600;margin-bottom:2px;}
-.lb-sub{font-size:11px;color:var(--text3);}
+.lb-name{font-size:14px;font-weight:600;margin-bottom:2px;}
+.lb-sub{font-size:12px;color:var(--text3);}
 .lb-bar-wrap{height:3px;background:rgba(108,142,245,0.1);border-radius:2px;margin-top:6px;}
 .lb-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);}
-.lb-score{font-family:var(--space);font-size:20px;font-weight:700;color:var(--accent2);}
+.lb-score{font-family:var(--space);font-size:18px;font-weight:700;color:var(--accent2);}
 .lb-score-unit{font-size:12px;color:var(--text3);display:block;text-align:right;}
 
 /* ── MEMBERS ── */
 .members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:28px;}
 .member-card{background:var(--glass-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px 16px;text-align:center;cursor:pointer;transition:all 0.3s;}
 .member-card:hover{border-color:rgba(108,142,245,0.3);transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.3);}
-.member-name{font-family:var(--mono);font-size:13px;color:var(--accent2);margin-bottom:4px;}
-.member-role{font-size:11px;color:var(--text3);margin-bottom:12px;}
+.member-name{font-family:var(--mono);font-size:12px;color:var(--accent2);margin-bottom:4px;}
+.member-role{font-size:12px;color:var(--text3);margin-bottom:12px;}
 .member-stats{display:flex;gap:0;justify-content:center;}
 .member-stat{flex:1;padding:6px 0;border-top:1px solid rgba(108,142,245,0.08);}
 .member-stat .n{font-family:var(--space);font-size:16px;font-weight:700;color:var(--text);}
 .member-stat .l{font-size:12px;color:var(--text3);}
-.section-sub-title{font-size:11px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;font-family:var(--mono);}
+.section-sub-title{font-size:12px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;font-family:var(--mono);}
 
 /* ── STATS ── */
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;}
@@ -742,9 +719,9 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .stat-card.pink{border-color:rgba(240,98,146,0.15);}
 .stat-card.yellow{border-color:rgba(255,179,71,0.15);}
 .stat-card.purple{border-color:rgba(200,114,234,0.15);}
-.stat-num{font-family:var(--space);font-size:34px;font-weight:700;color:var(--text);}
-.stat-label{font-size:13px;color:var(--text2);margin-top:4px;}
-.stat-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.stat-num{font-family:var(--space);font-size:32px;font-weight:700;color:var(--text);}
+.stat-label{font-size:12px;color:var(--text2);margin-top:4px;}
+.stat-sub{font-size:12px;color:var(--text3);margin-top:2px;}
 .activity-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(30,37,64,0.4);}
 .activity-row:last-child{border-bottom:none;}
 .activity-name{font-family:var(--mono);font-size:12px;width:120px;flex-shrink:0;}
@@ -819,7 +796,7 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .post-card-author{font-family:var(--mono);font-size:13px;color:var(--accent2);cursor:pointer;}
 .post-card-author:hover{text-decoration:underline;}
 .post-card-date{font-family:var(--mono);font-size:11px;color:var(--text3);}
-.post-card-body{font-size:15px;color:var(--text2);line-height:1.85;white-space:pre-wrap;word-break:break-word;}
+.post-card-body{font-size:14px;color:var(--text2);line-height:1.8;white-space:pre-wrap;word-break:break-word;}
 .post-card-footer{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(30,37,64,0.5);}
 .post-comment-toggle{font-family:var(--mono);font-size:12px;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:5px;transition:color 0.2s;}
 .post-comment-toggle:hover{color:var(--accent2);}
@@ -834,7 +811,7 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .comment-bubble-author{font-family:var(--mono);font-size:12px;color:var(--accent2);cursor:pointer;}
 .comment-bubble-author:hover{text-decoration:underline;}
 .comment-bubble-date{font-family:var(--mono);font-size:11px;color:var(--text3);}
-.comment-bubble-text{font-size:14px;color:var(--text2);line-height:1.65;white-space:pre-wrap;}
+.comment-bubble-text{font-size:13px;color:var(--text2);line-height:1.65;white-space:pre-wrap;}
 .comment-reply-btn{font-family:var(--mono);font-size:11px;color:var(--text3);cursor:pointer;margin-top:6px;display:inline-flex;align-items:center;gap:3px;}
 .comment-reply-btn:hover{color:var(--accent2);}
 .comment-replies{margin-left:20px;margin-top:8px;border-left:2px solid rgba(108,142,245,0.15);padding-left:12px;}
@@ -958,7 +935,7 @@ section.active.visible{opacity:1;transform:translateY(0);}
   color:rgba(120,130,160,0.7);letter-spacing:0.06em;
 }
 .profile-post-preview{
-  font-size:15px;color:rgba(210,220,240,0.9);
+  font-size:14px;color:rgba(210,220,240,0.9);
   line-height:1.6;font-weight:500;
 }
 .profile-post-rest{
@@ -1001,11 +978,11 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .lecture-item{display:flex;gap:20px;padding:18px 0;border-bottom:1px solid rgba(30,37,64,0.4);}
 .lecture-item:last-child{border-bottom:none;}
 .lecture-date-block{text-align:center;min-width:48px;}
-.lecture-month{font-size:11px;color:var(--accent);font-family:var(--mono);letter-spacing:0.1em;}
+.lecture-month{font-size:12px;color:var(--accent);font-family:var(--mono);letter-spacing:0.1em;}
 .lecture-day{font-family:var(--space);font-size:26px;font-weight:700;color:var(--text);line-height:1;}
 .lecture-year{font-size:12px;color:var(--text3);font-family:var(--mono);}
 .lecture-body{flex:1;}
-.lecture-title{font-size:16px;font-weight:600;margin-bottom:6px;}
+.lecture-title{font-size:15px;font-weight:600;margin-bottom:6px;}
 .lecture-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:8px;}
 .problem-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
 .problem-chip{font-family:var(--mono);font-size:12px;padding:3px 10px;background:rgba(108,142,245,0.08);border:1px solid rgba(108,142,245,0.18);border-radius:4px;color:var(--accent);text-decoration:none;transition:all 0.2s;}
@@ -1014,7 +991,7 @@ section.active.visible{opacity:1;transform:translateY(0);}
 /* ── ARCHIVE ── */
 .archive-table{width:100%;border-collapse:collapse;font-size:13px;}
 .archive-table thead tr{background:rgba(108,142,245,0.06);border-bottom:1px solid rgba(108,142,245,0.1);}
-.archive-table th{padding:10px 14px;text-align:left;font-size:11px;color:var(--text3);letter-spacing:0.08em;font-weight:400;}
+.archive-table th{padding:10px 14px;text-align:left;font-size:12px;color:var(--text3);letter-spacing:0.08em;font-weight:400;}
 .archive-table td{padding:11px 14px;border-bottom:1px solid rgba(30,37,64,0.4);}
 .archive-table tr:hover td{background:rgba(108,142,245,0.03);}
 
@@ -1030,9 +1007,9 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .resource-card{background:var(--glass-bg);backdrop-filter:blur(8px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;text-decoration:none;color:inherit;transition:all 0.3s;display:flex;flex-direction:column;gap:8px;}
 .resource-card:hover{border-color:rgba(108,142,245,0.3);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3);}
 .resource-icon{width:40px;height:40px;border-radius:10px;background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.2);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);}
-.resource-name{font-size:15px;font-weight:600;}
-.resource-desc{font-size:13px;color:var(--text2);}
-.resource-url{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.resource-name{font-size:14px;font-weight:600;}
+.resource-desc{font-size:12px;color:var(--text2);}
+.resource-url{font-size:12px;color:var(--text3);font-family:var(--mono);}
 
 /* ── BTNS ── */
 .btn{font-family:var(--mono);font-size:13px;padding:9px 18px;border-radius:8px;border:none;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
@@ -1715,7 +1692,7 @@ footer span{color:var(--accent2);}
 .quiz-prob-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(30,37,64,0.5);cursor:pointer;transition:background 0.15s;border-radius:8px;}
 .quiz-prob-row:hover{background:rgba(108,142,245,0.06);}
 .quiz-prob-num{font-family:var(--mono);font-size:11px;color:var(--text3);min-width:36px;}
-.quiz-prob-title{flex:1;font-size:15px;color:var(--text);}
+.quiz-prob-title{flex:1;font-size:14px;color:var(--text);}
 .quiz-prob-tags{display:flex;gap:4px;flex-wrap:wrap;}
 .quiz-prob-status{font-size:18px;min-width:22px;text-align:center;}
 .quiz-diff-badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:100px;}
@@ -1743,7 +1720,7 @@ footer span{color:var(--accent2);}
 .quiz-bookmark-btn:hover{color:rgb(255,200,50);}
 .quiz-bookmark-btn.marked{color:rgb(255,200,50);}
 .quiz-tags-wrap{display:flex;gap:4px;flex-wrap:wrap;}
-.quiz-question{font-size:17px;line-height:1.7;color:var(--text);margin-bottom:24px;font-weight:500;}
+.quiz-question{font-size:16px;line-height:1.7;color:var(--text);margin-bottom:24px;font-weight:500;}
 .quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:0;}
 .quiz-opt-btn{
   display:flex;align-items:center;gap:14px;
@@ -1895,7 +1872,7 @@ footer span{color:var(--accent2);}
   background:linear-gradient(90deg,transparent,rgba(108,142,245,0.15),transparent);
 }
 .bento-card:hover{border-color:rgba(108,142,245,0.22);}
-.bento-label{font-family:var(--mono);font-size:11px;color:rgba(180,195,255,0.9);letter-spacing:0.14em;margin-bottom:14px;}
+.bento-label{font-family:var(--mono);font-size:12px;color:rgba(180,195,255,0.9);letter-spacing:0.14em;margin-bottom:14px;}
 
 /* coach card */
 .bento-coach-row{display:flex;gap:14px;align-items:flex-start;}
@@ -1904,7 +1881,7 @@ footer span{color:var(--accent2);}
   background:linear-gradient(135deg,#6c8ef5,#2de8b0);
   display:flex;align-items:center;justify-content:center;
   font-family:var(--space);font-size:18px;font-weight:700;color:var(--bg);}
-.bento-coach-name{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.bento-coach-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;}
 .bento-coach-quote{font-size:12px;color:var(--text3);line-height:1.65;font-style:italic;}
 
 /* skills */
@@ -1938,7 +1915,7 @@ footer span{color:var(--accent2);}
   display:flex;gap:12px;padding:10px 0;
   border-bottom:1px solid rgba(30,37,64,0.4);}
 .update-item:last-child{border-bottom:none;}
-.update-date{font-family:var(--mono);font-size:11px;color:var(--text3);white-space:nowrap;padding-top:2px;min-width:68px;}
+.update-date{font-family:var(--mono);font-size:12px;color:var(--text3);white-space:nowrap;padding-top:2px;min-width:68px;}
 .update-content{font-size:13px;color:var(--text2);line-height:1.55;flex:1;}
 
 /* empty state */
@@ -2202,7 +2179,7 @@ mark.search-hl{
 .hd-glow{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(45,232,176,0.7),rgba(108,142,245,0.5),transparent);z-index:1;}
 .hd-left{flex:1;min-width:0;position:relative;z-index:1;}
 .hd-badge{font-family:var(--mono);font-size:11px;color:rgba(45,232,176,0.85);letter-spacing:0.12em;margin-bottom:10px;text-transform:uppercase;}
-.hd-title{font-size:22px;font-weight:700;color:rgba(255,255,255,0.95);margin-bottom:10px;line-height:1.3;}
+.hd-title{font-size:21px;font-weight:700;color:rgba(255,255,255,0.95);margin-bottom:10px;line-height:1.3;}
 .hd-note{font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:16px;padding:8px 12px;
   background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
   border-left:2px solid rgba(45,232,176,0.4);border-radius:0 8px 8px 0;}
@@ -3764,99 +3741,69 @@ section:not(.active) {
              xmlns="http://www.w3.org/2000/svg"
              xmlns:xlink="http://www.w3.org/1999/xlink">
           <defs>
-            <!-- 发光滤镜 -->
-            <filter id="glow-strong" x="-100%" y="-100%" width="300%" height="300%">
-              <feGaussianBlur stdDeviation="6" result="b1"/>
-              <feGaussianBlur stdDeviation="2" result="b2" in="SourceGraphic"/>
+
+            <!-- ── 滤镜 ── -->
+            <!-- 字母主光晕：柔和双层，减小 stdDeviation 让光边更锐利 -->
+            <filter id="glow-letter" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="2.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <!-- 霓虹描边光晕：比原来更散，让光晕边缘更柔 -->
+            <filter id="glow-neon" x="-70%" y="-70%" width="240%" height="240%">
+              <feGaussianBlur stdDeviation="4" result="b1"/>
+              <feGaussianBlur stdDeviation="1.2" result="b2" in="SourceGraphic"/>
               <feMerge><feMergeNode in="b1"/><feMergeNode in="b2"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
-            <filter id="glow-soft" x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur stdDeviation="2.8" result="blur"/>
+            <!-- 粒子光晕：轻盈 -->
+            <filter id="glow-soft" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="2" result="blur"/>
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
-            <filter id="glow-letter" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="3.5" result="blur"/>
+            <!-- 角框光晕 -->
+            <filter id="glow-corner" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="1.5" result="blur"/>
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <filter id="glow-neon" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="5" result="b1"/>
-              <feGaussianBlur stdDeviation="1.5" result="b2" in="SourceGraphic"/>
-              <feMerge><feMergeNode in="b1"/><feMergeNode in="b1"/><feMergeNode in="b2"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
 
-            <!-- H字母渐变 — 冷蓝主色 -->
-            <linearGradient id="hg" x1="0%" y1="0%" x2="8%" y2="100%">
-              <stop offset="0%"   stop-color="#90d8f8"/>
-              <stop offset="40%"  stop-color="#3898d0"/>
-              <stop offset="100%" stop-color="#0c5888"/>
+            <!-- ── H 字母渐变：冷蓝，顶部提亮，底部深邃 ── -->
+            <linearGradient id="hg" x1="0%" y1="0%" x2="5%" y2="100%">
+              <stop offset="0%"   stop-color="#b8e8ff"/>
+              <stop offset="25%"  stop-color="#5ab8f0"/>
+              <stop offset="60%"  stop-color="#2888d8"/>
+              <stop offset="100%" stop-color="#0a4878"/>
             </linearGradient>
-            <!-- J字母渐变 - 增强质感，添加金属光泽 -->
-            <linearGradient id="jg" x1="5%" y1="0%" x2="20%" y2="100%">
-              <stop offset="0%"   stop-color="#e0f8ff"/>
-              <stop offset="20%"  stop-color="#a0e0ff"/>
-              <stop offset="50%"  stop-color="#50b8e8"/>
-              <stop offset="75%"  stop-color="#2098d8"/>
-              <stop offset="100%" stop-color="#0a6098"/>
+
+            <!-- ── J 字母渐变：更通透，顶端接近白色 ── -->
+            <linearGradient id="jg" x1="8%" y1="0%" x2="18%" y2="100%">
+              <stop offset="0%"   stop-color="#e8f8ff"/>
+              <stop offset="15%"  stop-color="#a8e0ff"/>
+              <stop offset="45%"  stop-color="#48b0e8"/>
+              <stop offset="80%"  stop-color="#1880c8"/>
+              <stop offset="100%" stop-color="#084878"/>
             </linearGradient>
-            <!-- J的高光层渐变 -->
+
+            <!-- ── J 金属高光：横向，模拟管状高光 ── -->
             <linearGradient id="jg-highlight" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%"   stop-color="rgba(255,255,255,0)"/>
-              <stop offset="45%"  stop-color="rgba(255,255,255,0.4)"/>
-              <stop offset="55%"  stop-color="rgba(255,255,255,0.6)"/>
+              <stop offset="38%"  stop-color="rgba(255,255,255,0.25)"/>
+              <stop offset="52%"  stop-color="rgba(255,255,255,0.55)"/>
               <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
             </linearGradient>
-            <!-- 霓虹描边渐变 — 青白交替 -->
+
+            <!-- ── 霓虹描边渐变：青→白→青，更柔和 ── -->
             <linearGradient id="neon-stroke" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%"   stop-color="#00ffff" stop-opacity="0.9"/>
-              <stop offset="50%"  stop-color="#ffffff" stop-opacity="0.6"/>
-              <stop offset="100%" stop-color="#00cfff" stop-opacity="0.9"/>
-            </linearGradient>
-            <!-- J顶点节点渐变 -->
-            <radialGradient id="ng-hub" cx="32%" cy="28%" r="65%">
-              <stop offset="0%"   stop-color="#ffffff"/>
-              <stop offset="30%"  stop-color="#b0efff"/>
-              <stop offset="70%"  stop-color="#28c4f0"/>
-              <stop offset="100%" stop-color="#0a7ab8"/>
-            </radialGradient>
-
-            <!-- 扫光渐变 -->
-            <linearGradient id="shimmer-h" x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
-              <stop offset="0%"   stop-color="#ffffff" stop-opacity="0"/>
-              <stop offset="42%"  stop-color="#ffffff" stop-opacity="0"/>
-              <stop offset="50%"  stop-color="#c8f8ff" stop-opacity="0.5"/>
-              <stop offset="58%"  stop-color="#ffffff" stop-opacity="0"/>
-              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-              <animateTransform attributeName="gradientTransform" type="translate"
-                values="0 -1.3;0 1.3;0 -1.3" dur="2.6s" repeatCount="indefinite"/>
-            </linearGradient>
-            <linearGradient id="shimmer-j" x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
-              <stop offset="0%"   stop-color="#ffffff" stop-opacity="0"/>
-              <stop offset="42%"  stop-color="#ffffff" stop-opacity="0"/>
-              <stop offset="50%"  stop-color="#a0f0ff" stop-opacity="0.55"/>
-              <stop offset="58%"  stop-color="#ffffff" stop-opacity="0"/>
-              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-              <animateTransform attributeName="gradientTransform" type="translate"
-                values="0 -1.3;0 1.3;0 -1.3" dur="3.1s" repeatCount="indefinite" begin="0.8s"/>
+              <stop offset="0%"   stop-color="#40e8ff" stop-opacity="0.85"/>
+              <stop offset="40%"  stop-color="#c0f4ff" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#20d0ff" stop-opacity="0.85"/>
             </linearGradient>
 
-            <!-- 扫描线渐变 -->
-            <linearGradient id="scan-sweep" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%"   stop-color="#00ffff" stop-opacity="0"/>
-              <stop offset="50%"  stop-color="#00ffff" stop-opacity="1"/>
-              <stop offset="100%" stop-color="#00ffff" stop-opacity="0"/>
+            <!-- ── 角框渐变：竖方向，上亮下暗 ── -->
+            <linearGradient id="corner-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stop-color="#60f0ff" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#20b8d8" stop-opacity="0.4"/>
             </linearGradient>
-            <!-- clipPath：扫光限定在字母内 -->
-            <clipPath id="clip-H">
-              <rect x="112" y="28" width="14" height="100" rx="3.5"/>
-              <rect x="152" y="28" width="14" height="100" rx="3.5"/>
-              <rect x="112" y="68" width="54" height="13"  rx="2.5"/>
-            </clipPath>
-            <clipPath id="clip-J">
-              <!-- 连贯的J形状 -->
-              <path d="M 199 28 L 199 118 L 199 135 Q 199 158 178 162 Q 158 166 148 154 Q 145 150 145 145"
-                    fill="none" stroke="white" stroke-width="16" stroke-linecap="round"/>
-            </clipPath>
-            <!-- 粒子路径 -->
+
+            <!-- ── 粒子路径（和原来一致）── -->
             <path id="h-left"    d="M 119 28  L 119 128"/>
             <path id="h-right"   d="M 159 28  L 159 128"/>
             <path id="h-bar"     d="M 112 74  L 166 74"/>
@@ -3864,139 +3811,111 @@ section:not(.active) {
             <path id="h-right-r" d="M 159 128 L 159 28"/>
             <path id="j-full"    d="M 199 28 L 199 118 L 199 135 Q 199 158 178 162 Q 158 166 148 154 Q 145 150 145 145"/>
             <path id="j-full-r"  d="M 145 145 Q 145 150 148 154 Q 158 166 178 162 Q 199 158 199 135 L 199 118 L 199 28"/>
+
           </defs>
 
-          <!-- ══════════════════════════════════════
-               整体浮动容器          <!-- ══════════════════════════════════════
-               整体浮动容器
-          ════════════════════════════════════════ -->
           <g class="hjoi-float">
 
-            <!-- ══ 赛博格栅背景 ══ -->
-            <g opacity="0.07">
-              <!-- 竖线 -->
-              <line x1="119" y1="10" x2="119" y2="175" stroke="#00ffff" stroke-width="0.6"/>
-              <line x1="139" y1="10" x2="139" y2="175" stroke="#00ffff" stroke-width="0.6"/>
-              <line x1="159" y1="10" x2="159" y2="175" stroke="#00ffff" stroke-width="0.6"/>
-              <line x1="179" y1="10" x2="179" y2="175" stroke="#00ffff" stroke-width="0.6"/>
-              <line x1="199" y1="10" x2="199" y2="175" stroke="#00ffff" stroke-width="0.6"/>
-              <!-- 横线 -->
-              <line x1="83"  y1="50"  x2="235" y2="50"  stroke="#00ffff" stroke-width="0.6"/>
-              <line x1="83"  y1="80"  x2="235" y2="80"  stroke="#00ffff" stroke-width="0.6"/>
-              <line x1="83"  y1="110" x2="235" y2="110" stroke="#00ffff" stroke-width="0.6"/>
-              <line x1="83"  y1="140" x2="235" y2="140" stroke="#00ffff" stroke-width="0.6"/>
+            <!-- ══ 四角霓虹框：优化为渐变描边 + 更精致的尺寸 ══ -->
+            <g filter="url(#glow-corner)" fill="none">
+              <!-- 左上 -->
+              <polyline points="86,10 86,26 102,26"
+                stroke="url(#corner-grad)" stroke-width="1.4" stroke-linecap="round">
+                <animate attributeName="opacity" values="0.35;0.8;0.35" dur="3.2s" repeatCount="indefinite" begin="0s"/>
+              </polyline>
+              <!-- 右上 -->
+              <polyline points="232,10 232,26 216,26"
+                stroke="url(#corner-grad)" stroke-width="1.4" stroke-linecap="round">
+                <animate attributeName="opacity" values="0.35;0.8;0.35" dur="3.2s" repeatCount="indefinite" begin="0.8s"/>
+              </polyline>
+              <!-- 左下 -->
+              <polyline points="86,170 86,154 102,154"
+                stroke="url(#corner-grad)" stroke-width="1.4" stroke-linecap="round">
+                <animate attributeName="opacity" values="0.35;0.8;0.35" dur="3.2s" repeatCount="indefinite" begin="1.6s"/>
+              </polyline>
+              <!-- 右下 -->
+              <polyline points="232,170 232,154 216,154"
+                stroke="url(#corner-grad)" stroke-width="1.4" stroke-linecap="round">
+                <animate attributeName="opacity" values="0.35;0.8;0.35" dur="3.2s" repeatCount="indefinite" begin="2.4s"/>
+              </polyline>
             </g>
 
-            <!-- ══ 横向扫描线（从上往下扫，赛博CRT感）══ -->
-            <rect x="83"  y="15" width="152" height="6" rx="1"
-                  fill="url(#scan-sweep)" opacity="0.18">
-              <animateTransform attributeName="transform" type="translate"
-                values="0 0;0 155;0 0" dur="3.5s" repeatCount="indefinite" calcMode="spline"
-                keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
-            </rect>
-
-            <!-- ══ 角点装饰（四角霓虹框）══ -->
-            <g stroke="#00ffff" stroke-width="1.5" fill="none" opacity="0.5">
-              <polyline points="83,8  83,24  99,24"/>
-              <polyline points="235,8  235,24  219,24"/>
-              <polyline points="83,172 83,156 99,156"/>
-              <polyline points="235,172 235,156 219,156"/>
-              <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.4s" repeatCount="indefinite"/>
-            </g>
-
-            <!-- ══ H字母本体 ══ -->
+            <!-- ══ H 字母本体 ══ -->
             <g class="hjoi-letters letter-h" filter="url(#glow-letter)" data-letter="H">
               <rect x="112" y="28" width="14" height="100" rx="3.5" fill="url(#hg)"/>
               <rect x="152" y="28" width="14" height="100" rx="3.5" fill="url(#hg)"/>
               <rect x="112" y="68" width="54" height="13"  rx="2.5" fill="url(#hg)"/>
-              <!-- J - 改进版：连贯的大写J，去掉圆球和顶部横线 -->
+
+              <!-- ══ J 字母本体 ══ -->
               <g class="letter-j" data-letter="J">
-                <!-- J完整路径 - 一笔成型，无断点，无顶部横线 -->
                 <path d="M 199 28 L 199 118 L 199 135 Q 199 158 178 162 Q 158 166 148 154 Q 145 150 145 145"
                       fill="none" stroke="url(#jg)" stroke-width="14"
                       stroke-linecap="round" stroke-linejoin="round"/>
-                
-                <!-- J高光层 - 提升质感 -->
+                <!-- 金属高光，呼吸动画放慢 -->
                 <path d="M 199 28 L 199 118 L 199 135 Q 199 158 178 162 Q 158 166 148 154 Q 145 150 145 145"
-                      fill="none" stroke="url(#jg-highlight)" stroke-width="6"
-                      stroke-linecap="round" opacity="0.5">
-                  <animate attributeName="opacity" values="0.3;0.6;0.3" dur="3.5s" repeatCount="indefinite"/>
+                      fill="none" stroke="url(#jg-highlight)" stroke-width="5"
+                      stroke-linecap="round" opacity="0.45">
+                  <animate attributeName="opacity" values="0.25;0.55;0.25" dur="4.5s" repeatCount="indefinite"/>
                 </path>
-                
-                <!-- J内侧高光 - 增强立体感 -->
+                <!-- 内侧细高光线 -->
                 <path d="M 196 32 L 196 118 L 196 135 Q 196 155 178 159 Q 160 163 150 152"
-                      fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"
-                      stroke-linecap="round" opacity="0.6">
-                  <animate attributeName="opacity" values="0.4;0.7;0.4" dur="3.8s" repeatCount="indefinite" begin="0.3s"/>
+                      fill="none" stroke="rgba(220,248,255,0.35)" stroke-width="1.5"
+                      stroke-linecap="round">
+                  <animate attributeName="opacity" values="0.3;0.6;0.3" dur="5s" repeatCount="indefinite" begin="0.5s"/>
                 </path>
               </g>
             </g>
 
-            <!-- ══ 霓虹描边（字母外轮廓呼吸光晕）══ -->
+            <!-- ══ 霓虹描边呼吸光晕：降低峰值，延长周期，更柔和 ══ -->
             <g filter="url(#glow-neon)" fill="none">
-              <!-- H描边 -->
               <rect x="112" y="28" width="14" height="100" rx="3.5"
-                    stroke="url(#neon-stroke)" stroke-width="1.2">
-                <animate attributeName="stroke-opacity" values="0.15;0.7;0.15" dur="2.8s" repeatCount="indefinite"/>
+                    stroke="url(#neon-stroke)" stroke-width="1.1">
+                <animate attributeName="stroke-opacity" values="0.08;0.55;0.08" dur="3.8s" repeatCount="indefinite" begin="0s"/>
               </rect>
               <rect x="152" y="28" width="14" height="100" rx="3.5"
-                    stroke="url(#neon-stroke)" stroke-width="1.2">
-                <animate attributeName="stroke-opacity" values="0.15;0.7;0.15" dur="2.8s" repeatCount="indefinite" begin="0.3s"/>
+                    stroke="url(#neon-stroke)" stroke-width="1.1">
+                <animate attributeName="stroke-opacity" values="0.08;0.55;0.08" dur="3.8s" repeatCount="indefinite" begin="0.5s"/>
               </rect>
               <rect x="112" y="68" width="54" height="13" rx="2.5"
-                    stroke="url(#neon-stroke)" stroke-width="1.2">
-                <animate attributeName="stroke-opacity" values="0.15;0.65;0.15" dur="2.1s" repeatCount="indefinite" begin="0.6s"/>
+                    stroke="url(#neon-stroke)" stroke-width="1.1">
+                <animate attributeName="stroke-opacity" values="0.08;0.5;0.08" dur="3.2s" repeatCount="indefinite" begin="1s"/>
               </rect>
-              <!-- J描边 - 连贯路径 -->
               <path d="M 199 28 L 199 118 L 199 135 Q 199 158 178 162 Q 158 166 148 154 Q 145 150 145 145"
-                    stroke="url(#neon-stroke)" stroke-width="1.5" fill="none"
+                    stroke="url(#neon-stroke)" stroke-width="1.3" fill="none"
                     stroke-linecap="round" stroke-linejoin="round">
-                <animate attributeName="stroke-opacity" values="0.1;0.7;0.1" dur="3.1s" repeatCount="indefinite" begin="0.4s"/>
+                <animate attributeName="stroke-opacity" values="0.06;0.55;0.06" dur="4.2s" repeatCount="indefinite" begin="0.7s"/>
               </path>
             </g>
 
-            <!-- ══ 扫光层 ══ -->
-            <g clip-path="url(#clip-H)" filter="url(#glow-letter)">
-              <rect x="108" y="24" width="62" height="108" fill="url(#shimmer-h)"/>
-            </g>
-            <g clip-path="url(#clip-J)" filter="url(#glow-letter)">
-              <rect x="140" y="14" width="68" height="158" fill="url(#shimmer-j)"/>
-            </g>
-
-            <!-- ══ 粒子流（极细，若隐若现）══ -->
-            <g filter="url(#glow-soft)" opacity="0.65">
-              <circle r="1.4" fill="#c8f0ff">
-                <animateMotion dur="2.8s" repeatCount="indefinite" begin="0s"><mpath href="#h-left"/></animateMotion>
-                <animate attributeName="opacity" values="0;0;0.5;0.5;0" keyTimes="0;0.12;0.25;0.78;1" dur="2.8s" repeatCount="indefinite" begin="0s"/>
+            <!-- ══ 粒子流：减为3条，速度放慢，更细腻 ══ -->
+            <g filter="url(#glow-soft)" opacity="0.7">
+              <!-- H左竖：向下 -->
+              <circle r="1.2" fill="#d8f4ff">
+                <animateMotion dur="3.6s" repeatCount="indefinite" begin="0s"><mpath href="#h-left"/></animateMotion>
+                <animate attributeName="opacity" values="0;0;0.6;0.6;0" keyTimes="0;0.1;0.22;0.8;1" dur="3.6s" repeatCount="indefinite" begin="0s"/>
               </circle>
-              <circle r="1.1" fill="#a0e8ff">
-                <animateMotion dur="3.2s" repeatCount="indefinite" begin="1.1s"><mpath href="#h-right-r"/></animateMotion>
-                <animate attributeName="opacity" values="0;0;0.45;0.45;0" keyTimes="0;0.12;0.25;0.78;1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
+              <!-- H横杠：从左到右 -->
+              <circle r="1.0" fill="#b8eeff">
+                <animateMotion dur="2.8s" repeatCount="indefinite" begin="1.4s"><mpath href="#h-bar"/></animateMotion>
+                <animate attributeName="opacity" values="0;0;0.55;0.55;0" keyTimes="0;0.1;0.25;0.78;1" dur="2.8s" repeatCount="indefinite" begin="1.4s"/>
               </circle>
-              <circle r="1.3" fill="#e0f8ff">
-                <animateMotion dur="2.2s" repeatCount="indefinite" begin="0.6s"><mpath href="#h-bar"/></animateMotion>
-                <animate attributeName="opacity" values="0;0;0.5;0.5;0" keyTimes="0;0.12;0.25;0.78;1" dur="2.2s" repeatCount="indefinite" begin="0.6s"/>
-              </circle>
-              <circle r="1.5" fill="#d8f6ff">
-                <animateMotion dur="3.8s" repeatCount="indefinite" begin="0.4s"><mpath href="#j-full"/></animateMotion>
-                <animate attributeName="opacity" values="0;0;0.48;0.48;0" keyTimes="0;0.08;0.2;0.82;1" dur="3.8s" repeatCount="indefinite" begin="0.4s"/>
-              </circle>
-              <circle r="1.1" fill="#b0ecff">
-                <animateMotion dur="3.8s" repeatCount="indefinite" begin="2.2s"><mpath href="#j-full-r"/></animateMotion>
-                <animate attributeName="opacity" values="0;0;0.4;0.4;0" keyTimes="0;0.08;0.2;0.82;1" dur="3.8s" repeatCount="indefinite" begin="2.2s"/>
+              <!-- J：完整路径向下 -->
+              <circle r="1.3" fill="#e0f6ff">
+                <animateMotion dur="4.8s" repeatCount="indefinite" begin="0.8s"><mpath href="#j-full"/></animateMotion>
+                <animate attributeName="opacity" values="0;0;0.55;0.55;0" keyTimes="0;0.06;0.18;0.84;1" dur="4.8s" repeatCount="indefinite" begin="0.8s"/>
               </circle>
             </g>
 
-            <!-- ══ HJOI 品牌文字 ══ -->
+            <!-- ══ HJOI 品牌文字：加宽两侧分隔线，字母间距微调 ══ -->
             <g filter="url(#glow-soft)">
-              <line x1="82"  y1="178" x2="118" y2="178" stroke="rgba(0,220,255,0.25)" stroke-width="1"/>
-              <line x1="202" y1="178" x2="238" y2="178" stroke="rgba(0,220,255,0.25)" stroke-width="1"/>
-              <text x="160" y="193"
+              <line x1="80"  y1="179" x2="120" y2="179" stroke="rgba(0,210,255,0.2)" stroke-width="0.8"/>
+              <line x1="200" y1="179" x2="240" y2="179" stroke="rgba(0,210,255,0.2)" stroke-width="0.8"/>
+              <text x="160" y="194"
                     text-anchor="middle"
                     font-family="'JetBrains Mono', 'Space Mono', monospace"
-                    font-size="19" font-weight="700"
-                    letter-spacing="7"
-                    fill="rgba(160,228,255,0.92)">HJOI</text>
+                    font-size="18" font-weight="700"
+                    letter-spacing="8"
+                    fill="rgba(168,232,255,0.88)">HJOI</text>
             </g>
 
           </g><!-- end hjoi-float -->
