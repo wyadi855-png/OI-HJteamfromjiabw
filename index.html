@@ -3947,7 +3947,7 @@ section:not(.active) {
       <div class="hero-text">
         <div class="hero-tag-row">
           <div class="hero-tag">// 每日知识点</div>
-          <button class="checkin-btn" id="checkin-btn" onclick="doCheckin(event)" title="打卡">
+          <button class="checkin-btn" id="checkin-btn" onclick="doHeroCheckin(event)" title="打卡">
             <svg class="checkin-icon" viewBox="0 0 16 16" shape-rendering="crispEdges">
               <!-- pixel checkbox -->
               <rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1"/>
@@ -4994,7 +4994,9 @@ async function doRegister(){
   if(!username||username.length<2){document.getElementById('reg-error').textContent='用户名至少2个字符';return;}
   if(password.length<6){document.getElementById('reg-error').textContent='密码至少6位';return;}
   try{
-    await apiRequest('/auth/register',{method:'POST',body:JSON.stringify({username,password})});
+    const regGroupId=document.getElementById('reg-group')?.value;
+    const regGroup=regGroupId?parseInt(regGroupId):null;
+    await apiRequest('/auth/register',{method:'POST',body:JSON.stringify({username,password,group_id:regGroup})});
     document.getElementById('reg-success').textContent='注册成功，正在登录…';
     setTimeout(async()=>{
       try{
@@ -7680,15 +7682,15 @@ function spawnOrzParticles(anchor){
 // ── Checkin ──────────────────────────────────────────────
 const CODE_SNIPPETS=['AC','O(1)','O(n)','O(log n)','++i','i++','int','long long','void','for','while','if','else','return','true','false','dfs()','bfs()','dp[]','ans++','inf','mod','n--','ok','#define','scanf','printf','sort()','swap()','min()','max()','0x3f','1e9','n<<1','>>1','&1','|=','n-1','n+1'];
 const CODE_COLORS=['#2de8b0','#6c8ef5','#c792ea','#ffb347','#7dd3fc','#86efac'];
-async function doCheckin(e){
+async function doHeroCheckin(e){
   if(!currentUser){showToast('请先登录','error');return;}
   const btn=document.getElementById('checkin-btn');
   if(btn.classList.contains('checked'))return;
 
-  const today=getLocalToday();
-  const{error}=await sb.from('hero_checkins').insert({user_id:currentUser.id,date:today});
-  if(error&&error.code!=='23505'){// 23505 = unique violation (already checked in)
-    showToast('打卡失败','error');return;
+  try{
+    await apiRequest('/daily/hero-checkin',{method:'POST'});
+  }catch(err){
+    if(!err.message?.includes('already')){showToast('打卡失败','error');return;}
   }
 
   btn.classList.add('checked');
@@ -7717,12 +7719,13 @@ async function doCheckin(e){
 async function initCheckinState(){
   const btn=document.getElementById('checkin-btn');
   if(!btn||!currentUser)return;
-  const today=getLocalToday();
-  const{data}=await sb.from('hero_checkins').select('id').eq('user_id',currentUser.id).eq('date',today).maybeSingle();
-  if(data){
-    btn.classList.add('checked');
-    btn.querySelector('.checkin-label').textContent='已打卡';
-  }
+  try{
+    const data=await apiRequest('/daily/hero-checkin/status');
+    if(data?.checked){
+      btn.classList.add('checked');
+      btn.querySelector('.checkin-label').textContent='已打卡';
+    }
+  }catch(e){}
 }
 
 // ── Emoji Picker ────────────────────────────────────────────
