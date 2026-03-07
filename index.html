@@ -101,7 +101,7 @@
 :root{
   --bg:#080b12;--surface:#0f1320;--surface2:#161c2e;--border:#1e2540;
   --accent:#6c8ef5;--accent2:#2de8b0;--accent3:#f06292;--accent4:#ffb347;
-  --text:#e8edf8;--text2:#7a86a8;--text3:#404d6a;
+  --text:#e8edf8;--text2:#8e9cbf;--text3:#5a6a90;
   --red:#ff5370;--yellow:#ffcb6b;--green:#2de8b0;--purple:#c792ea;
   --mono:'JetBrains Mono',monospace;--serif:'Noto Serif SC',serif;--space:'Space Mono',monospace;--pixel:'Press Start 2P',monospace;
   --glow-blue:0 0 20px rgba(108,142,245,0.25);
@@ -512,7 +512,7 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .contest-header:hover{background:rgba(108,142,245,0.04);}
 .contest-header:hover .contest-title{color:var(--accent);}
 .contest-title{font-size:15px;font-weight:600;letter-spacing:-0.01em;transition:color 0.2s;}
-.contest-date{font-family:var(--mono);font-size:12px;color:var(--text3);}
+.contest-date{font-family:var(--mono);font-size:12.5px;color:var(--text2);}
 .contest-toggle{font-size:12px;color:var(--text3);margin-left:8px;transition:transform 0.3s;}
 .contest-card[data-open="1"] .contest-toggle{transform:rotate(180deg);}
 .contest-body{padding:0 24px 20px;border-top:1px solid rgba(108,142,245,0.08);}
@@ -546,7 +546,7 @@ section.active.visible{opacity:1;transform:translateY(0);}
 /* ── FEED ── */
 .feed-item{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid rgba(30,37,64,0.5);}
 .feed-item:last-child{border-bottom:none;}
-.feed-date{font-size:12px;color:var(--text3);font-family:var(--mono);white-space:nowrap;margin-top:2px;min-width:72px;}
+.feed-date{font-size:12.5px;color:var(--text2);font-family:var(--mono);white-space:nowrap;margin-top:2px;min-width:72px;}
 .feed-content{font-size:13px;color:var(--text2);line-height:1.6;flex:1;}
 .update-tag{font-size:12px;padding:1px 7px;border-radius:3px;margin-left:6px;font-family:var(--mono);}
 .tag-note{background:rgba(108,142,245,0.1);color:var(--accent);}
@@ -562,14 +562,14 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .ann-card:hover{border-color:rgba(108,142,245,0.25);}
 .ann-card.pinned{border-left:2px solid var(--accent2);}
 .ann-title{font-size:15px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
-.ann-meta{font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:10px;}
+.ann-meta{font-size:12.5px;color:var(--text2);font-family:var(--mono);margin-bottom:10px;}
 .ann-content{font-size:13px;color:var(--text2);line-height:1.7;}
 
 /* ── NOTES ── */
 .blog-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;}
 .blog-card-top h3{font-size:14px;font-weight:600;line-height:1.4;}
-.blog-meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--text3);flex-wrap:wrap;margin-bottom:10px;}
-.blog-excerpt{font-size:12px;color:var(--text3);line-height:1.6;}
+.blog-meta{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--text2);flex-wrap:wrap;margin-bottom:10px;}
+.blog-excerpt{font-size:12.5px;color:var(--text2);line-height:1.65;}
 .author{color:var(--accent2);cursor:pointer;font-family:var(--mono);}
 .author:hover{text-decoration:underline;}
 .topic-badge{font-size:12px;padding:2px 8px;background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.2);border-radius:4px;color:var(--accent);white-space:nowrap;}
@@ -980,7 +980,7 @@ section.active.visible{opacity:1;transform:translateY(0);}
 
 /* ── COMMENTS ── */
 .comment-item{padding:14px 0;border-bottom:1px solid rgba(30,37,64,0.5);}
-.comment-meta{font-size:12px;color:var(--text3);margin-bottom:6px;display:flex;gap:8px;}
+.comment-meta{font-size:12.5px;color:var(--text2);margin-bottom:6px;display:flex;gap:8px;}
 .comment-content{font-size:13px;color:var(--text2);}
 .comment-input-row{display:flex;gap:8px;margin-top:14px;}
 .comment-input-row input{flex:1;}
@@ -1003,7 +1003,7 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .lb-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--space);font-size:14px;font-weight:700;color:var(--bg);flex-shrink:0;}
 .lb-info{flex:1;}
 .lb-name{font-size:14px;font-weight:600;margin-bottom:2px;}
-.lb-sub{font-size:12px;color:var(--text3);}
+.lb-sub{font-size:12.5px;color:var(--text2);}
 .lb-bar-wrap{height:3px;background:rgba(108,142,245,0.1);border-radius:2px;margin-top:6px;}
 .lb-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);}
 .lb-score{font-family:var(--space);font-size:18px;font-weight:700;color:var(--accent2);}
@@ -4972,12 +4972,14 @@ section:not(.active) {
 .nav-more-trigger {
   display: inline-flex !important;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   color: rgba(255,255,255,0.5) !important;
   font-family: var(--mono) !important;
   font-size: 13px !important;
   padding: 5px 13px !important;
   border-radius: 100px !important;
+  line-height: 1 !important;
+  vertical-align: middle;
   transition: color 0.18s, background 0.18s !important;
   cursor: pointer;
   user-select: none;
@@ -4986,11 +4988,12 @@ section:not(.active) {
   content: '';
   display: inline-block;
   width: 0; height: 0;
-  border-left: 3.5px solid transparent;
-  border-right: 3.5px solid transparent;
-  border-top: 4px solid currentColor;
-  opacity: 0.55;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 3.5px solid currentColor;
+  opacity: 0.5;
   transition: transform 0.22s var(--smooth);
+  margin-top: 1px;
 }
 .nav-more-trigger:hover {
   color: rgba(255,255,255,0.88) !important;
@@ -4998,8 +5001,10 @@ section:not(.active) {
 }
 .nav-more-trigger.open-state::after {
   transform: rotate(180deg);
-  opacity: 0.8;
+  opacity: 0.75;
 }
+/* 确保 li 里的触发器和其他 a 垂直对齐一致 */
+.nav-more-wrap { display: inline-flex; align-items: center; }
 
 /* ── Nav 收缩时 logo 同步缩小 ── */
 .nav-logo { transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
@@ -5153,7 +5158,7 @@ nav.scrolled .nav-bottom { border-top-color: rgba(255,255,255,0.03); }
       <li><a onclick="show('knowledge')" id="nav-knowledge">知识库</a></li>
       <li><a onclick="show('leaderboard')" id="nav-leaderboard">排行榜</a></li>
       <li class="nav-more-wrap">
-        <a onclick="toggleMoreMenu(event)" class="nav-more-trigger">更多 ▾</a>
+        <a onclick="toggleMoreMenu(event)" class="nav-more-trigger">更多</a>
       </li>
     </ul>
   </div>
