@@ -9025,9 +9025,12 @@ async function showDMConvList(){
 
 // 从外部打开私信（个人主页按钮）
 async function openDMWith(userId, username){
-  if(!currentUser) return;
+  console.log('[DM] openDMWith', userId, username, 'currentUser:', currentUser);
+  if(!currentUser){console.log('[DM] no currentUser, abort');return;}
   _dmOpen = true;
-  document.getElementById('dm-panel').classList.add('open');
+  const panel=document.getElementById('dm-panel');
+  console.log('[DM] panel element:', panel);
+  if(panel) panel.classList.add('open');
   document.getElementById('notif-panel')?.classList.remove('open');
   // 直接用已知信息构造 peer，避免依赖 sb session
   let peer = {id: userId, username: username || userId, avatar_url: null};
