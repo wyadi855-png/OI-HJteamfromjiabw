@@ -741,22 +741,16 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .profile-stats{display:flex;gap:24px;margin-top:14px;}
 .profile-stat .num{font-family:var(--space);font-size:20px;font-weight:700;color:var(--text);}
 .profile-stat .lbl{font-size:12px;color:var(--text3);}
-.profile-edit-btn{font-family:var(--mono);font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid rgba(108,142,245,0.2);background:rgba(108,142,245,0.08);color:var(--accent);cursor:pointer;margin-top:12px;display:inline-block;transition:all 0.2s;}
-.profile-edit-btn:hover{background:rgba(108,142,245,0.15);}
+.profile-edit-btn{font-family:var(--mono);font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid rgba(108,142,245,0.2);background:rgba(108,142,245,0.08);color:var(--accent);cursor:pointer;display:inline-block;transition:all 0.2s;}
+.profile-edit-btn:hover{background:rgba(108,142,245,0.15);} 
+.profile-dm-btn{font-family:var(--mono);font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid rgba(45,232,176,0.24);background:rgba(45,232,176,0.08);color:var(--accent2);cursor:pointer;display:inline-block;transition:all .2s;}
+.profile-dm-btn:hover{background:rgba(45,232,176,0.16);color:#fff;}
 .profile-motto{
   font-size:13px;color:rgba(108,142,245,0.85);
   font-style:italic;margin-bottom:6px;
   font-family:var(--space);letter-spacing:0.01em;
 }
-.profile-bio{font-size:13px;color:var(--text2);margin-bottom:8px;max-width:520px;line-height:1.6;}
-.profile-main{flex:1;min-width:0;}
-.profile-meta-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 6px;}
-.profile-meta-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-family:var(--mono);border:1px solid rgba(108,142,245,0.16);background:rgba(108,142,245,0.06);color:var(--text2);}
-.profile-meta-chip.luogu-bound{border-color:rgba(45,232,176,0.28);background:rgba(45,232,176,0.08);color:var(--accent2);}
-.profile-meta-chip.luogu-unbound{border-color:rgba(255,179,71,0.22);background:rgba(255,179,71,0.08);color:var(--yellow);}
-.profile-meta-chip.group-chip{border-color:rgba(108,142,245,0.22);color:var(--accent);}
-.profile-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
-.profile-edit-btn,.profile-dm-btn{margin:0!important;display:inline-flex;align-items:center;justify-content:center;}
+.profile-bio{font-size:13px;color:var(--text2);margin-bottom:8px;max-width:400px;line-height:1.6;}
 
 /* 头像上传控件 */
 .avatar-upload-wrap{display:flex;align-items:center;gap:18px;}
@@ -2111,7 +2105,6 @@ mark.search-hl{
 /* 边：初始绘制动画 */
 .rel-edge {
   animation: relEdgeDraw 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
-  opacity: .96;
 }
 @keyframes relEdgeDraw { to { stroke-dashoffset: 0; } }
 /* 流动粒子动画 */
@@ -4875,6 +4868,47 @@ async function supabaseRequest(requestFn, maxRetries = 3) {
 let currentUser=null,currentProfile=null;
 const isCoach=()=>currentProfile?.role==='coach';
 
+function normalizeText(v){
+  if(v===null||v===undefined) return '';
+  const s=String(v).trim();
+  if(!s||s==='NULL'||s==='EMPTY') return '';
+  return s;
+}
+function normalizeLuoguUid(v){
+  const s=normalizeText(v);
+  return s.replace(/^@/,'');
+}
+async function hydrateCurrentProfile(seed={}){
+  if(!currentUser?.id) return null;
+  const base={
+    id: currentUser.id,
+    username: seed.username || currentProfile?.username || '',
+    role: seed.role || currentProfile?.role || 'student',
+    avatar_url: seed.avatar_url || currentProfile?.avatar_url || '',
+    bio: normalizeText(seed.bio || currentProfile?.bio),
+    motto: normalizeText(seed.motto || currentProfile?.motto),
+    luogu_uid: normalizeLuoguUid(seed.luogu_uid || currentProfile?.luogu_uid),
+    group_id: seed.group_id ?? currentProfile?.group_id ?? null
+  };
+  const {data, error} = await sb.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+  if(error){
+    currentProfile = base;
+    return currentProfile;
+  }
+  currentProfile = {
+    ...base,
+    ...(data||{}),
+    username: (data?.username || base.username),
+    role: (data?.role || base.role),
+    avatar_url: data?.avatar_url || base.avatar_url || '',
+    bio: normalizeText(data?.bio ?? base.bio),
+    motto: normalizeText(data?.motto ?? base.motto),
+    luogu_uid: normalizeLuoguUid(data?.luogu_uid ?? base.luogu_uid),
+    group_id: data?.group_id ?? base.group_id ?? null,
+  };
+  return currentProfile;
+}
+
 // ── Navigation ─────────────────────────────────────────────
 function updateNavIndicator(navEl){
   const ind=document.getElementById('nav-indicator');
@@ -4943,41 +4977,12 @@ function renderAuthArea(){
   }
 }
 
-function normalizeLuoguUid(v){
-  if(v===null||v===undefined) return '';
-  const s=String(v).trim();
-  return s && s !== 'null' && s !== 'undefined' ? s : '';
-}
-async function hydrateCurrentProfile(base={}){
-  if(!currentUser?.id){
-    currentProfile={...base};
-    return currentProfile;
-  }
-  let dbProfile=null;
-  try{
-    const {data}=await sb.from('profiles').select('id,username,role,avatar_url,bio,motto,group_id,luogu_uid').eq('id',currentUser.id).maybeSingle();
-    dbProfile=data||null;
-  }catch(e){
-    console.warn('hydrateCurrentProfile failed:',e);
-  }
-  currentProfile={...base,...(dbProfile||{})};
-  currentProfile.username=currentProfile.username||base.username||'';
-  currentProfile.role=currentProfile.role||base.role||'student';
-  currentProfile.avatar_url=currentProfile.avatar_url||'';
-  currentProfile.bio=currentProfile.bio||'';
-  currentProfile.motto=currentProfile.motto||'';
-  currentProfile.luogu_uid=normalizeLuoguUid(currentProfile.luogu_uid||currentProfile.luoguUid||currentProfile.luoguId||'');
-  if(currentProfile.group_id===''||currentProfile.group_id===undefined) currentProfile.group_id=null;
-  return currentProfile;
-}
-
 // 本地日期（避免 UTC 时区偏差）
 function getLocalToday(){
   const d=new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 async function loadSession(){
-  // 页面初始化：从后端 token 恢复登录状态
   const token=localStorage.getItem('hjoi_token');
   if(!token){
     window.location.href='login.html';
@@ -4986,7 +4991,15 @@ async function loadSession(){
   try{
     const data=await apiRequest('/auth/session');
     currentUser={id:data.user_id,email:''};
-    await hydrateCurrentProfile({username:data.username,role:data.is_coach?'coach':'student'});
+    await hydrateCurrentProfile({
+      username:data.username,
+      role:data.role || (data.is_coach?'coach':'student'),
+      avatar_url:data.avatar_url||'',
+      bio:data.bio||'',
+      motto:data.motto||'',
+      luogu_uid:data.luogu_uid||'',
+      group_id:data.group_id??null
+    });
   }catch(e){
     localStorage.removeItem('hjoi_token');
     window.location.href='login.html';
@@ -5013,7 +5026,15 @@ async function doLogin(){
     const data=await apiRequest('/auth/login',{method:'POST',body:JSON.stringify({username,password})});
     localStorage.setItem('hjoi_token',data.access_token);
     currentUser={id:data.user_id,email:usernameToEmail(username)};
-    await hydrateCurrentProfile({username:data.username,role:data.is_coach?'coach':'student'});
+    await hydrateCurrentProfile({
+      username:data.username,
+      role:data.role || (data.is_coach?'coach':'student'),
+      avatar_url:data.avatar_url||'',
+      bio:data.bio||'',
+      motto:data.motto||'',
+      luogu_uid:data.luogu_uid||'',
+      group_id:data.group_id??null
+    });
     closeModal('auth-modal');
     renderAuthArea();
     showToast('登录成功 ✓','success');
@@ -5038,7 +5059,15 @@ async function doRegister(){
         const data=await apiRequest('/auth/login',{method:'POST',body:JSON.stringify({username,password})});
         localStorage.setItem('hjoi_token',data.access_token);
         currentUser={id:data.user_id,email:usernameToEmail(username)};
-        await hydrateCurrentProfile({username:data.username,role:data.is_coach?'coach':'student'});
+        await hydrateCurrentProfile({
+          username:data.username,
+          role:data.role || (data.is_coach?'coach':'student'),
+          avatar_url:data.avatar_url||'',
+          bio:data.bio||'',
+          motto:data.motto||'',
+          luogu_uid:data.luogu_uid||'',
+          group_id:data.group_id??null
+        });
         closeModal('auth-modal');renderAuthArea();showToast('注册并登录成功 ✓','success');loadHomeFeed();checkNotifDot();initDM();
       }catch(e){document.getElementById('reg-error').textContent=e.message;}
     },800);
@@ -6989,19 +7018,21 @@ async function showProfile(username){
     sb.from('posts').select('id,content,created_at').eq('author_id',profile.id).order('created_at',{ascending:false}),
   ]);
   const isSelf=currentUser&&currentProfile&&currentProfile.username===username;
-  const luoguUid = normalizeLuoguUid(profile.luogu_uid || profile.luoguUid || profile.luoguId || '');
+  const mottoText = normalizeText(profile.motto);
+  const bioText = normalizeText(profile.bio);
+  const luoguUid = normalizeLuoguUid(profile.luogu_uid);
   let html='<div class="profile-hero">';
   html+=avatarEl(username,profile.avatar_url||'',80,28);
-  html+='<div class="profile-main">';
+  html+='<div style="flex:1;min-width:0">';
   html+='<div class="profile-name">@'+escHtml(username)+'</div>';
   html+='<div class="profile-role-tag">'+(profile.role==='coach'?'🎓 教练':'🧑‍💻 学生')+'</div>';
-  html+='<div class="profile-meta-row">';
-  html+='<span class="profile-meta-chip '+(luoguUid?'luogu-bound':'luogu-unbound')+'">'+(luoguUid?('洛谷 UID · '+escHtml(luoguUid)):'洛谷暂未绑定')+'</span>';
-  if(profile.group_id) html+='<span class="profile-meta-chip group-chip">训练组 · L'+escHtml(String(profile.group_id))+'</span>';
+  html+='<div style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 10px">';
+  html+='<span class="topic-badge" style="background:rgba(255,179,71,.08);border-color:rgba(255,179,71,.24);color:#ffcb6b">'+(luoguUid?('洛谷 UID · '+escHtml(luoguUid)):'洛谷暂未绑定')+'</span>';
+  if(profile.group_id) html+='<span class="topic-badge">训练组 · '+escHtml(profile.group_id)+'</span>';
   html+='</div>';
-  if(profile.motto)html+='<div class="profile-motto">「'+escHtml(profile.motto)+'」</div>';
-  if(profile.bio)html+='<div class="profile-bio">'+escHtml(profile.bio)+'</div>';
-  html+='<div class="profile-actions">';
+  if(mottoText)html+='<div class="profile-motto">「'+escHtml(mottoText)+'」</div>';
+  if(bioText)html+='<div class="profile-bio">'+escHtml(bioText)+'</div>';
+  html+='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">';
   if(isSelf)html+='<button class="profile-edit-btn" onclick="openModal(&apos;settings-modal&apos;);loadSettingsData()">编辑资料</button>';
   if(!isSelf&&currentUser)html+='<button class="profile-dm-btn" data-uid="'+escHtml(profile.id)+'" data-uname="'+escHtml(username)+'">💬 发私信</button>';
   html+='</div>';
@@ -7068,8 +7099,8 @@ async function showProfile(username){
   }
   buildHeatmap(profile.id).then(h=>{const hel=document.getElementById('heatmap-'+username);if(hel)hel.innerHTML=h;});
   // 有洛谷UID则拉洛谷数据，否则用本站题解
-  if(luoguUid){
-    fetchLuoguAndBuildRadar(luoguUid, notes||[], username);
+  if(profile.luogu_uid){
+    fetchLuoguAndBuildRadar(profile.luogu_uid, notes||[], username);
   } else {
     buildRadar(notes||[], [], username);
   }
@@ -7122,7 +7153,6 @@ async function loadProfileSocial(profile, username){
   const mutualPeerIds = (followingRows||[])
     .map(r => r.following_id)
     .filter(id => profileFollowerIds.has(id));
-  // 查询互关用户的用户名
   let peerUsernameMap = {};
   if (mutualPeerIds.length > 0) {
     const { data: peerProfiles } = await sb.from('profiles').select('id, username').in('id', mutualPeerIds);
@@ -7139,116 +7169,62 @@ async function loadProfileSocial(profile, username){
     });
     const wrap = document.createElement('div');
     wrap.className = 'rel-graph-wrap';
-    const W = 520;
-    const peers = mutualPeers.slice(0, 12);
-    const radius = Math.min(185, 90 + peers.length * 12);
-    const cx = W / 2, cy = 60;
-    const angleStep = peers.length === 1 ? 0 : (Math.PI * 1.4) / (peers.length - 1);
-    const angleStart = Math.PI / 2 + (peers.length === 1 ? 0 : -(Math.PI * 1.4) / 2);
+    const W = 640, H = 360, cx = W / 2, cy = H / 2;
+    const peers = mutualPeers.slice(0, 10);
+    const orbit = Math.min(180, 110 + peers.length * 8);
+    const centerR = 34;
+    const peerR = peers.length <= 3 ? 28 : 24;
     const peerPositions = peers.map((p, i) => {
-      const angle = peers.length === 1 ? Math.PI / 2 : angleStart + i * angleStep;
-      return { ...p, x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius };
+      const angle = -Math.PI / 2 + i * (Math.PI * 2 / peers.length);
+      return { ...p, x: cx + Math.cos(angle) * orbit, y: cy + Math.sin(angle) * orbit };
     });
-    const svgH = Math.max(220, cy + radius + 70);
-    const R = 28; // 基础节点半径
-    // 节点大小根据互关数动态调整：互关越多越大
-    const peerCount = peers.length;
-    // defs: glow filter + gradients + arrowhead markers
-    let svg = `<svg class="rel-graph-svg" viewBox="0 0 ${W} ${svgH}" xmlns="http://www.w3.org/2000/svg">
+    let svg = `<svg class="rel-graph-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
 <defs>
-  <filter id="rg-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-  <filter id="rg-edge-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.8" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-  <radialGradient id="rg-center" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#a0eaff"/><stop offset="100%" stop-color="#2090c8"/></radialGradient>
-  <radialGradient id="rg-peer" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#c0d8ff"/><stop offset="100%" stop-color="#4060a8"/></radialGradient>
-  <!-- 箭头：中心→周围 (out) -->
-  <marker id="arr-out" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-    <path d="M0,0 L0,6 L8,3 z" fill="rgba(45,232,176,0.92)"/>
-  </marker>
-  <!-- 箭头：周围→中心 (in) -->
-  <marker id="arr-in" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-    <path d="M0,0 L0,6 L8,3 z" fill="rgba(108,142,245,0.92)"/>
-  </marker>
+  <filter id="rg-node-glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="rg-edge-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <radialGradient id="rg-center" cx="35%" cy="30%" r="70%"><stop offset="0%" stop-color="#8df7ff"/><stop offset="100%" stop-color="#2196d3"/></radialGradient>
+  <radialGradient id="rg-peer" cx="35%" cy="30%" r="70%"><stop offset="0%" stop-color="#d7e5ff"/><stop offset="100%" stop-color="#5e7fd6"/></radialGradient>
+  <marker id="arr-out" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L0,10 L10,5 z" fill="#36dfb4"/></marker>
+  <marker id="arr-in" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L0,10 L10,5 z" fill="#7aa8ff"/></marker>
 </defs>
-<pattern id="rg-grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(108,142,245,0.04)" stroke-width="1"/></pattern>
-<rect width="${W}" height="${svgH}" fill="url(#rg-grid)"/>`;
+<rect width="${W}" height="${H}" rx="20" fill="rgba(8,12,24,.78)"/>
+<circle cx="${cx}" cy="${cy}" r="${orbit}" fill="none" stroke="rgba(108,142,245,.18)" stroke-width="1.2" stroke-dasharray="4 8"/>`;
 
-    peerPositions.forEach((peer, i) => {
+    peerPositions.forEach((peer) => {
       const dx = peer.x - cx, dy = peer.y - cy;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      const ux = dx/dist, uy = dy/dist;
-      // 线段起止点缩进到节点边缘
-      const x1 = (cx + ux*R).toFixed(1), y1 = (cy + uy*R).toFixed(1);
-      const x2 = (peer.x - ux*R).toFixed(1), y2 = (peer.y - uy*R).toFixed(1);
-      const len = Math.ceil(dist - R*2 + 10);
-      const delay = (i * 0.08).toFixed(2);
-      const labelAB = labelMap[profileId]?.[peer.id] || ''; // 中心→peer
-      const labelBA = labelMap[peer.id]?.[profileId] || ''; // peer→中心
-      const midX = ((cx + peer.x) / 2).toFixed(1);
-      const midY = ((cy + peer.y) / 2).toFixed(1);
-
-      // 中心→peer 有向线（绿色箭头）
-      if (labelAB) {
-        // 偏移一点避免重叠
-        const ox = (-uy*5).toFixed(1), oy = (ux*5).toFixed(1);
-        svg += `<line x1="${(parseFloat(x1)+parseFloat(ox)).toFixed(1)}" y1="${(parseFloat(y1)+parseFloat(oy)).toFixed(1)}" x2="${(parseFloat(x2)+parseFloat(ox)).toFixed(1)}" y2="${(parseFloat(y2)+parseFloat(oy)).toFixed(1)}" stroke="rgba(45,232,176,0.92)" stroke-width="2.6" filter="url(#rg-edge-glow)" stroke-linecap="round" stroke-dasharray="${len}" stroke-dashoffset="${len}" marker-end="url(#arr-out)" class="rel-edge" style="animation-delay:${delay}s"/>`;
-      }
-      // peer→中心 有向线（蓝色箭头）
-      if (labelBA) {
-        const ox = (uy*5).toFixed(1), oy = (-ux*5).toFixed(1);
-        svg += `<line x1="${(parseFloat(x2)+parseFloat(ox)).toFixed(1)}" y1="${(parseFloat(y2)+parseFloat(oy)).toFixed(1)}" x2="${(parseFloat(x1)+parseFloat(ox)).toFixed(1)}" y2="${(parseFloat(y1)+parseFloat(oy)).toFixed(1)}" stroke="rgba(108,142,245,0.92)" stroke-width="2.6" filter="url(#rg-edge-glow)" stroke-linecap="round" stroke-dasharray="${len}" stroke-dashoffset="${len}" marker-end="url(#arr-in)" class="rel-edge" style="animation-delay:${delay}s"/>`;
-      }
-      // 无标签时画普通线
+      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      const ux = dx / dist, uy = dy / dist;
+      const sx = cx + ux * centerR, sy = cy + uy * centerR;
+      const tx = peer.x - ux * peerR, ty = peer.y - uy * peerR;
+      const labelAB = labelMap[profile.id]?.[peer.id] || '';
+      const labelBA = labelMap[peer.id]?.[profile.id] || '';
+      const mx = (sx + tx) / 2, my = (sy + ty) / 2;
+      const nx = -uy, ny = ux;
       if (!labelAB && !labelBA) {
-        svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(180,205,255,0.72)" stroke-width="2.2" filter="url(#rg-edge-glow)" stroke-linecap="round" stroke-dasharray="${len}" stroke-dashoffset="${len}" class="rel-edge" style="animation-delay:${delay}s"/>`;
+        svg += `<line x1="${sx.toFixed(1)}" y1="${sy.toFixed(1)}" x2="${tx.toFixed(1)}" y2="${ty.toFixed(1)}" stroke="rgba(120,150,240,.42)" stroke-width="2.2" stroke-linecap="round" filter="url(#rg-edge-glow)"/>`;
       }
-
-      // 标签气泡（偏移避开线）
       if (labelAB) {
-        const bw = labelAB.length * 7 + 14;
-        const lx = (parseFloat(midX) - uy*18).toFixed(1);
-        const ly = (parseFloat(midY) + ux*18).toFixed(1);
-        svg += `<rect x="${(parseFloat(lx)-bw/2).toFixed(0)}" y="${(parseFloat(ly)-10).toFixed(0)}" width="${bw}" height="18" rx="9" fill="rgba(10,14,26,0.9)" stroke="rgba(45,232,176,0.4)" stroke-width="1"/><text x="${lx}" y="${(parseFloat(ly)+4).toFixed(0)}" text-anchor="middle" class="rel-label-bubble" fill="rgba(45,232,176,0.9)">${escHtml(labelAB)}</text>`;
+        const os = 8;
+        svg += `<line x1="${(sx+nx*os).toFixed(1)}" y1="${(sy+ny*os).toFixed(1)}" x2="${(tx+nx*os).toFixed(1)}" y2="${(ty+ny*os).toFixed(1)}" stroke="rgba(54,223,180,.9)" stroke-width="2.6" stroke-linecap="round" marker-end="url(#arr-out)" filter="url(#rg-edge-glow)"/>`;
+        const lx = mx + nx * 22, ly = my + ny * 22;
+        const bw = Math.max(42, labelAB.length * 9 + 16);
+        svg += `<rect x="${(lx-bw/2).toFixed(1)}" y="${(ly-12).toFixed(1)}" width="${bw}" height="24" rx="12" fill="rgba(6,10,18,.88)" stroke="rgba(54,223,180,.35)" stroke-width="1"/>`;
+        svg += `<text x="${lx.toFixed(1)}" y="${(ly+4).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="#7ff5d8">${escHtml(labelAB)}</text>`;
       }
       if (labelBA) {
-        const bw = labelBA.length * 7 + 14;
-        const lx = (parseFloat(midX) + uy*18).toFixed(1);
-        const ly = (parseFloat(midY) - ux*18).toFixed(1);
-        svg += `<rect x="${(parseFloat(lx)-bw/2).toFixed(0)}" y="${(parseFloat(ly)-10).toFixed(0)}" width="${bw}" height="18" rx="9" fill="rgba(10,14,26,0.9)" stroke="rgba(108,142,245,0.4)" stroke-width="1"/><text x="${lx}" y="${(parseFloat(ly)+4).toFixed(0)}" text-anchor="middle" class="rel-label-bubble" fill="rgba(108,142,245,0.9)">${escHtml(labelBA)}</text>`;
+        const os = -8;
+        svg += `<line x1="${(tx+nx*os).toFixed(1)}" y1="${(ty+ny*os).toFixed(1)}" x2="${(sx+nx*os).toFixed(1)}" y2="${(sy+ny*os).toFixed(1)}" stroke="rgba(122,168,255,.92)" stroke-width="2.6" stroke-linecap="round" marker-end="url(#arr-in)" filter="url(#rg-edge-glow)"/>`;
+        const lx = mx + nx * -22, ly = my + ny * -22;
+        const bw = Math.max(42, labelBA.length * 9 + 16);
+        svg += `<rect x="${(lx-bw/2).toFixed(1)}" y="${(ly-12).toFixed(1)}" width="${bw}" height="24" rx="12" fill="rgba(6,10,18,.88)" stroke="rgba(122,168,255,.35)" stroke-width="1"/>`;
+        svg += `<text x="${lx.toFixed(1)}" y="${(ly+4).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="#bdd4ff">${escHtml(labelBA)}</text>`;
       }
     });
 
-    // 中心节点大小随互关数增加略微变大
-    const centerR = Math.min(38, R + peerCount * 1.2);
-    svg += `<circle cx="${cx}" cy="${cy}" r="${centerR}" fill="url(#rg-center)" filter="url(#rg-glow)"/>`;
-    // 脉冲圈
-    svg += `<circle cx="${cx}" cy="${cy}" r="${centerR}" fill="none" stroke="rgba(45,232,176,0.2)" stroke-width="1"><animate attributeName="r" from="${centerR}" to="${centerR+12}" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" from="0.4" to="0" dur="2s" repeatCount="indefinite"/></circle>`;
-    svg += `<text x="${cx}" y="${cy-7}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.45)">@</text><text x="${cx}" y="${cy+7}" text-anchor="middle" font-family="var(--mono)" font-size="12" font-weight="700" fill="#e8f8ff">${escHtml(username.slice(0,8))}</text>`;
-
-    peerPositions.forEach((peer, i) => {
-      const delay = (0.1 + i * 0.08).toFixed(2);
-      // 节点大小根据和中心的标签数量动态调整
-      const hasLabel = (labelMap[profileId]?.[peer.id] || labelMap[peer.id]?.[profileId]) ? 1 : 0;
-      const peerR = R + hasLabel * 4;
-      svg += `<g style="cursor:pointer;opacity:0;animation:logoFadeIn 0.3s ease forwards;animation-delay:${delay}s" onclick="showProfile('${escHtml(peer.username)}')">`;
-      svg += `<circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${peerR}" fill="url(#rg-peer)" filter="url(#rg-glow)"/>`;
-      if(hasLabel) svg += `<circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${peerR}" fill="none" stroke="rgba(45,232,176,0.3)" stroke-width="1"><animate attributeName="r" from="${peerR}" to="${peerR+8}" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" from="0.3" to="0" dur="2.4s" repeatCount="indefinite"/></circle>`;
-      svg += `<text x="${peer.x.toFixed(1)}" y="${(peer.y-7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.4)">@</text>`;
-      svg += `<text x="${peer.x.toFixed(1)}" y="${(peer.y+7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="600" fill="#c8dcff">${escHtml(peer.username.slice(0,7))}</text>`;
-      svg += `</g>`;
+    svg += `<g><circle cx="${cx}" cy="${cy}" r="${centerR}" fill="url(#rg-center)" filter="url(#rg-node-glow)"/><circle cx="${cx}" cy="${cy}" r="${centerR+10}" fill="none" stroke="rgba(45,232,176,.22)" stroke-width="1.2"/><text x="${cx}" y="${cy-7}" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="rgba(255,255,255,.5)">@</text><text x="${cx}" y="${cy+14}" text-anchor="middle" font-family="var(--mono)" font-size="13" font-weight="700" fill="#eaf9ff">${escHtml(username.slice(0,10))}</text></g>`;
+    peerPositions.forEach((peer) => {
+      svg += `<g style="cursor:pointer" onclick="showProfile('${escHtml(peer.username)}')"><circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${peerR}" fill="url(#rg-peer)" filter="url(#rg-node-glow)"/><text x="${peer.x.toFixed(1)}" y="${(peer.y-7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,.45)">@</text><text x="${peer.x.toFixed(1)}" y="${(peer.y+12).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="700" fill="#eef4ff">${escHtml(peer.username.slice(0,10))}</text></g>`;
     });
-
-    // 流动粒子（每条有向边上一个小点来回流动）
-    peerPositions.forEach((peer, i) => {
-      const labelAB = labelMap[profileId]?.[peer.id];
-      const labelBA = labelMap[peer.id]?.[profileId];
-      const delay = (i * 0.4).toFixed(1);
-      if(labelAB || labelBA) {
-        const pathId = `rg-path-${i}`;
-        svg += `<path id="${pathId}" d="M${cx},${cy} L${peer.x.toFixed(1)},${peer.y.toFixed(1)}" fill="none" stroke="none"/>`;
-        svg += `<circle r="2.5" fill="rgba(45,232,176,0.9)" opacity="0" style="animation-delay:${delay}s"><animateMotion dur="1.8s" repeatCount="indefinite" begin="${delay}s"><mpath href="#${pathId}"/></animateMotion><animate attributeName="opacity" values="0;1;1;0" dur="1.8s" repeatCount="indefinite" begin="${delay}s"/></circle>`;
-      }
-    });
-
     svg += `</svg>`;
     wrap.innerHTML = svg;
     relSec.appendChild(wrap);
@@ -7843,10 +7819,10 @@ async function loadSettingsData(){
   if(motto){
     motto.value = currentProfile.motto||'';
     document.getElementById('motto-count').textContent = (currentProfile.motto||'').length;
-    motto.oninput=()=>document.getElementById('motto-count').textContent=motto.value.length;
+    motto.addEventListener('input',()=>document.getElementById('motto-count').textContent=motto.value.length);
   }
   document.getElementById('set-bio').value=currentProfile.bio||'';
-  document.getElementById('set-luogu-uid').value=normalizeLuoguUid(currentProfile.luogu_uid||'');
+  document.getElementById('set-luogu-uid').value=currentProfile.luogu_uid||'';
   const grpEl=document.getElementById('set-group');
   if(grpEl) grpEl.value=currentProfile.group_id||'';
 }
@@ -7866,7 +7842,7 @@ function previewAvatar(input){
 async function saveSettings(){
   const bio=document.getElementById('set-bio').value.trim();
   const motto=(document.getElementById('set-motto')?.value||'').trim();
-  const luogu_uid=normalizeLuoguUid(document.getElementById('set-luogu-uid').value);
+  const luogu_uid=document.getElementById('set-luogu-uid').value.trim();
   const gv=document.getElementById('set-group')?.value;
   const group_id=gv?parseInt(gv):null;
   const errEl=document.getElementById('settings-avatar-error');
@@ -7893,13 +7869,15 @@ async function saveSettings(){
     setTimeout(()=>prog.style.display='none',600);
   }
 
-  const{error}=await sb.from('profiles').update({avatar_url,bio,motto,group_id,luogu_uid:luogu_uid||null}).eq('id',currentUser.id);
+  const payload={avatar_url,bio,motto,group_id,luogu_uid};
+  const{error}=await sb.from('profiles').update(payload).eq('id',currentUser.id);
   if(error){errEl.textContent=error.message;return;}
-  currentProfile={...currentProfile,avatar_url,bio,motto,group_id,luogu_uid};
-  closeModal('settings-modal');showToast('设置已保存 ✓','success');
+  currentProfile={...currentProfile,...payload,bio:normalizeText(bio),motto:normalizeText(motto),luogu_uid:normalizeLuoguUid(luogu_uid)};
   renderAuthArea();
-  // 刷新个人主页（如果正在看）
-if(document.getElementById('profile')?.classList.contains('active')){
+  closeModal('settings-modal');showToast('设置已保存 ✓','success');
+  if(document.getElementById('profile')?.classList.contains('active')){
+    await showProfile(currentProfile.username);
+  }
 }
 async function savePassword(){
   const pw=document.getElementById('set-newpw').value;
