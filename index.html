@@ -4199,6 +4199,7 @@ section:not(.active) {
         <option value="8">抖音</option>
       </select>
     </div>
+    <div class="form-group"><label>洛谷 UID <span style="font-size:11px;color:var(--text3);font-weight:400">（选填）</span></label><input type="text" id="reg-luogu-uid" placeholder="如：123456"></div>
     <div id="reg-error" class="form-error"></div><div id="reg-success" class="form-success"></div>
     <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('auth-modal')">取消</button><button class="btn btn-primary" onclick="doRegister()">注册</button></div>
   </div>
@@ -5052,7 +5053,8 @@ async function doRegister(){
   if(!username||username.length<2){document.getElementById('reg-error').textContent='用户名至少2个字符';return;}
   if(password.length<6){document.getElementById('reg-error').textContent='密码至少6位';return;}
   try{
-    await apiRequest('/auth/register',{method:'POST',body:JSON.stringify({username,password})});
+    const regLuoguUid = (document.getElementById('reg-luogu-uid')?.value||'').trim();
+    await apiRequest('/auth/register',{method:'POST',body:JSON.stringify({username,password,luogu_uid:regLuoguUid})});
     document.getElementById('reg-success').textContent='注册成功，正在登录…';
     setTimeout(async()=>{
       try{
@@ -7027,7 +7029,9 @@ async function showProfile(username){
   html+='<div class="profile-name">@'+escHtml(username)+'</div>';
   html+='<div class="profile-role-tag">'+(profile.role==='coach'?'🎓 教练':'🧑‍💻 学生')+'</div>';
   html+='<div style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 10px">';
-  html+='<span class="topic-badge" style="background:rgba(255,179,71,.08);border-color:rgba(255,179,71,.24);color:#ffcb6b">'+(luoguUid?('洛谷 UID · '+escHtml(luoguUid)):'洛谷暂未绑定')+'</span>';
+  html+=(luoguUid
+    ? '<a href="https://www.luogu.com.cn/user/'+escHtml(luoguUid)+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:6px 14px;border-radius:100px;background:rgba(255,179,71,.10);border:1px solid rgba(255,179,71,.35);color:#ffcb6b;text-decoration:none;font-family:var(--mono);transition:background 0.2s,border-color 0.2s;" onmouseover="this.style.background=&quot;rgba(255,179,71,.2)&quot;;this.style.borderColor=&quot;rgba(255,179,71,.6)&quot;" onmouseout="this.style.background=&quot;rgba(255,179,71,.10)&quot;;this.style.borderColor=&quot;rgba(255,179,71,.35)&quot;">🔗 洛谷 · '+escHtml(luoguUid)+'</a>'
+    : '<span style="display:inline-flex;align-items:center;font-size:13px;padding:6px 14px;border-radius:100px;background:rgba(255,179,71,.05);border:1px solid rgba(255,179,71,.18);color:rgba(255,203,107,0.5);font-family:var(--mono);">洛谷暂未绑定</span>');
   if(profile.group_id) html+='<span class="topic-badge">训练组 · '+escHtml(profile.group_id)+'</span>';
   html+='</div>';
   if(mottoText)html+='<div class="profile-motto">「'+escHtml(mottoText)+'」</div>';
@@ -7869,13 +7873,16 @@ async function saveSettings(){
     setTimeout(()=>prog.style.display='none',600);
   }
 
-  const payload={avatar_url,bio,motto,group_id,luogu_uid};
+  // 确保所有字段都显式包含，避免undefined被跳过
+  const payload={avatar_url,bio:bio||'',motto:motto||'',group_id,luogu_uid:luogu_uid||''};
   const{error}=await sb.from('profiles').update(payload).eq('id',currentUser.id);
   if(error){errEl.textContent=error.message;return;}
   currentProfile={...currentProfile,...payload,bio:normalizeText(bio),motto:normalizeText(motto),luogu_uid:normalizeLuoguUid(luogu_uid)};
   renderAuthArea();
   closeModal('settings-modal');showToast('设置已保存 ✓','success');
-  if(document.getElementById('profile')?.classList.contains('active')){
+  // 无论当前在哪个tab，只要profile区域存在就刷新
+  const profileSection = document.getElementById('profile');
+  if(profileSection){
     await showProfile(currentProfile.username);
   }
 }
