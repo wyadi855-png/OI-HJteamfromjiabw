@@ -28,6 +28,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" media="print" onload="this.media='all'">
 <!-- highlight.js loaded on demand -->
 <style>
+/* 题目来源选择按钮 */
+.p-src-btn{font-family:var(--mono);font-size:12px;padding:5px 14px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.15s;}
+.p-src-btn.active{border-color:var(--accent);background:rgba(108,142,245,0.12);color:var(--accent);}
+.p-src-btn:hover{border-color:rgba(108,142,245,0.4);color:var(--text);}
 /* ── Variables ── */
 :root{
   --bg:#080b12;--surface:#0f1320;--surface2:#161c2e;--border:#1e2540;
@@ -4507,7 +4511,8 @@ section:not(.active) {
   <div class="page-header">
     <div class="page-header-left"><div class="label">// problem_archive</div><h1>题目存档</h1><p>训练题库，按难度与知识点分类。点击题号可直达洛谷。</p></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <button class="btn btn-outline btn-sm" id="btn-luogu-import" onclick="openModal('luogu-import-modal')" style="display:none">📥 洛谷批量导入</button>
+      
+      <select id="archive-src-filter" class="judge-select" style="width:90px;font-size:12px" onchange="filterArchive()"><option value="">全部来源</option><option value="洛谷">洛谷</option><option value="CF">CF</option><option value="自拟">自拟</option></select>
       <button class="btn btn-yellow btn-sm" id="btn-new-problem" onclick="openProblemModal()" style="display:none">+ 添加题目</button>
     </div>
   </div>
@@ -5423,11 +5428,14 @@ function renderAuthArea(){
     area.innerHTML=`<span class="nav-user" style="cursor:pointer" onclick="showProfile('${currentProfile.username}')">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}<button class="btn btn-outline btn-sm" onclick="openModal('settings-modal');loadSettingsData()">设置</button><button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
     if(isCoach()){coachNav.style.display='';const da=document.getElementById('drawer-admin');if(da)da.style.display='';}
     ['btn-new-note','btn-new-post'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
-    if(isCoach())['btn-new-contest','btn-new-problem','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
+    if(isCoach())['btn-new-contest','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
+    // 所有登录用户可添加题目
+    const btnP=document.getElementById('btn-new-problem');if(btnP)btnP.style.display='inline-flex';
   }else{
     area.innerHTML=`<button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button>`;
     coachNav.style.display='none';const da2=document.getElementById('drawer-admin');if(da2)da2.style.display='none';
-    ['btn-new-note','btn-new-post','btn-new-contest','btn-new-lecture','btn-new-problem','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+    ['btn-new-note','btn-new-post','btn-new-contest','btn-new-lecture','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+    const btnP2=document.getElementById('btn-new-problem');if(btnP2)btnP2.style.display='none';
   }
 }
 
@@ -7095,7 +7103,7 @@ function renderArchiveTable(data){
   list.innerHTML=
     '<div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-bottom:10px">共 '+data.length+' 道题</div>'+
     '<div class="archive-table-wrap"><table class="archive-table">'+
-    '<thead><tr><th>题目</th><th>题号</th><th>难度</th><th>知识点</th><th>限制</th>'+(isCoach()?'<th></th>':'')+
+    '<thead><tr><th>题目</th><th>题号</th><th>难度</th><th>知识点</th>'+(isCoach()||currentUser?'<th></th>':'')+
     '</tr></thead><tbody id="archive-tbody"></tbody></table></div>'+
     '<div id="archive-judge-container"></div>'+
     '<div id="archive-load-more" style="text-align:center;padding:16px;display:none">'+
@@ -7108,14 +7116,32 @@ function renderArchivePage(){
   if(!tbody) return;
   const slice = _archiveRenderData.slice(0, (_archivePage+1)*_archivePageSize);
   tbody.innerHTML = slice.map(function(p){
+    var src = p.source || '洛谷';
+    var srcColor = src==='CF'?'#ff8c00':src==='自拟'?'#c792ea':'#4e9af1';
+    var srcBg    = src==='CF'?'rgba(255,140,0,0.1)':src==='自拟'?'rgba(199,146,234,0.1)':'rgba(78,154,241,0.1)';
+    var srcBorder= src==='CF'?'rgba(255,140,0,0.25)':src==='自拟'?'rgba(199,146,234,0.25)':'rgba(78,154,241,0.25)';
+    var pid = p.problem_id || '';
+    var url = p.url || '';
+    if(!url && pid){
+      if(src==='CF'){
+        var m=pid.match(/^(\d+)([A-Za-z]+\d*)$/);
+        url=m?'https://codeforces.com/problemset/problem/'+m[1]+'/'+m[2].toUpperCase():'';
+      } else if(src==='洛谷'){
+        url='https://www.luogu.com.cn/problem/'+pid;
+      }
+    }
+    var pidCell = pid
+      ? (url ? '<a href="'+escHtml(url)+'" target="_blank" style="font-family:var(--mono);color:var(--accent);font-size:12px">'+escHtml(pid)+'</a>' : '<span style="font-family:var(--mono);font-size:12px;color:var(--text2)">'+escHtml(pid)+'</span>')
+      : '<span style="color:var(--text3);font-size:12px">—</span>';
     return '<tr>'+
-      '<td>'+escHtml(p.title)+'</td>'+
-      '<td><a href="https://www.luogu.com.cn/problem/'+escHtml(p.problem_id)+'" target="_blank" style="font-family:var(--mono);color:var(--accent)">'+escHtml(p.problem_id)+'</a> '+
-      '<button class="archive-judge-btn" onclick="toggleArchiveJudge('+p.id+',\''+escHtml(p.title).replace(/'/g,"\\'")+'\')" >⚡</button></td>'+
+      '<td>'+
+        '<span style="display:inline-block;font-size:10px;padding:1px 7px;border-radius:100px;border:1px solid '+srcBorder+';background:'+srcBg+';color:'+srcColor+';margin-right:6px;vertical-align:middle">'+escHtml(src)+'</span>'+
+        escHtml(p.title)+
+      '</td>'+
+      '<td>'+pidCell+' <button class="archive-judge-btn" onclick="toggleArchiveJudge('+p.id+',\''+escHtml(p.title).replace(/'/g,"\\'")+'\')" >⚡</button></td>'+
       '<td><span class="diff-badge diff-'+(p.difficulty||'')+'">'+( p.difficulty||'-')+'</span></td>'+
       '<td style="font-family:var(--mono);font-size:12px;color:var(--text3)">'+escHtml(p.topic||'-')+'</td>'+
-      '<td style="font-family:var(--mono);font-size:11px;color:var(--text3)">'+(p.time_limit?p.time_limit+'ms':'-')+'</td>'+
-      (isCoach()?'<td><button class="btn btn-danger btn-sm" onclick="deleteProblem('+p.id+')">删除</button></td>':'')+
+      (isCoach()||p.created_by===currentUser?.id?'<td><button class="btn btn-danger btn-sm" onclick="deleteProblem('+p.id+')">删除</button></td>':'')+
       '</tr>';
   }).join('');
   const more = document.getElementById('archive-load-more');
@@ -7174,11 +7200,13 @@ async function loadArchive(){
 
 function filterArchive(q){
   const query = (q !== undefined ? q : document.getElementById('archive-search')?.value || '').toLowerCase();
-  const diff  = document.getElementById('archive-diff-filter')?.value || '';
+  const diff   = document.getElementById('archive-diff-filter')?.value || '';
+  const source = document.getElementById('archive-src-filter')?.value || '';
   const filtered = _archiveData.filter(p=>{
     const matchQ = !query || p.title.toLowerCase().includes(query) || (p.problem_id||'').toLowerCase().includes(query) || (p.topic||'').toLowerCase().includes(query);
-    const matchD = !diff || p.difficulty === diff;
-    return matchQ && matchD;
+    const matchD = !diff   || p.difficulty === diff;
+    const matchS = !source || (p.source||'洛谷') === source;
+    return matchQ && matchD && matchS;
   });
   renderArchiveTable(filtered);
 }
@@ -7360,26 +7388,82 @@ async function submitLuoguImport(){
     loadArchive();
   }
 }
-function openProblemModal(){if(!isCoach())return;openModal('problem-modal');}
+function openProblemModal(){
+  if(!currentUser){showToast('请先登录','error');return;}
+  // 重置表单
+  ['p-title','p-id','p-tags'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const diff=document.getElementById('p-diff');if(diff)diff.value='';
+  document.getElementById('problem-error').textContent='';
+  selectProblemSource('洛谷');
+  openModal('problem-modal');
+}
+
+function selectProblemSource(src){
+  document.getElementById('p-source').value=src;
+  document.querySelectorAll('.p-src-btn').forEach(b=>b.classList.toggle('active',b.dataset.src===src));
+  const idWrap=document.getElementById('p-id-wrap');
+  const idLabel=document.getElementById('p-id-label');
+  const idInput=document.getElementById('p-id');
+  if(src==='自拟'){
+    idWrap.style.display='none';
+    idInput.value='';
+  } else {
+    idWrap.style.display='';
+    if(src==='洛谷'){
+      idLabel.innerHTML='题号 <span style="font-size:11px;color:var(--text3)">(填写后自动带出标题)</span>';
+      idInput.placeholder='如：P1001';
+    } else {
+      idLabel.innerHTML='题号 <span style="font-size:11px;color:var(--text3)">(如 1234A)</span>';
+      idInput.placeholder='如：1234A';
+    }
+  }
+}
+
+function onProblemIdInput(val){
+  const src=document.getElementById('p-source').value;
+  if(src==='洛谷') autoFillFromLuogu(val);
+  else if(src==='CF'){
+    // CF 格式自动生成链接提示
+    const match=val.trim().match(/^(\d+)([A-Za-z]+\d*)$/);
+    if(match){
+      const url='https://codeforces.com/problemset/problem/'+match[1]+'/'+match[2].toUpperCase();
+      const urlEl=document.getElementById('p-url');
+      if(urlEl) urlEl.value=url;
+    }
+  }
+}
+
 async function submitProblem(){
+  if(!currentUser){showToast('请先登录','error');return;}
   const title=document.getElementById('p-title').value.trim();
-  const problem_id=document.getElementById('p-id').value.trim().toUpperCase();
-  if(!title||!problem_id){document.getElementById('problem-error').textContent='请填写题目名称和题号';return;}
+  const source=document.getElementById('p-source').value;
+  const raw_id=document.getElementById('p-id').value.trim();
+  const errEl=document.getElementById('problem-error');
+  errEl.textContent='';
+  if(!title){errEl.textContent='请填写题目名称';return;}
+
+  // 自动生成链接
+  let problem_id=raw_id.toUpperCase();
+  let url='';
+  if(source==='洛谷'&&problem_id) url='https://www.luogu.com.cn/problem/'+problem_id;
+  else if(source==='CF'&&raw_id){
+    const m=raw_id.match(/^(\d+)([A-Za-z]+\d*)$/);
+    if(m) url='https://codeforces.com/problemset/problem/'+m[1]+'/'+m[2].toUpperCase();
+  }
+
   try{
     await apiRequest('/archive/add',{method:'POST',body:JSON.stringify({
       title,
-      problem_id,
-      difficulty: document.getElementById('p-diff').value,
-      topic: document.getElementById('p-tags').value.trim(),
-      url: document.getElementById('p-url')?.value.trim()||'',
-      time_limit: parseInt(document.getElementById('p-time')?.value)||1000,
-      memory_limit: parseInt(document.getElementById('p-mem')?.value)||256,
+      problem_id: problem_id||null,
+      source,
+      difficulty: document.getElementById('p-diff').value||null,
+      topic: document.getElementById('p-tags').value.trim()||null,
+      url,
     })});
     closeModal('problem-modal');
-    ['p-title','p-id','p-tags','p-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     showToast('题目已添加 ✓','success');
     loadArchive();
-  }catch(e){document.getElementById('problem-error').textContent=e.message||'添加失败';}
+  }catch(e){errEl.textContent=e.message||'添加失败';}
 }
 async function deleteProblem(id){
   if(!confirm('确认删除？'))return;
@@ -11395,30 +11479,37 @@ async function showContestChart(contestId, preloaded, title){
 
 <!-- PROBLEM MODAL -->
 <div class="modal-overlay" id="problem-modal">
-  <div class="modal" style="width:720px;max-width:96vw;max-height:90vh;overflow-y:auto">
+  <div class="modal" style="max-width:480px;width:100%">
     <div class="modal-header">
-      <h2 id="problem-modal-title">添加题目</h2>
+      <h2>添加题目</h2>
       <button class="modal-close" onclick="closeModal('problem-modal')">✕</button>
     </div>
     <div class="modal-body">
       <div id="problem-error" class="error-msg"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="form-group" style="grid-column:1/-1">
-          <label>题目名称 *</label>
-          <input id="p-title" type="text" placeholder="如：最短路径问题">
+      <!-- 来源选择 -->
+      <div class="form-group">
+        <label>题目来源</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="p-source-btns">
+          <button type="button" class="p-src-btn active" data-src="洛谷" onclick="selectProblemSource('洛谷')">🔵 洛谷</button>
+          <button type="button" class="p-src-btn" data-src="CF" onclick="selectProblemSource('CF')">🟠 Codeforces</button>
+          <button type="button" class="p-src-btn" data-src="自拟" onclick="selectProblemSource('自拟')">✏️ 自拟</button>
         </div>
-        <div class="form-group">
-          <label>题目编号（洛谷等）</label>
-          <input id="p-id" type="text" placeholder="如：P1001" oninput="autoFillFromLuogu(this.value)">
-        </div>
-        <div class="form-group">
-          <label>原题链接</label>
-          <input id="p-url" type="text" placeholder="https://www.luogu.com.cn/problem/P1001">
-        </div>
+        <input type="hidden" id="p-source" value="洛谷">
+      </div>
+      <!-- 题号（洛谷/CF 显示，自拟隐藏） -->
+      <div class="form-group" id="p-id-wrap">
+        <label id="p-id-label">题号 <span style="font-size:11px;color:var(--text3)">(填写后自动带出标题)</span></label>
+        <input id="p-id" type="text" placeholder="如：P1001 或 1234A" oninput="onProblemIdInput(this.value)">
+      </div>
+      <div class="form-group">
+        <label>题目名称 *</label>
+        <input id="p-title" type="text" placeholder="如：最短路径问题">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div class="form-group">
           <label>难度</label>
           <select id="p-diff">
-            <option value="unrated">未评级</option>
+            <option value="">未设置</option>
             <option value="入门">入门</option>
             <option value="普及">普及</option>
             <option value="提高">提高</option>
@@ -11426,57 +11517,14 @@ async function showContestChart(contestId, preloaded, title){
           </select>
         </div>
         <div class="form-group">
-          <label>算法标签（逗号分隔）</label>
-          <input id="p-tags" type="text" placeholder="DP, 图论, 贪心">
-        </div>
-        <div class="form-group">
-          <label>时间限制 (ms)</label>
-          <input id="p-time" type="number" value="1000" min="100" max="10000">
-        </div>
-        <div class="form-group">
-          <label>内存限制 (MB)</label>
-          <input id="p-mem" type="number" value="256" min="32" max="1024">
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label>题目描述</label>
-          <textarea id="p-desc" rows="4" placeholder="支持 Markdown 和数学公式"></textarea>
-        </div>
-        <div class="form-group">
-          <label>输入格式</label>
-          <textarea id="p-input-fmt" rows="3"></textarea>
-        </div>
-        <div class="form-group">
-          <label>输出格式</label>
-          <textarea id="p-output-fmt" rows="3"></textarea>
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label>样例输入</label>
-          <textarea id="p-ex-in" rows="3" placeholder="1 2"></textarea>
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label>样例输出</label>
-          <textarea id="p-ex-out" rows="2" placeholder="3"></textarea>
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label>数据范围 / 提示</label>
-          <textarea id="p-hint" rows="2"></textarea>
-        </div>
-        <div class="form-group" style="grid-column:1/-1" id="p-solution-wrap">
-          <label>题解（仅教练可见）</label>
-          <textarea id="p-solution" rows="4"></textarea>
-        </div>
-        <div class="form-group" style="grid-column:1/-1" id="p-status-wrap">
-          <label>状态</label>
-          <select id="p-status">
-            <option value="published">发布</option>
-            <option value="pending">待审核</option>
-          </select>
+          <label>算法标签</label>
+          <input id="p-tags" type="text" placeholder="DP, 图论">
         </div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('problem-modal')">取消</button>
-      <button class="btn btn-primary" onclick="submitProblem()">保存</button>
+      <button class="btn btn-primary" onclick="submitProblem()">添加</button>
     </div>
   </div>
 </div>
