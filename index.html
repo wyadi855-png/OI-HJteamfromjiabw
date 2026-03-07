@@ -87,22 +87,23 @@ nav.scrolled{
 .nav-hjoi-svg{width:88px;height:32px;display:block;overflow:visible;transition:filter 0.3s;}
 .nav-logo:hover .nav-hjoi-svg{filter:drop-shadow(0 0 6px rgba(45,232,176,0.6));}
 .nav-actions{display:flex;align-items:center;gap:10px;}
-.nav-links{display:flex;flex-wrap:wrap;gap:3px;padding:0 16px 10px;border-top:1px solid rgba(255,255,255,0.06);list-style:none;margin:0;}
+.nav-links{display:flex;flex-wrap:wrap;gap:3px;padding:0 16px 10px;border-top:1px solid rgba(255,255,255,0.06);list-style:none;margin:0;position:relative;}
 .nav-links a{
   font-size:13px;color:rgba(255,255,255,0.6);text-decoration:none;
   padding:6px 14px;border-radius:100px;cursor:pointer;
   font-family:var(--mono);letter-spacing:0.02em;
-  transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  transition:color 0.2s ease,background 0.2s ease;
+  position:relative;
 }
-.nav-links a:hover{
-  color:rgba(255,255,255,0.92);
-  background:rgba(255,255,255,0.1);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.15);
-}
-.nav-links a.active{
-  color:#fff;
-  background:rgba(255,255,255,0.12);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.2),0 2px 8px rgba(0,0,0,0.2);
+.nav-links a:hover{ color:rgba(255,255,255,0.92); }
+.nav-links a.active{ color:#fff; }
+/* 活跃指示线 */
+#nav-indicator{
+  position:absolute;bottom:0;left:0;height:2px;
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  border-radius:2px;
+  transition:left 0.3s cubic-bezier(0.34,1.56,0.64,1),width 0.3s cubic-bezier(0.34,1.56,0.64,1),opacity 0.2s;
+  pointer-events:none;opacity:0;
 }
 .nav-more-wrap{position:relative;display:inline-block;}
 .nav-more-menu{position:fixed;background:rgba(10,13,24,0.97);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:10px;padding:6px;min-width:150px;display:none;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
@@ -1548,16 +1549,25 @@ footer span{color:var(--accent2);}
 
 #dm-panel{
   position:fixed;top:60px;right:20px;
-  width:360px;max-height:560px;
-  background:rgba(8,12,24,0.97);
+  width:680px;max-height:580px;
+  background:rgba(8,12,24,0.98);
   backdrop-filter:blur(24px);
   border:1px solid rgba(108,142,245,0.15);
-  border-radius:14px;
-  box-shadow:0 16px 48px rgba(0,0,0,0.6);
+  border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.7);
   z-index:99999;display:none;
   flex-direction:column;overflow:hidden;
 }
 #dm-panel.open{display:flex!important;animation:fadeIn 0.2s ease;}
+/* 两栏布局 */
+#dm-body{display:flex;flex:1;overflow:hidden;min-height:0;}
+#dm-sidebar{
+  width:220px;flex-shrink:0;
+  border-right:1px solid rgba(108,142,245,0.1);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+#dm-conv-list{flex:1;overflow-y:auto;padding:6px 0;}
+#dm-chat-pane{flex:1;display:flex;flex-direction:column;min-width:0;}
 .dm-panel-header{
   display:flex;align-items:center;justify-content:space-between;
   padding:14px 16px 12px;
@@ -1572,11 +1582,12 @@ footer span{color:var(--accent2);}
 #dm-conv-list{overflow-y:auto;flex:1;}
 .dm-conv-item{
   display:flex;align-items:center;gap:10px;
-  padding:12px 16px;cursor:pointer;
-  border-bottom:1px solid rgba(255,255,255,0.04);
+  padding:10px 12px;cursor:pointer;
+  border-radius:10px;margin:0 6px;
   transition:background 0.15s;
 }
-.dm-conv-item:hover{background:rgba(108,142,245,0.07);}
+.dm-conv-item:hover{background:rgba(108,142,245,0.1);}
+.dm-conv-item.active{background:rgba(108,142,245,0.15);}
 .dm-conv-avatar{
   width:36px;height:36px;border-radius:50%;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
@@ -1605,34 +1616,37 @@ footer span{color:var(--accent2);}
 .dm-back-btn:hover{color:var(--accent2);}
 #dm-chat-name{font-family:var(--mono);font-size:13px;color:var(--text);}
 #dm-messages{
-  flex:1;overflow-y:auto;padding:14px 14px 8px;
-  display:flex;flex-direction:column;gap:8px;
-  min-height:200px;max-height:380px;
+  flex:1;overflow-y:auto;padding:12px 0 8px;
+  display:flex;flex-direction:column;gap:4px;
+  min-height:0;
 }
 .dm-msg{
-  max-width:76%;padding:8px 12px;border-radius:12px;
-  font-size:13px;line-height:1.5;word-break:break-word;
-  position:relative;
+  max-width:72%;padding:9px 13px;
+  font-size:13px;line-height:1.55;word-break:break-word;
+  position:relative;display:inline-block;
 }
 .dm-msg.sent{
   align-self:flex-end;
-  background:linear-gradient(135deg,rgba(108,142,245,0.3),rgba(45,232,176,0.2));
-  border:1px solid rgba(108,142,245,0.2);
-  border-bottom-right-radius:3px;
-  color:var(--text);
+  background:linear-gradient(135deg,#3a5bd9,#2cc9a0);
+  border-radius:18px 18px 4px 18px;
+  color:#fff;
 }
 .dm-msg.recv{
   align-self:flex-start;
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.08);
-  border-bottom-left-radius:3px;
+  background:rgba(255,255,255,0.09);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:18px 18px 18px 4px;
   color:var(--text);
 }
 .dm-msg-time{
-  font-size:10px;color:var(--text3);font-family:var(--mono);
-  margin-top:3px;text-align:right;
+  font-size:10px;opacity:0.55;font-family:var(--mono);
+  margin-top:3px;text-align:right;display:block;
 }
 .dm-msg.recv .dm-msg-time{text-align:left;}
+/* 消息行包装 */
+.dm-msg-row{display:flex;flex-direction:column;margin:2px 12px;}
+.dm-msg-row.sent{align-items:flex-end;}
+.dm-msg-row.recv{align-items:flex-start;}
 .dm-date-divider{
   text-align:center;font-family:var(--mono);font-size:10px;
   color:var(--text3);margin:4px 0;
@@ -2086,13 +2100,18 @@ mark.search-hl{
   margin-top: 12px;
 }
 .rel-graph-svg { display: block; width: 100%; }
-/* 边动画 */
+/* 边：初始绘制动画 */
 .rel-edge {
-  stroke-dasharray: 300;
-  stroke-dashoffset: 300;
-  animation: relEdgeDraw 0.6s ease forwards;
+  animation: relEdgeDraw 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
 }
 @keyframes relEdgeDraw { to { stroke-dashoffset: 0; } }
+/* 流动粒子动画 */
+@keyframes flowDot { 0%{offset-distance:0%}100%{offset-distance:100%} }
+.rel-flow-dot {
+  r: 2.5;
+  fill: rgba(45,232,176,0.8);
+  animation: flowDot 2s linear infinite;
+}
 /* 标签文字气泡 */
 .rel-label-bubble {
   font-family: var(--mono);
@@ -3653,7 +3672,8 @@ section:not(.active) {
     </div>
   </div>
   <div class="nav-bottom">
-    <ul class="nav-links">
+    <ul class="nav-links" id="nav-links-ul">
+      <div id="nav-indicator"></div>
       <li><a onclick="show('home')" id="nav-home" class="active">首页</a></li>
       <li><a onclick="show('announcements')" id="nav-announcements">公告</a></li>
       <li><a onclick="show('contests')" id="nav-contests">模拟赛</a></li>
@@ -4847,6 +4867,17 @@ let currentUser=null,currentProfile=null;
 const isCoach=()=>currentProfile?.role==='coach';
 
 // ── Navigation ─────────────────────────────────────────────
+function updateNavIndicator(navEl){
+  const ind=document.getElementById('nav-indicator');
+  const ul=document.getElementById('nav-links-ul');
+  if(!ind||!ul||!navEl) return;
+  const ulRect=ul.getBoundingClientRect();
+  const elRect=navEl.getBoundingClientRect();
+  ind.style.left=(elRect.left-ulRect.left)+'px';
+  ind.style.width=elRect.width+'px';
+  ind.style.opacity='1';
+}
+
 function show(id){
   document.querySelectorAll('section').forEach(s=>{s.classList.remove('active');s.classList.remove('visible');});
   document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
@@ -4854,13 +4885,38 @@ function show(id){
   sec.classList.add('active');
   requestAnimationFrame(()=>requestAnimationFrame(()=>sec.classList.add('visible')));
   const navEl=document.getElementById('nav-'+id);
-  if(navEl)navEl.classList.add('active');
+  if(navEl){navEl.classList.add('active');updateNavIndicator(navEl);}
   // 同步移动端抽屉 active 状态
   syncDrawerActive(id);
   window.scrollTo(0,0);
   const loaders={syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,quiz:initQuiz,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks,daily:loadDaily};
   if(loaders[id])loaders[id]();
 }
+
+// hover 时预览指示线位置
+document.addEventListener('DOMContentLoaded',()=>{
+  const ul=document.getElementById('nav-links-ul');
+  if(!ul) return;
+  ul.querySelectorAll('a[id^="nav-"]').forEach(a=>{
+    a.addEventListener('mouseenter',()=>{
+      const ind=document.getElementById('nav-indicator');
+      const ulRect=ul.getBoundingClientRect();
+      const elRect=a.getBoundingClientRect();
+      ind.style.left=(elRect.left-ulRect.left)+'px';
+      ind.style.width=elRect.width+'px';
+      ind.style.opacity='0.5';
+    });
+    a.addEventListener('mouseleave',()=>{
+      // 恢复到 active 位置
+      const active=ul.querySelector('a.active');
+      if(active) updateNavIndicator(active);
+      else document.getElementById('nav-indicator').style.opacity='0';
+    });
+  });
+  // 初始化位置
+  const active=ul.querySelector('a.active');
+  if(active) setTimeout(()=>updateNavIndicator(active),100);
+});
 
 // ── Auth UI ────────────────────────────────────────────────
 function renderAuthArea(){
@@ -7050,7 +7106,9 @@ async function loadProfileSocial(profile, username){
       return { ...p, x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius };
     });
     const svgH = Math.max(220, cy + radius + 70);
-    const R = 28; // 统一节点半径
+    const R = 28; // 基础节点半径
+    // 节点大小根据互关数动态调整：互关越多越大
+    const peerCount = peers.length;
     // defs: glow filter + gradients + arrowhead markers
     let svg = `<svg class="rel-graph-svg" viewBox="0 0 ${W} ${svgH}" xmlns="http://www.w3.org/2000/svg">
 <defs>
@@ -7114,12 +7172,38 @@ async function loadProfileSocial(profile, username){
       }
     });
 
-    // 所有节点统一大小 R=28
-    svg += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#rg-center)" filter="url(#rg-glow)"/><text x="${cx}" y="${cy-7}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.45)">@</text><text x="${cx}" y="${cy+7}" text-anchor="middle" font-family="var(--mono)" font-size="12" font-weight="700" fill="#e8f8ff">${escHtml(username.slice(0,8))}</text>`;
+    // 中心节点大小随互关数增加略微变大
+    const centerR = Math.min(38, R + peerCount * 1.2);
+    svg += `<circle cx="${cx}" cy="${cy}" r="${centerR}" fill="url(#rg-center)" filter="url(#rg-glow)"/>`;
+    // 脉冲圈
+    svg += `<circle cx="${cx}" cy="${cy}" r="${centerR}" fill="none" stroke="rgba(45,232,176,0.2)" stroke-width="1"><animate attributeName="r" from="${centerR}" to="${centerR+12}" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" from="0.4" to="0" dur="2s" repeatCount="indefinite"/></circle>`;
+    svg += `<text x="${cx}" y="${cy-7}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.45)">@</text><text x="${cx}" y="${cy+7}" text-anchor="middle" font-family="var(--mono)" font-size="12" font-weight="700" fill="#e8f8ff">${escHtml(username.slice(0,8))}</text>`;
+
     peerPositions.forEach((peer, i) => {
       const delay = (0.1 + i * 0.08).toFixed(2);
-      svg += `<g style="cursor:pointer;opacity:0;animation:logoFadeIn 0.3s ease forwards;animation-delay:${delay}s" onclick="showProfile('${escHtml(peer.username)}')"><circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${R}" fill="url(#rg-peer)" filter="url(#rg-glow)"/><text x="${peer.x.toFixed(1)}" y="${(peer.y-7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.4)">@</text><text x="${peer.x.toFixed(1)}" y="${(peer.y+7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="600" fill="#c8dcff">${escHtml(peer.username.slice(0,7))}</text></g>`;
+      // 节点大小根据和中心的标签数量动态调整
+      const hasLabel = (labelMap[profileId]?.[peer.id] || labelMap[peer.id]?.[profileId]) ? 1 : 0;
+      const peerR = R + hasLabel * 4;
+      svg += `<g style="cursor:pointer;opacity:0;animation:logoFadeIn 0.3s ease forwards;animation-delay:${delay}s" onclick="showProfile('${escHtml(peer.username)}')">`;
+      svg += `<circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${peerR}" fill="url(#rg-peer)" filter="url(#rg-glow)"/>`;
+      if(hasLabel) svg += `<circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${peerR}" fill="none" stroke="rgba(45,232,176,0.3)" stroke-width="1"><animate attributeName="r" from="${peerR}" to="${peerR+8}" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" from="0.3" to="0" dur="2.4s" repeatCount="indefinite"/></circle>`;
+      svg += `<text x="${peer.x.toFixed(1)}" y="${(peer.y-7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.4)">@</text>`;
+      svg += `<text x="${peer.x.toFixed(1)}" y="${(peer.y+7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="600" fill="#c8dcff">${escHtml(peer.username.slice(0,7))}</text>`;
+      svg += `</g>`;
     });
+
+    // 流动粒子（每条有向边上一个小点来回流动）
+    peerPositions.forEach((peer, i) => {
+      const labelAB = labelMap[profileId]?.[peer.id];
+      const labelBA = labelMap[peer.id]?.[profileId];
+      const delay = (i * 0.4).toFixed(1);
+      if(labelAB || labelBA) {
+        const pathId = `rg-path-${i}`;
+        svg += `<path id="${pathId}" d="M${cx},${cy} L${peer.x.toFixed(1)},${peer.y.toFixed(1)}" fill="none" stroke="none"/>`;
+        svg += `<circle r="2.5" fill="rgba(45,232,176,0.9)" opacity="0" style="animation-delay:${delay}s"><animateMotion dur="1.8s" repeatCount="indefinite" begin="${delay}s"><mpath href="#${pathId}"/></animateMotion><animate attributeName="opacity" values="0;1;1;0" dur="1.8s" repeatCount="indefinite" begin="${delay}s"/></circle>`;
+      }
+    });
+
     svg += `</svg>`;
     wrap.innerHTML = svg;
     relSec.appendChild(wrap);
@@ -9004,11 +9088,7 @@ function closeDMPanel(){
 
 // 对话列表
 async function showDMConvList(){
-  document.getElementById('dm-conv-list').style.display = '';
-  document.getElementById('dm-chat').style.display = 'none';
-  document.getElementById('dm-panel-title').textContent = '私信';
   _dmChatWith = null;
-
   const convList = document.getElementById('dm-conv-list');
   convList.innerHTML = '<div class="dm-loading">加载中…</div>';
 
@@ -9060,7 +9140,12 @@ async function showDMConvList(){
         <div class="dm-conv-time">${fmtDate(msg.created_at)}</div>
         ${unreadCnt?`<div class="dm-unread-dot"></div>`:''}
       </div>`;
-    item.onclick=()=>openDMChat(peer);
+    item.dataset.uid = peer.id;
+    item.onclick=()=>{
+      document.querySelectorAll('.dm-conv-item').forEach(i=>i.classList.remove('active'));
+      item.classList.add('active');
+      openDMChat(peer);
+    };
     convList.appendChild(item);
   });
 }
@@ -9085,10 +9170,10 @@ async function openDMWith(userId, username){
 // 打开具体聊天
 async function openDMChat(peer){
   _dmChatWith = peer;
-  document.getElementById('dm-conv-list').style.display = 'none';
-  document.getElementById('dm-chat').style.display = 'flex';
-  document.getElementById('dm-chat').style.flexDirection = 'column';
-  document.getElementById('dm-panel-title').textContent = '私信';
+  document.getElementById('dm-chat-placeholder').style.display = 'none';
+  const chatEl = document.getElementById('dm-chat');
+  chatEl.style.display = 'flex';
+  chatEl.style.flexDirection = 'column';
   document.getElementById('dm-chat-name').textContent = '@'+peer.username;
 
   const msgsEl = document.getElementById('dm-messages');
@@ -9128,11 +9213,14 @@ function appendDMMessage(msg, isSent){
   const empty=msgsEl.querySelector('.dm-empty');
   if(empty) empty.remove();
 
-  const wrap=document.createElement('div');
+  const row=document.createElement('div');
+  row.className='dm-msg-row '+(isSent?'sent':'recv');
   const time=new Date(msg.created_at).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
-  wrap.className='dm-msg '+(isSent?'sent':'recv');
-  wrap.innerHTML=`<div>${escHtml(msg.content)}</div><div class="dm-msg-time">${time}</div>`;
-  msgsEl.appendChild(wrap);
+  const bubble=document.createElement('div');
+  bubble.className='dm-msg '+(isSent?'sent':'recv');
+  bubble.innerHTML=`<span>${escHtml(msg.content)}</span><span class="dm-msg-time">${time}</span>`;
+  row.appendChild(bubble);
+  msgsEl.appendChild(row);
   msgsEl.scrollTop=msgsEl.scrollHeight;
 }
 
@@ -10903,18 +10991,24 @@ async function showContestChart(contestId, preloaded, title){
     <span id="dm-panel-title">私信</span>
     <button class="dm-close-btn" onclick="closeDMPanel()">✕</button>
   </div>
-  <!-- 对话列表 -->
-  <div id="dm-conv-list"></div>
-  <!-- 聊天界面 -->
-  <div id="dm-chat" style="display:none">
-    <div class="dm-chat-header">
-      <button class="dm-back-btn" onclick="showDMConvList()">← 返回</button>
-      <span id="dm-chat-name"></span>
+  <div id="dm-body">
+    <!-- 左侧会话列表 -->
+    <div id="dm-sidebar">
+      <div id="dm-conv-list"><div class="dm-empty" style="padding:24px 12px;font-size:12px">加载中…</div></div>
     </div>
-    <div id="dm-messages"></div>
-    <div class="dm-input-wrap">
-      <textarea id="dm-input" placeholder="输入消息…" rows="1" maxlength="2000" onkeydown="dmInputKey(event)" oninput="dmAutoResize(this)"></textarea>
-      <button class="dm-send-btn" onclick="sendDM()">发送</button>
+    <!-- 右侧聊天区 -->
+    <div id="dm-chat-pane">
+      <div id="dm-chat-placeholder" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:var(--mono);font-size:12px">// 选择一个会话</div>
+      <div id="dm-chat" style="display:none;flex-direction:column;flex:1;min-height:0;">
+        <div class="dm-chat-header">
+          <span id="dm-chat-name"></span>
+        </div>
+        <div id="dm-messages"></div>
+        <div class="dm-input-wrap">
+          <textarea id="dm-input" placeholder="输入消息…" rows="1" maxlength="2000" onkeydown="dmInputKey(event)" oninput="dmAutoResize(this)"></textarea>
+          <button class="dm-send-btn" onclick="sendDM()">发送</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
