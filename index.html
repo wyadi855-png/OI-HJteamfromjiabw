@@ -1744,6 +1744,72 @@ footer span{color:var(--accent2);}
   text-align:center;font-family:var(--mono);font-size:11px;
   color:var(--text3);padding:4px 0;
 }
+/* ── 消息引用/回复 ── */
+.gc-quote{
+  display:flex;flex-direction:column;gap:1px;
+  border-left:3px solid var(--accent);
+  background:rgba(108,142,245,0.07);
+  border-radius:0 6px 6px 0;
+  padding:5px 10px;margin-bottom:5px;
+  cursor:pointer;transition:background 0.15s;
+  max-width:100%;
+}
+.gc-quote:hover{background:rgba(108,142,245,0.13);}
+.gc-quote-author{font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:700;}
+.gc-quote-content{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* 回复输入条 */
+.gc-reply-bar{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(108,142,245,0.08);border-top:1px solid rgba(108,142,245,0.2);
+  padding:6px 12px;font-size:12px;
+}
+.gc-reply-bar-who{color:var(--text3);font-family:var(--mono);white-space:nowrap;}
+.gc-reply-bar-who b{color:var(--accent2);}
+.gc-reply-bar-preview{flex:1;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gc-reply-bar-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 4px;margin-left:auto;flex-shrink:0;}
+.gc-reply-bar-close:hover{color:var(--text);}
+/* 回复按钮 */
+.gc-reply-btn{
+  position:absolute;right:86px;top:50%;transform:translateY(-50%);
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  border-radius:6px;padding:3px 6px;font-size:12px;
+  cursor:pointer;opacity:0;transition:opacity 0.15s;line-height:1;color:var(--text2);
+}
+.gc-reply-btn:hover{background:rgba(108,142,245,0.2);}
+.gc-msg-row:hover .gc-reply-btn{opacity:1;}
+/* 消息高亮闪烁 */
+@keyframes gcMsgFlash{0%,100%{background:transparent;}40%{background:rgba(108,142,245,0.18);}}
+.gc-msg-highlight{animation:gcMsgFlash 1.2s ease;}
+/* ── 代码块 ── */
+.gc-code-block{
+  margin:6px 0;border-radius:8px;overflow:hidden;
+  border:1px solid rgba(108,142,245,0.15);
+  background:#1a1d2e;font-size:12px;
+}
+.gc-code-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:5px 12px;background:rgba(0,0,0,0.3);
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+}
+.gc-code-copy{
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
+  border-radius:4px;padding:2px 8px;font-size:10px;font-family:var(--mono);
+  color:var(--text2);cursor:pointer;transition:background 0.15s;
+}
+.gc-code-copy:hover{background:rgba(108,142,245,0.25);color:var(--accent);}
+.gc-code-block pre{margin:0;padding:12px;overflow-x:auto;}
+.gc-code-block code{font-size:12px;line-height:1.6;font-family:'JetBrains Mono',monospace;}
+.gc-inline-code{
+  background:rgba(108,142,245,0.12);border:1px solid rgba(108,142,245,0.2);
+  border-radius:3px;padding:1px 5px;font-family:var(--mono);font-size:0.9em;color:var(--accent2);
+}
+/* ── 图片占位 ── */
+.gc-img-placeholder{
+  background:rgba(255,255,255,0.05);border-radius:8px;
+  display:inline-block;overflow:hidden;margin-top:4px;
+  min-width:60px;min-height:40px;
+}
+.gc-img-placeholder img{display:block;max-width:100%;}
 /* 新消息提示按钮 */
 #gc-new-msg-btn{
   position:absolute;bottom:72px;left:50%;transform:translateX(-50%);
@@ -11689,6 +11755,11 @@ let _gcMentionQuery = '';
 let _gcAllMembers = []; // 全体成员缓存
 let _gcUnread = false;
 let _gcReactions = {}; // msgId -> {emoji: [{user_id,username}]}
+let _gcReplyTo = null;  // {id, username, content} 当前引用的消息
+let _gcHistoryDone = false; // 是否已加载到最早消息
+let _gcHistoryLoading = false; // 防重复加载
+let _gcOldestMsgId = null; // 分页游标
+let _gcReconnectDelay = 3000; // 指数退避起始值
 
 // ── 频道权限判断 ──────────────────────────────────────
 function gcCanAccess(ch) {
@@ -11763,12 +11834,14 @@ function gcConnect() {
     _gcWs = new WebSocket(wsUrl + '?token=' + encodeURIComponent(localStorage.getItem('hjoi_token') || ''));
   } catch(e) {
     console.warn('[GC] WS连接失败:', e);
-    _gcReconnectTimer = setTimeout(gcConnect, 3000);
+    _gcReconnectTimer = setTimeout(gcConnect, _gcReconnectDelay);
+    _gcReconnectDelay = Math.min(_gcReconnectDelay * 2, 60000);
     return;
   }
 
   _gcWs.onopen = () => {
     console.log('[GC] WebSocket已连接');
+    _gcReconnectDelay = 3000; // 连接成功重置退避
     gcWsSend({ type: 'join', channel: _gcCurrentChannel });
     // 25秒心跳
     _gcHeartbeatTimer = setInterval(async () => {
@@ -11792,9 +11865,10 @@ function gcConnect() {
   };
 
   _gcWs.onclose = () => {
-    console.log('[GC] WebSocket断开，3秒后重连');
+    console.log('[GC] WebSocket断开，', _gcReconnectDelay/1000, '秒后重连');
     clearInterval(_gcHeartbeatTimer);
-    _gcReconnectTimer = setTimeout(gcConnect, 3000);
+    _gcReconnectTimer = setTimeout(gcConnect, _gcReconnectDelay);
+    _gcReconnectDelay = Math.min(_gcReconnectDelay * 2, 60000); // 指数退避，最大60s
   };
 
   _gcWs.onerror = (e) => {
@@ -11890,6 +11964,12 @@ function gcHandleWsMessage(msg) {
 
 // ── 拉取历史消息 ──────────────────────────────────────
 async function gcLoadHistory(channelId) {
+  // 重置分页状态
+  _gcHistoryDone = false;
+  _gcHistoryLoading = false;
+  _gcOldestMsgId = null;
+  _gcReactions = {};
+
   const container = document.getElementById('gc-messages');
   // 骨架屏
   container.innerHTML = [1,2,3].map(i => `
@@ -11907,13 +11987,54 @@ async function gcLoadHistory(channelId) {
     container.innerHTML = '';
     if (msgs.length === 0) {
       container.innerHTML = '<div class="gc-system-msg" style="padding:24px 0">这里还没有消息，来打个招呼吧 👋</div>';
+      _gcHistoryDone = true;
       return;
     }
     msgs.forEach((m, i) => gcAppendMessage(m, false, msgs[i-1]));
+    _gcOldestMsgId = msgs[0].id;
+    if (msgs.length < 50) _gcHistoryDone = true;
     gcScrollToBottom();
   } catch (e) {
     container.innerHTML = '<div class="gc-system-msg" style="color:var(--red);padding:24px 0">加载失败，请检查网络连接</div>';
   }
+}
+
+// 分页加载更早的消息（滚到顶部触发）
+async function gcLoadMoreHistory() {
+  if (_gcHistoryDone || _gcHistoryLoading || !_gcOldestMsgId) return;
+  _gcHistoryLoading = true;
+  const container = document.getElementById('gc-messages');
+  // 顶部加载指示器
+  const loader = document.createElement('div');
+  loader.id = 'gc-load-more-indicator';
+  loader.className = 'gc-system-msg';
+  loader.style.padding = '8px 0';
+  loader.innerHTML = '<span style="opacity:0.5">加载更多…</span>';
+  container.prepend(loader);
+  const prevScrollH = container.scrollHeight;
+  try {
+    const data = await apiRequest(`/chat/history/${_gcCurrentChannel}?limit=50&before=${_gcOldestMsgId}`);
+    const msgs = Array.isArray(data) ? data : (data.messages || []);
+    loader.remove();
+    if (msgs.length === 0) { _gcHistoryDone = true; _gcHistoryLoading = false; return; }
+    // 倒序插入（从旧到新）到顶部
+    const frag = document.createDocumentFragment();
+    msgs.forEach((m, i) => {
+      // 临时渲染到 frag，保持滚动位置
+      const dummy = document.createElement('div');
+      gcAppendMessageTo(dummy, m, false, msgs[i-1]);
+      while (dummy.firstChild) frag.appendChild(dummy.firstChild);
+    });
+    container.prepend(frag);
+    // 保持滚动位置
+    container.scrollTop = container.scrollHeight - prevScrollH;
+    _gcOldestMsgId = msgs[0].id;
+    if (msgs.length < 50) _gcHistoryDone = true;
+  } catch (e) {
+    loader.remove();
+    showToast('加载历史失败', 'error');
+  }
+  _gcHistoryLoading = false;
 }
 
 // ── 渲染单条消息 ──────────────────────────────────────
@@ -11950,18 +12071,29 @@ function gcAppendMessage(msg, animate, prevMsg) {
   const currTime = msg.created_at ? new Date(msg.created_at).getTime() : 0;
   const isGrouped = prevUser === username && (currTime - prevTime) < 5 * 60 * 1000 && !prevMsg?.retracted;
 
+  // 引用内容
+  const quoteHtml = (!isRetracted && msg.reply_to) ? gcBuildQuoteHtml(msg.reply_to) : '';
+
   let contentHtml = '';
   if (isRetracted) {
     contentHtml = '<span class="gc-msg-content retracted">[ 此消息已撤回 ]</span>';
   } else if (msg.image_url) {
-    contentHtml = `<img class="gc-msg-img" src="${escHtml(msg.image_url)}" alt="图片" onclick="openGCLightbox('${escHtml(msg.image_url)}')" loading="lazy">`;
+    // 图片懒加载：用已知宽高占位防止跳动
+    const w = msg.image_width || 240, h = msg.image_height || 160;
+    const ratio = Math.min(320/w, 240/h, 1);
+    const dw = Math.round(w*ratio), dh = Math.round(h*ratio);
+    contentHtml = `<div class="gc-img-placeholder" style="width:${dw}px;height:${dh}px"><img class="gc-msg-img" src="${escHtml(msg.image_url)}" alt="图片" width="${dw}" height="${dh}" onclick="openGCLightbox('${escHtml(msg.image_url)}')" loading="lazy" onload="this.parentElement.style.height='auto'"></div>`;
     if (msg.content) contentHtml = `<div class="gc-msg-content">${gcFormatContent(msg.content)}</div>` + contentHtml;
   } else {
     contentHtml = `<div class="gc-msg-content">${gcFormatContent(msg.content || '')}</div>`;
   }
+  contentHtml = quoteHtml + contentHtml;
 
   const retractBtn = canRetract && !isRetracted
     ? `<button class="gc-retract-btn" onclick="gcRetractMsg('${escHtml(msg.id)}')">撤回</button>`
+    : '';
+  const replyBtn = !isRetracted
+    ? `<button class="gc-reply-btn" onclick="gcSetReply({id:'${escHtml(String(msg.id))}',username:'${escHtml(username)}',content:${JSON.stringify(msg.content||'')}})" title="回复">↩</button>`
     : '';
 
   const row = document.createElement('div');
@@ -11972,7 +12104,7 @@ function gcAppendMessage(msg, animate, prevMsg) {
     const avPlaceholder = `<div class="gc-msg-av gc-msg-av-ph"></div>`;
     const reactionsDiv2 = `<div class="gc-reactions" id="gc-reactions-${msg.id}"></div>`;
     const emojiBtn2 = !isRetracted ? `<button class="gc-react-btn" onclick="gcShowReactionPicker('${escHtml(msg.id)}',this)" title="表情反应">😊</button>` : '';
-    row.innerHTML = `${avPlaceholder}<div class="gc-msg-body"><span class="gc-msg-time-hover">${timeStr}</span>${contentHtml}${reactionsDiv2}</div>${emojiBtn2}${retractBtn}`;
+    row.innerHTML = `${avPlaceholder}<div class="gc-msg-body"><span class="gc-msg-time-hover">${timeStr}</span>${contentHtml}${reactionsDiv2}</div>${replyBtn}${emojiBtn2}${retractBtn}`;
   } else {
     const avHtml = avatarUrl
       ? `<div class="gc-msg-av" onclick="showProfile('${escHtml(username)}')"><img src="${escHtml(avatarUrl)}" alt=""></div>`
@@ -11980,15 +12112,80 @@ function gcAppendMessage(msg, animate, prevMsg) {
     const emojiBtn = !isRetracted ? `<button class="gc-react-btn" onclick="gcShowReactionPicker('${escHtml(msg.id)}',this)" title="表情反应">😊</button>` : '';
     // 反应区域
     const reactionsDiv = `<div class="gc-reactions" id="gc-reactions-${msg.id}"></div>`;
-    row.innerHTML = `${avHtml}<div class="gc-msg-body"><div class="gc-msg-meta"><span class="gc-msg-author" onclick="showProfile('${escHtml(username)}')">${escHtml(username)}</span><span class="gc-msg-time">${timeStr}</span></div>${contentHtml}${reactionsDiv}</div>${emojiBtn}${retractBtn}`;
+    row.innerHTML = `${avHtml}<div class="gc-msg-body"><div class="gc-msg-meta"><span class="gc-msg-author" onclick="showProfile('${escHtml(username)}')">${escHtml(username)}</span><span class="gc-msg-time">${timeStr}</span></div>${contentHtml}${reactionsDiv}</div>${replyBtn}${emojiBtn}${retractBtn}`;
   }
   container.appendChild(row);
 }
 
+// 用于分页：渲染到指定容器
+function gcAppendMessageTo(target, msg, animate, prevMsg) {
+  const realContainer = document.getElementById('gc-messages');
+  const orig = realContainer.appendChild;
+  realContainer.appendChild = (el) => target.appendChild(el);
+  gcAppendMessage(msg, animate, prevMsg);
+  realContainer.appendChild = orig;
+}
+
 // @提及高亮 + 安全转义
 function gcFormatContent(text) {
-  return escHtml(text).replace(/@([\w\u4e00-\u9fa5_-]+)/g,
-    '<span class="gc-mention" onclick="showProfile(\'$1\')">@$1</span>');
+  // 代码块（```lang\n...\n```）
+  const codeBlockRe = /```([\w]*)\n?([\s\S]*?)```/g;
+  let result = '';
+  let lastIdx = 0;
+  let m;
+  while ((m = codeBlockRe.exec(text)) !== null) {
+    // 处理代码块之前的普通文本
+    result += gcFormatInline(text.slice(lastIdx, m.index));
+    const lang = m[1] || '';
+    const code = m[2];
+    const langAttr = lang ? ` class="language-${escHtml(lang)}"` : '';
+    result += `<div class="gc-code-block"><div class="gc-code-header"><span>${escHtml(lang||'code')}</span><button class="gc-code-copy" onclick="gcCopyCode(this)">复制</button></div><pre><code${langAttr}>${escHtml(code)}</code></pre></div>`;
+    lastIdx = m.index + m[0].length;
+  }
+  result += gcFormatInline(text.slice(lastIdx));
+  // 懒加载 hljs
+  if (result.includes('gc-code-block')) {
+    setTimeout(() => {
+      document.querySelectorAll('.gc-code-block code:not(.hljs)').forEach(el => {
+        if (typeof hljs !== 'undefined') hljs.highlightElement(el);
+        else {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+          s.onload = () => document.querySelectorAll('.gc-code-block code:not(.hljs)').forEach(e => hljs.highlightElement(e));
+          document.head.appendChild(s);
+        }
+      });
+    }, 0);
+  }
+  return result;
+}
+
+function gcFormatInline(text) {
+  return escHtml(text)
+    .replace(/`([^`]+)`/g, '<code class="gc-inline-code">$1</code>')
+    .replace(/@([\w\u4e00-\u9fa5_-]+)/g, '<span class="gc-mention" onclick="showProfile(\'$1\')">@$1</span>');
+}
+
+function gcCopyCode(btn) {
+  const code = btn.closest('.gc-code-block').querySelector('code').textContent;
+  navigator.clipboard.writeText(code).then(() => { btn.textContent = '✓'; setTimeout(() => btn.textContent = '复制', 1500); });
+}
+
+// 引用消息 HTML
+function gcBuildQuoteHtml(replyTo) {
+  if (!replyTo) return '';
+  const preview = replyTo.content ? replyTo.content.slice(0, 80) + (replyTo.content.length > 80 ? '…' : '') : '📷 图片';
+  return `<div class="gc-quote" onclick="gcScrollToMsg('${escHtml(String(replyTo.id))}')">`
+    + `<span class="gc-quote-author">${escHtml(replyTo.username)}</span>`
+    + `<span class="gc-quote-content">${escHtml(preview)}</span></div>`;
+}
+
+function gcScrollToMsg(msgId) {
+  const el = document.getElementById('gc-msg-' + msgId);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.add('gc-msg-highlight');
+  setTimeout(() => el.classList.remove('gc-msg-highlight'), 1500);
 }
 
 function gcIsAtBottom() {
@@ -11999,6 +12196,16 @@ function gcScrollToBottom() {
   const el = document.getElementById('gc-messages');
   el.scrollTop = el.scrollHeight;
   document.getElementById('gc-new-msg-btn').classList.remove('show');
+}
+
+// 滚动监听：顶部触发分页加载
+function gcInitScrollListener() {
+  const el = document.getElementById('gc-messages');
+  if (el._gcScrollListenerAdded) return;
+  el._gcScrollListenerAdded = true;
+  el.addEventListener('scroll', () => {
+    if (el.scrollTop < 60) gcLoadMoreHistory();
+  }, { passive: true });
 }
 
 function gcAppendSystemMsg(text) {
@@ -12053,13 +12260,37 @@ async function gcSendMessage() {
   _gcPendingImgs = [];
   document.getElementById('gc-img-preview').innerHTML = '';
 
-  // 发文字
+  // 发文字（携带引用）
   if (text) {
-    gcWsSend({ type: 'message', channel: _gcCurrentChannel, content: text });
+    const payload = { type: 'message', channel: _gcCurrentChannel, content: text };
+    if (_gcReplyTo) { payload.reply_to_id = String(_gcReplyTo.id); }
+    gcWsSend(payload);
+    gcClearReply();
   }
 
   input.value = '';
   input.style.height = 'auto';
+}
+
+function gcSetReply(msg) {
+  _gcReplyTo = msg;
+  let bar = document.getElementById('gc-reply-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'gc-reply-bar';
+    bar.className = 'gc-reply-bar';
+    const wrap = document.getElementById('gc-input-wrap');
+    wrap.prepend(bar);
+  }
+  const preview = msg.content ? msg.content.slice(0, 60) + (msg.content.length > 60 ? '…' : '') : '📷 图片';
+  bar.innerHTML = `<span class="gc-reply-bar-who">回复 <b>${escHtml(msg.username)}</b>：</span><span class="gc-reply-bar-preview">${escHtml(preview)}</span><button class="gc-reply-bar-close" onclick="gcClearReply()">✕</button>`;
+  document.getElementById('gc-input').focus();
+}
+
+function gcClearReply() {
+  _gcReplyTo = null;
+  const bar = document.getElementById('gc-reply-bar');
+  if (bar) bar.remove();
 }
 
 // ── 撤回消息 ──────────────────────────────────────────
@@ -12297,6 +12528,7 @@ function closeGCLightbox() {
 function initGC() {
   const btn = document.getElementById('gc-nav-btn');
   if (btn) btn.style.display = 'inline-flex';
+  gcInitScrollListener();
   document.addEventListener('click', e => {
     if (window.innerWidth <= 700 && _gcSidebarOpen &&
         !e.target.closest('#gc-sidebar') && !e.target.closest('#gc-channel-toggle-btn')) {
