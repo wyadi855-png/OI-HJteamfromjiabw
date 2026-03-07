@@ -3273,7 +3273,7 @@ button:focus-visible, a:focus-visible {
 }
 
 /* ── 8. Fluid typography with clamp ── */
-.hero h1         { font-size: clamp(2rem, 5.5vw, 4.8rem) !important; }
+.hero h1:not(#hero-main-title) { font-size: clamp(2rem, 5.5vw, 4.8rem) !important; }
 .hero-desc       { font-size: clamp(13px, 1.4vw, 15px) !important; }
 .page-header h1  { font-size: clamp(1.4rem, 3vw, 2.2rem) !important; }
 .bento-label     { font-size: clamp(11px, 1vw, 12px) !important; }
@@ -4200,25 +4200,27 @@ section:not(.active) {
       <li><a onclick="show('leaderboard')" id="nav-leaderboard">排行榜</a></li>
       <li class="nav-more-wrap">
         <a onclick="toggleMoreMenu(event)" class="nav-more-trigger">更多 ▾</a>
-        <div class="nav-more-menu" id="nav-more-menu">
-          <div class="nav-more-group-label">工具</div>
-          <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
-          <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
-          <a onclick="closeMoreMenu();show('judge')" id="nav-judge">⚡ 在线评测</a>
-          <a onclick="closeMoreMenu();show('quiz')" id="nav-quiz">🧠 判断题练习</a>
-          <div class="nav-more-divider"></div>
-          <div class="nav-more-group-label">数据</div>
-          <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
-          <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">🏆 排行榜</a>
-          <div class="nav-more-divider"></div>
-          <a onclick="closeMoreMenu();show('daily')" id="nav-daily">📅 每日一题</a>
-          <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
-          <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
-        </div>
       </li>
     </ul>
   </div>
 </nav>
+
+<!-- 更多菜单（移出nav避免backdrop-filter破坏fixed定位） -->
+<div class="nav-more-menu" id="nav-more-menu">
+  <div class="nav-more-group-label">工具</div>
+  <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
+  <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
+  <a onclick="closeMoreMenu();show('judge')" id="nav-judge">⚡ 在线评测</a>
+  <a onclick="closeMoreMenu();show('quiz')" id="nav-quiz">🧠 判断题练习</a>
+  <div class="nav-more-divider"></div>
+  <div class="nav-more-group-label">数据</div>
+  <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
+  <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">🏆 排行榜</a>
+  <div class="nav-more-divider"></div>
+  <a onclick="closeMoreMenu();show('daily')" id="nav-daily">📅 每日一题</a>
+  <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
+  <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
+</div>
 
 <!-- 移动端抽屉导航 -->
 <div class="nav-drawer" id="nav-drawer">
