@@ -163,6 +163,201 @@ nav.scrolled .nav-bottom .nav-links{padding-bottom:7px;}
 .nav-hjoi-svg{width:88px;height:32px;display:block;overflow:visible;transition:filter 0.3s;}
 .nav-logo:hover .nav-hjoi-svg{filter:drop-shadow(0 0 6px rgba(45,232,176,0.6));}
 .nav-actions{display:flex;align-items:center;gap:10px;}
+
+/* ══════════════════════════
+   STATUS ISLAND — 状态岛
+   ══════════════════════════ */
+.nav-status-island{
+  display:inline-flex;align-items:center;
+  gap:0;
+  background:
+    linear-gradient(160deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.02) 100%),
+    rgba(8,11,22,0.75);
+  border:1px solid rgba(108,142,245,0.2);
+  border-radius:100px;
+  padding:4px 5px;
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 2px 12px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(0,0,0,0.2);
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s,
+    transform 0.3s var(--spring),
+    background 0.25s;
+  position:relative;
+}
+.nav-status-island:hover{
+  border-color:rgba(108,142,245,0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 4px 20px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(0,0,0,0.2),
+    0 0 16px rgba(108,142,245,0.1);
+  transform:translateY(-1px);
+}
+nav.scrolled .nav-status-island{
+  padding:3px 4px;
+  background:rgba(6,8,16,0.85);
+}
+
+/* 岛内动作按钮（图标） */
+.island-btn{
+  position:relative;
+  width:30px;height:30px;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:none;cursor:pointer;
+  border-radius:100px;
+  color:rgba(255,255,255,0.45);
+  transition:color 0.18s,background 0.18s,transform 0.22s var(--spring);
+  flex-shrink:0;
+}
+.island-btn:hover{
+  color:rgba(255,255,255,0.9);
+  background:rgba(255,255,255,0.08);
+  transform:scale(1.12);
+}
+.island-btn:active{transform:scale(0.94);}
+.island-btn svg{display:block;flex-shrink:0;}
+
+/* 每个按钮的主题色 hover */
+#island-gc:hover  { color:#a5b8ff; background:rgba(108,142,245,0.14); }
+#island-dm:hover  { color:#2de8b0; background:rgba(45,232,176,0.12);  }
+#island-notif:hover{ color:#c772ea; background:rgba(200,114,234,0.12); }
+
+/* 未读角标 */
+.island-badge{
+  position:absolute;
+  top:2px;right:2px;
+  min-width:14px;height:14px;
+  border-radius:100px;
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  display:none;align-items:center;justify-content:center;
+  padding:0 3px;line-height:14px;
+  border:1.5px solid rgba(6,9,20,0.95);
+  pointer-events:none;
+}
+.island-badge.show{
+  display:flex;
+  animation:badgePop 0.3s var(--spring) both;
+}
+#island-gc   .island-badge{ background:var(--accent);   color:#fff; box-shadow:0 0 6px rgba(108,142,245,0.7); }
+#island-dm   .island-badge{ background:#ff5370;          color:#fff; box-shadow:0 0 6px rgba(255,83,112,0.7);  }
+#island-notif .island-badge{ background:#c772ea;         color:#fff; box-shadow:0 0 6px rgba(200,114,234,0.7); }
+
+/* 岛内分割线 */
+.island-sep{
+  width:1px;height:18px;
+  background:linear-gradient(180deg,transparent,rgba(108,142,245,0.25),transparent);
+  margin:0 3px;flex-shrink:0;
+}
+
+/* 岛内头像区（已登录时） */
+.island-user{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:2px 8px 2px 4px;
+  border-radius:100px;cursor:pointer;
+  transition:background 0.18s;
+  position:relative;
+}
+.island-user:hover{ background:rgba(255,255,255,0.07); }
+.island-avatar{
+  width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:#060610;
+  overflow:hidden;flex-shrink:0;
+  box-shadow:0 0 0 1.5px rgba(108,142,245,0.35);
+  transition:box-shadow 0.2s;
+}
+.island-user:hover .island-avatar{ box-shadow:0 0 0 2px var(--accent2); }
+.island-avatar img{ width:100%;height:100%;object-fit:cover;border-radius:50%; }
+.island-username{
+  font-family:var(--mono);font-size:11px;
+  color:rgba(255,255,255,0.65);
+  max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  letter-spacing:0.02em;
+  transition:color 0.18s, max-width 0.35s, opacity 0.35s;
+}
+.island-user:hover .island-username{ color:rgba(255,255,255,0.92); }
+/* 滚动时隐藏用户名 */
+nav.scrolled .island-username{
+  max-width:0;
+  opacity:0;
+  overflow:hidden;
+  padding:0;
+  margin:0;
+}
+
+/* 岛内 dropdown（替换原 nav-avatar-dropdown） */
+.island-dropdown{
+  position:absolute;top:calc(100% + 10px);right:0;
+  min-width:176px;
+  background:
+    linear-gradient(160deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.01) 100%),
+    rgba(8,11,22,0.97);
+  backdrop-filter:blur(32px) saturate(180%);
+  -webkit-backdrop-filter:blur(32px) saturate(180%);
+  border:1px solid rgba(108,142,245,0.2);
+  border-radius:14px;
+  padding:7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 0 0 1px rgba(0,0,0,0.25),
+    0 16px 48px rgba(0,0,0,0.65);
+  opacity:0;pointer-events:none;
+  transform:translateY(-8px) scale(0.96);
+  transition:opacity 0.2s var(--smooth),transform 0.25s var(--spring);
+  z-index:500;
+}
+.island-dropdown.open{
+  opacity:1;pointer-events:all;
+  transform:translateY(0) scale(1);
+}
+.island-dd-uname{
+  font-family:var(--mono);font-size:11px;
+  color:var(--text3);padding:5px 10px 4px;
+  letter-spacing:0.06em;
+}
+.island-dd-sep{
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(108,142,245,0.12),transparent);
+  margin:4px 2px;
+}
+.island-dd-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:9px;
+  cursor:pointer;font-family:var(--mono);font-size:12px;
+  color:rgba(200,210,240,0.75);
+  transition:background 0.13s,color 0.13s,transform 0.18s var(--spring);
+  white-space:nowrap;
+}
+.island-dd-item:hover{
+  background:rgba(108,142,245,0.13);
+  color:#fff;
+  transform:translateX(3px);
+}
+.island-dd-item.danger:hover{
+  background:rgba(255,83,112,0.12);
+  color:#ff5370;
+}
+.island-dd-item svg{ flex-shrink:0;opacity:0.7; }
+
+/* 未登录时的登录按钮直接在岛内 */
+.island-login-btn{
+  font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:5px 13px;border-radius:100px;border:none;
+  background:linear-gradient(135deg,rgba(108,142,245,0.85),rgba(45,232,176,0.8));
+  color:#fff;cursor:pointer;white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.15),0 2px 8px rgba(108,142,245,0.25);
+  transition:all 0.2s var(--spring);
+}
+.island-login-btn:hover{
+  transform:scale(1.05);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.2),0 4px 16px rgba(108,142,245,0.35);
+  filter:brightness(1.1);
+}
 .nav-links{display:flex;flex-wrap:wrap;gap:2px;padding:0 16px 10px;border-top:1px solid rgba(255,255,255,0.05);list-style:none;margin:0;position:relative;}
 .nav-links a{
   font-size:13px;color:rgba(255,255,255,0.5);text-decoration:none;
@@ -4818,6 +5013,14 @@ nav.scrolled .nav-bottom { border-top-color: rgba(255,255,255,0.03); }
 @media (max-width: 768px) {
   nav.scrolled .nav-top { padding: 7px 14px !important; }
 }
+
+/* ── 移动端状态岛精简 ── */
+@media (max-width: 640px) {
+  .island-username { display: none; }
+  .island-btn { width: 28px; height: 28px; }
+  .nav-status-island { padding: 3px 4px; gap: 0; }
+  .island-sep { margin: 0 2px; }
+}
 </style>
 </head>
 <body>
@@ -4906,23 +5109,31 @@ nav.scrolled .nav-bottom { border-top-color: rgba(255,255,255,0.03); }
         </defs>
       </svg>
     </div>
-    <div style="display:flex;align-items:center;gap:6px">
-      <button class="nav-pill-btn" id="gc-nav-btn" onclick="toggleGCPanel()" style="display:none">
-        <svg viewBox="0 0 14 14" width="13" height="13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 2.5h12a.5.5 0 01.5.5v6a.5.5 0 01-.5.5H4.5L1 12V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/><circle cx="4.5" cy="6" r=".7" fill="currentColor"/><circle cx="7" cy="6" r=".7" fill="currentColor"/><circle cx="9.5" cy="6" r=".7" fill="currentColor"/></svg>
-        <span>群聊</span>
-        <div class="gc-notif-badge" id="gc-badge"></div>
-      </button>
-      <button class="nav-pill-btn" id="dm-nav-btn" onclick="toggleDMPanel()" style="display:none">
-        <svg viewBox="0 0 14 14" width="13" height="13" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x=".5" y="1.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M.5 3.5l6.5 4 6.5-4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
-        <span>私信</span>
-        <div class="notif-badge" id="dm-badge"></div>
-      </button>
-            <button class="nav-pill-btn" id="notif-btn" onclick="toggleNotifPanel()">
-  <svg viewBox="0 0 14 14" width="13" height="13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 1a4 4 0 00-4 4v2.5L1.5 9h11L11 7.5V5a4 4 0 00-4-4zM5.5 9.5a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  <span>通知</span>
-  <div class="notif-badge" id="notif-dot"></div>
-</button>
-      <div id="nav-auth-area"><button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button></div>
+    <div class="nav-actions">
+      <!-- 状态岛 -->
+      <div class="nav-status-island" id="nav-status-island">
+        <!-- 群聊 -->
+        <button class="island-btn" id="island-gc" onclick="toggleGCPanel()" style="display:none" title="群聊">
+          <svg width="15" height="15" viewBox="0 0 14 14" fill="none"><path d="M1 2.5h12a.5.5 0 01.5.5v6a.5.5 0 01-.5.5H4.5L1 12V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.15" stroke-linejoin="round"/><circle cx="4.5" cy="6" r=".75" fill="currentColor"/><circle cx="7" cy="6" r=".75" fill="currentColor"/><circle cx="9.5" cy="6" r=".75" fill="currentColor"/></svg>
+          <div class="island-badge" id="gc-badge"></div>
+        </button>
+        <!-- 私信 -->
+        <button class="island-btn" id="island-dm" onclick="toggleDMPanel()" style="display:none" title="私信">
+          <svg width="15" height="15" viewBox="0 0 14 14" fill="none"><rect x=".5" y="2" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.15"/><path d="M.5 4l6.5 4 6.5-4" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"/></svg>
+          <div class="island-badge" id="dm-badge"></div>
+        </button>
+        <!-- 通知 -->
+        <button class="island-btn" id="island-notif" onclick="toggleNotifPanel()" title="通知">
+          <svg width="15" height="15" viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 00-4 4v2.5L1.5 9h11L11 7.5V5a4 4 0 00-4-4zM5.5 9.5a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="island-badge" id="notif-dot"></div>
+        </button>
+        <!-- 分割线 + 用户区 -->
+        <div class="island-sep" id="island-sep" style="display:none"></div>
+        <div id="nav-auth-area">
+          <!-- 未登录时显示登录按钮，登录后由 renderAuthArea() 替换 -->
+          <button class="island-login-btn" onclick="openModal('auth-modal')">登录</button>
+        </div>
+      </div>
       <!-- 汉堡菜单按钮（仅移动端显示） -->
       <button class="nav-hamburger" id="nav-hamburger" onclick="toggleNavDrawer()" aria-label="菜单">
         <span></span><span></span><span></span>
@@ -6356,46 +6567,78 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 // ── Auth UI ────────────────────────────────────────────────
 
-function toggleNavDropdown(e){
+function toggleIslandDropdown(e){
   e.stopPropagation();
   const dd=document.getElementById('nav-avatar-dropdown');
-  if(dd) dd.classList.toggle('open');
+  if(!dd) return;
+  const isOpen=dd.classList.contains('open');
+  dd.classList.toggle('open');
+  if(!isOpen){
+    setTimeout(()=>document.addEventListener('click',closeIslandDropdownOutside),50);
+  }
 }
-function closeNavDropdown(){
+function closeIslandDropdown(){
   const dd=document.getElementById('nav-avatar-dropdown');
   if(dd) dd.classList.remove('open');
+  document.removeEventListener('click',closeIslandDropdownOutside);
 }
+function closeIslandDropdownOutside(e){
+  const dd=document.getElementById('nav-avatar-dropdown');
+  const btn=document.getElementById('island-user-btn');
+  if(dd&&btn&&!dd.contains(e.target)&&!btn.contains(e.target)){
+    closeIslandDropdown();
+  }
+}
+// 向后兼容旧调用
+function toggleNavDropdown(e){ toggleIslandDropdown(e); }
+function closeNavDropdown(){ closeIslandDropdown(); }
 document.addEventListener('click',function(){closeNavDropdown();});
 function renderAuthArea(){
   const area=document.getElementById('nav-auth-area');
+  const sep=document.getElementById('island-sep');
+  const gcBtn=document.getElementById('island-gc');
+  const dmBtn=document.getElementById('island-dm');
   const coachNav=document.getElementById('nav-admin');
   if(currentUser&&currentProfile){
     const _av=currentProfile.avatar_url;
     const _avatarInner=_av
       ?`<img src="${escHtml(_av)}" alt="">`
-      :`<span style="font-size:13px;font-weight:700;color:#060610">${currentProfile.username.charAt(0).toUpperCase()}</span>`;
+      :`<span style="font-size:10px;font-weight:700;color:#060610">${currentProfile.username.charAt(0).toUpperCase()}</span>`;
     const _avatarBg=_av?'transparent':avatarGradient(currentProfile.username);
-    area.innerHTML=`<div style="position:relative;display:inline-flex;align-items:center">
-      <button class="nav-avatar-btn" id="nav-avatar-btn" onclick="toggleNavDropdown(event)" title="@${escHtml(currentProfile.username)}">
-        <div class="nav-avatar-inner" style="background:${_avatarBg}">${_avatarInner}</div>
-        <div class="nav-avatar-ring"></div>
-      </button>
-      <div class="nav-avatar-dropdown" id="nav-avatar-dropdown">
-        <div class="nav-dd-uname">@${escHtml(currentProfile.username)}${isCoach()?'&nbsp;<span class="coach-badge" style="font-size:10px">教练</span>':''}</div>
-        <div class="nav-dd-sep"></div>
-        <div class="nav-dd-item" onclick="closeNavDropdown();show('profile');showProfile('${escHtml(currentProfile.username)}')">👤 个人主页</div>
-        <div class="nav-dd-item" onclick="closeNavDropdown();openModal('settings-modal');loadSettingsData()">⚙️ 设置</div>
-        <div class="nav-dd-sep"></div>
-        <div class="nav-dd-item danger" onclick="closeNavDropdown();doLogout()">退出登录</div>
+    if(gcBtn) gcBtn.style.display='flex';
+    if(dmBtn) dmBtn.style.display='flex';
+    if(sep)   sep.style.display='block';
+    area.innerHTML=`
+      <div class="island-user" id="island-user-btn" onclick="toggleIslandDropdown(event)">
+        <div class="island-avatar" style="background:${_avatarBg}">${_avatarInner}</div>
+        <span class="island-username">@${escHtml(currentProfile.username)}</span>
       </div>
-    </div>`;
+      <div class="island-dropdown" id="nav-avatar-dropdown">
+        <div class="island-dd-uname">@${escHtml(currentProfile.username)}${isCoach()?'&nbsp;<span style="font-size:9px;color:var(--accent2);letter-spacing:0.08em">COACH</span>':''}</div>
+        <div class="island-dd-sep"></div>
+        <div class="island-dd-item" onclick="closeIslandDropdown();show('profile');showProfile('${escHtml(currentProfile.username)}')">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.1"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+          个人主页
+        </div>
+        <div class="island-dd-item" onclick="closeIslandDropdown();openModal('settings-modal');loadSettingsData()">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.1"/><path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M2.5 2.5l1 1M10.5 10.5l1 1M2.5 11.5l1-1M10.5 3.5l1-1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+          设置
+        </div>
+        <div class="island-dd-sep"></div>
+        <div class="island-dd-item danger" onclick="closeIslandDropdown();doLogout()">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M5 2H2v10h3M9 4l3 3-3 3M5 7h7" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          退出登录
+        </div>
+      </div>`;
     if(isCoach()){coachNav.style.display='';const da=document.getElementById('drawer-admin');if(da)da.style.display='';}
     ['btn-new-note','btn-new-post','btn-new-post-community'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
     if(isCoach())['btn-new-contest','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
-    // 所有登录用户可添加题目
     const btnP=document.getElementById('btn-new-problem');if(btnP)btnP.style.display='inline-flex';
   }else{
-    area.innerHTML=`<button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button>`;
+    if(gcBtn) gcBtn.style.display='none';
+    if(dmBtn) dmBtn.style.display='none';
+    if(sep)   sep.style.display='none';
+    area.innerHTML=`<button class="island-login-btn" onclick="openModal('auth-modal')">登录</button>`;
     coachNav.style.display='none';const da2=document.getElementById('drawer-admin');if(da2)da2.style.display='none';
     ['btn-new-note','btn-new-post','btn-new-contest','btn-new-lecture','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
     const btnP2=document.getElementById('btn-new-problem');if(btnP2)btnP2.style.display='none';
@@ -9494,7 +9737,7 @@ function toggleNotifPanel(){
   if(notifOpen)setTimeout(()=>document.addEventListener('click',closeNotifOutside),50);
 }
 function closeNotifOutside(e){
-  if(!e.target.closest('#notif-panel')&&!e.target.closest('#notif-btn')){
+  if(!e.target.closest('#notif-panel')&&!e.target.closest('#island-notif')){
     notifOpen=false;
     document.getElementById('notif-panel').classList.remove('open');
     document.removeEventListener('click',closeNotifOutside);
@@ -11374,8 +11617,8 @@ let _dmUnreadCount = 0;
 
 // 初始化：登录后调用
 async function initDM(){
-  const btn = document.getElementById('dm-nav-btn');
-  if(btn) btn.style.display = '';
+  const btn = document.getElementById('island-dm');
+  if(btn) btn.style.display = 'flex';
   await refreshDMUnread();
   subscribeDMRealtime();
 }
@@ -11626,7 +11869,7 @@ async function markDMRead(fromId){
 // 点外部关闭
 document.addEventListener('click',e=>{
   const panel=document.getElementById('dm-panel');
-  const btn=document.getElementById('dm-nav-btn');
+  const btn=document.getElementById('island-dm');
   if(_dmOpen&&panel&&!panel.contains(e.target)&&!btn?.contains(e.target)){
     closeDMPanel();
   }
@@ -14240,8 +14483,8 @@ function closeGCLightbox() {
 
 // ── 初始化（登录后调用） ──────────────────────────────
 function initGC() {
-  const btn = document.getElementById('gc-nav-btn');
-  if (btn) btn.style.display = 'inline-flex';
+  const btn = document.getElementById('island-gc');
+  if (btn) btn.style.display = 'flex';
   gcInitScrollListener();
   document.addEventListener('click', e => {
     if (window.innerWidth <= 700 && _gcSidebarOpen &&
