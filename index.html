@@ -749,6 +749,9 @@ section.active.visible{opacity:1;transform:translateY(0);}
   font-family:var(--space);letter-spacing:0.01em;
 }
 .profile-bio{font-size:13px;color:var(--text2);margin-bottom:8px;max-width:400px;line-height:1.6;}
+.profile-luogu-link{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;color:var(--accent2);text-decoration:none;background:rgba(45,232,176,0.08);border:1px solid rgba(45,232,176,0.2);padding:3px 10px;border-radius:100px;margin-top:6px;transition:all 0.2s;}
+.profile-luogu-link:hover{background:rgba(45,232,176,0.15);border-color:rgba(45,232,176,0.4);}
+.profile-luogu-unbound{display:inline-block;font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:6px;}
 
 /* 头像上传控件 */
 .avatar-upload-wrap{display:flex;align-items:center;gap:18px;}
@@ -2093,6 +2096,7 @@ mark.search-hl{
 .rel-graph-wrap {
   position: relative;
   width: 100%;
+  max-width: 380px;
   background: rgba(10,14,26,0.6);
   border: 1px solid rgba(108,142,245,0.1);
   border-radius: 14px;
@@ -6961,6 +6965,12 @@ async function showProfile(username){
   html+='<div class="profile-role-tag">'+(profile.role==='coach'?'🎓 教练':'🧑‍💻 学生')+'</div>';
   if(profile.motto)html+='<div class="profile-motto">「'+escHtml(profile.motto)+'」</div>';
   if(profile.bio)html+='<div class="profile-bio">'+escHtml(profile.bio)+'</div>';
+  // 洛谷 UID 显示
+  if(profile.luogu_uid){
+    html+='<a class="profile-luogu-link" href="https://www.luogu.com.cn/user/'+escHtml(String(profile.luogu_uid))+'" target="_blank">🟢 洛谷 #'+escHtml(String(profile.luogu_uid))+'</a>';
+  } else {
+    html+='<span class="profile-luogu-unbound">暂未绑定洛谷</span>';
+  }
   if(isSelf)html+='<button class="profile-edit-btn" onclick="openModal(&apos;settings-modal&apos;);loadSettingsData()">编辑资料</button>';
   if(!isSelf&&currentUser)html+='<button class="profile-dm-btn" data-uid="'+escHtml(profile.id)+'" data-uname="'+escHtml(username)+'">💬 发私信</button>';
   html+='<div class="profile-stats">';
@@ -7097,17 +7107,17 @@ async function loadProfileSocial(profile, username){
     });
     const wrap = document.createElement('div');
     wrap.className = 'rel-graph-wrap';
-    const W = 520;
+    const W = 360;
     const peers = mutualPeers.slice(0, 12);
-    const radius = Math.min(175, 80 + peers.length * 10);
-    const cx = W / 2, cy = W / 2;  // 中心点居中
+    const radius = Math.min(130, 60 + peers.length * 8);
+    const cx = W / 2, cy = W / 2;
     const angleStep = peers.length === 1 ? 0 : (Math.PI * 1.4) / (peers.length - 1);
     const angleStart = Math.PI / 2 + (peers.length === 1 ? 0 : -(Math.PI * 1.4) / 2);
     const peerPositions = peers.map((p, i) => {
       const angle = peers.length === 1 ? Math.PI / 2 : angleStart + i * angleStep;
       return { ...p, x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius };
     });
-    const svgH = W;  // 正方形画布，内容完整居中
+    const svgH = W;
     const R = 28; // 基础节点半径
     // 节点大小根据互关数动态调整：互关越多越大
     const peerCount = peers.length;
@@ -7187,7 +7197,10 @@ async function loadProfileSocial(profile, username){
       const peerR = R + hasLabel * 4;
       svg += `<g style="cursor:pointer;opacity:0;animation:logoFadeIn 0.3s ease forwards;animation-delay:${delay}s" onclick="showProfile('${escHtml(peer.username)}')">`;
       svg += `<circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${peerR}" fill="url(#rg-peer)" filter="url(#rg-glow)"/>`;
-      if(hasLabel) svg += `<circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${peerR}" fill="none" stroke="rgba(45,232,176,0.3)" stroke-width="1"><animate attributeName="r" from="${peerR}" to="${peerR+8}" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" from="0.3" to="0" dur="2.4s" repeatCount="indefinite"/></circle>`;
+      // 所有节点都有呼吸动画，有标签的更明显
+      const pulseColor = hasLabel ? 'rgba(45,232,176,0.35)' : 'rgba(108,142,245,0.2)';
+      const pulseDur = (2.2 + i * 0.3).toFixed(1);
+      svg += `<circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${peerR}" fill="none" stroke="${pulseColor}" stroke-width="1.5"><animate attributeName="r" from="${peerR}" to="${peerR+9}" dur="${pulseDur}s" repeatCount="indefinite"/><animate attributeName="opacity" from="0.5" to="0" dur="${pulseDur}s" repeatCount="indefinite"/></circle>`;
       svg += `<text x="${peer.x.toFixed(1)}" y="${(peer.y-7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.4)">@</text>`;
       svg += `<text x="${peer.x.toFixed(1)}" y="${(peer.y+7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="600" fill="#c8dcff">${escHtml(peer.username.slice(0,7))}</text>`;
       svg += `</g>`;
