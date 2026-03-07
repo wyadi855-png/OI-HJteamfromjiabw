@@ -4755,6 +4755,23 @@ document.addEventListener('click', function(e) {
 const SUPABASE_URL = 'https://dgsugcvedimcecudstkq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3VnY3ZlZGltY2VjdWRzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDA2MDYsImV4cCI6MjA4ODIxNjYwNn0.0AnkF5MMrtiqwbau9q6pLD6pDrzXRkyPIoNsx4au8xI';
 
+// ── 后端 API 地址 ──────────────────────────────────────────
+const API_BASE = 'https://zestful-determination-production.up.railway.app/api/v1';
+// 本地开发时改为：const API_BASE = 'http://localhost:8001/api/v1';
+
+// 通用 API 请求函数（自动带 token）
+async function apiRequest(path, options = {}) {
+  const token = localStorage.getItem('hjoi_token');
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(API_BASE + path, { ...options, headers });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || '请求失败');
+  }
+  return res.json();
+}
+
 // 创建Supabase客户端，添加重试配置
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
@@ -4842,50 +4859,25 @@ function getLocalToday(){
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 async function loadSession(){
-  // 页面初始化：直接从 getSession 获取，避免与 onAuthStateChange 竞争
-  const{data:{session}}=await sb.auth.getSession();
-  if(!session){
-    // 未登录 → 跳转到登录页
+  // 页面初始化：从后端 token 恢复登录状态
+  const token=localStorage.getItem('hjoi_token');
+  if(!token){
     window.location.href='login.html';
     return;
   }
-  currentUser=session.user;
-  let{data:profile}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
-  // profile 不存在时（trigger 未执行）自动创建
-  if(!profile){
-    const emailPart=currentUser.email?.split('@')[0]||'user';
-    const fallbackUsername=emailPart.replace(/[^a-zA-Z0-9_]/g,'_');
-    await sb.from('profiles').upsert({id:currentUser.id,username:fallbackUsername});
-    const{data:p2}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
-    profile=p2;
+  try{
+    const data=await apiRequest('/auth/session');
+    currentUser={id:data.user_id,email:''};
+    currentProfile={username:data.username,role:data.is_coach?'coach':'student'};
+  }catch(e){
+    localStorage.removeItem('hjoi_token');
+    window.location.href='login.html';
+    return;
   }
-  currentProfile=profile;
   renderAuthArea();
   loadHomeFeed();
   checkNotifDot(); initCheckinState();
-  initRealtime();
-  initDM();
 }
-
-// onAuthStateChange 仅处理登录/登出事件，不与 loadSession 竞争
-let _authInitDone = false;
-sb.auth.onAuthStateChange(async(event, session)=>{
-  // 忽略页面加载时 Supabase 自动触发的第一次 INITIAL_SESSION 事件
-  // 由 loadSession() 统一处理，避免竞争条件
-  if(!_authInitDone){ _authInitDone=true; return; }
-
-  if(session){
-    currentUser=session.user;
-    // 必须等 profile 加载完再渲染，否则右上角仍显示"登录/注册"
-    const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
-    currentProfile=data;
-  } else {
-    currentUser=null;
-    currentProfile=null;
-  }
-  renderAuthArea();
-  if(currentUser){ checkNotifDot(); loadHomeFeed(); initCheckinState(); }
-});
 
 function usernameToEmail(u){return`${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@oiteam.local`;}
 function switchAuthTab(tab){
@@ -4898,17 +4890,19 @@ async function doLogin(){
   const password=document.getElementById('login-password').value;
   document.getElementById('login-error').textContent='';
   if(!username){document.getElementById('login-error').textContent='请填写用户名';return;}
-  const{data:signInData,error}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});
-  if(error){document.getElementById('login-error').textContent='用户名或密码错误';return;}
-  // 登录成功后立即加载 profile，确保右上角立即更新
-  currentUser=signInData.user;
-  const{data:profile}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
-  currentProfile=profile;
-  closeModal('auth-modal');
-  renderAuthArea();
-  showToast('登录成功 ✓','success');
-  loadHomeFeed();
-  checkNotifDot();
+  try{
+    const data=await apiRequest('/auth/login',{method:'POST',body:JSON.stringify({username,password})});
+    localStorage.setItem('hjoi_token',data.access_token);
+    currentUser={id:data.user_id,email:usernameToEmail(username)};
+    currentProfile={username:data.username,role:data.is_coach?'coach':'student'};
+    closeModal('auth-modal');
+    renderAuthArea();
+    showToast('登录成功 ✓','success');
+    loadHomeFeed();
+    checkNotifDot();
+  }catch(e){
+    document.getElementById('login-error').textContent=e.message||'用户名或密码错误';
+  }
 }
 async function doRegister(){
   const username=document.getElementById('reg-username').value.trim();
@@ -4916,15 +4910,23 @@ async function doRegister(){
   document.getElementById('reg-error').textContent='';document.getElementById('reg-success').textContent='';
   if(!username||username.length<2){document.getElementById('reg-error').textContent='用户名至少2个字符';return;}
   if(password.length<6){document.getElementById('reg-error').textContent='密码至少6位';return;}
-  const{data:ex}=await sb.from('profiles').select('id').eq('username',username).maybeSingle();
-  if(ex){document.getElementById('reg-error').textContent='用户名已被占用';return;}
-  const{data,error}=await sb.auth.signUp({email:usernameToEmail(username),password});
-  if(error){document.getElementById('reg-error').textContent=error.message;return;}
-  if(data.user)await sb.from('profiles').insert({id:data.user.id,username});
-  document.getElementById('reg-success').textContent='注册成功，正在登录…';
-  setTimeout(async()=>{const{error:le}=await sb.auth.signInWithPassword({email:usernameToEmail(username),password});if(!le){closeModal('auth-modal');showToast('注册并登录成功 ✓','success');loadHomeFeed();}},800);
+  try{
+    await apiRequest('/auth/register',{method:'POST',body:JSON.stringify({username,password})});
+    document.getElementById('reg-success').textContent='注册成功，正在登录…';
+    setTimeout(async()=>{
+      try{
+        const data=await apiRequest('/auth/login',{method:'POST',body:JSON.stringify({username,password})});
+        localStorage.setItem('hjoi_token',data.access_token);
+        currentUser={id:data.user_id,email:usernameToEmail(username)};
+        currentProfile={username:data.username,role:data.is_coach?'coach':'student'};
+        closeModal('auth-modal');showToast('注册并登录成功 ✓','success');loadHomeFeed();
+      }catch(e){document.getElementById('reg-error').textContent=e.message;}
+    },800);
+  }catch(e){
+    document.getElementById('reg-error').textContent=e.message||'注册失败';
+  }
 }
-async function doLogout(){await sb.auth.signOut();window.location.href='login.html';}
+async function doLogout(){localStorage.removeItem('hjoi_token');currentUser=null;currentProfile=null;renderAuthArea();showToast('已退出登录','success');}
 
 
 // ══════════════════════════════════════════════════════
@@ -5572,12 +5574,13 @@ function openAnnModal(){if(!isCoach())return;openModal('ann-modal');}
 async function submitAnn(){
   const title=document.getElementById('ann-title').value.trim(),content=document.getElementById('ann-content').value.trim();
   if(!title||!content){document.getElementById('ann-error').textContent='请填写标题和内容';return;}
-  const{error}=await sb.from('announcements').insert({title,content,is_pinned:document.getElementById('ann-pinned').checked,created_by:currentUser.id});
-  if(error){document.getElementById('ann-error').textContent=error.message;return;}
-  closeModal('ann-modal');['ann-title','ann-content'].forEach(id=>document.getElementById(id).value='');document.getElementById('ann-pinned').checked=false;
-  showToast('公告发布成功 ✓','success');loadAnnouncements();
+  try{
+    await apiRequest('/announcements',{method:'POST',body:JSON.stringify({title,content,is_pinned:document.getElementById('ann-pinned').checked})});
+    closeModal('ann-modal');['ann-title','ann-content'].forEach(id=>document.getElementById(id).value='');document.getElementById('ann-pinned').checked=false;
+    showToast('公告发布成功 ✓','success');loadAnnouncements();
+  }catch(e){document.getElementById('ann-error').textContent=e.message;}
 }
-async function deleteAnn(id){if(!confirm('确认删除？'))return;await sb.from('announcements').delete().eq('id',id);showToast('已删除','success');loadAnnouncements();}
+async function deleteAnn(id){if(!confirm('确认删除？'))return;try{await apiRequest(`/announcements/${id}`,{method:'DELETE'});showToast('已删除','success');loadAnnouncements();}catch(e){showToast(e.message,'error');}}
 
 // ── Contests ───────────────────────────────────────────────
 async function loadContests(){
@@ -5737,15 +5740,15 @@ function addResultRow(){const tr=document.createElement('tr');tr.innerHTML=`<td>
 async function submitContest(){
   const title=document.getElementById('c-title').value.trim(),date=document.getElementById('c-date').value;
   if(!title||!date){document.getElementById('contest-error').textContent='请填写赛名和日期';return;}
-  const{data:contest,error}=await sb.from('contests').insert({title,contest_date:date,problems:document.getElementById('c-problems').value.trim(),comment:document.getElementById('c-comment').value.trim(),created_by:currentUser.id}).select().single();
-  if(error){document.getElementById('contest-error').textContent=error.message;return;}
-  const rows=document.querySelectorAll('#results-rows tr');const rd=[];
-  rows.forEach(row=>{const inputs=row.querySelectorAll('input');const name=inputs[0].value.trim();if(name)rd.push({contest_id:contest.id,student_name:name,solved:parseInt(inputs[1].value)||0,score:parseInt(inputs[2].value)||0,rank:parseInt(inputs[3].value)||0});});
-  if(rd.length)await sb.from('contest_results').insert(rd);
-  closeModal('contest-modal');showToast('模拟赛录入成功 ✓','success');loadContests();
-  ['c-title','c-date','c-problems','c-comment'].forEach(id=>document.getElementById(id).value='');
+  const rows=document.querySelectorAll('#results-rows tr');const results=[];
+  rows.forEach(row=>{const inputs=row.querySelectorAll('input');const name=inputs[0].value.trim();if(name)results.push({student_name:name,solved:parseInt(inputs[1].value)||0,score:parseInt(inputs[2].value)||0,rank:parseInt(inputs[3].value)||0});});
+  try{
+    await apiRequest('/contests',{method:'POST',body:JSON.stringify({title,contest_date:date,problems:document.getElementById('c-problems').value.trim(),comment:document.getElementById('c-comment').value.trim(),results})});
+    closeModal('contest-modal');showToast('模拟赛录入成功 ✓','success');loadContests();
+    ['c-title','c-date','c-problems','c-comment'].forEach(id=>document.getElementById(id).value='');
+  }catch(e){document.getElementById('contest-error').textContent=e.message;}
 }
-async function deleteContest(id){if(!confirm('确认删除这场模拟赛及其所有成绩？'))return;await sb.from('contests').delete().eq('id',id);showToast('已删除','success');loadContests();}
+async function deleteContest(id){if(!confirm('确认删除这场模拟赛及其所有成绩？'))return;try{await apiRequest(`/contests/${id}`,{method:'DELETE'});showToast('已删除','success');loadContests();}catch(e){showToast(e.message,'error');}}
 
 // ── Notes ──────────────────────────────────────────────────
 let activeNoteTag='';
