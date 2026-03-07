@@ -8897,9 +8897,11 @@ function initStagger(container) {
 // Re-run stagger whenever new content loads (合并了多处 window.show 覆盖，避免调用链混乱)
 const _origShow = window.show;
 window.show = function(id) {
-  // 1. 执行原始 show 逻辑（切换 section + 加载数据）
+  // 1. 离开群聊时断开 WS
+  if (id !== 'chat' && chatWs) { chatCloseWs(); chatInited = false; }
+  // 2. 执行原始 show 逻辑（切换 section + 加载数据）
   _origShow && _origShow(id);
-  // 2. stagger 入场动画
+  // 3. stagger 入场动画
   setTimeout(() => initStagger(), 120);
 };
 setTimeout(() => initStagger(), 300);
@@ -12524,12 +12526,7 @@ function chatOpenLightbox(url) {
   document.getElementById('chat-lightbox').classList.add('open');
 }
 
-// ── 离开聊天页时断开 WS ──────────────────────────────────
-const _origShow = show;
-window.show = function(id) {
-  if (id !== 'chat' && chatWs) { chatCloseWs(); chatInited = false; }
-  _origShow(id);
-};
+// ── 离开聊天页时断开 WS（由 show 包裹实现，见上方）──────
 
 </script>
 </body>
