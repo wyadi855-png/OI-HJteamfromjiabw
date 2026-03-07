@@ -7421,7 +7421,14 @@ function selectProblemSource(src){
 
 function onProblemIdInput(val){
   const src=document.getElementById('p-source').value;
-  if(src==='洛谷') autoFillFromLuogu(val);
+  if(src==='洛谷'){
+    // 只自动填链接，不请求洛谷（CORS 被拦）
+    const pid = val.trim().toUpperCase();
+    if(/^[A-Z]+\d+$/.test(pid)){
+      const urlEl = document.getElementById('p-url');
+      if(urlEl) urlEl.value = 'https://www.luogu.com.cn/problem/'+pid;
+    }
+  }
   else if(src==='CF'){
     // CF 格式自动生成链接提示
     const match=val.trim().match(/^(\d+)([A-Za-z]+\d*)$/);
@@ -11498,7 +11505,7 @@ async function showContestChart(contestId, preloaded, title){
       </div>
       <!-- 题号（洛谷/CF 显示，自拟隐藏） -->
       <div class="form-group" id="p-id-wrap">
-        <label id="p-id-label">题号 <span style="font-size:11px;color:var(--text3)">(填写后自动带出标题)</span></label>
+        <label id="p-id-label">题号</label>
         <input id="p-id" type="text" placeholder="如：P1001 或 1234A" oninput="onProblemIdInput(this.value)">
       </div>
       <div class="form-group">
