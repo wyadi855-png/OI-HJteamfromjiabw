@@ -8334,10 +8334,12 @@ async function doCheckin(e){
   const btn=document.getElementById('checkin-btn');
   if(btn.classList.contains('checked'))return;
 
-  const today=getLocalToday();
-  const{error}=await sb.from('hero_checkins').insert({user_id:currentUser.id,date:today});
-  if(error&&error.code!=='23505'){// 23505 = unique violation (already checked in)
-    showToast('打卡失败','error');return;
+  try{
+    await apiRequest('/daily/hero-checkin',{method:'POST'});
+  }catch(err){
+    if(!err.message||!err.message.includes('already checked in today')){
+      showToast('打卡失败','error');return;
+    }
   }
 
   btn.classList.add('checked');
@@ -8366,12 +8368,13 @@ async function doCheckin(e){
 async function initCheckinState(){
   const btn=document.getElementById('checkin-btn');
   if(!btn||!currentUser)return;
-  const today=getLocalToday();
-  const{data}=await sb.from('hero_checkins').select('id').eq('user_id',currentUser.id).eq('date',today).maybeSingle();
-  if(data){
-    btn.classList.add('checked');
-    btn.querySelector('.checkin-label').textContent='已打卡';
-  }
+  try{
+    const{checked}=await apiRequest('/daily/hero-checkin/status');
+    if(checked){
+      btn.classList.add('checked');
+      btn.querySelector('.checkin-label').textContent='已打卡';
+    }
+  }catch(e){}
 }
 
 // ── Emoji Picker ────────────────────────────────────────────
