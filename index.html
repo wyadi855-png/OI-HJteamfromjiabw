@@ -3724,27 +3724,6 @@ section:not(.active) {
 
 <div class="notif-panel" id="notif-panel"><div class="notif-header"><h3>通知</h3><button class="btn btn-outline btn-sm" onclick="markAllRead()">全部已读</button></div><div id="notif-list"><div class="notif-empty">// 暂无通知</div></div></div>
 
-<!-- DM PANEL -->
-<div id="dm-panel">
-  <div class="dm-panel-header">
-    <span id="dm-panel-title">私信</span>
-    <button class="dm-close-btn" onclick="closeDMPanel()">✕</button>
-  </div>
-  <!-- 对话列表 -->
-  <div id="dm-conv-list"></div>
-  <!-- 聊天界面 -->
-  <div id="dm-chat" style="display:none">
-    <div class="dm-chat-header">
-      <button class="dm-back-btn" onclick="showDMConvList()">← 返回</button>
-      <span id="dm-chat-name"></span>
-    </div>
-    <div id="dm-messages"></div>
-    <div class="dm-input-wrap">
-      <textarea id="dm-input" placeholder="输入消息…" rows="1" maxlength="2000" onkeydown="dmInputKey(event)" oninput="dmAutoResize(this)"></textarea>
-      <button class="dm-send-btn" onclick="sendDM()">发送</button>
-    </div>
-  </div>
-</div>
 <main class="main">
 
 <!-- HOME -->
@@ -10854,6 +10833,27 @@ async function showContestChart(contestId, preloaded, title){
 <!-- Global emoji panel (shared) -->
 <div class="emoji-panel" id="emoji-panel" onclick="event.stopPropagation()">
   <div class="emoji-grid" id="emoji-grid"></div>
+</div>
+<!-- DM PANEL -->
+<div id="dm-panel">
+  <div class="dm-panel-header">
+    <span id="dm-panel-title">私信</span>
+    <button class="dm-close-btn" onclick="closeDMPanel()">✕</button>
+  </div>
+  <!-- 对话列表 -->
+  <div id="dm-conv-list"></div>
+  <!-- 聊天界面 -->
+  <div id="dm-chat" style="display:none">
+    <div class="dm-chat-header">
+      <button class="dm-back-btn" onclick="showDMConvList()">← 返回</button>
+      <span id="dm-chat-name"></span>
+    </div>
+    <div id="dm-messages"></div>
+    <div class="dm-input-wrap">
+      <textarea id="dm-input" placeholder="输入消息…" rows="1" maxlength="2000" onkeydown="dmInputKey(event)" oninput="dmAutoResize(this)"></textarea>
+      <button class="dm-send-btn" onclick="sendDM()">发送</button>
+    </div>
+  </div>
 </div>
 </body>
 </html>
