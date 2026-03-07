@@ -8923,13 +8923,10 @@ function updateDMBadge(){
 
 async function refreshDMUnread(){
   if(!currentUser) return;
-  const{data}=await sb.from('messages').select('id',{count:'exact',head:true})
-    .eq('to_id',currentUser.id).eq('read',false);
-  _dmUnreadCount = data?.length ?? 0;
-  // count query returns count differently
-  const{count}=await sb.from('messages').select('*',{count:'exact',head:true})
-    .eq('to_id',currentUser.id).eq('read',false);
-  _dmUnreadCount = count || 0;
+  try{
+    const{count}=await apiRequest('/messages/unread/count');
+    _dmUnreadCount = count || 0;
+  }catch(e){ _dmUnreadCount=0; }
   updateDMBadge();
 }
 
@@ -8974,10 +8971,7 @@ async function showDMConvList(){
   convList.innerHTML = '<div class="dm-loading">加载中…</div>';
 
   // 拿所有和自己相关的消息，按对方分组
-  const{data:msgs}=await sb.from('messages')
-    .select('*')
-    .or(`from_id.eq.${currentUser.id},to_id.eq.${currentUser.id}`)
-    .order('created_at',{ascending:false});
+  const msgs = await apiRequest('/messages').catch(()=>[]);
 
   if(!msgs||!msgs.length){
     convList.innerHTML='<div class="dm-empty">// 暂无私信<br><span style="opacity:0.5">去别人的主页发一条吧</span></div>';
@@ -9059,10 +9053,7 @@ async function openDMChat(peer){
   msgsEl.innerHTML = '<div class="dm-loading">加载中…</div>';
 
   // 拉历史消息
-  const{data:msgs}=await sb.from('messages')
-    .select('*')
-    .or(`and(from_id.eq.${currentUser.id},to_id.eq.${peer.id}),and(from_id.eq.${peer.id},to_id.eq.${currentUser.id})`)
-    .order('created_at',{ascending:true});
+  const msgs = await apiRequest(`/messages/${peer.id}`).catch(()=>[]);
 
   msgsEl.innerHTML='';
   if(!msgs||!msgs.length){
@@ -9112,14 +9103,10 @@ async function sendDM(){
   input.value='';
   dmAutoResize(input);
 
-  const{data,error}=await sb.from('messages').insert({
-    from_id:currentUser.id,
-    to_id:_dmChatWith.id,
-    content
-  }).select().single();
-
-  if(error){showToast('发送失败: '+error.message,'error');input.value=content;return;}
-  appendDMMessage(data, true);
+  try{
+    const data=await apiRequest('/messages',{method:'POST',body:JSON.stringify({to_id:_dmChatWith.id,content})});
+    appendDMMessage(data, true);
+  }catch(e){showToast('发送失败: '+e.message,'error');input.value=content;}
 }
 
 function dmInputKey(e){
@@ -9132,7 +9119,9 @@ function dmAutoResize(ta){
 
 async function markDMRead(fromId){
   if(!currentUser) return;
-  await sb.from('messages').update({read:true})
+  apiRequest(`/messages/${fromId}/read`,{method:'PATCH'}).catch(()=>{});
+  // legacy fallback (no-op if table RLS blocks)
+  sb.from('messages').update({read:true})
     .eq('to_id',currentUser.id).eq('from_id',fromId).eq('read',false);
   // 刷新未读
   await refreshDMUnread();
