@@ -11617,7 +11617,7 @@ function gcConnect() {
 
   const wsUrl = API_BASE.replace(/^https?/, ws => ws === 'https' ? 'wss' : 'ws').replace('/api/v1', '') + '/ws/chat';
   try {
-    _gcWs = new WebSocket(wsUrl + '?token=' + encodeURIComponent(currentUser?.access_token || ''));
+    _gcWs = new WebSocket(wsUrl + '?token=' + encodeURIComponent(localStorage.getItem('hjoi_token') || ''));
   } catch(e) {
     console.warn('[GC] WS连接失败:', e);
     _gcReconnectTimer = setTimeout(gcConnect, 3000);
