@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>HJOI</title>
+<title>HJOI — 登录</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -23,57 +23,39 @@ html,body{width:100%;height:100%;background:var(--ink);color:var(--text);font-fa
     radial-gradient(ellipse 45% 40% at 55% 45%,rgba(110,70,240,.05) 0%,transparent 50%);}
 #orb-canvas{position:fixed;inset:0;z-index:1;pointer-events:none;}
 
-.page{position:relative;z-index:10;width:100vw;height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(24px,4vh,40px);padding:env(safe-area-inset-top,20px) 20px env(safe-area-inset-bottom,20px);}
+.page{position:relative;z-index:10;width:100vw;height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(20px,3.5vh,36px);padding:env(safe-area-inset-top,20px) 20px env(safe-area-inset-bottom,20px);}
 
-/* ── HJOI HERO LOGO ── */
+/* ── LOGO ── */
 .logo-block{text-align:center;opacity:0;animation:logoIn .9s cubic-bezier(0.22,1,.36,1) .05s forwards;}
 @keyframes logoIn{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
-
 .logo-wrap{position:relative;display:inline-block;}
-
-.hjoi-glow{
-  position:absolute;top:50%;left:50%;
-  width:300px;height:90px;
-  transform:translate(-50%,-50%);
-  background:radial-gradient(ellipse,rgba(79,142,247,.22) 0%,rgba(45,232,176,.12) 40%,transparent 70%);
-  filter:blur(36px);pointer-events:none;
-  animation:glowPulse 4.5s ease-in-out infinite;z-index:0;
-}
+.hjoi-glow{position:absolute;top:50%;left:50%;width:300px;height:90px;transform:translate(-50%,-50%);background:radial-gradient(ellipse,rgba(79,142,247,.22) 0%,rgba(45,232,176,.12) 40%,transparent 70%);filter:blur(36px);pointer-events:none;animation:glowPulse 4.5s ease-in-out infinite;z-index:0;}
 @keyframes glowPulse{0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}}
-
-.hjoi-text{
-  position:relative;z-index:1;
-  font-family:var(--sans);
-  font-size:clamp(48px,9vw,72px);
-  font-weight:900;letter-spacing:-.03em;line-height:1;
-  background:linear-gradient(155deg,rgba(255,255,255,.96) 0%,rgba(200,218,255,.9) 30%,rgba(79,142,247,.88) 62%,rgba(45,232,176,.85) 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  animation:logoFloat 4.8s ease-in-out infinite;
-  filter:drop-shadow(0 0 24px rgba(79,142,247,.32)) drop-shadow(0 0 52px rgba(45,232,176,.16)) drop-shadow(0 2px 6px rgba(0,0,0,.5));
-}
+.hjoi-text{position:relative;z-index:1;font-family:var(--sans);font-size:clamp(48px,9vw,72px);font-weight:900;letter-spacing:-.03em;line-height:1;background:linear-gradient(155deg,rgba(255,255,255,.96) 0%,rgba(200,218,255,.9) 30%,rgba(79,142,247,.88) 62%,rgba(45,232,176,.85) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:logoFloat 4.8s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(79,142,247,.32)) drop-shadow(0 0 52px rgba(45,232,176,.16)) drop-shadow(0 2px 6px rgba(0,0,0,.5));}
 @keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
 
 /* ── CARD ── */
-.card{width:min(400px,calc(100vw - 32px));border-radius:28px;
-  background:rgba(13,13,21,.76);backdrop-filter:blur(56px) saturate(160%);-webkit-backdrop-filter:blur(56px) saturate(160%);
-  border:1px solid var(--border);
-  box-shadow:0 0 0 .5px rgba(255,255,255,.05) inset,0 1px 0 rgba(255,255,255,.11) inset,0 28px 72px -14px rgba(0,0,0,.65),0 6px 22px rgba(0,0,0,.32);
-  overflow:hidden;position:relative;opacity:0;transform:translateY(22px) scale(.97);
-  animation:cardIn .85s cubic-bezier(0.22,1,.36,1) .2s forwards;}
+.card{width:min(420px,calc(100vw - 32px));border-radius:28px;background:rgba(13,13,21,.76);backdrop-filter:blur(56px) saturate(160%);-webkit-backdrop-filter:blur(56px) saturate(160%);border:1px solid var(--border);box-shadow:0 0 0 .5px rgba(255,255,255,.05) inset,0 1px 0 rgba(255,255,255,.11) inset,0 28px 72px -14px rgba(0,0,0,.65),0 6px 22px rgba(0,0,0,.32);overflow:hidden;position:relative;opacity:0;transform:translateY(22px) scale(.97);animation:cardIn .85s cubic-bezier(0.22,1,.36,1) .2s forwards;}
 .card::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);pointer-events:none;z-index:1;}
 @keyframes cardIn{to{opacity:1;transform:translateY(0) scale(1);}}
 
+/* ── TABS ── */
 .tabs{display:flex;padding:5px 5px 0;gap:3px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border2);}
 .tab-btn{flex:1;padding:11px 8px;border:none;background:none;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-radius:12px 12px 0 0;transition:color .2s var(--smooth),background .2s var(--smooth);letter-spacing:.015em;position:relative;}
 .tab-btn.active{color:var(--text);background:rgba(255,255,255,.06);}
 .tab-btn.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(79,142,247,.55),rgba(45,232,176,.38),transparent);}
 
-.form-body{padding:24px 24px 22px;max-height:calc(100svh - 300px);overflow-y:auto;scrollbar-width:none;}
+/* ── FORM BODY ── */
+.form-body{padding:22px 24px 20px;max-height:calc(100svh - 280px);overflow-y:auto;scrollbar-width:none;}
 .form-body::-webkit-scrollbar{display:none;}
 
-.field{margin-bottom:12px;}
-.field-label{font-family:var(--mono);font-size:10px;font-weight:300;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+/* ── FIELDS ── */
+.field{margin-bottom:11px;}
+.field-label{font-family:var(--mono);font-size:10px;font-weight:300;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.field-label-hint{font-size:9px;letter-spacing:0;color:var(--text3);text-transform:none;margin-left:auto;}
 .req{color:var(--red);font-size:9px;letter-spacing:0;}
+
+/* ── INPUT BASE ── */
 .field input,.field select{width:100%;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:12px 14px;font-family:var(--sans);font-size:15px;font-weight:400;color:var(--text);outline:none;transition:border-color .18s,background .18s,box-shadow .18s;-webkit-appearance:none;}
 .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.28)' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px;cursor:pointer;}
 .field select option{background:#10101a;color:var(--text);}
@@ -82,9 +64,63 @@ html,body{width:100%;height:100%;background:var(--ink);color:var(--text);font-fa
 .field input:-webkit-autofill,.field input:-webkit-autofill:focus{-webkit-text-fill-color:rgba(255,255,255,.92)!important;-webkit-box-shadow:0 0 0 1000px #131320 inset!important;caret-color:white;}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 
+/* ── 输入框状态：valid / invalid ── */
+.field input.is-valid{border-color:rgba(45,232,176,.4)!important;background:rgba(45,232,176,.04)!important;}
+.field input.is-invalid{border-color:rgba(255,69,58,.4)!important;background:rgba(255,69,58,.04)!important;}
+.field-inline-err{font-family:var(--mono);font-size:9.5px;color:var(--red);margin-top:4px;min-height:13px;display:none;}
+.field-inline-err.show{display:block;}
+
+/* ── 邮箱 + 发送验证码 行 ── */
+.email-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:11px;}
+.email-row .field{flex:1;margin-bottom:0;}
+.send-code-btn{
+  flex-shrink:0;height:44px;padding:0 14px;
+  border:1px solid rgba(79,142,247,.3);border-radius:13px;
+  background:rgba(79,142,247,.08);
+  font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.04em;
+  color:var(--blue);cursor:pointer;white-space:nowrap;
+  transition:all .18s;
+}
+.send-code-btn:hover:not(:disabled){background:rgba(79,142,247,.16);border-color:rgba(79,142,247,.55);}
+.send-code-btn:disabled{opacity:.45;cursor:not-allowed;}
+.send-code-btn.cooldown{color:var(--text3);border-color:rgba(255,255,255,.08);background:transparent;}
+
+/* ── 验证码输入框 ── */
+.code-field{position:relative;}
+.code-field input{letter-spacing:.18em;font-size:16px;text-align:center;font-family:var(--mono);padding:12px 40px 12px 14px;}
+.code-valid-icon{
+  position:absolute;right:13px;top:50%;transform:translateY(-50%);
+  font-size:16px;opacity:0;transition:opacity .2s;pointer-events:none;
+}
+.code-valid-icon.show{opacity:1;}
+
+/* ── 密码强度 ── */
+.pw-strength{display:flex;gap:3px;margin-top:6px;height:3px;}
+.pw-bar{flex:1;border-radius:2px;background:rgba(255,255,255,.07);transition:background .25s;}
+.pw-bar.s1{background:#ff453a;}
+.pw-bar.s2{background:#ffb347;}
+.pw-bar.s3{background:#4f8ef7;}
+.pw-bar.s4{background:#2de8b0;}
+
+/* ── 步骤指示器（注册分两步） ── */
+.step-indicator{
+  display:flex;align-items:center;gap:6px;
+  padding:0 24px 14px;margin-top:-4px;
+}
+.step-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(255,255,255,.12);transition:all .3s var(--spring);
+}
+.step-dot.active{background:var(--blue);box-shadow:0 0 6px rgba(79,142,247,.5);width:18px;border-radius:3px;}
+.step-dot.done{background:var(--teal);}
+.step-line{flex:1;height:1px;background:rgba(255,255,255,.06);}
+.step-label{font-family:var(--mono);font-size:9.5px;color:var(--text3);letter-spacing:.08em;margin-left:auto;}
+
+/* ── FORM ERROR ── */
 .form-err{font-family:var(--mono);font-size:10.5px;color:var(--red);min-height:14px;margin:0 0 10px;opacity:0;transform:translateY(-3px);transition:opacity .18s,transform .18s;}
 .form-err.show{opacity:1;transform:none;}
 
+/* ── SUBMIT BUTTON ── */
 .btn-submit{width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(130deg,#4f8ef7 0%,#3ad9c5 55%,#2de8b0 100%);font-family:var(--sans);font-size:15px;font-weight:600;color:#060610;letter-spacing:.01em;cursor:pointer;position:relative;overflow:hidden;transition:transform .18s var(--spring),box-shadow .2s,opacity .15s;box-shadow:0 3px 20px rgba(79,142,247,.28),0 1px 0 rgba(255,255,255,.22) inset;margin-top:4px;}
 .btn-submit::before{content:'';position:absolute;top:0;left:0;right:0;height:48%;background:linear-gradient(180deg,rgba(255,255,255,.16) 0%,transparent 100%);pointer-events:none;}
 .btn-submit:hover:not(:disabled){transform:translateY(-1.5px) scale(1.008);box-shadow:0 6px 28px rgba(79,142,247,.38),0 1px 0 rgba(255,255,255,.22) inset;}
@@ -98,6 +134,21 @@ html,body{width:100%;height:100%;background:var(--ink);color:var(--text);font-fa
 .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.22);transform:scale(0);animation:rpl .5s ease-out forwards;pointer-events:none;}
 @keyframes rpl{to{transform:scale(4);opacity:0;}}
 
+/* ── 返回上一步按钮 ── */
+.btn-back{
+  width:100%;padding:11px;border:1px solid rgba(255,255,255,.07);border-radius:14px;
+  background:rgba(255,255,255,.03);font-family:var(--sans);font-size:14px;font-weight:500;
+  color:var(--text2);letter-spacing:.01em;cursor:pointer;
+  transition:all .18s;margin-top:8px;
+}
+.btn-back:hover{background:rgba(255,255,255,.06);color:var(--text);}
+
+/* ── 忘记密码 / 辅助链接 ── */
+.form-aux{text-align:center;margin-top:10px;}
+.form-aux a{font-family:var(--mono);font-size:10px;color:rgba(79,142,247,.6);text-decoration:none;letter-spacing:.05em;transition:color .15s;}
+.form-aux a:hover{color:var(--blue);}
+
+/* ── SUCCESS OVERLAY ── */
 .success-overlay{position:absolute;inset:0;border-radius:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(7,7,13,.95);backdrop-filter:blur(20px);opacity:0;pointer-events:none;transition:opacity .35s;z-index:50;}
 .success-overlay.show{opacity:1;pointer-events:all;}
 .success-check{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#2de8b0);display:flex;align-items:center;justify-content:center;font-size:22px;color:#07070d;animation:checkPop .5s var(--spring);box-shadow:0 6px 28px rgba(45,232,176,.28);}
@@ -105,43 +156,50 @@ html,body{width:100%;height:100%;background:var(--ink);color:var(--text);font-fa
 .success-name{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--text);}
 .success-hint{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.1em;}
 
+/* ── FOOTER ── */
 .page-foot{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));left:0;right:0;text-align:center;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.06em;z-index:20;opacity:0;animation:fadeIn .5s ease 1.3s forwards;}
 .page-foot a{color:rgba(79,142,247,.7);text-decoration:none;}
 .page-foot a:hover{color:var(--blue);}
 @keyframes fadeIn{to{opacity:1;}}
-/* ── OI Badge 选择器 ── */
-.badge-section{margin:14px 0 4px;}
+
+/* ── BADGE 选择器 ── */
+.badge-section{margin:12px 0 4px;}
 .badge-section-label{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);margin-bottom:7px;}
 .badge-row{display:flex;gap:5px;flex-wrap:wrap;}
-.badge-chip{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:5px 11px;border-radius:100px;
-  font-size:12px;font-family:var(--mono);font-weight:400;
-  border:1px solid rgba(255,255,255,.09);
-  background:rgba(255,255,255,.03);
-  color:rgba(255,255,255,.48);cursor:pointer;
-  transition:all .14s ease;user-select:none;white-space:nowrap;
-}
+.badge-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:100px;font-size:12px;font-family:var(--mono);font-weight:400;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:rgba(255,255,255,.48);cursor:pointer;transition:all .14s ease;user-select:none;white-space:nowrap;}
 .badge-chip:hover{border-color:rgba(79,142,247,.4);color:rgba(255,255,255,.8);}
-.badge-chip.on{
-  border-color:var(--blue);
-  background:rgba(79,142,247,.13);
-  color:rgba(255,255,255,.92);
-  box-shadow:0 0 0 1px rgba(79,142,247,.18);
-}
+.badge-chip.on{border-color:var(--blue);background:rgba(79,142,247,.13);color:rgba(255,255,255,.92);box-shadow:0 0 0 1px rgba(79,142,247,.18);}
 .badge-chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;opacity:.8;}
-/* 省份下拉 */
 .province-wrap{margin-top:8px;display:none;}
 .province-wrap.open{display:block;}
 .badge-section-sub{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--text3);margin:10px 0 6px;}
 
+/* ── 步骤切换动画 ── */
+.reg-step{display:none;}
+.reg-step.active{display:block;animation:stepIn .3s cubic-bezier(0.22,1,.36,1);}
+@keyframes stepIn{from{opacity:0;transform:translateX(14px);}to{opacity:1;transform:translateX(0);}}
+.reg-step.back{animation:stepInBack .3s cubic-bezier(0.22,1,.36,1);}
+@keyframes stepInBack{from{opacity:0;transform:translateX(-14px);}to{opacity:1;transform:translateX(0);}}
 
-@media(max-width:420px){.form-body{padding:20px 18px 18px;}.field-row{grid-template-columns:1fr;}.hjoi-text{font-size:clamp(44px,12vw,64px);}}
+/* ── toast 通知 ── */
+.toast{
+  position:fixed;top:max(20px,env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-80px);
+  background:rgba(13,13,21,.92);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.08);border-radius:12px;
+  padding:10px 18px;font-family:var(--mono);font-size:12px;color:var(--text2);
+  white-space:nowrap;z-index:999;transition:transform .35s var(--spring),opacity .25s;opacity:0;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.toast.ok{color:var(--teal);border-color:rgba(45,232,176,.2);}
+.toast.err{color:var(--red);border-color:rgba(255,69,58,.2);}
+
+@media(max-width:420px){.form-body{padding:18px 16px 16px;}.field-row{grid-template-columns:1fr;}.hjoi-text{font-size:clamp(44px,12vw,64px);}.email-row{flex-direction:column;gap:0;}.send-code-btn{width:100%;height:40px;}}
 </style>
 </head>
 <body>
 <div class="bg"></div>
 <canvas id="orb-canvas"></canvas>
+<div id="toast" class="toast"></div>
 
 <div class="page">
   <div class="logo-block">
@@ -157,13 +215,17 @@ html,body{width:100%;height:100%;background:var(--ink);color:var(--text);font-fa
       <button class="tab-btn" id="tab-register" onclick="switchTab('register')">注册</button>
     </div>
 
+    <!-- ══════════════ 登录表单 ══════════════ -->
     <div class="form-body" id="form-login">
       <div class="field">
         <div class="field-label">用户名</div>
         <input id="l-user" type="text" placeholder="your_handle" autocomplete="username" spellcheck="false">
       </div>
       <div class="field">
-        <div class="field-label">密码</div>
+        <div class="field-label">
+          密码
+          <a href="#" class="field-label-hint" onclick="showForgotHint(event)">忘记密码？</a>
+        </div>
         <input id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password">
       </div>
       <div class="form-err" id="login-err"></div>
@@ -172,78 +234,129 @@ html,body{width:100%;height:100%;background:var(--ink);color:var(--text);font-fa
       </button>
     </div>
 
-    <div class="form-body" id="form-register" style="display:none">
-      <div class="field">
-        <div class="field-label">用户名</div>
-        <input id="r-user" type="text" placeholder="字母、数字、下划线" autocomplete="username" spellcheck="false">
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <div class="field-label">密码</div>
-          <input id="r-pass" type="password" placeholder="至少6位" autocomplete="new-password">
-        </div>
-        <div class="field">
-          <div class="field-label">确认密码</div>
-          <input id="r-pass2" type="password" placeholder="再输一次" autocomplete="new-password">
-        </div>
-      </div>
-      <div class="field">
-        <div class="field-label">训练组 <span class="req">必填</span></div>
-        <select id="r-group">
-          <option value="">选择分组…</option>
-          <option value="1">L1</option><option value="2">L2</option><option value="3">L3</option>
-          <option value="4">L4</option><option value="5">L5</option><option value="6">L6</option>
-          <option value="7">Oth</option>
-        </select>
-      </div>
-      <div class="field">
-        <div class="field-label">省份 <span style="color:var(--text3);font-size:9px">选填</span></div>
-        <select id="r-province">
-          <option value="">不设置</option><option value="北京">北京</option><option value="天津">天津</option><option value="河北">河北</option><option value="山西">山西</option><option value="内蒙古">内蒙古</option><option value="辽宁">辽宁</option><option value="吉林">吉林</option><option value="黑龙江">黑龙江</option><option value="上海">上海</option><option value="江苏">江苏</option><option value="浙江">浙江</option><option value="安徽">安徽</option><option value="福建">福建</option><option value="江西">江西</option><option value="山东">山东</option><option value="河南">河南</option><option value="湖北">湖北</option><option value="湖南">湖南</option><option value="广东">广东</option><option value="广西">广西</option><option value="海南">海南</option><option value="重庆">重庆</option><option value="四川">四川</option><option value="贵州">贵州</option><option value="云南">云南</option><option value="西藏">西藏</option><option value="陕西">陕西</option><option value="甘肃">甘肃</option><option value="青海">青海</option><option value="宁夏">宁夏</option><option value="新疆">新疆</option>
-        </select>
-      </div>
-      <div class="field">
-        <div class="field-label">洛谷 UID <span style="color:var(--text3);font-size:9px">选填</span></div>
-        <input id="r-luogu" type="text" placeholder="如：123456" autocomplete="off" inputmode="numeric">
+    <!-- ══════════════ 注册表单（两步走） ══════════════ -->
+    <div id="form-register" style="display:none">
+      <!-- 步骤指示器 -->
+      <div class="step-indicator" id="step-indicator">
+        <div class="step-dot active" id="sdot-1"></div>
+        <div style="width:24px;height:1px;background:rgba(255,255,255,.07)"></div>
+        <div class="step-dot" id="sdot-2"></div>
+        <span class="step-label" id="step-label">基本信息</span>
       </div>
 
-      <div class="badge-section" id="badge-block">
-        <div class="badge-section-label">OI 水平 <span style="color:var(--text3);font-size:8.5px;letter-spacing:0">选填</span></div>
-        <div class="badge-row" id="badge-row-main">
-          <div class="badge-chip" data-badge="蒟蒻" onclick="toggleBadge(this,'蒟蒻')"><span class="dot" style="background:#9b9b9b"></span>蒟蒻</div>
-          <div class="badge-chip" data-badge="CSP-J" onclick="toggleBadge(this,'CSP-J')"><span class="dot" style="background:#4e9af1"></span>CSP-J</div>
-          <div class="badge-chip" data-badge="CSP-S" onclick="toggleBadge(this,'CSP-S')"><span class="dot" style="background:#4e9af1"></span>CSP-S</div>
-          <div class="badge-chip" data-badge="NOIP一等" onclick="toggleBadge(this,'NOIP一等')"><span class="dot" style="background:#2de8b0"></span>NOIP 一等</div>
-          <div class="badge-chip" data-badge="NOIP二等" onclick="toggleBadge(this,'NOIP二等')"><span class="dot" style="background:#2de8b0"></span>NOIP 二等</div>
-          <div class="badge-chip" data-badge="NOIP三等" onclick="toggleBadge(this,'NOIP三等')"><span class="dot" style="background:#2de8b0"></span>NOIP 三等</div>
+      <!-- ── Step 1：账号 + 邮箱验证 ── -->
+      <div class="form-body reg-step active" id="reg-step-1">
+        <!-- 用户名 -->
+        <div class="field">
+          <div class="field-label">用户名 <span class="req">*</span></div>
+          <input id="r-user" type="text" placeholder="字母、数字、下划线" autocomplete="username" spellcheck="false"
+            oninput="validateUsername(this)">
+          <div class="field-inline-err" id="r-user-err"></div>
         </div>
-        <!-- 省队 -->
-        <div style="margin-top:8px;">
-          <div class="badge-section-label" style="margin-bottom:6px">省队</div>
-          <div class="badge-row">
-            <div class="badge-chip" data-badge="省队" onclick="toggleProvince(this)"><span class="dot" style="background:#c792ea"></span>省队</div>
+
+        <!-- 密码行 -->
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">密码 <span class="req">*</span></div>
+            <input id="r-pass" type="password" placeholder="至少6位" autocomplete="new-password" oninput="checkPwStrength(this.value)">
+            <div class="pw-strength" id="pw-strength">
+              <div class="pw-bar" id="pwb1"></div><div class="pw-bar" id="pwb2"></div>
+              <div class="pw-bar" id="pwb3"></div><div class="pw-bar" id="pwb4"></div>
+            </div>
           </div>
-          <div class="province-wrap" id="province-wrap">
-            <div class="badge-section-sub">选择省份</div>
-            <div class="badge-row" id="province-row" style="max-height:110px;overflow-y:auto;scrollbar-width:none;gap:4px;"></div>
-          </div>
-        </div>
-        <!-- NOI -->
-        <div style="margin-top:8px;">
-          <div class="badge-section-label" style="margin-bottom:6px">NOI</div>
-          <div class="badge-row">
-            <div class="badge-chip" data-badge="NOI金" onclick="toggleBadge(this,'NOI金')"><span class="dot" style="background:#FFD700"></span>金牌</div>
-            <div class="badge-chip" data-badge="NOI银" onclick="toggleBadge(this,'NOI银')"><span class="dot" style="background:#C0C0C0"></span>银牌</div>
-            <div class="badge-chip" data-badge="NOI铜" onclick="toggleBadge(this,'NOI铜')"><span class="dot" style="background:#CD7F32"></span>铜牌</div>
+          <div class="field">
+            <div class="field-label">确认密码 <span class="req">*</span></div>
+            <input id="r-pass2" type="password" placeholder="再输一次" autocomplete="new-password" oninput="validatePass2(this)">
           </div>
         </div>
+
+        <!-- 邮箱 -->
+        <div class="email-row">
+          <div class="field">
+            <div class="field-label">邮箱 <span class="req">*</span></div>
+            <input id="r-email" type="email" placeholder="your@email.com" autocomplete="email" oninput="validateEmail(this)">
+          </div>
+          <button class="send-code-btn" id="btn-send-code" onclick="sendCode()">发送验证码</button>
+        </div>
+
+        <!-- 验证码 -->
+        <div class="field code-field">
+          <div class="field-label">验证码 <span class="req">*</span></div>
+          <input id="r-code" type="text" placeholder="6位数字" maxlength="6" inputmode="numeric"
+            autocomplete="one-time-code" oninput="onCodeInput(this)">
+          <span class="code-valid-icon" id="code-valid-icon">✓</span>
+        </div>
+
+        <div class="form-err" id="register-err-1"></div>
+        <button class="btn-submit" id="btn-reg-next" onclick="doRegStep1()">
+          <div class="btn-inner"><div class="spinner-ring"></div><span class="btn-label">下一步</span></div>
+        </button>
       </div>
-      <div class="form-err" id="register-err"></div>
-      <button class="btn-submit" id="btn-register" onclick="doRegister()">
-        <div class="btn-inner"><div class="spinner-ring"></div><span class="btn-label">创建账号</span></div>
-      </button>
+
+      <!-- ── Step 2：竞赛资料（可选） ── -->
+      <div class="form-body reg-step" id="reg-step-2">
+        <div class="field">
+          <div class="field-label">训练组 <span class="req">*</span></div>
+          <select id="r-group">
+            <option value="">选择分组…</option>
+            <option value="1">L1</option><option value="2">L2</option><option value="3">L3</option>
+            <option value="4">L4</option><option value="5">L5</option><option value="6">L6</option>
+            <option value="7">Oth</option>
+          </select>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">省份 <span class="field-label-hint">选填</span></div>
+            <select id="r-province">
+              <option value="">不设置</option><option>北京</option><option>天津</option><option>河北</option><option>山西</option><option>内蒙古</option><option>辽宁</option><option>吉林</option><option>黑龙江</option><option>上海</option><option>江苏</option><option>浙江</option><option>安徽</option><option>福建</option><option>江西</option><option>山东</option><option>河南</option><option>湖北</option><option>湖南</option><option>广东</option><option>广西</option><option>海南</option><option>重庆</option><option>四川</option><option>贵州</option><option>云南</option><option>西藏</option><option>陕西</option><option>甘肃</option><option>青海</option><option>宁夏</option><option>新疆</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-label">洛谷 UID <span class="field-label-hint">选填</span></div>
+            <input id="r-luogu" type="text" placeholder="如：123456" autocomplete="off" inputmode="numeric">
+          </div>
+        </div>
+
+        <div class="badge-section" id="badge-block">
+          <div class="badge-section-label">OI 水平 <span style="color:var(--text3);font-size:8.5px;letter-spacing:0">选填</span></div>
+          <div class="badge-row" id="badge-row-main">
+            <div class="badge-chip" data-badge="蒟蒻" onclick="toggleBadge(this,'蒟蒻')"><span class="dot" style="background:#9b9b9b"></span>蒟蒻</div>
+            <div class="badge-chip" data-badge="CSP-J" onclick="toggleBadge(this,'CSP-J')"><span class="dot" style="background:#4e9af1"></span>CSP-J</div>
+            <div class="badge-chip" data-badge="CSP-S" onclick="toggleBadge(this,'CSP-S')"><span class="dot" style="background:#4e9af1"></span>CSP-S</div>
+            <div class="badge-chip" data-badge="NOIP一等" onclick="toggleBadge(this,'NOIP一等')"><span class="dot" style="background:#2de8b0"></span>NOIP 一等</div>
+            <div class="badge-chip" data-badge="NOIP二等" onclick="toggleBadge(this,'NOIP二等')"><span class="dot" style="background:#2de8b0"></span>NOIP 二等</div>
+            <div class="badge-chip" data-badge="NOIP三等" onclick="toggleBadge(this,'NOIP三等')"><span class="dot" style="background:#2de8b0"></span>NOIP 三等</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div class="badge-section-label" style="margin-bottom:6px">省队</div>
+            <div class="badge-row">
+              <div class="badge-chip" data-badge="省队" onclick="toggleProvince(this)"><span class="dot" style="background:#c792ea"></span>省队</div>
+            </div>
+            <div class="province-wrap" id="province-wrap">
+              <div class="badge-section-sub">选择省份</div>
+              <div class="badge-row" id="province-row" style="max-height:100px;overflow-y:auto;scrollbar-width:none;gap:4px;"></div>
+            </div>
+          </div>
+          <div style="margin-top:8px;">
+            <div class="badge-section-label" style="margin-bottom:6px">NOI</div>
+            <div class="badge-row">
+              <div class="badge-chip" data-badge="NOI金" onclick="toggleBadge(this,'NOI金')"><span class="dot" style="background:#FFD700"></span>金牌</div>
+              <div class="badge-chip" data-badge="NOI银" onclick="toggleBadge(this,'NOI银')"><span class="dot" style="background:#C0C0C0"></span>银牌</div>
+              <div class="badge-chip" data-badge="NOI铜" onclick="toggleBadge(this,'NOI铜')"><span class="dot" style="background:#CD7F32"></span>铜牌</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-err" id="register-err-2"></div>
+        <button class="btn-submit" id="btn-register" onclick="doRegister()">
+          <div class="btn-inner"><div class="spinner-ring"></div><span class="btn-label">创建账号</span></div>
+        </button>
+        <button class="btn-back" onclick="goBack()">← 返回上一步</button>
+      </div>
     </div>
 
+    <!-- SUCCESS -->
     <div class="success-overlay" id="success-overlay">
       <div class="success-check">✓</div>
       <div class="success-name" id="success-name">欢迎</div>
@@ -255,6 +368,7 @@ html,body{width:100%;height:100%;background:var(--ink);color:var(--text);font-fa
 <div class="page-foot"><a href="index.html">← 返回首页</a> &nbsp;·&nbsp; HJOI</div>
 
 <script>
+// ── 背景光球 ──────────────────────────────────────────
 const cv=document.getElementById('orb-canvas'),cx=cv.getContext('2d');
 let W,H,mx=-999,my=-999;
 function rsz(){W=cv.width=innerWidth;H=cv.height=innerHeight;}rsz();
@@ -265,70 +379,277 @@ const ORBS=[{bx:.18,by:.12,r:300,c:'79,142,247',ph:0,sp:.00075},{bx:.82,by:.82,r
 let t=0;
 (function frame(){cx.clearRect(0,0,W,H);t++;ORBS.forEach(o=>{const fx=(o.bx+Math.sin(t*o.sp+o.ph)*.09)*W,fy=(o.by+Math.cos(t*o.sp+o.ph*1.4)*.07)*H,dx=mx-fx,dy=my-fy,dist=Math.hypot(dx,dy),pull=Math.max(0,(500-dist)/500)*.05,px=fx+dx*pull,py=fy+dy*pull,g=cx.createRadialGradient(px,py,0,px,py,o.r);g.addColorStop(0,`rgba(${o.c},.12)`);g.addColorStop(.5,`rgba(${o.c},.04)`);g.addColorStop(1,`rgba(${o.c},0)`);cx.fillStyle=g;cx.beginPath();cx.arc(px,py,o.r,0,Math.PI*2);cx.fill();});requestAnimationFrame(frame);})();
 
+// ── API ───────────────────────────────────────────────
+const API_BASE='https://zestful-determination-production.up.railway.app/api/v1';
+async function apiRequest(path,options={}){
+  const token=localStorage.getItem('hjoi_token');
+  const headers={'Content-Type':'application/json',...(options.headers||{})};
+  if(token)headers['Authorization']=`Bearer ${token}`;
+  const res=await fetch(API_BASE+path,{...options,headers});
+  if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.detail||'请求失败');}
+  return res.json();
+}
 
-// ── OI Badge 选择逻辑 ──
+// 已登录则直接跳转
+(async()=>{
+  const token=localStorage.getItem('hjoi_token');
+  if(token){try{await apiRequest('/auth/session');window.location.href='index.html';}catch(e){localStorage.removeItem('hjoi_token');}}
+})();
+
+// ── Toast ─────────────────────────────────────────────
+let _toastTimer;
+function showToast(msg, type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show '+(type==='ok'?'ok':type==='err'?'err':'');
+  clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ── 工具 ──────────────────────────────────────────────
+function showError(id,msg){const el=document.getElementById(id);el.textContent=msg;el.classList.add('show');}
+function clearError(id){const el=document.getElementById(id);el.textContent='';el.classList.remove('show');}
+function clearAllErrors(){['login-err','register-err-1','register-err-2'].forEach(clearError);}
+function showSuccess(username){document.getElementById('success-name').textContent=`欢迎，${username}`;document.getElementById('success-overlay').classList.add('show');setTimeout(()=>{window.location.href='index.html';},1600);}
+function setLoading(id,on,label){const btn=document.getElementById(id);btn.disabled=on;btn.classList.toggle('loading',on);if(label)btn.querySelector('.btn-label').textContent=on?'处理中…':label;}
+
+// ── Tab 切换 ──────────────────────────────────────────
+function switchTab(tab){
+  document.getElementById('tab-login').classList.toggle('active',tab==='login');
+  document.getElementById('tab-register').classList.toggle('active',tab==='register');
+  document.getElementById('form-login').style.display=tab==='login'?'':'none';
+  document.getElementById('form-register').style.display=tab==='register'?'':'none';
+  clearAllErrors();
+  if(tab==='register') resetRegToStep1();
+}
+
+// ── 忘记密码提示 ──────────────────────────────────────
+function showForgotHint(e){e.preventDefault();showToast('请联系管理员重置密码','');}
+
+// ── Enter 键 ──────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  if(document.getElementById('form-login').style.display!=='none') doLogin();
+  else if(document.getElementById('reg-step-1').classList.contains('active')) doRegStep1();
+  else doRegister();
+});
+
+// ── Ripple ────────────────────────────────────────────
+document.querySelectorAll('.btn-submit').forEach(btn=>{btn.addEventListener('pointerdown',e=>{const r=btn.getBoundingClientRect(),s=Math.max(r.width,r.height),rip=document.createElement('span');rip.className='ripple';rip.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;btn.appendChild(rip);setTimeout(()=>rip.remove(),500);});});
+
+// ── 登录 ──────────────────────────────────────────────
+async function doLogin(){
+  clearAllErrors();
+  const username=document.getElementById('l-user').value.trim();
+  const password=document.getElementById('l-pass').value;
+  if(!username){showError('login-err','请输入用户名');return;}
+  if(!password){showError('login-err','请输入密码');return;}
+  setLoading('btn-login',true,'进入系统');
+  try{
+    const data=await apiRequest('/auth/login',{method:'POST',body:JSON.stringify({username,password})});
+    localStorage.setItem('hjoi_token',data.access_token);
+    showSuccess(username);
+  }catch(e){
+    showError('login-err',e.message||'用户名或密码错误');
+    setLoading('btn-login',false,'进入系统');
+  }
+}
+
+// ── 注册 Step 1：表单验证 + inline 校验 ──────────────
+
+function validateUsername(input){
+  const v=input.value.trim();
+  const err=document.getElementById('r-user-err');
+  if(!v){input.className='';err.classList.remove('show');return false;}
+  if(v.length<2||v.length>20){
+    input.classList.remove('is-valid');input.classList.add('is-invalid');
+    err.textContent='2-20个字符';err.classList.add('show');return false;
+  }
+  if(!/^[a-zA-Z0-9_]+$/.test(v)){
+    input.classList.remove('is-valid');input.classList.add('is-invalid');
+    err.textContent='只能含字母、数字、下划线';err.classList.add('show');return false;
+  }
+  input.classList.remove('is-invalid');input.classList.add('is-valid');
+  err.classList.remove('show');return true;
+}
+
+function validateEmail(input){
+  const v=input.value.trim();
+  const ok=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  input.classList.toggle('is-valid',ok&&v.length>0);
+  input.classList.toggle('is-invalid',!ok&&v.length>0);
+  return ok;
+}
+
+function validatePass2(input){
+  const pw=document.getElementById('r-pass').value;
+  const ok=input.value===pw&&pw.length>=6;
+  input.classList.toggle('is-valid',ok&&input.value.length>0);
+  input.classList.toggle('is-invalid',!ok&&input.value.length>0);
+}
+
+function checkPwStrength(v){
+  let score=0;
+  if(v.length>=6)score++;if(v.length>=10)score++;
+  if(/[A-Z]/.test(v)&&/[a-z]/.test(v))score++;
+  if(/[^a-zA-Z0-9]/.test(v)||/[0-9]/.test(v)&&v.length>=8)score++;
+  for(let i=1;i<=4;i++){
+    const b=document.getElementById('pwb'+i);
+    b.className='pw-bar'+(i<=score?' s'+score:'');
+  }
+}
+
+function onCodeInput(input){
+  input.value=input.value.replace(/\D/g,'').slice(0,6);
+  const done=input.value.length===6;
+  document.getElementById('code-valid-icon').classList.toggle('show',done);
+  input.classList.toggle('is-valid',done);
+}
+
+// ── 发送验证码 ─────────────────────────────────────────
+let _codeCooldown=0;
+async function sendCode(){
+  const email=document.getElementById('r-email').value.trim();
+  if(!validateEmail(document.getElementById('r-email'))){
+    showToast('请输入有效邮箱','err');return;
+  }
+  const btn=document.getElementById('btn-send-code');
+  btn.disabled=true;
+  try{
+    await apiRequest('/auth/send-code',{method:'POST',body:JSON.stringify({email})});
+    showToast('验证码已发送，请查收邮件','ok');
+    startCooldown(btn);
+  }catch(e){
+    showToast(e.message||'发送失败','err');
+    btn.disabled=false;
+  }
+}
+
+function startCooldown(btn){
+  let s=60;
+  btn.classList.add('cooldown');
+  btn.textContent=`${s}s`;
+  const iv=setInterval(()=>{
+    s--;btn.textContent=`${s}s`;
+    if(s<=0){clearInterval(iv);btn.textContent='重新发送';btn.disabled=false;btn.classList.remove('cooldown');}
+  },1000);
+}
+
+// ── 注册 Step 1 提交 ──────────────────────────────────
+async function doRegStep1(){
+  clearError('register-err-1');
+  const uOk=validateUsername(document.getElementById('r-user'));
+  const eOk=validateEmail(document.getElementById('r-email'));
+  const pw=document.getElementById('r-pass').value;
+  const pw2=document.getElementById('r-pass2').value;
+  const code=document.getElementById('r-code').value.trim();
+
+  if(!uOk){showError('register-err-1','用户名不合规');return;}
+  if(pw.length<6){showError('register-err-1','密码至少6位');return;}
+  if(pw!==pw2){showError('register-err-1','两次密码不一致');return;}
+  if(!eOk){showError('register-err-1','请输入有效邮箱');return;}
+  if(code.length!==6){showError('register-err-1','请输入6位验证码');return;}
+
+  // 校验验证码（可选：也可放到最终提交时统一校验）
+  // 这里直接进入step2，验证码在最终提交时后端校验
+  goToStep2();
+}
+
+// ── 步骤切换 ──────────────────────────────────────────
+let _currentStep=1;
+
+function goToStep2(){
+  _currentStep=2;
+  document.getElementById('reg-step-1').classList.remove('active','back');
+  document.getElementById('reg-step-2').classList.add('active');
+  document.getElementById('sdot-1').className='step-dot done';
+  document.getElementById('sdot-2').className='step-dot active';
+  document.getElementById('step-label').textContent='竞赛资料';
+}
+
+function goBack(){
+  _currentStep=1;
+  document.getElementById('reg-step-2').classList.remove('active');
+  document.getElementById('reg-step-1').classList.add('active','back');
+  document.getElementById('sdot-1').className='step-dot active';
+  document.getElementById('sdot-2').className='step-dot';
+  document.getElementById('step-label').textContent='基本信息';
+}
+
+function resetRegToStep1(){
+  _currentStep=1;
+  document.getElementById('reg-step-1').classList.add('active');
+  document.getElementById('reg-step-2').classList.remove('active');
+  document.getElementById('sdot-1').className='step-dot active';
+  document.getElementById('sdot-2').className='step-dot';
+  document.getElementById('step-label').textContent='基本信息';
+}
+
+// ── 注册最终提交 ──────────────────────────────────────
+async function doRegister(){
+  clearError('register-err-2');
+  const group_val=document.getElementById('r-group').value;
+  const group_id=group_val?parseInt(group_val):null;
+  if(!group_id){showError('register-err-2','请选择训练组');return;}
+
+  const username=document.getElementById('r-user').value.trim();
+  const password=document.getElementById('r-pass').value;
+  const email=document.getElementById('r-email').value.trim();
+  const code=document.getElementById('r-code').value.trim();
+  const luogu_uid=document.getElementById('r-luogu').value.trim();
+  const province=document.getElementById('r-province').value;
+
+  setLoading('btn-register',true,'创建账号');
+  try{
+    // 使用邮箱验证码注册接口
+    const data=await apiRequest('/auth/register-email',{
+      method:'POST',
+      body:JSON.stringify({
+        email, code, username, password,
+        luogu_uid:luogu_uid||null,
+        group_id,
+        oi_badge:_selectedBadge||null,
+        province:province||null,
+      })
+    });
+    localStorage.setItem('hjoi_token',data.access_token);
+    showSuccess(username);
+  }catch(e){
+    showError('register-err-2',e.message||'注册失败');
+    setLoading('btn-register',false,'创建账号');
+  }
+}
+
+// ── Badge 选择 ────────────────────────────────────────
 const PROVINCES=['北京','天津','河北','山西','内蒙古','辽宁','吉林','黑龙江','上海','江苏','浙江','安徽','福建','江西','山东','河南','湖北','湖南','广东','广西','海南','重庆','四川','贵州','云南','西藏','陕西','甘肃','青海','宁夏','新疆'];
 (function initProvinces(){
-  const row = document.getElementById('province-row');
-  if(!row) return;
+  const row=document.getElementById('province-row');
+  if(!row)return;
   PROVINCES.forEach(p=>{
-    const chip = document.createElement('div');
-    chip.className = 'badge-chip';
-    chip.dataset.badge = '省队-'+p;
-    chip.textContent = p;
-    chip.onclick = function(){ toggleBadge(this, '省队-'+p); };
+    const chip=document.createElement('div');
+    chip.className='badge-chip';chip.dataset.badge='省队-'+p;chip.textContent=p;
+    chip.onclick=function(){toggleBadge(this,'省队-'+p);};
     row.appendChild(chip);
   });
 })();
 
-let _selectedBadge = '';  // 单选
-
-function toggleBadge(el, badge){
-  // 互斥：只能选一个
-  if(el.classList.contains('on')){
-    el.classList.remove('on');
-    _selectedBadge = '';
-  } else {
+let _selectedBadge='';
+function toggleBadge(el,badge){
+  if(el.classList.contains('on')){el.classList.remove('on');_selectedBadge='';}
+  else{
     document.querySelectorAll('#badge-block .badge-chip').forEach(c=>c.classList.remove('on'));
-    el.classList.add('on');
-    _selectedBadge = badge;
-    // 选了非省队时关闭省份
-    if(badge !== '省队') document.getElementById('province-wrap').classList.remove('open');
+    el.classList.add('on');_selectedBadge=badge;
+    if(badge!=='省队')document.getElementById('province-wrap').classList.remove('open');
   }
 }
-
 function toggleProvince(el){
-  const wrap = document.getElementById('province-wrap');
-  const isOpen = wrap.classList.contains('open');
-  if(el.classList.contains('on') && isOpen){
-    el.classList.remove('on');
-    _selectedBadge = '';
-    wrap.classList.remove('open');
-  } else {
+  const wrap=document.getElementById('province-wrap');
+  const isOpen=wrap.classList.contains('open');
+  if(el.classList.contains('on')&&isOpen){el.classList.remove('on');_selectedBadge='';wrap.classList.remove('open');}
+  else{
     document.querySelectorAll('#badge-block .badge-chip').forEach(c=>c.classList.remove('on'));
-    el.classList.add('on');
-    wrap.classList.toggle('open', true);
-    // 不设省份时先把省队记为无省份
-    if(!_selectedBadge.startsWith('省队-')) _selectedBadge = '省队';
+    el.classList.add('on');wrap.classList.toggle('open',true);
+    if(!_selectedBadge.startsWith('省队-'))_selectedBadge='省队';
   }
 }
-
-function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('form-login').style.display=tab==='login'?'':'none';document.getElementById('form-register').style.display=tab==='register'?'':'none';clearErrors();}
-function clearErrors(){['login-err','register-err'].forEach(id=>{const el=document.getElementById(id);el.textContent='';el.classList.remove('show');});}
-function showError(id,msg){const el=document.getElementById(id);el.textContent=msg;el.classList.add('show');}
-document.querySelectorAll('.btn-submit').forEach(btn=>{btn.addEventListener('pointerdown',e=>{const r=btn.getBoundingClientRect(),s=Math.max(r.width,r.height),rip=document.createElement('span');rip.className='ripple';rip.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;btn.appendChild(rip);setTimeout(()=>rip.remove(),500);});});
-document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;document.getElementById('form-login').style.display!=='none'?doLogin():doRegister();});
-
-const API_BASE='https://zestful-determination-production.up.railway.app/api/v1';
-async function apiRequest(path,options={}){const token=localStorage.getItem('hjoi_token');const headers={'Content-Type':'application/json',...(options.headers||{})};if(token)headers['Authorization']=`Bearer ${token}`;const res=await fetch(API_BASE+path,{...options,headers});if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.detail||'请求失败');}return res.json();}
-// 已登录则直接跳转
-(async()=>{const token=localStorage.getItem('hjoi_token');if(token){try{await apiRequest('/auth/session');window.location.href='index.html';}catch(e){localStorage.removeItem('hjoi_token');}}})();
-function toEmail(u){return`${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@oiteam.local`;}
-function showSuccess(username){document.getElementById('success-name').textContent=`欢迎，${username}`;document.getElementById('success-overlay').classList.add('show');setTimeout(()=>{window.location.href='index.html';},1600);}
-function setLoading(id,on){const btn=document.getElementById(id);btn.disabled=on;btn.classList.toggle('loading',on);btn.querySelector('.btn-label').textContent=on?'验证中…':(id==='btn-login'?'进入系统':'创建账号');}
-async function doLogin(){clearErrors();const username=document.getElementById('l-user').value.trim(),password=document.getElementById('l-pass').value;if(!username){showError('login-err','请输入用户名');return;}if(!password){showError('login-err','请输入密码');return;}setLoading('btn-login',true);try{const data=await apiRequest('/auth/login',{method:'POST',body:JSON.stringify({username,password})});localStorage.setItem('hjoi_token',data.access_token);showSuccess(username);}catch(e){showError('login-err',e.message||'用户名或密码错误');setLoading('btn-login',false);}}
-async function doRegister(){clearErrors();const username=document.getElementById('r-user').value.trim(),password=document.getElementById('r-pass').value,password2=document.getElementById('r-pass2').value,group_val=document.getElementById('r-group').value,group_id=group_val?parseInt(group_val):null,luogu_uid=document.getElementById('r-luogu').value.trim();if(!username||username.length<2){showError('register-err','用户名至少2位');return;}if(!/^[a-zA-Z0-9_]+$/.test(username)){showError('register-err','只能含字母、数字、下划线');return;}if(password.length<6){showError('register-err','密码至少6位');return;}if(password!==password2){showError('register-err','两次密码不一致');return;}if(!group_id){showError('register-err','请选择训练组');return;}setLoading('btn-register',true);try{await apiRequest('/auth/register',{method:'POST',body:JSON.stringify({username,password,oi_badge:_selectedBadge||null,province:document.getElementById('r-province')?.value||null})});await new Promise(r=>setTimeout(r,800));const data=await apiRequest('/auth/login',{method:'POST',body:JSON.stringify({username,password})});localStorage.setItem('hjoi_token',data.access_token);showSuccess(username);}catch(e){showError('register-err',e.message||'注册失败');setLoading('btn-register',false);}}
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>
