@@ -5139,7 +5139,7 @@ function avatarEl(username,avatarUrl,size,fontSize){
     const y = baseY + (Math.random() - 0.5) * (H / LANES) * 0.4;
     const speed = 0.14 + Math.random() * 0.28;   // 更慢，飘逸感
     const size = 11 + Math.random() * 5;
-    const opacity = 0.18 + Math.random() * 0.22; // 提亮：之前0.05~0.15太淡，现在0.18~0.40清晰可见
+    const opacity = 0.38 + Math.random() * 0.28; // 0.38~0.66，更清晰可见
     const color = colors[Math.floor(Math.random() * colors.length)];
     const word = words[Math.floor(Math.random() * words.length)];
     const x = startX !== undefined ? startX : W + 60 + Math.random() * 600;
