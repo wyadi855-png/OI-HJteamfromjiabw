@@ -777,6 +777,63 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .member-card{background:var(--glass-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px 16px;text-align:center;cursor:pointer;transition:all 0.3s;}
 .member-card:hover{border-color:rgba(108,142,245,0.3);transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.3);}
 .member-name{font-family:var(--mono);font-size:12px;color:var(--accent2);margin-bottom:4px;}
+
+/* ── Community 成员横向卡片 ── */
+.cm-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.cm-card{
+  display:flex;align-items:center;gap:14px;
+  padding:13px 16px;
+  background:rgba(15,19,32,0.55);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px;
+  cursor:pointer;
+  transition:transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s ease, border-color 0.2s ease, background 0.2s ease;
+  position:relative;overflow:hidden;
+}
+.cm-card::before{
+  content:'';position:absolute;inset:0;border-radius:16px;
+  background:linear-gradient(135deg,rgba(108,142,245,0.04) 0%,rgba(45,232,176,0.02) 100%);
+  opacity:0;transition:opacity 0.2s;pointer-events:none;
+}
+.cm-card:hover{
+  transform:translateY(-2px);
+  border-color:rgba(108,142,245,0.22);
+  box-shadow:0 6px 24px rgba(0,0,0,0.3), 0 0 0 1px rgba(108,142,245,0.08);
+  background:rgba(20,25,45,0.75);
+}
+.cm-card:hover::before{opacity:1;}
+.cm-card:active{transform:scale(0.985) translateY(0);}
+.cm-avatar{
+  width:48px;height:48px;
+  border-radius:13px;
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;color:#fff;
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,0.35);
+}
+.cm-avatar img{width:100%;height:100%;object-fit:cover;border-radius:13px;}
+.cm-avatar.is-coach{box-shadow:0 0 0 2px rgba(255,179,71,0.6),0 2px 10px rgba(255,179,71,0.2);}
+.cm-info{flex:1;min-width:0;}
+.cm-username{
+  font-family:var(--mono);font-size:13px;font-weight:600;
+  color:rgba(255,255,255,0.9);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:5px;
+}
+.cm-tags{display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
+.cm-tag{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 7px;border-radius:6px;letter-spacing:0.02em;white-space:nowrap;}
+.cm-tag-coach{color:#ffb347;background:rgba(255,179,71,0.1);border:1px solid rgba(255,179,71,0.2);}
+.cm-tag-province{color:rgba(108,142,245,0.9);background:rgba(108,142,245,0.08);border:1px solid rgba(108,142,245,0.18);}
+.cm-arrow{font-size:12px;color:rgba(255,255,255,0.18);flex-shrink:0;transition:color 0.2s,transform 0.2s;}
+.cm-card:hover .cm-arrow{color:rgba(108,142,245,0.6);transform:translateX(2px);}
+@media(max-width:600px){
+  .cm-card{padding:11px 13px;gap:11px;}
+  .cm-avatar{width:42px;height:42px;border-radius:11px;}
+  .cm-avatar img{border-radius:11px;}
+  .cm-username{font-size:12px;}
+}
 .member-role{font-size:12px;color:var(--text3);margin-bottom:12px;}
 .member-stats{display:flex;gap:0;justify-content:center;}
 .member-stat{flex:1;padding:6px 0;border-top:1px solid rgba(108,142,245,0.08);}
@@ -6157,35 +6214,48 @@ async function loadCommunityMembers(){
   const el=document.getElementById('community-members-list');
   if(!el) return;
   try{
-    const{data:members}=await sb.from('profiles').select('id,username,avatar_url,role').order('created_at');
+    const{data:members}=await sb.from('profiles').select('id,username,avatar_url,role,oi_badge,province').order('created_at');
     if(!members||!members.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><p>暂无成员</p></div>';return;}
     _allCommunityMembers=members;
-    el.innerHTML=`<div class="members-grid">${members.map(m=>{
-      const av=m.avatar_url?`<img src="${escHtml(m.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:`<span style="font-size:16px;font-weight:700;color:#060610">${(m.username||'?')[0].toUpperCase()}</span>`;
-      const bg=m.avatar_url?'transparent':avatarGradient(m.username||'');
-      return `<div class="member-card" onclick="show('profile');showProfile('${escHtml(m.username)}')">
-        <div class="member-avatar" style="background:${bg}">${av}</div>
-        <div class="member-name">@${escHtml(m.username||'')}</div>
-        ${m.role==='coach'?'<span class="coach-badge" style="font-size:10px;margin-top:2px">教练</span>':''}
-      </div>`;
-    }).join('')}</div>`;
+    el.innerHTML=renderCmGrid(members);
   }catch(e){el.innerHTML='<div class="empty-state"><p>加载失败</p></div>';}
+}
+
+function renderCmGrid(members){
+  return `<div class="cm-grid">${members.map(m=>{
+    const isCoach=m.role==='coach';
+    const bg=m.avatar_url?'transparent':avatarGradient(m.username||'');
+    const av=m.avatar_url
+      ?`<img src="${escHtml(m.avatar_url)}" alt="">`
+      :`<span style="font-size:18px;font-weight:700;color:#fff;mix-blend-mode:luminosity">${(m.username||'?')[0].toUpperCase()}</span>`;
+    // OI badge颜色
+    let badgeHtml='';
+    if(m.oi_badge){
+      const cfg={'蒟蒻':{c:'#9b9b9b',bg:'rgba(155,155,155,.1)',br:'rgba(155,155,155,.2)'},'CSP-J':{c:'#4e9af1',bg:'rgba(78,154,241,.1)',br:'rgba(78,154,241,.2)'},'CSP-S':{c:'#4e9af1',bg:'rgba(78,154,241,.1)',br:'rgba(78,154,241,.2)'},'NOIP一等':{c:'#2de8b0',bg:'rgba(45,232,176,.1)',br:'rgba(45,232,176,.2)'},'NOIP二等':{c:'#2de8b0',bg:'rgba(45,232,176,.1)',br:'rgba(45,232,176,.2)'},'NOIP三等':{c:'#2de8b0',bg:'rgba(45,232,176,.1)',br:'rgba(45,232,176,.2)'},'NOI金':{c:'#FFD700',bg:'rgba(255,215,0,.1)',br:'rgba(255,215,0,.25)'},'NOI银':{c:'#C0C0C0',bg:'rgba(192,192,192,.1)',br:'rgba(192,192,192,.25)'},'NOI铜':{c:'#CD7F32',bg:'rgba(205,127,50,.1)',br:'rgba(205,127,50,.25)'}};
+      const label=m.oi_badge.startsWith('省队-')?'省队·'+m.oi_badge.slice(3):m.oi_badge;
+      const s=cfg[m.oi_badge]||{c:'#c792ea',bg:'rgba(199,146,234,.1)',br:'rgba(199,146,234,.2)'};
+      badgeHtml=`<span class="cm-tag" style="color:${s.c};background:${s.bg};border:1px solid ${s.br}">${escHtml(label)}</span>`;
+    }
+    const coachTag=isCoach?'<span class="cm-tag cm-tag-coach">教练</span>':'';
+    const provTag=m.province?`<span class="cm-tag cm-tag-province">${escHtml(m.province)}</span>`:'';
+    const hasTags=isCoach||m.oi_badge||m.province;
+    return `<div class="cm-card" onclick="show('profile');showProfile('${escHtml(m.username)}')">
+      <div class="cm-avatar${isCoach?' is-coach':''}" style="background:${bg}">${av}</div>
+      <div class="cm-info">
+        <div class="cm-username">@${escHtml(m.username||'')}</div>
+        ${hasTags?`<div class="cm-tags">${coachTag}${badgeHtml}${provTag}</div>`:''}
+      </div>
+      <span class="cm-arrow">›</span>
+    </div>`;
+  }).join('')}</div>`;
 }
 
 function filterCommunityMembers(){
   const q=(document.getElementById('community-member-search')?.value||'').toLowerCase();
   const el=document.getElementById('community-members-list');
   if(!el||!_allCommunityMembers.length) return;
-  const filtered=_allCommunityMembers.filter(m=>(m.username||'').toLowerCase().includes(q));
-  el.innerHTML=`<div class="members-grid">${filtered.map(m=>{
-    const av=m.avatar_url?`<img src="${escHtml(m.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:`<span style="font-size:16px;font-weight:700;color:#060610">${(m.username||'?')[0].toUpperCase()}</span>`;
-    const bg=m.avatar_url?'transparent':avatarGradient(m.username||'');
-    return `<div class="member-card" onclick="show('profile');showProfile('${escHtml(m.username)}')">
-      <div class="member-avatar" style="background:${bg}">${av}</div>
-      <div class="member-name">@${escHtml(m.username||'')}</div>
-      ${m.role==='coach'?'<span class="coach-badge" style="font-size:10px;margin-top:2px">教练</span>':''}
-    </div>`;
-  }).join('')}</div>`;
+  const filtered=_allCommunityMembers.filter(m=>(m.username||'').toLowerCase().includes(q)||(m.province||'').toLowerCase().includes(q));
+  el.innerHTML=renderCmGrid(filtered);
 }
 
 async function loadCommunityEmotions(){
