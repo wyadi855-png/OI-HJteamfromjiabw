@@ -7097,15 +7097,15 @@ async function loadProfileSocial(profile, username){
     wrap.className = 'rel-graph-wrap';
     const W = 520;
     const peers = mutualPeers.slice(0, 12);
-    const radius = Math.min(185, 90 + peers.length * 12);
-    const cx = W / 2, cy = 60;
+    const radius = Math.min(175, 80 + peers.length * 10);
+    const cx = W / 2, cy = W / 2;  // 中心点居中
     const angleStep = peers.length === 1 ? 0 : (Math.PI * 1.4) / (peers.length - 1);
     const angleStart = Math.PI / 2 + (peers.length === 1 ? 0 : -(Math.PI * 1.4) / 2);
     const peerPositions = peers.map((p, i) => {
       const angle = peers.length === 1 ? Math.PI / 2 : angleStart + i * angleStep;
       return { ...p, x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius };
     });
-    const svgH = Math.max(220, cy + radius + 70);
+    const svgH = W;  // 正方形画布，内容完整居中
     const R = 28; // 基础节点半径
     // 节点大小根据互关数动态调整：互关越多越大
     const peerCount = peers.length;
@@ -7115,13 +7115,12 @@ async function loadProfileSocial(profile, username){
   <filter id="rg-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   <radialGradient id="rg-center" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#a0eaff"/><stop offset="100%" stop-color="#2090c8"/></radialGradient>
   <radialGradient id="rg-peer" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#c0d8ff"/><stop offset="100%" stop-color="#4060a8"/></radialGradient>
-  <!-- 箭头：中心→周围 (out) -->
-  <marker id="arr-out" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-    <path d="M0,0 L0,6 L8,3 z" fill="rgba(45,232,176,0.7)"/>
+  <!-- 箭头：细小简洁 -->
+  <marker id="arr-out" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+    <path d="M0,1 L5,3 L0,5" fill="none" stroke="rgba(45,232,176,0.8)" stroke-width="1"/>
   </marker>
-  <!-- 箭头：周围→中心 (in) -->
-  <marker id="arr-in" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-    <path d="M0,0 L0,6 L8,3 z" fill="rgba(108,142,245,0.7)"/>
+  <marker id="arr-in" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+    <path d="M0,1 L5,3 L0,5" fill="none" stroke="rgba(108,142,245,0.8)" stroke-width="1"/>
   </marker>
 </defs>
 <pattern id="rg-grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(108,142,245,0.04)" stroke-width="1"/></pattern>
@@ -7190,18 +7189,6 @@ async function loadProfileSocial(profile, username){
       svg += `<text x="${peer.x.toFixed(1)}" y="${(peer.y-7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.4)">@</text>`;
       svg += `<text x="${peer.x.toFixed(1)}" y="${(peer.y+7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="600" fill="#c8dcff">${escHtml(peer.username.slice(0,7))}</text>`;
       svg += `</g>`;
-    });
-
-    // 流动粒子（每条有向边上一个小点来回流动）
-    peerPositions.forEach((peer, i) => {
-      const labelAB = labelMap[profileId]?.[peer.id];
-      const labelBA = labelMap[peer.id]?.[profileId];
-      const delay = (i * 0.4).toFixed(1);
-      if(labelAB || labelBA) {
-        const pathId = `rg-path-${i}`;
-        svg += `<path id="${pathId}" d="M${cx},${cy} L${peer.x.toFixed(1)},${peer.y.toFixed(1)}" fill="none" stroke="none"/>`;
-        svg += `<circle r="2.5" fill="rgba(45,232,176,0.9)" opacity="0" style="animation-delay:${delay}s"><animateMotion dur="1.8s" repeatCount="indefinite" begin="${delay}s"><mpath href="#${pathId}"/></animateMotion><animate attributeName="opacity" values="0;1;1;0" dur="1.8s" repeatCount="indefinite" begin="${delay}s"/></circle>`;
-      }
     });
 
     svg += `</svg>`;
@@ -7838,13 +7825,14 @@ async function saveSettings(){
     const fill=document.getElementById('avatar-upload-fill');
     const lbl=document.getElementById('avatar-upload-label');
     prog.style.display='block'; fill.style.width='30%'; lbl.textContent='上传中…';
-    const ext=file.name.split('.').pop();
-    const path=`avatars/${currentUser.id}.${ext}`;
-    const{error:upErr}=await sb.storage.from('note-images').upload(path,file,{upsert:true,contentType:file.type});
-    if(upErr){errEl.textContent='头像上传失败: '+upErr.message;prog.style.display='none';return;}
+    const formData=new FormData();
+    formData.append('file',file);
+    const token=localStorage.getItem('hjoi_token');
+    const upRes=await fetch(API_BASE+'/auth/avatar',{method:'POST',headers:{'Authorization':'Bearer '+token},body:formData});
+    if(!upRes.ok){const e=await upRes.json().catch(()=>({}));errEl.textContent='头像上传失败: '+(e.detail||upRes.status);prog.style.display='none';return;}
+    const upData=await upRes.json();
     fill.style.width='100%'; lbl.textContent='完成 ✓';
-    const{data:urlData}=sb.storage.from('note-images').getPublicUrl(path);
-    avatar_url=urlData.publicUrl+'?t='+Date.now();
+    avatar_url=upData.avatar_url+'?t='+Date.now();
     setTimeout(()=>prog.style.display='none',600);
   }
 
