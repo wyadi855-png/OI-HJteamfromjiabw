@@ -7899,9 +7899,7 @@ async function saveSettings(){
   closeModal('settings-modal');showToast('设置已保存 ✓','success');
   renderAuthArea();
   // 刷新个人主页（如果正在看）
-  if(document.getElementById('profile')?.classList.contains('active')){
-    showProfile(currentProfile.username);
-  }
+if(document.getElementById('profile')?.classList.contains('active')){
 }
 async function savePassword(){
   const pw=document.getElementById('set-newpw').value;
