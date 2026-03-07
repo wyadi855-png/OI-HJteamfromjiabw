@@ -1969,6 +1969,18 @@ mark.search-hl{
   color:var(--text3);background:none;border:none;
   cursor:pointer;padding:8px 0 0;transition:color 0.2s;display:block;}
 .ann-read-btn:hover{color:var(--accent2);}
+/* mood chips */
+.mood-chip{font-size:12px;padding:4px 10px;border-radius:100px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .15s;font-family:var(--mono);}
+.mood-chip:hover{border-color:var(--accent);color:var(--accent);}
+.mood-chip.active{border-color:var(--accent2);background:rgba(45,232,176,.1);color:var(--accent2);}
+.post-mood-tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:100px;background:rgba(45,232,176,.08);border:1px solid rgba(45,232,176,.2);color:var(--accent2);margin-bottom:8px;font-family:var(--mono);}
+/* post markdown */
+.post-card-body.markdown-body{font-size:13px;line-height:1.7;}
+.post-card-body.markdown-body h1,.post-card-body.markdown-body h2,.post-card-body.markdown-body h3{font-size:14px;margin:8px 0 4px;color:var(--text);}
+.post-card-body.markdown-body p{margin:4px 0;}
+.post-card-body.markdown-body code{background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:12px;font-family:var(--mono);}
+.post-card-body.markdown-body pre{background:var(--surface2);padding:10px;border-radius:8px;overflow-x:auto;margin:8px 0;}
+.post-card-body.markdown-body ul,.post-card-body.markdown-body ol{padding-left:20px;margin:4px 0;}
 .ann-expand-btn{display:inline-block;margin-top:8px;font-size:12px;color:var(--accent);cursor:pointer;font-family:var(--mono);letter-spacing:0.03em;transition:color 0.15s;}
 .ann-expand-btn:hover{color:var(--accent2);}
 .ann-content.ann-preview{white-space:pre-wrap;}
@@ -4003,7 +4015,17 @@ section:not(.active) {
 <section id="lectures"><div class="container">
   <div class="page-header">
     <div class="page-header-left"><div class="label">// courses</div><h1>课程</h1><p>课程记录与各班教学计划。</p></div>
-    <div style="display:flex;gap:8px;align-items:center">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input type="text" id="lecture-search" placeholder="搜索课程…" style="width:140px;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--mono)" oninput="filterLectures()">
+      <select id="lecture-level-filter" onchange="filterLectures()" style="padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--mono)">
+        <option value="">全部难度</option>
+        <option value="入门">入门</option>
+        <option value="普及-">普及-</option>
+        <option value="普及">普及</option>
+        <option value="普及+/提高-">普及+/提高-</option>
+        <option value="提高">提高</option>
+        <option value="省选/NOI">省选/NOI</option>
+      </select>
       <button class="btn btn-yellow btn-sm" id="btn-new-lecture" onclick="openLectureModal()" style="display:none">+ 添加课程</button>
       <button id="btn-add-syllabus" class="btn btn-primary btn-sm" onclick="openSyllabusModal()" style="display:none">+ 添加本周计划</button>
     </div>
@@ -4121,7 +4143,10 @@ section:not(.active) {
 
 <!-- MEMBERS -->
 <section id="members"><div class="container">
-  <div class="page-header"><div class="page-header-left"><div class="label">// members</div><h1>Oiers</h1><p>认识我们的每一位 Oier。</p></div></div>
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// members</div><h1>Oiers</h1><p>认识我们的每一位 Oier。</p></div>
+    <input type="text" id="member-search" placeholder="搜索成员…" style="width:150px;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--mono)" oninput="filterMembers()">
+  </div>
   <div id="members-list"><div class="loading"><div class="spinner"></div>加载中…</div></div>
 </div></section>
 
@@ -4231,7 +4256,19 @@ section:not(.active) {
 <!-- POST MODAL -->
 <div class="modal-overlay" id="post-modal"><div class="modal">
   <h2>📝 写随笔</h2>
-  <div class="form-group"><label>内容</label><textarea id="post-content" placeholder="记录今天的训练感受…" style="min-height:130px"></textarea></div>
+  <div class="form-group">
+    <label>心情</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap" id="mood-picker">
+      <span class="mood-chip" data-mood="💪 干劲满满">💪 干劲满满</span>
+      <span class="mood-chip" data-mood="🤔 有点难">🤔 有点难</span>
+      <span class="mood-chip" data-mood="😅 被题虐了">😅 被题虐了</span>
+      <span class="mood-chip" data-mood="🎉 AC了">🎉 AC了</span>
+      <span class="mood-chip" data-mood="😴 有点累">😴 有点累</span>
+      <span class="mood-chip" data-mood="💡 想明白了">💡 想明白了</span>
+    </div>
+    <input type="hidden" id="post-mood" value="">
+  </div>
+  <div class="form-group"><label>内容（支持 Markdown）</label><textarea id="post-content" placeholder="记录今天的训练感受…" style="min-height:130px"></textarea></div>
   <div id="post-error" class="form-error"></div>
   <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('post-modal')">取消</button><button class="btn btn-primary" onclick="submitPost()">发布</button></div>
 </div></div>
@@ -6229,7 +6266,8 @@ async function loadPosts(){
         <span class="post-card-author" onclick="event.stopPropagation();showProfile('${escHtml(p.profiles?.username||'')}')")>@${escHtml(p.profiles?.username||'匿名')}</span>
         <span class="post-card-date">${fmtDate(p.created_at)}</span>
       </div>
-      <div class="post-card-body">${escHtml(p.content).replace(/\n/g,'<br>')}</div>
+      ${p.mood?`<div class="post-mood-tag">${escHtml(p.mood)}</div>`:''}
+      <div class="post-card-body markdown-body">${(()=>{try{return DOMPurify.sanitize(marked.parse(p.content||''));}catch(e){return escHtml(p.content||'').replace(/\n/g,'<br>');}})()}</div>
       <div class="post-card-footer">
         <span class="post-comment-toggle" onclick="event.stopPropagation();togglePostComments(${p.id},this)">💬 <span class="cmt-count">...</span> 条评论</span>
         <button class="orz-btn" id="orz-btn-${p.id}" onclick="event.stopPropagation();togglePostLike(${p.id},this)"><span class="orz-text">orz</span><span class="orz-count" id="orz-count-${p.id}">0</span></button>
@@ -6368,8 +6406,31 @@ async function deletePostComment(id,postId){
   if(!confirm('确认删除？'))return;
   try{await apiRequest(`/posts/comments/${id}`,{method:'DELETE'});showToast('已删除','success');await renderPostComments(postId);}catch(e){showToast(e.message,'error');}
 }
-function openPostModal(){if(!currentUser){openModal('auth-modal');return;}openModal('post-modal');}
-async function submitPost(){const content=document.getElementById('post-content').value.trim();if(!content){document.getElementById('post-error').textContent='请填写内容';return;}try{await apiRequest('/posts',{method:'POST',body:JSON.stringify({content})});closeModal('post-modal');document.getElementById('post-content').value='';showToast('随笔发布成功 ✓','success');loadPosts();}catch(e){document.getElementById('post-error').textContent=e.message;}}
+function openPostModal(){
+  if(!currentUser){openModal('auth-modal');return;}
+  openModal('post-modal');
+  document.querySelectorAll('#mood-picker .mood-chip').forEach(chip=>{
+    chip.onclick=()=>{
+      const cur=document.getElementById('post-mood').value;
+      document.querySelectorAll('#mood-picker .mood-chip').forEach(c=>c.classList.remove('active'));
+      if(cur===chip.dataset.mood){document.getElementById('post-mood').value='';}
+      else{chip.classList.add('active');document.getElementById('post-mood').value=chip.dataset.mood;}
+    };
+  });
+}
+async function submitPost(){
+  const content=document.getElementById('post-content').value.trim();
+  const mood=document.getElementById('post-mood').value||null;
+  if(!content){document.getElementById('post-error').textContent='请填写内容';return;}
+  try{
+    await apiRequest('/posts',{method:'POST',body:JSON.stringify({content,mood})});
+    closeModal('post-modal');
+    document.getElementById('post-content').value='';
+    document.getElementById('post-mood').value='';
+    document.querySelectorAll('#mood-picker .mood-chip').forEach(c=>c.classList.remove('active'));
+    showToast('随笔发布成功 ✓','success');loadPosts();
+  }catch(e){document.getElementById('post-error').textContent=e.message;}
+}
 async function deletePost(id){if(!confirm('确认删除？'))return;try{await apiRequest(`/posts/${id}`,{method:'DELETE'});showToast('已删除','success');loadPosts();}catch(e){showToast(e.message,'error');}}
 
 // ── Lectures ───────────────────────────────────────────────
@@ -6389,33 +6450,50 @@ async function loadLectures(){
     </div>`).join('')+'</div>';
   const{data}=await sb.from('lectures').select('*').order('lecture_date',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty">暂无课程记录</div>';return;}
-  const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  _allLectures=data;
   list.innerHTML='';
-  data.forEach(l=>{
-    const problems=(l.problems||'').split(/[\s,]+/).filter(Boolean);
-    const homework=(l.homework||'').split(/[\s,]+/).filter(Boolean);
-    const conclusions=(l.conclusions||'').split('\n').map(s=>s.trim()).filter(Boolean);
-    const d=new Date(l.lecture_date);
-    const item=document.createElement('div');item.className='lecture-item';
-    function pchips(arr,cls){return arr.map(p=>'<a href="https://www.luogu.com.cn/problem/'+escHtml(p)+'" target="_blank" class="problem-chip '+cls+'">'+escHtml(p)+'</a>').join('');}
-    item.innerHTML=
-      '<div class="lecture-date-block">'
-      +'<div class="lecture-month">'+months[d.getMonth()]+'</div>'
-      +'<div class="lecture-day">'+d.getDate()+'</div>'
-      +'<div class="lecture-year">'+d.getFullYear()+'</div>'
-      +'</div>'
-      +'<div class="lecture-body">'
-      +'<div class="lecture-title-row"><span class="lecture-title-text">'+escHtml(l.topic)+'</span>'+(l.level?'<span class="lecture-level-tag">'+escHtml(l.level)+'</span>':'')+'</div>'
-      +(l.content?'<div class="lecture-desc">'+escHtml(l.content)+'</div>':'')
-      +(conclusions.length?'<div class="lecture-conclusions"><div class="lecture-section-label">💡 关键结论</div><ol class="conclusions-list">'+conclusions.map(c=>'<li>'+escHtml(c)+'</li>').join('')+'</ol></div>':'')
-      +(problems.length?'<div class="lecture-section-label" style="margin-top:10px">📌 讲解题</div><div class="problem-chips">'+pchips(problems,'chip-blue')+'</div>':'')
-      +(homework.length?'<div class="lecture-section-label" style="margin-top:8px">📝 作业题</div><div class="problem-chips">'+pchips(homework,'chip-green')+'</div>':'')
-      +(isCoach()?'<button class="btn btn-danger btn-sm" style="margin-top:10px" data-lid="'+l.id+'">删除</button>':'')
-      +'</div>';
-    if(isCoach()){const db=item.querySelector('[data-lid]');if(db)db.addEventListener('click',()=>deleteLecture(+db.dataset.lid));}
-    list.appendChild(item);
-  });;
+  data.forEach(l=>list.appendChild(makeLectureItem(l)));;
   } catch(e){ console.error("loadLectures:", e); showToast("加载失败，请刷新重试", "error"); }
+}
+const _lbMonths=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+let _allLectures=[];
+function makeLectureItem(l){
+  const problems=(l.problems||'').split(/[\s,]+/).filter(Boolean);
+  const homework=(l.homework||'').split(/[\s,]+/).filter(Boolean);
+  const conclusions=(l.conclusions||'').split('\n').map(s=>s.trim()).filter(Boolean);
+  const d=new Date(l.lecture_date);
+  const item=document.createElement('div');item.className='lecture-item';
+  function pchips(arr,cls){return arr.map(p=>'<a href="https://www.luogu.com.cn/problem/'+escHtml(p)+'" target="_blank" class="problem-chip '+cls+'">'+escHtml(p)+'</a>').join('');}
+  item.innerHTML=
+    '<div class="lecture-date-block">'
+    +'<div class="lecture-month">'+_lbMonths[d.getMonth()]+'</div>'
+    +'<div class="lecture-day">'+d.getDate()+'</div>'
+    +'<div class="lecture-year">'+d.getFullYear()+'</div>'
+    +'</div>'
+    +'<div class="lecture-body">'
+    +'<div class="lecture-title-row"><span class="lecture-title-text">'+escHtml(l.topic)+'</span>'+(l.level?'<span class="lecture-level-tag">'+escHtml(l.level)+'</span>':'')+'</div>'
+    +(l.content?'<div class="lecture-desc">'+escHtml(l.content)+'</div>':'')
+    +(conclusions.length?'<div class="lecture-conclusions"><div class="lecture-section-label">💡 关键结论</div><ol class="conclusions-list">'+conclusions.map(c=>'<li>'+escHtml(c)+'</li>').join('')+'</ol></div>':'')
+    +(problems.length?'<div class="lecture-section-label" style="margin-top:10px">📌 讲解题</div><div class="problem-chips">'+pchips(problems,'chip-blue')+'</div>':'')
+    +(homework.length?'<div class="lecture-section-label" style="margin-top:8px">📝 作业题</div><div class="problem-chips">'+pchips(homework,'chip-green')+'</div>':'')
+    +(isCoach()?'<button class="btn btn-danger btn-sm" style="margin-top:10px" data-lid="'+l.id+'">删除</button>':'')
+    +'</div>';
+  if(isCoach()){const db=item.querySelector('[data-lid]');if(db)db.addEventListener('click',()=>deleteLecture(+db.dataset.lid));}
+  return item;
+}
+function filterLectures(){
+  const q=(document.getElementById('lecture-search')?.value||'').toLowerCase();
+  const level=document.getElementById('lecture-level-filter')?.value||'';
+  const list=document.getElementById('lectures-list');
+  if(!_allLectures.length)return;
+  list.innerHTML='';
+  const filtered=_allLectures.filter(l=>{
+    const matchQ=!q||(l.topic||'').toLowerCase().includes(q)||(l.content||'').toLowerCase().includes(q)||(l.problems||'').toLowerCase().includes(q);
+    const matchL=!level||l.level===level;
+    return matchQ&&matchL;
+  });
+  if(!filtered.length){list.innerHTML='<div class="empty">没有符合条件的课程</div>';return;}
+  filtered.forEach(l=>list.appendChild(makeLectureItem(l)));
 }
 function openLectureModal(){if(!isCoach())return;openModal('lecture-modal');}
 async function submitLecture(){
@@ -10024,14 +10102,18 @@ async function loadLeaderboard(mode){
       if(!byContest[r.contest_id])byContest[r.contest_id]=[];
       byContest[r.contest_id].push(r);
     });
-    // For each contest, split into div2/div1 (same logic as display)
+    // 优先用 division 字段(1=Div1,2=Div2)，兜底用旧同名逻辑
     const d2scores={},d1scores={},d2cnt={},d1cnt={};
     Object.entries(byContest).forEach(([cid,rs])=>{
-      rs.sort((a,b)=>b.score-a.score);
-      const seen={};const d2=[],d1=[];
-      rs.forEach(r=>{if(seen[r.student_name])d1.push(r);else{seen[r.student_name]=true;d2.push(r);}});
-      const maxD2=d2[0]?.score||1;
-      const maxD1=d1[0]?.score||1;
+      const hasDivField=rs.some(r=>r.division===1||r.division===2);
+      const d2=[],d1=[];
+      if(hasDivField){
+        rs.forEach(r=>{(r.division===1?d1:d2).push(r);});
+      } else {
+        rs.sort((a,b)=>b.score-a.score);
+        const seen={};
+        rs.forEach(r=>{if(seen[r.student_name])d1.push(r);else{seen[r.student_name]=true;d2.push(r);}});
+      }
       d2.forEach(r=>{d2scores[r.student_name]=(d2scores[r.student_name]||0)+r.score;d2cnt[r.student_name]=(d2cnt[r.student_name]||0)+1;});
       d1.forEach(r=>{d1scores[r.student_name]=(d1scores[r.student_name]||0)+r.score;d1cnt[r.student_name]=(d1cnt[r.student_name]||0)+1;});
     });
@@ -10142,16 +10224,21 @@ function makeMemberCard(p,myFollowing,myFollowers,grps){
   return card;
 }
 
+function filterMembers(){
+  const q=(document.getElementById('member-search')?.value||'').toLowerCase().trim();
+  document.querySelectorAll('.member-card').forEach(card=>{
+    const name=(card.querySelector('.member-name')?.textContent||'').toLowerCase();
+    card.style.display=(!q||name.includes(q))?'':'none';
+  });
+}
 async function toggleFollow(uid,isFollowing,btn){
   if(!currentUser){showToast('请先登录','error');return;}
   btn.disabled=true;
-  if(isFollowing){
-    await sb.from('follows').delete().eq('follower_id',currentUser.id).eq('following_id',uid);
-    btn.textContent='+ 关注';btn.classList.remove('following');btn.dataset.following='false';
-  } else {
-    await sb.from('follows').insert({follower_id:currentUser.id,following_id:uid});
-    btn.textContent='已关注';btn.classList.add('following');btn.dataset.following='true';
-  }
+  try{
+    await apiRequest(`/members/${uid}/follow`,{method:'POST',body:JSON.stringify({action:isFollowing?'unfollow':'follow'})});
+    if(isFollowing){btn.textContent='+ 关注';btn.classList.remove('following');btn.dataset.following='false';}
+    else{btn.textContent='已关注';btn.classList.add('following');btn.dataset.following='true';}
+  }catch(e){showToast(e.message,'error');}
   btn.disabled=false;
 }
 
