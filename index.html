@@ -5898,7 +5898,7 @@ async function loadDaily(){
       if(myCheckin){
         html+='<button class="checkin-btn checked" onclick="undoCheckin('+daily.id+')">✓ 已打卡 · 取消</button>';
       } else {
-        html+='<button class="checkin-btn" onclick="doCheckin('+daily.id+')">我做出来了 ✓</button>';
+        html+='<button class="checkin-btn" onclick="doDailyCheckin('+daily.id+')">我做出来了 ✓</button>';
       }
     } else {
       html+='<button class="checkin-btn" onclick="openModal(\'auth-modal\')">登录后打卡</button>';
@@ -6054,7 +6054,7 @@ async function homeDailyCheckin(dailyId, isChecked){
   }catch(e){showToast(e.message,'error');}
 }
 
-async function doCheckin(dailyId){
+async function doDailyCheckin(dailyId){
   if(!currentUser){showToast('请先登录','error');return;}
   try{
     await apiRequest('/daily/checkin',{method:'POST',body:JSON.stringify({daily_id:dailyId})});
