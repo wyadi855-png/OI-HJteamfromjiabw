@@ -11845,31 +11845,6 @@ function gcAppendMessage(msg, animate, prevMsg) {
   container.appendChild(row);
 }
 
-  const avHtml = avatarUrl
-    ? `<div class="gc-msg-av" onclick="showProfile('${escHtml(username)}')"><img src="${escHtml(avatarUrl)}" alt=""></div>`
-    : `<div class="gc-msg-av" style="background:${avatarGradient(username)}" onclick="showProfile('${escHtml(username)}')">${username.charAt(0).toUpperCase()}</div>`;
-
-  const retractBtn = canRetract && !isRetracted
-    ? `<button class="gc-retract-btn" onclick="gcRetractMsg('${escHtml(msg.id)}')">撤回</button>`
-    : '';
-
-  const row = document.createElement('div');
-  row.className = 'gc-msg-row' + (animate ? ' gc-msg-anim' : '');
-  row.id = 'gc-msg-' + msg.id;
-  row.innerHTML = `
-    ${avHtml}
-    <div class="gc-msg-body">
-      <div class="gc-msg-meta">
-        <span class="gc-msg-author" onclick="showProfile('${escHtml(username)}')">${escHtml(username)}</span>
-        <span class="gc-msg-time">${timeStr}</span>
-      </div>
-      ${contentHtml}
-    </div>
-    ${retractBtn}
-  `;
-  container.appendChild(row);
-}
-
 // @提及高亮 + 安全转义
 function gcFormatContent(text) {
   return escHtml(text).replace(/@([\w\u4e00-\u9fa5_-]+)/g,
