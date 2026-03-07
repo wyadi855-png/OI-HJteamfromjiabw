@@ -5178,30 +5178,25 @@ async function loadAnnouncements(){
     </div>`).join('')+'</div>';
   const{data}=await sb.from('announcements').select('*,profiles(username)').order('is_pinned',{ascending:false}).order('created_at',{ascending:false});
   if(!data||!data.length){list.innerHTML='<div class="empty-state"><div class="empty-state-icon">📢</div><h3>暂无公告</h3><p>教练发布的比赛通知和训练安排会出现在这里。</p></div>';return;}
-  const readIds=new Set(JSON.parse(localStorage.getItem('read_anns')||'[]'));
+  // 记录上次访问公告页的时间，用于判断是否有新公告
+  const lastVisit=parseInt(localStorage.getItem('ann_last_visit')||'0');
+  // 进入公告页，自动更新访问时间
+  localStorage.setItem('ann_last_visit', Date.now().toString());
+
   list.innerHTML='';
   data.forEach(a=>{
-    const isRead=readIds.has(a.id);
+    const isNew=new Date(a.created_at).getTime()>lastVisit;
     const card=document.createElement('div');
-    card.className='ann-card'+(a.is_pinned?' pinned':'')+(isRead?'':' ann-unread');
+    card.className='ann-card'+(a.is_pinned?' pinned':'')+(isNew?' ann-unread':'');
     card.innerHTML=
       '<div class="ann-card-top">'
-      +'<div class="ann-title">'+escHtml(a.title)+(isRead?'':'<span class="ann-new-dot"></span>')+'</div>'
+      +'<div class="ann-title">'+escHtml(a.title)+(isNew?'<span class="ann-new-dot"></span>':'')+'</div>'
       +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'
       +(a.is_pinned?'<span class="ann-pin">📌 置顶</span>':'')
       +(isCoach()?'<button class="btn btn-danger btn-sm" onclick="deleteAnn('+a.id+')">删除</button>':'')
       +'</div></div>'
       +'<div class="ann-meta">'+fmtDate(a.created_at)+' · '+(a.profiles?.username||'教练')+'</div>'
-      +'<div class="ann-content ann-preview">'+escHtml(a.content)+'</div>'
-      +'<button class="ann-read-btn" data-id="'+a.id+'">'+(isRead?'已读':'标记已读')+'</button>';
-    card.querySelector('.ann-read-btn').addEventListener('click', ()=>{
-      readIds.add(a.id);
-      localStorage.setItem('read_anns', JSON.stringify([...readIds]));
-      card.classList.remove('ann-unread');
-      card.querySelector('.ann-new-dot')?.remove();
-      card.querySelector('.ann-read-btn').textContent='已读';
-      updateUnreadAnnBadge(data);
-    });
+      +'<div class="ann-content ann-preview">'+escHtml(a.content)+'</div>';
     list.appendChild(card);
   });
   updateUnreadAnnBadge(data);
@@ -5209,8 +5204,8 @@ async function loadAnnouncements(){
 }
 
 function updateUnreadAnnBadge(anns){
-  const readIds=new Set(JSON.parse(localStorage.getItem('read_anns')||'[]'));
-  const unread=(anns||[]).filter(a=>!readIds.has(a.id)).length;
+  const lastVisit=parseInt(localStorage.getItem('ann_last_visit')||'0');
+  const unread=(anns||[]).filter(a=>new Date(a.created_at).getTime()>lastVisit).length;
   const navAnn=document.getElementById('nav-announcements');
   if(navAnn){
     const existing=navAnn.querySelector('.nav-badge');
@@ -10242,6 +10237,10 @@ function openEditPost(id,postContent){
 async function checkNotifDot(){
   if(!currentUser)return;
   let count=0;
+  // 未读公告（基于上次访问公告页的时间）
+  const lastVisit=parseInt(localStorage.getItem('ann_last_visit')||'0');
+  const{data:anns}=await sb.from('announcements').select('id,created_at').order('created_at',{ascending:false}).limit(20);
+  if(anns)count+=(anns).filter(a=>new Date(a.created_at).getTime()>lastVisit).length;
   // 题解评论
   const{data:myNotes}=await sb.from('notes').select('id').eq('author_id',currentUser.id);
   if(myNotes&&myNotes.length){
