@@ -657,6 +657,8 @@ section.active.visible{opacity:1;transform:translateY(0);}
 @media (max-width: 640px) {
   .hero-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
   .hjoi-logo-svg-standalone { width: 180px; height: 138px; }
+  .hero-topic { font-size: clamp(18px, 8vw, 34px); }
+  .hero-phrase { font-size: 12px; letter-spacing: 0.08em; }
 }
 
 
@@ -2972,22 +2974,36 @@ body::after {
 }
 /* 主题词：强制一行，字号自适应不换行 */
 .hero-topic {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   color: rgba(225, 240, 255, 0.95);
   font-size: clamp(22px, 4vw, 56px);
   font-weight: 800;
-  white-space: nowrap;
+  white-space: normal;
   letter-spacing: -0.02em;
+  line-height: 1.12;
+  max-width: 100%;
   text-shadow:
-    0 1px 0   rgba(255,255,255,0.06),
+    0 1px 0 rgba(255,255,255,0.06),
     0 4px 24px rgba(0,0,0,0.7);
+}
+.hero-topic-line {
+  display: block;
+  white-space: normal;
+  word-break: keep-all;
+}
+.hero-topic-line + .hero-topic-line {
+  margin-top: 4px;
 }
 /* 说明小字块 */
 .hero-phrases-block {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 4px;
-  margin-top: 2px;
+  margin-top: 6px;
+  max-width: 100%;
 }
 /* 每条说明：边缘呼吸闪光，静态显示 */
 .hero-phrase {
@@ -2995,7 +3011,9 @@ body::after {
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.12em;
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.7;
+  max-width: 100%;
   color: #2de8b0 !important;
   -webkit-text-fill-color: #2de8b0 !important;
   background: none !important;
@@ -3273,7 +3291,7 @@ button:focus-visible, a:focus-visible {
 }
 
 /* ── 8. Fluid typography with clamp ── */
-.hero h1:not(#hero-main-title) { font-size: clamp(2rem, 5.5vw, 4.8rem) !important; }
+.hero h1         { font-size: clamp(2rem, 5.5vw, 4.8rem) !important; }
 .hero-desc       { font-size: clamp(13px, 1.4vw, 15px) !important; }
 .page-header h1  { font-size: clamp(1.4rem, 3vw, 2.2rem) !important; }
 .bento-label     { font-size: clamp(11px, 1vw, 12px) !important; }
@@ -4200,27 +4218,30 @@ section:not(.active) {
       <li><a onclick="show('leaderboard')" id="nav-leaderboard">排行榜</a></li>
       <li class="nav-more-wrap">
         <a onclick="toggleMoreMenu(event)" class="nav-more-trigger">更多 ▾</a>
+        <div class="nav-more-menu" id="nav-more-menu">
+          <div class="nav-more-group-label">社区</div>
+          <a onclick="closeMoreMenu();show('community')" id="nav-community-m">🌐 社区</a>
+          <div class="nav-more-divider"></div>
+          <div class="nav-more-group-label">教学</div>
+          <div class="nav-more-divider"></div>
+          <div class="nav-more-group-label">工具</div>
+          <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
+          <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
+          <a onclick="closeMoreMenu();show('judge')" id="nav-judge">⚡ 在线评测</a>
+          <a onclick="closeMoreMenu();show('quiz')" id="nav-quiz">🧠 判断题练习</a>
+          <div class="nav-more-divider"></div>
+          <div class="nav-more-group-label">数据</div>
+          <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
+          <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">🏆 排行榜</a>
+          <div class="nav-more-divider"></div>
+          <a onclick="closeMoreMenu();show('daily')" id="nav-daily">📅 每日一题</a>
+          <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
+          <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
+        </div>
       </li>
     </ul>
   </div>
 </nav>
-
-<!-- 更多菜单（移出nav避免backdrop-filter破坏fixed定位） -->
-<div class="nav-more-menu" id="nav-more-menu">
-  <div class="nav-more-group-label">工具</div>
-  <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
-  <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
-  <a onclick="closeMoreMenu();show('judge')" id="nav-judge">⚡ 在线评测</a>
-  <a onclick="closeMoreMenu();show('quiz')" id="nav-quiz">🧠 判断题练习</a>
-  <div class="nav-more-divider"></div>
-  <div class="nav-more-group-label">数据</div>
-  <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
-  <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">🏆 排行榜</a>
-  <div class="nav-more-divider"></div>
-  <a onclick="closeMoreMenu();show('daily')" id="nav-daily">📅 每日一题</a>
-  <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
-  <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
-</div>
 
 <!-- 移动端抽屉导航 -->
 <div class="nav-drawer" id="nav-drawer">
@@ -6159,6 +6180,7 @@ async function loadCommunityMembers(){
   const el = document.getElementById('community-members-list');
   if(!el) return;
   try{
+    const sb2 = get_supabase ? get_supabase() : sb;
     const{data:members} = await sb.from('profiles').select('id,username,avatar_url,role').order('created_at');
     if(!members||!members.length){ el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><p>暂无成员</p></div>'; return; }
     el.innerHTML = `<div class="members-grid">${members.map(m=>{
@@ -9027,17 +9049,15 @@ async function uploadProfileBanner(input){
   if(!['jpg','jpeg','png','webp'].includes(ext)){showToast('仅支持 JPG/PNG/WebP','error');return;}
   if(file.size > 5*1024*1024){showToast('图片不能超过 5MB','error');return;}
   showToast('上传中…','info');
-  try{
-    const fd = new FormData();
-    fd.append('file', file);
-    const token = localStorage.getItem('hjoi_token');
-    const res = await fetch(API_BASE+'/upload/banner',{method:'POST',headers:{...(token?{'Authorization':'Bearer '+token}:{})},body:fd});
-    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.detail||'上传失败');}
-    const{url}=await res.json();
-    currentProfile.banner_url = url;
-    showToast('背景图已更新 ✓','success');
-    await showProfile(currentProfile.username);
-  }catch(e){showToast('上传失败: '+e.message,'error');}
+  const path = 'banners/'+currentUser.id+'.'+ext;
+  const{error:upErr}=await sb.storage.from('note-images').upload(path,file,{upsert:true,'content-type':file.type});
+  if(upErr){showToast('上传失败: '+upErr.message,'error');return;}
+  const{data:urlData}=sb.storage.from('note-images').getPublicUrl(path);
+  const banner_url = urlData.publicUrl+'?t='+Date.now();
+  await sb.from('profiles').update({banner_url}).eq('id',currentUser.id);
+  currentProfile.banner_url = banner_url;
+  showToast('背景图已更新 ✓','success');
+  await showProfile(currentProfile.username);
 }
 
 async function saveSettings(){
@@ -9056,21 +9076,19 @@ async function saveSettings(){
 
   if(fileInput?.files?.length){
     const file=fileInput.files[0];
+    // 显示进度条
     const prog=document.getElementById('avatar-upload-progress');
     const fill=document.getElementById('avatar-upload-fill');
     const lbl=document.getElementById('avatar-upload-label');
     prog.style.display='block'; fill.style.width='30%'; lbl.textContent='上传中…';
-    try{
-      const fd=new FormData();
-      fd.append('file',file);
-      const token=localStorage.getItem('hjoi_token');
-      const res=await fetch(API_BASE+'/upload/avatar',{method:'POST',headers:{...(token?{'Authorization':'Bearer '+token}:{})},body:fd});
-      if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.detail||'上传失败');}
-      const{url}=await res.json();
-      avatar_url=url;
-      fill.style.width='100%'; lbl.textContent='完成 ✓';
-      setTimeout(()=>prog.style.display='none',600);
-    }catch(e){errEl.textContent='头像上传失败: '+e.message;prog.style.display='none';return;}
+    const ext=file.name.split('.').pop();
+    const path=`avatars/${currentUser.id}.${ext}`;
+    const{error:upErr}=await sb.storage.from('note-images').upload(path,file,{upsert:true,contentType:file.type});
+    if(upErr){errEl.textContent='头像上传失败: '+upErr.message;prog.style.display='none';return;}
+    fill.style.width='100%'; lbl.textContent='完成 ✓';
+    const{data:urlData}=sb.storage.from('note-images').getPublicUrl(path);
+    avatar_url=urlData.publicUrl+'?t='+Date.now();
+    setTimeout(()=>prog.style.display='none',600);
   }
 
   // 用户名校验
@@ -9333,8 +9351,13 @@ function initTopicAutocomplete(inputId){
     const phrasesHtml = daily.phrases.map((p,i) =>
       `<span class="hero-phrase phrase-${i}">${p}</span>`
     ).join('');
+    const topicHtml =
+      `<span class="hero-topic">` +
+        `<span class="hero-topic-line">${daily.line1 || ''}</span>` +
+        `${daily.line2 ? `<span class="hero-topic-line">${daily.line2}</span>` : ''}` +
+      `</span>`;
     titleEl.innerHTML =
-      `<span class="hero-topic">${daily.line1}${daily.line2 ? '&nbsp;' + daily.line2 : ''}</span>` +
+      topicHtml +
       `<span class="hero-phrases-block">${phrasesHtml}</span>`;
   }
 })();
