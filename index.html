@@ -2,8 +2,37 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HJOI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HJOI — OI 教学平台</title>
+
+<!-- PWA 基础 -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080b12">
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- iOS 专属（Safari 添加到主屏幕） -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HJOI">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+<!-- 防止 iOS 把数字识别成电话号码 -->
+<meta name="format-detection" content="telephone=no">
+
+<!-- SEO -->
+<meta name="description" content="HJOI 信息学竞赛教学平台 — 题解、模拟赛、排行榜、在线评测">
+<meta name="keywords" content="OI, NOI, NOIP, 信息学竞赛, 算法, 题解">
+
+<!-- Service Worker 注册 -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('[PWA] SW registered, scope:', reg.scope))
+      .catch(err => console.warn('[PWA] SW registration failed:', err));
+  });
+}
+</script>
 
 <!-- 性能优化：预连接和DNS预解析 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
