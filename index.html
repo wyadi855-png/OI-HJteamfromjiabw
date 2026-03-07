@@ -6171,7 +6171,7 @@ async function homeDailyCheckin(dailyId, isChecked){
   if(!currentUser){showToast('请先登录','error');return;}
   if(isChecked){
     // 取消打卡
-    try{ await apiRequest('/daily/checkin/undo',{method:'POST',body:JSON.stringify({daily_id:dailyId})}); }catch(e){}
+    try{ await apiRequest('/daily/checkin/undo',{method:'POST',body:JSON.stringify({daily_id:dailyId})}); }catch(e){showToast(e.message,'error');}
     loadHomeDailyCard();
     return;
   }
@@ -6181,7 +6181,11 @@ async function homeDailyCheckin(dailyId, isChecked){
     showToast('打卡成功 🎉','success');
     triggerCheckinEffect();
   }catch(e){
-    // 不管什么错误，都刷新状态（可能已经打过卡了）
+    if(e.message&&(e.message.includes('已经打过卡')||e.message.includes('already'))){
+      showToast('今天已经打过卡了 ✓','info');
+    } else {
+      showToast('打卡失败: '+e.message,'error');
+    }
   }
   loadHomeDailyCard();
 }
