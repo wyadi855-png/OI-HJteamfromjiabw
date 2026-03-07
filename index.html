@@ -7217,16 +7217,24 @@ async function loadProfileSocial(profile, username){
     wrap.className = 'rel-graph-wrap';
     const W = 640, H = 380, cx = W / 2, cy = H / 2;
     const peers = mutualPeers.slice(0, 10);
-    const orbit = Math.min(185, 115 + peers.length * 9);
-    const centerR = 36;
-    const peerR = peers.length <= 3 ? 30 : 25;
+    const n = peers.length;
+    // 动态节点大小：人多时缩小
+    const centerR = Math.max(28, 38 - n * 1.2);
+    const peerR   = Math.max(20, Math.min(30, 32 - n * 1.5));
+    const orbit   = Math.min(190, 120 + n * 8);
+
     const peerPositions = peers.map((p, i) => {
-      const angle = -Math.PI / 2 + i * (Math.PI * 2 / peers.length);
+      const angle = -Math.PI / 2 + i * (Math.PI * 2 / n);
       return { ...p, x: cx + Math.cos(angle) * orbit, y: cy + Math.sin(angle) * orbit };
     });
 
-    // 贝塞尔曲线控制点（向外弯曲）
-    function curvePath(x1,y1,x2,y2,bend=0.25){
+    // 先批量拉所有用户头像（中心 + 外围）
+    const allIds = [profile.id, ...peers.map(p=>p.id)];
+    const {data: avatarProfiles} = await sb.from('profiles').select('id,username,avatar_url').in('id', allIds);
+    const avatarMap = {};
+    (avatarProfiles||[]).forEach(p => avatarMap[p.id] = p.avatar_url||'');
+
+    function curvePath(x1,y1,x2,y2,bend=0.22){
       const mx=(x1+x2)/2, my=(y1+y2)/2;
       const dx=x2-x1, dy=y2-y1;
       const nx=-dy, ny=dx;
@@ -7235,153 +7243,162 @@ async function loadProfileSocial(profile, username){
       const by=my+ny/len*(Math.sqrt(dx*dx+dy*dy)*bend);
       return `M${x1.toFixed(1)},${y1.toFixed(1)} Q${bx.toFixed(1)},${by.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`;
     }
-    // 贝塞尔曲线上的点（t∈[0,1]）
-    function bezierPoint(x1,y1,x2,y2,bend,t){
-      const mx=(x1+x2)/2, my=(y1+y2)/2;
-      const dx=x2-x1, dy=y2-y1;
-      const nx=-dy, ny=dx;
-      const len=Math.sqrt(nx*nx+ny*ny)||1;
+    function bezierMid(x1,y1,x2,y2,bend,t=0.5){
+      const mx=(x1+x2)/2,my=(y1+y2)/2,dx=x2-x1,dy=y2-y1;
+      const nx=-dy,ny=dx,len=Math.sqrt(nx*nx+ny*ny)||1;
       const bx=mx+nx/len*(Math.sqrt(dx*dx+dy*dy)*bend);
       const by=my+ny/len*(Math.sqrt(dx*dx+dy*dy)*bend);
       const it=1-t;
       return {x:it*it*x1+2*it*t*bx+t*t*x2, y:it*it*y1+2*it*t*by+t*t*y2};
     }
 
-    let flowDots = []; // 收集流动光点数据，后面统一加动画
+    // 生成唯一ID前缀避免多图冲突
+    const gid = 'rg'+Date.now();
+    let flowDots = [];
 
-    let svg = `<svg class="rel-graph-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    // 头像 image 元素（用 clipPath 裁成圆）
+    function avatarCircle(id, ax, ay, r, avatarUrl, isCenter=false){
+      const clipId = `${gid}-clip-${id}`;
+      const gradient = isCenter ? `url(#${gid}-center)` : `url(#${gid}-peer)`;
+      let out = `<clipPath id="${clipId}"><circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="${r}"/></clipPath>`;
+      // 底色渐变（头像加载失败时兜底）
+      out += `<circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="${r}" fill="${gradient}" filter="url(#${gid}-node-glow)"/>`;
+      if(avatarUrl){
+        out += `<image href="${avatarUrl}" x="${(ax-r).toFixed(1)}" y="${(ay-r).toFixed(1)}" width="${r*2}" height="${r*2}" clip-path="url(#${clipId})" preserveAspectRatio="xMidYMid slice" style="filter:saturate(1.1)"/>`;
+        // 头像上叠加微弱光边
+        out += `<circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="${r}" fill="none" stroke="${isCenter?'rgba(45,232,176,.45)':'rgba(150,180,255,.35)'}" stroke-width="2"/>`;
+      } else {
+        // 无头像：显示首字母
+        const letter = (avatarProfiles?.find(p=>p.id===id)?.username||'?').charAt(0).toUpperCase();
+        out += `<text x="${ax.toFixed(1)}" y="${(ay+r*0.35).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="${(r*0.72).toFixed(0)}" font-weight="700" fill="rgba(255,255,255,0.9)">${letter}</text>`;
+      }
+      return out;
+    }
+
+    let svg = `<svg class="rel-graph-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <defs>
-  <filter id="rg-node-glow" x="-80%" y="-80%" width="260%" height="260%">
+  <filter id="${gid}-node-glow" x="-70%" y="-70%" width="240%" height="240%">
     <feGaussianBlur stdDeviation="5" result="b"/>
     <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
-  <filter id="rg-edge-glow" x="-60%" y="-60%" width="220%" height="220%">
-    <feGaussianBlur stdDeviation="2.8" result="b"/>
+  <filter id="${gid}-edge-glow" x="-60%" y="-60%" width="220%" height="220%">
+    <feGaussianBlur stdDeviation="2.5" result="b"/>
     <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
-  <filter id="rg-dot-glow" x="-200%" y="-200%" width="500%" height="500%">
-    <feGaussianBlur stdDeviation="3" result="b"/>
+  <filter id="${gid}-dot-glow" x="-300%" y="-300%" width="700%" height="700%">
+    <feGaussianBlur stdDeviation="3.5" result="b"/>
     <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
-  <radialGradient id="rg-center" cx="35%" cy="28%" r="72%">
+  <radialGradient id="${gid}-center" cx="35%" cy="28%" r="72%">
     <stop offset="0%" stop-color="#a0f4ff"/>
-    <stop offset="55%" stop-color="#29b6f6"/>
+    <stop offset="60%" stop-color="#29b6f6"/>
     <stop offset="100%" stop-color="#0d47a1"/>
   </radialGradient>
-  <radialGradient id="rg-peer" cx="35%" cy="28%" r="72%">
+  <radialGradient id="${gid}-peer" cx="35%" cy="28%" r="72%">
     <stop offset="0%" stop-color="#e8eeff"/>
-    <stop offset="55%" stop-color="#7ea8f8"/>
+    <stop offset="60%" stop-color="#7ea8f8"/>
     <stop offset="100%" stop-color="#3a5bbf"/>
   </radialGradient>
-  <radialGradient id="rg-pulse" cx="50%" cy="50%" r="50%">
-    <stop offset="0%" stop-color="rgba(45,232,176,0.35)"/>
+  <radialGradient id="${gid}-pulse" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="rgba(45,232,176,0.3)"/>
     <stop offset="100%" stop-color="rgba(45,232,176,0)"/>
   </radialGradient>
-  <marker id="arr-out" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-    <path d="M0,0 L0,8 L8,4 z" fill="#36dfb4"/>
+  <marker id="${gid}-arr-out" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+    <path d="M0,0 L0,7 L7,3.5 z" fill="#36dfb4"/>
   </marker>
-  <marker id="arr-in" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-    <path d="M0,0 L0,8 L8,4 z" fill="#7aa8ff"/>
+  <marker id="${gid}-arr-in" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+    <path d="M0,0 L0,7 L7,3.5 z" fill="#7aa8ff"/>
   </marker>
   <style>
-    .rg-center-pulse { animation: rgPulse 2.8s ease-in-out infinite; transform-origin: ${cx}px ${cy}px; }
-    .rg-peer-node { transition: transform 0.2s; cursor: pointer; }
-    .rg-peer-node:hover { transform: scale(1.18); }
-    .rg-orbit-ring { animation: rgOrbitSpin 28s linear infinite; transform-origin: ${cx}px ${cy}px; }
-    @keyframes rgPulse {
-      0%,100% { opacity: 0.18; r: ${centerR+12}; }
-      50% { opacity: 0.42; r: ${centerR+22}; }
-    }
-    @keyframes rgOrbitSpin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    .rg-node-enter { animation: rgNodeIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
-    @keyframes rgNodeIn {
-      from { opacity:0; transform: scale(0.3); }
-      to { opacity:1; transform: scale(1); }
-    }
+    .${gid}-pulse { animation: ${gid}Pulse 3s ease-in-out infinite; transform-origin: ${cx}px ${cy}px; }
+    .${gid}-orbit { animation: ${gid}Spin 30s linear infinite; transform-origin: ${cx}px ${cy}px; }
+    .${gid}-enter { animation: ${gid}In 0.55s cubic-bezier(0.34,1.56,0.64,1) both; }
+    .${gid}-peer-wrap { cursor:pointer; }
+    .${gid}-peer-wrap:hover .${gid}-hover-ring { opacity:1; }
+    .${gid}-peer-wrap:hover .${gid}-hover-label { opacity:1; transform:translateY(0); }
+    .${gid}-hover-ring { opacity:0; transition:opacity 0.18s; }
+    .${gid}-hover-label { opacity:0; transition:opacity 0.18s, transform 0.18s; transform:translateY(4px); }
+    @keyframes ${gid}Pulse { 0%,100%{opacity:.15} 50%{opacity:.4} }
+    @keyframes ${gid}Spin  { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    @keyframes ${gid}In    { from{opacity:0;transform:scale(0.2)} to{opacity:1;transform:scale(1)} }
   </style>
 </defs>
-<rect width="${W}" height="${H}" rx="20" fill="rgba(6,9,20,.82)"/>
-<circle class="rg-orbit-ring" cx="${cx}" cy="${cy}" r="${orbit}" fill="none" stroke="rgba(108,142,245,.12)" stroke-width="1" stroke-dasharray="3 9"/>
-<circle class="rg-center-pulse" cx="${cx}" cy="${cy}" r="${centerR+14}" fill="url(#rg-pulse)"/>`;
+<rect width="${W}" height="${H}" rx="20" fill="rgba(5,8,18,.85)"/>
+<circle class="${gid}-orbit" cx="${cx}" cy="${cy}" r="${orbit}" fill="none" stroke="rgba(108,142,245,.1)" stroke-width="1" stroke-dasharray="3 10"/>
+<circle class="${gid}-pulse" cx="${cx}" cy="${cy}" r="${centerR+18}" fill="url(#${gid}-pulse)"/>`;
 
-    // 连线（贝塞尔曲线）
+    // ── 连线（曲线）──
     peerPositions.forEach((peer, pi) => {
-      const dx = peer.x - cx, dy = peer.y - cy;
-      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-      const ux = dx / dist, uy = dy / dist;
-      const sx = cx + ux * centerR, sy = cy + uy * centerR;
-      const tx = peer.x - ux * peerR, ty = peer.y - uy * peerR;
-      const labelAB = labelMap[profile.id]?.[peer.id] || '';
-      const labelBA = labelMap[peer.id]?.[profile.id] || '';
-      const bend = 0.22;
+      const dx=peer.x-cx, dy=peer.y-cy;
+      const dist=Math.sqrt(dx*dx+dy*dy)||1;
+      const ux=dx/dist, uy=dy/dist;
+      const sx=cx+ux*centerR, sy=cy+uy*centerR;
+      const tx=peer.x-ux*peerR, ty=peer.y-uy*peerR;
+      const labelAB = labelMap[profile.id]?.[peer.id]||'';
+      const labelBA = labelMap[peer.id]?.[profile.id]||'';
+      const bend=0.22, nx2=-uy, ny2=ux;
 
-      if (!labelAB && !labelBA) {
-        const d = curvePath(sx,sy,tx,ty,bend);
-        svg += `<path d="${d}" fill="none" stroke="rgba(120,150,240,.35)" stroke-width="2" stroke-linecap="round" filter="url(#rg-edge-glow)"/>`;
-        // 无标签时也加流动光点（淡）
-        const mid = bezierPoint(sx,sy,tx,ty,bend,0.5);
-        flowDots.push({sx,sy,tx,ty,bend,color:'rgba(180,200,255,0.7)',dur:2.4+pi*0.3});
+      if(!labelAB&&!labelBA){
+        svg+=`<path d="${curvePath(sx,sy,tx,ty,bend)}" fill="none" stroke="rgba(120,150,240,.3)" stroke-width="1.8" stroke-linecap="round" filter="url(#${gid}-edge-glow)"/>`;
+        flowDots.push({sx,sy,tx,ty,bend,color:'rgba(160,185,255,0.6)',dur:2.6+pi*0.28});
       }
-      if (labelAB) {
-        const os = 7;
-        const nx2 = -uy, ny2 = ux;
-        const d = curvePath(sx+nx2*os, sy+ny2*os, tx+nx2*os, ty+ny2*os, bend);
-        svg += `<path d="${d}" fill="none" stroke="rgba(54,223,180,.85)" stroke-width="2.4" stroke-linecap="round" marker-end="url(#arr-out)" filter="url(#rg-edge-glow)"/>`;
-        const mid = bezierPoint(sx+nx2*os,sy+ny2*os,tx+nx2*os,ty+ny2*os,bend,0.45);
-        const lx = mid.x + nx2*18, ly = mid.y + ny2*18;
-        const bw = Math.max(44, labelAB.length * 10 + 18);
-        svg += `<rect x="${(lx-bw/2).toFixed(1)}" y="${(ly-13).toFixed(1)}" width="${bw}" height="26" rx="13" fill="rgba(4,8,18,.9)" stroke="rgba(54,223,180,.4)" stroke-width="1"/>`;
-        svg += `<text x="${lx.toFixed(1)}" y="${(ly+4.5).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="600" fill="#7ff5d8">${escHtml(labelAB)}</text>`;
-        flowDots.push({sx:sx+nx2*os,sy:sy+ny2*os,tx:tx+nx2*os,ty:ty+ny2*os,bend,color:'rgba(54,232,180,0.9)',dur:1.8+pi*0.25});
+      if(labelAB){
+        const os=6;
+        const d=curvePath(sx+nx2*os,sy+ny2*os,tx+nx2*os,ty+ny2*os,bend);
+        svg+=`<path d="${d}" fill="none" stroke="rgba(54,223,180,.8)" stroke-width="2.2" stroke-linecap="round" marker-end="url(#${gid}-arr-out)" filter="url(#${gid}-edge-glow)"/>`;
+        const mid=bezierMid(sx+nx2*os,sy+ny2*os,tx+nx2*os,ty+ny2*os,bend);
+        const lx=mid.x+nx2*16, ly=mid.y+ny2*16;
+        const bw=Math.max(40,labelAB.length*10+16);
+        svg+=`<rect x="${(lx-bw/2).toFixed(1)}" y="${(ly-12).toFixed(1)}" width="${bw}" height="24" rx="12" fill="rgba(4,8,18,.92)" stroke="rgba(54,223,180,.38)" stroke-width="1"/>`;
+        svg+=`<text x="${lx.toFixed(1)}" y="${(ly+4.5).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="600" fill="#7ff5d8">${escHtml(labelAB)}</text>`;
+        flowDots.push({sx:sx+nx2*os,sy:sy+ny2*os,tx:tx+nx2*os,ty:ty+ny2*os,bend,color:'rgba(54,232,180,.9)',dur:1.9+pi*0.22});
       }
-      if (labelBA) {
-        const os = -7;
-        const nx2 = -uy, ny2 = ux;
-        const d = curvePath(tx+nx2*os, ty+ny2*os, sx+nx2*os, sy+ny2*os, bend);
-        svg += `<path d="${d}" fill="none" stroke="rgba(122,168,255,.88)" stroke-width="2.4" stroke-linecap="round" marker-end="url(#arr-in)" filter="url(#rg-edge-glow)"/>`;
-        const mid = bezierPoint(tx+nx2*os,ty+ny2*os,sx+nx2*os,sy+ny2*os,bend,0.45);
-        const lx = mid.x + nx2*(-18), ly = mid.y + ny2*(-18);
-        const bw = Math.max(44, labelBA.length * 10 + 18);
-        svg += `<rect x="${(lx-bw/2).toFixed(1)}" y="${(ly-13).toFixed(1)}" width="${bw}" height="26" rx="13" fill="rgba(4,8,18,.9)" stroke="rgba(122,168,255,.4)" stroke-width="1"/>`;
-        svg += `<text x="${lx.toFixed(1)}" y="${(ly+4.5).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="600" fill="#bdd4ff">${escHtml(labelBA)}</text>`;
-        flowDots.push({sx:tx+nx2*os,sy:ty+ny2*os,tx:sx+nx2*os,ty:sy+ny2*os,bend,color:'rgba(130,172,255,0.9)',dur:1.8+pi*0.25});
+      if(labelBA){
+        const os=-6;
+        const d=curvePath(tx+nx2*os,ty+ny2*os,sx+nx2*os,sy+ny2*os,bend);
+        svg+=`<path d="${d}" fill="none" stroke="rgba(122,168,255,.85)" stroke-width="2.2" stroke-linecap="round" marker-end="url(#${gid}-arr-in)" filter="url(#${gid}-edge-glow)"/>`;
+        const mid=bezierMid(tx+nx2*os,ty+ny2*os,sx+nx2*os,sy+ny2*os,bend);
+        const lx=mid.x+nx2*(-16), ly=mid.y+ny2*(-16);
+        const bw=Math.max(40,labelBA.length*10+16);
+        svg+=`<rect x="${(lx-bw/2).toFixed(1)}" y="${(ly-12).toFixed(1)}" width="${bw}" height="24" rx="12" fill="rgba(4,8,18,.92)" stroke="rgba(122,168,255,.38)" stroke-width="1"/>`;
+        svg+=`<text x="${lx.toFixed(1)}" y="${(ly+4.5).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="600" fill="#bdd4ff">${escHtml(labelBA)}</text>`;
+        flowDots.push({sx:tx+nx2*os,sy:ty+ny2*os,tx:sx+nx2*os,ty:sy+ny2*os,bend,color:'rgba(130,172,255,.9)',dur:1.9+pi*0.22});
       }
     });
 
-    // 流动光点（animateMotion）
-    flowDots.forEach((fd, i) => {
-      const d = curvePath(fd.sx,fd.sy,fd.tx,fd.ty,fd.bend);
-      svg += `<circle r="3.5" fill="${fd.color}" filter="url(#rg-dot-glow)">
-        <animateMotion dur="${fd.dur.toFixed(2)}s" repeatCount="indefinite" begin="${(i*0.4).toFixed(1)}s">
-          <mpath href="#rg-flow-path-${i}"/>
-        </animateMotion>
-      </circle>
-      <path id="rg-flow-path-${i}" d="${d}" fill="none" stroke="none"/>`;
+    // ── 流动光点 ──
+    flowDots.forEach((fd,i)=>{
+      const d=curvePath(fd.sx,fd.sy,fd.tx,fd.ty,fd.bend);
+      const pid=`${gid}-fp${i}`;
+      svg+=`<path id="${pid}" d="${d}" fill="none" stroke="none"/>
+<circle r="3" fill="${fd.color}" filter="url(#${gid}-dot-glow)">
+  <animateMotion dur="${fd.dur.toFixed(2)}s" repeatCount="indefinite" begin="${(i*0.35).toFixed(1)}s"><mpath href="#${pid}"/></animateMotion>
+</circle>`;
     });
 
-    // 中心节点（最后渲染，在最上层）
-    svg += `<g class="rg-node-enter" style="animation-delay:0s;transform-origin:${cx}px ${cy}px">
-  <circle cx="${cx}" cy="${cy}" r="${centerR+10}" fill="none" stroke="rgba(45,232,176,.2)" stroke-width="1.5" stroke-dasharray="5 5"/>
-  <circle cx="${cx}" cy="${cy}" r="${centerR}" fill="url(#rg-center)" filter="url(#rg-node-glow)"/>
-  <text x="${cx}" y="${cy-8}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,.5)">@</text>
-  <text x="${cx}" y="${cy+13}" text-anchor="middle" font-family="var(--mono)" font-size="13" font-weight="700" letter-spacing="0.5" fill="#eaf9ff">${escHtml(username.slice(0,10))}</text>
+    // ── 中心节点（头像）──
+    svg+=`<g class="${gid}-enter" style="animation-delay:0s;transform-origin:${cx}px ${cy}px">
+  <circle cx="${cx}" cy="${cy}" r="${centerR+11}" fill="none" stroke="rgba(45,232,176,.22)" stroke-width="1.5" stroke-dasharray="4 6"/>
+  ${avatarCircle(profile.id, cx, cy, centerR, avatarMap[profile.id], true)}
 </g>`;
 
-    // 外围节点
-    peerPositions.forEach((peer, i) => {
-      const delay = (0.08 + i * 0.07).toFixed(2);
-      svg += `<g class="rg-peer-node rg-node-enter" style="animation-delay:${delay}s;transform-origin:${peer.x.toFixed(1)}px ${peer.y.toFixed(1)}px" onclick="showProfile('${escHtml(peer.username)}')">
-  <circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${peerR+8}" fill="rgba(108,142,245,0.06)"/>
-  <circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${peerR}" fill="url(#rg-peer)" filter="url(#rg-node-glow)"/>
-  <text x="${peer.x.toFixed(1)}" y="${(peer.y-8).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="rgba(255,255,255,.4)">@</text>
-  <text x="${peer.x.toFixed(1)}" y="${(peer.y+11).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="700" letter-spacing="0.3" fill="#eef4ff">${escHtml(peer.username.slice(0,10))}</text>
+    // ── 外围节点（头像 + hover显示用户名）──
+    peerPositions.forEach((peer,i)=>{
+      const delay=(0.07+i*0.06).toFixed(2);
+      const av=avatarMap[peer.id]||'';
+      const uname=escHtml(peer.username.slice(0,12));
+      const lbw=Math.max(52, peer.username.slice(0,12).length*8+16);
+      svg+=`<g class="${gid}-peer-wrap ${gid}-enter" style="animation-delay:${delay}s;transform-origin:${peer.x.toFixed(1)}px ${peer.y.toFixed(1)}px" onclick="showProfile('${escHtml(peer.username)}')">
+  <circle class="${gid}-hover-ring" cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${peerR+10}" fill="rgba(108,142,245,.08)" stroke="rgba(108,142,245,.25)" stroke-width="1.2"/>
+  ${avatarCircle(peer.id, peer.x, peer.y, peerR, av, false)}
+  <g class="${gid}-hover-label">
+    <rect x="${(peer.x-lbw/2).toFixed(1)}" y="${(peer.y+peerR+5).toFixed(1)}" width="${lbw}" height="22" rx="11" fill="rgba(6,10,22,.92)" stroke="rgba(108,142,245,.3)" stroke-width="1"/>
+    <text x="${peer.x.toFixed(1)}" y="${(peer.y+peerR+20).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="10" font-weight="600" fill="#c8d8ff">@${uname}</text>
+  </g>
 </g>`;
     });
 
-    svg += `</svg>`;
+    svg+=`</svg>`;
     wrap.innerHTML = svg;
     relSec.appendChild(wrap);
   }
@@ -8005,7 +8022,7 @@ async function uploadProfileBanner(input){
   if(file.size > 5*1024*1024){showToast('图片不能超过 5MB','error');return;}
   showToast('上传中…','info');
   const path = 'banners/'+currentUser.id+'.'+ext;
-  const{error:upErr}=await sb.storage.from('note-images').upload(path,file,{upsert:true,contentType:file.type});
+  const{error:upErr}=await sb.storage.from('note-images').upload(path,file,{upsert:true,'content-type':file.type});
   if(upErr){showToast('上传失败: '+upErr.message,'error');return;}
   const{data:urlData}=sb.storage.from('note-images').getPublicUrl(path);
   const banner_url = urlData.publicUrl+'?t='+Date.now();
