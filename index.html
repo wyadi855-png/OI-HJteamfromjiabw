@@ -175,7 +175,7 @@ nav.scrolled{
   pointer-events:none;opacity:0;
 }
 .nav-more-wrap{position:relative;display:inline-block;}
-.nav-more-menu{position:fixed;background:rgba(10,13,24,0.97);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:10px;padding:6px;min-width:150px;display:none;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
+.nav-more-menu{position:fixed;top:-9999px;left:0;background:rgba(10,13,24,0.97);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:10px;padding:6px;min-width:150px;display:none;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
 .nav-more-menu.open{display:block;animation:fadeIn 0.15s ease;}
 /* .nav-more-menu a — see definition below at line ~611 */
 .nav-more-menu a:hover{background:rgba(108,142,245,0.12);color:var(--accent);}
@@ -4204,23 +4204,6 @@ section:not(.active) {
     </ul>
   </div>
 </nav>
-
-<!-- 更多菜单（移出nav避免backdrop-filter破坏fixed定位） -->
-<div class="nav-more-menu" id="nav-more-menu">
-  <div class="nav-more-group-label">工具</div>
-  <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
-  <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
-  <a onclick="closeMoreMenu();show('judge')" id="nav-judge">⚡ 在线评测</a>
-  <a onclick="closeMoreMenu();show('quiz')" id="nav-quiz">🧠 判断题练习</a>
-  <div class="nav-more-divider"></div>
-  <div class="nav-more-group-label">数据</div>
-  <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
-  <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">🏆 排行榜</a>
-  <div class="nav-more-divider"></div>
-  <a onclick="closeMoreMenu();show('daily')" id="nav-daily">📅 每日一题</a>
-  <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
-  <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
-</div>
 
 <!-- 移动端抽屉导航 -->
 <div class="nav-drawer" id="nav-drawer">
@@ -13261,5 +13244,22 @@ function gcApplyReaction(msgId, emoji, userId, isAdd) {
   if (!bar.children.length) bar.remove();
 }
 </script>
+
+<!-- 更多菜单：放在body最末尾确保fixed定位不受任何父元素影响 -->
+<div class="nav-more-menu" id="nav-more-menu">
+  <div class="nav-more-group-label">工具</div>
+  <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
+  <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
+  <a onclick="closeMoreMenu();show('judge')" id="nav-judge">⚡ 在线评测</a>
+  <a onclick="closeMoreMenu();show('quiz')" id="nav-quiz">🧠 判断题练习</a>
+  <div class="nav-more-divider"></div>
+  <div class="nav-more-group-label">数据</div>
+  <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
+  <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">🏆 排行榜</a>
+  <div class="nav-more-divider"></div>
+  <a onclick="closeMoreMenu();show('daily')" id="nav-daily">📅 每日一题</a>
+  <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
+  <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
+</div>
 </body>
 </html>
