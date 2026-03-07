@@ -11901,7 +11901,7 @@ async function gcSendMessage() {
       formData.append('channel', _gcCurrentChannel);
       const res = await fetch(API_BASE + '/chat/image', {
         method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + (currentUser.access_token || '') },
+        headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('hjoi_token') || '') },
         body: formData
       });
       if (!res.ok) throw new Error('上传失败');
