@@ -109,6 +109,32 @@ html,body{width:100%;height:100%;background:var(--ink);color:var(--text);font-fa
 .page-foot a{color:rgba(79,142,247,.7);text-decoration:none;}
 .page-foot a:hover{color:var(--blue);}
 @keyframes fadeIn{to{opacity:1;}}
+/* ── OI Badge 选择器 ── */
+.badge-section{margin:14px 0 4px;}
+.badge-section-label{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);margin-bottom:7px;}
+.badge-row{display:flex;gap:5px;flex-wrap:wrap;}
+.badge-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:5px 11px;border-radius:100px;
+  font-size:12px;font-family:var(--mono);font-weight:400;
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.03);
+  color:rgba(255,255,255,.48);cursor:pointer;
+  transition:all .14s ease;user-select:none;white-space:nowrap;
+}
+.badge-chip:hover{border-color:rgba(79,142,247,.4);color:rgba(255,255,255,.8);}
+.badge-chip.on{
+  border-color:var(--blue);
+  background:rgba(79,142,247,.13);
+  color:rgba(255,255,255,.92);
+  box-shadow:0 0 0 1px rgba(79,142,247,.18);
+}
+.badge-chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;opacity:.8;}
+/* 省份下拉 */
+.province-wrap{margin-top:8px;display:none;}
+.province-wrap.open{display:block;}
+.badge-section-sub{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--text3);margin:10px 0 6px;}
+
 
 @media(max-width:420px){.form-body{padding:20px 18px 18px;}.field-row{grid-template-columns:1fr;}.hjoi-text{font-size:clamp(44px,12vw,64px);}}
 </style>
@@ -174,6 +200,38 @@ html,body{width:100%;height:100%;background:var(--ink);color:var(--text);font-fa
         <div class="field-label">洛谷 UID <span style="color:var(--text3);font-size:9px">选填</span></div>
         <input id="r-luogu" type="text" placeholder="如：123456" autocomplete="off" inputmode="numeric">
       </div>
+
+      <div class="badge-section" id="badge-block">
+        <div class="badge-section-label">OI 水平 <span style="color:var(--text3);font-size:8.5px;letter-spacing:0">选填</span></div>
+        <div class="badge-row" id="badge-row-main">
+          <div class="badge-chip" data-badge="蒟蒻" onclick="toggleBadge(this,'蒟蒻')"><span class="dot" style="background:#9b9b9b"></span>蒟蒻</div>
+          <div class="badge-chip" data-badge="CSP-J" onclick="toggleBadge(this,'CSP-J')"><span class="dot" style="background:#4e9af1"></span>CSP-J</div>
+          <div class="badge-chip" data-badge="CSP-S" onclick="toggleBadge(this,'CSP-S')"><span class="dot" style="background:#4e9af1"></span>CSP-S</div>
+          <div class="badge-chip" data-badge="NOIP一等" onclick="toggleBadge(this,'NOIP一等')"><span class="dot" style="background:#2de8b0"></span>NOIP 一等</div>
+          <div class="badge-chip" data-badge="NOIP二等" onclick="toggleBadge(this,'NOIP二等')"><span class="dot" style="background:#2de8b0"></span>NOIP 二等</div>
+          <div class="badge-chip" data-badge="NOIP三等" onclick="toggleBadge(this,'NOIP三等')"><span class="dot" style="background:#2de8b0"></span>NOIP 三等</div>
+        </div>
+        <!-- 省队 -->
+        <div style="margin-top:8px;">
+          <div class="badge-section-label" style="margin-bottom:6px">省队</div>
+          <div class="badge-row">
+            <div class="badge-chip" data-badge="省队" onclick="toggleProvince(this)"><span class="dot" style="background:#c792ea"></span>省队</div>
+          </div>
+          <div class="province-wrap" id="province-wrap">
+            <div class="badge-section-sub">选择省份</div>
+            <div class="badge-row" id="province-row" style="max-height:110px;overflow-y:auto;scrollbar-width:none;gap:4px;"></div>
+          </div>
+        </div>
+        <!-- NOI -->
+        <div style="margin-top:8px;">
+          <div class="badge-section-label" style="margin-bottom:6px">NOI</div>
+          <div class="badge-row">
+            <div class="badge-chip" data-badge="NOI金" onclick="toggleBadge(this,'NOI金')"><span class="dot" style="background:#FFD700"></span>金牌</div>
+            <div class="badge-chip" data-badge="NOI银" onclick="toggleBadge(this,'NOI银')"><span class="dot" style="background:#C0C0C0"></span>银牌</div>
+            <div class="badge-chip" data-badge="NOI铜" onclick="toggleBadge(this,'NOI铜')"><span class="dot" style="background:#CD7F32"></span>铜牌</div>
+          </div>
+        </div>
+      </div>
       <div class="form-err" id="register-err"></div>
       <button class="btn-submit" id="btn-register" onclick="doRegister()">
         <div class="btn-inner"><div class="spinner-ring"></div><span class="btn-label">创建账号</span></div>
@@ -200,6 +258,54 @@ window.addEventListener('touchmove',e=>{mx=e.touches[0].clientX;my=e.touches[0].
 const ORBS=[{bx:.18,by:.12,r:300,c:'79,142,247',ph:0,sp:.00075},{bx:.82,by:.82,r:240,c:'45,232,176',ph:2.09,sp:.001},{bx:.58,by:.35,r:200,c:'120,70,250',ph:4.19,sp:.00065},{bx:.12,by:.72,r:170,c:'240,130,60',ph:1.05,sp:.0012}];
 let t=0;
 (function frame(){cx.clearRect(0,0,W,H);t++;ORBS.forEach(o=>{const fx=(o.bx+Math.sin(t*o.sp+o.ph)*.09)*W,fy=(o.by+Math.cos(t*o.sp+o.ph*1.4)*.07)*H,dx=mx-fx,dy=my-fy,dist=Math.hypot(dx,dy),pull=Math.max(0,(500-dist)/500)*.05,px=fx+dx*pull,py=fy+dy*pull,g=cx.createRadialGradient(px,py,0,px,py,o.r);g.addColorStop(0,`rgba(${o.c},.12)`);g.addColorStop(.5,`rgba(${o.c},.04)`);g.addColorStop(1,`rgba(${o.c},0)`);cx.fillStyle=g;cx.beginPath();cx.arc(px,py,o.r,0,Math.PI*2);cx.fill();});requestAnimationFrame(frame);})();
+
+
+// ── OI Badge 选择逻辑 ──
+const PROVINCES=['北京','天津','河北','山西','内蒙古','辽宁','吉林','黑龙江','上海','江苏','浙江','安徽','福建','江西','山东','河南','湖北','湖南','广东','广西','海南','重庆','四川','贵州','云南','西藏','陕西','甘肃','青海','宁夏','新疆'];
+(function initProvinces(){
+  const row = document.getElementById('province-row');
+  if(!row) return;
+  PROVINCES.forEach(p=>{
+    const chip = document.createElement('div');
+    chip.className = 'badge-chip';
+    chip.dataset.badge = '省队-'+p;
+    chip.textContent = p;
+    chip.onclick = function(){ toggleBadge(this, '省队-'+p); };
+    row.appendChild(chip);
+  });
+})();
+
+let _selectedBadge = '';  // 单选
+
+function toggleBadge(el, badge){
+  // 互斥：只能选一个
+  if(el.classList.contains('on')){
+    el.classList.remove('on');
+    _selectedBadge = '';
+  } else {
+    document.querySelectorAll('#badge-block .badge-chip').forEach(c=>c.classList.remove('on'));
+    el.classList.add('on');
+    _selectedBadge = badge;
+    // 选了非省队时关闭省份
+    if(badge !== '省队') document.getElementById('province-wrap').classList.remove('open');
+  }
+}
+
+function toggleProvince(el){
+  const wrap = document.getElementById('province-wrap');
+  const isOpen = wrap.classList.contains('open');
+  if(el.classList.contains('on') && isOpen){
+    el.classList.remove('on');
+    _selectedBadge = '';
+    wrap.classList.remove('open');
+  } else {
+    document.querySelectorAll('#badge-block .badge-chip').forEach(c=>c.classList.remove('on'));
+    el.classList.add('on');
+    wrap.classList.toggle('open', true);
+    // 不设省份时先把省队记为无省份
+    if(!_selectedBadge.startsWith('省队-')) _selectedBadge = '省队';
+  }
+}
 
 function switchTab(tab){document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');document.getElementById('form-login').style.display=tab==='login'?'':'none';document.getElementById('form-register').style.display=tab==='register'?'':'none';clearErrors();}
 function clearErrors(){['login-err','register-err'].forEach(id=>{const el=document.getElementById(id);el.textContent='';el.classList.remove('show');});}
