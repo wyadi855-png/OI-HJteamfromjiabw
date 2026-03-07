@@ -6919,7 +6919,7 @@ async function showProfile(username){
   if(profile.motto)html+='<div class="profile-motto">「'+escHtml(profile.motto)+'」</div>';
   if(profile.bio)html+='<div class="profile-bio">'+escHtml(profile.bio)+'</div>';
   if(isSelf)html+='<button class="profile-edit-btn" onclick="openModal(&apos;settings-modal&apos;);loadSettingsData()">编辑资料</button>';
-  if(!isSelf&&currentUser)html+='<button class="profile-dm-btn" onclick="window._dmClickUid=this.dataset.uid;window._dmClickName=this.dataset.uname;openDMWith(window._dmClickUid,window._dmClickName)" data-uid="'+escHtml(profile.id)+'" data-uname="'+escHtml(username)+'">💬 发私信</button>';
+  if(!isSelf&&currentUser)html+='<button class="profile-dm-btn" onclick="openDMWith(\''+escHtml(profile.id)+'\',\''+escHtml(username)+'\')" >💬 发私信</button>';
   html+='<div class="profile-stats">';
   html+='<div class="profile-stat"><div class="num">'+(notes?notes.length:0)+'</div><div class="lbl">题解</div></div>';
   html+='<div class="profile-stat"><div class="num">'+(posts?posts.length:0)+'</div><div class="lbl">随笔</div></div>';
@@ -9031,23 +9031,18 @@ async function showDMConvList(){
 
 // 从外部打开私信（个人主页按钮）
 async function openDMWith(userId, username){
-  console.log('[DM] openDMWith called', userId, username);
-  if(!currentUser){console.log('[DM] not logged in');return;}
-  // 确保面板打开
+  if(!currentUser) return;
   _dmOpen = true;
   document.getElementById('dm-panel').classList.add('open');
   document.getElementById('notif-panel')?.classList.remove('open');
-
-  // 如果只传了 userId，查 profile
-  let peer;
-  if(username){
-    const{data}=await sb.from('profiles').select('id,username,avatar_url').eq('id',userId).single();
-    peer=data;
-  } else {
-    const{data}=await sb.from('profiles').select('id,username,avatar_url').eq('id',userId).single();
-    peer=data;
+  // 直接用已知信息构造 peer，避免依赖 sb session
+  let peer = {id: userId, username: username || userId, avatar_url: null};
+  if(!username){
+    try{
+      const{data}=await sb.from('profiles').select('id,username,avatar_url').eq('id',userId).maybeSingle();
+      if(data) peer = data;
+    }catch(e){}
   }
-  if(!peer) return;
   openDMChat(peer);
 }
 
