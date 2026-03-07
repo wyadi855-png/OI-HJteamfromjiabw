@@ -5445,7 +5445,7 @@ function renderAuthArea(){
   const coachNav=document.getElementById('nav-admin');
   if(currentUser&&currentProfile){
     area.innerHTML=`<span class="nav-user" style="cursor:pointer" onclick="showProfile('${currentProfile.username}')">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}${(function(){
-  const b=profileData.oi_badge||'';if(!b)return '';
+  const b=currentProfile.oi_badge||'';if(!b)return '';
   const cfg={
     '蒟蒻':     {c:'#9b9b9b',bg:'rgba(155,155,155,.1)',br:'rgba(155,155,155,.25)'},
     'CSP-J':    {c:'#4e9af1',bg:'rgba(78,154,241,.1)', br:'rgba(78,154,241,.25)'},
