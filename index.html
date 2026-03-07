@@ -12007,7 +12007,7 @@ function closeGCLightbox() {
 // ── 初始化（登录后调用） ──────────────────────────────
 function initGC() {
   const btn = document.getElementById('gc-nav-btn');
-  if (btn) btn.style.display = '';
+  if (btn) btn.style.display = 'inline-flex';
   // 点击面板外关闭
   document.addEventListener('click', e => {
     if (_gcOpen && !e.target.closest('#gc-panel') && !e.target.closest('#gc-nav-btn')) {
