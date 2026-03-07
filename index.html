@@ -51,6 +51,52 @@
 .oi-province-grid{display:flex;flex-wrap:wrap;gap:4px;max-height:100px;overflow-y:auto;scrollbar-width:none;}
 /* 展示用 badge（个人主页） */
 .oi-rank-tag{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:100px;font-size:11px;font-family:var(--mono);border:1px solid;}
+
+/* ── 导航栏用户头像 ── */
+.nav-avatar-btn{
+  position:relative;width:32px;height:32px;border-radius:50%;
+  cursor:pointer;border:none;padding:0;background:none;flex-shrink:0;
+  transition:transform .18s var(--spring);
+}
+.nav-avatar-btn:hover{transform:scale(1.08);}
+.nav-avatar-inner{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:#060610;
+  overflow:hidden;
+}
+.nav-avatar-inner img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.nav-avatar-ring{
+  position:absolute;inset:-2px;border-radius:50%;
+  border:1.5px solid transparent;
+  background:linear-gradient(135deg,var(--accent),var(--accent2)) border-box;
+  -webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:destination-out;mask-composite:exclude;
+  animation:avatarPulse 2.8s ease-in-out infinite;
+}
+@keyframes avatarPulse{
+  0%,100%{opacity:.55;transform:scale(1);}
+  50%{opacity:1;transform:scale(1.06);}
+}
+.nav-avatar-dropdown{
+  position:absolute;top:calc(100% + 10px);right:0;
+  min-width:160px;
+  background:rgba(10,12,22,.95);backdrop-filter:blur(20px);
+  border:1px solid var(--border);border-radius:12px;
+  padding:6px;box-shadow:0 8px 32px rgba(0,0,0,.5);
+  opacity:0;pointer-events:none;transform:translateY(-6px) scale(.97);
+  transition:opacity .15s,transform .15s;z-index:200;
+}
+.nav-avatar-dropdown.open{opacity:1;pointer-events:all;transform:none;}
+.nav-dd-item{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;
+  border-radius:8px;cursor:pointer;font-size:13px;color:var(--text2);
+  transition:background .12s,color .12s;white-space:nowrap;
+}
+.nav-dd-item:hover{background:rgba(108,142,245,.1);color:var(--text);}
+.nav-dd-item.danger:hover{background:rgba(255,83,112,.1);color:#ff5370;}
+.nav-dd-sep{height:1px;background:var(--border);margin:4px 2px;}
+.nav-dd-uname{font-size:11px;font-family:var(--mono);color:var(--text3);padding:6px 10px 2px;}
 /* ── Variables ── */
 :root{
   --bg:#080b12;--surface:#0f1320;--surface2:#161c2e;--border:#1e2540;
@@ -5446,27 +5492,40 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 // ── Auth UI ────────────────────────────────────────────────
+
+function toggleNavDropdown(e){
+  e.stopPropagation();
+  const dd=document.getElementById('nav-avatar-dropdown');
+  if(dd) dd.classList.toggle('open');
+}
+function closeNavDropdown(){
+  const dd=document.getElementById('nav-avatar-dropdown');
+  if(dd) dd.classList.remove('open');
+}
+document.addEventListener('click',function(){closeNavDropdown();});
 function renderAuthArea(){
   const area=document.getElementById('nav-auth-area');
   const coachNav=document.getElementById('nav-admin');
   if(currentUser&&currentProfile){
-    area.innerHTML=`<span class="nav-user" style="cursor:pointer" onclick="showProfile('${currentProfile.username}')">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}${(function(){
-  const b=currentProfile.oi_badge||'';if(!b)return '';
-  const cfg={
-    '蒟蒻':     {c:'#9b9b9b',bg:'rgba(155,155,155,.1)',br:'rgba(155,155,155,.25)'},
-    'CSP-J':    {c:'#4e9af1',bg:'rgba(78,154,241,.1)', br:'rgba(78,154,241,.25)'},
-    'CSP-S':    {c:'#4e9af1',bg:'rgba(78,154,241,.1)', br:'rgba(78,154,241,.25)'},
-    'NOIP一等': {c:'#2de8b0',bg:'rgba(45,232,176,.1)', br:'rgba(45,232,176,.25)'},
-    'NOIP二等': {c:'#2de8b0',bg:'rgba(45,232,176,.1)', br:'rgba(45,232,176,.25)'},
-    'NOIP三等': {c:'#2de8b0',bg:'rgba(45,232,176,.1)', br:'rgba(45,232,176,.25)'},
-    'NOI金':    {c:'#FFD700',bg:'rgba(255,215,0,.1)',   br:'rgba(255,215,0,.3)'},
-    'NOI银':    {c:'#C0C0C0',bg:'rgba(192,192,192,.1)', br:'rgba(192,192,192,.3)'},
-    'NOI铜':    {c:'#CD7F32',bg:'rgba(205,127,50,.1)',  br:'rgba(205,127,50,.3)'},
-  };
-  const label = b.startsWith('省队-')?'省队·'+b.slice(3):b;
-  const s = cfg[b]||{c:'#c792ea',bg:'rgba(199,146,234,.1)',br:'rgba(199,146,234,.25)'};
-  return '<span class="oi-rank-tag" style="color:'+s.c+';background:'+s.bg+';border-color:'+s.br+'">'+escHtml(label)+'</span>';
-})()}<button class="btn btn-outline btn-sm" onclick="openModal('settings-modal');loadSettingsData()">设置</button><button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
+    const _av=currentProfile.avatar_url;
+    const _avatarInner=_av
+      ?`<img src="${escHtml(_av)}" alt="">`
+      :`<span style="font-size:13px;font-weight:700;color:#060610">${currentProfile.username.charAt(0).toUpperCase()}</span>`;
+    const _avatarBg=_av?'transparent':avatarGradient(currentProfile.username);
+    area.innerHTML=`<div style="position:relative;display:inline-flex;align-items:center">
+      <button class="nav-avatar-btn" id="nav-avatar-btn" onclick="toggleNavDropdown(event)" title="@${escHtml(currentProfile.username)}">
+        <div class="nav-avatar-inner" style="background:${_avatarBg}">${_avatarInner}</div>
+        <div class="nav-avatar-ring"></div>
+      </button>
+      <div class="nav-avatar-dropdown" id="nav-avatar-dropdown">
+        <div class="nav-dd-uname">@${escHtml(currentProfile.username)}${isCoach()?'&nbsp;<span class="coach-badge" style="font-size:10px">教练</span>':''}</div>
+        <div class="nav-dd-sep"></div>
+        <div class="nav-dd-item" onclick="closeNavDropdown();show('profile');showProfile('${escHtml(currentProfile.username)}')">👤 个人主页</div>
+        <div class="nav-dd-item" onclick="closeNavDropdown();openModal('settings-modal');loadSettingsData()">⚙️ 设置</div>
+        <div class="nav-dd-sep"></div>
+        <div class="nav-dd-item danger" onclick="closeNavDropdown();doLogout()">退出登录</div>
+      </div>
+    </div>`;
     if(isCoach()){coachNav.style.display='';const da=document.getElementById('drawer-admin');if(da)da.style.display='';}
     ['btn-new-note','btn-new-post'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
     if(isCoach())['btn-new-contest','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
@@ -6113,10 +6172,7 @@ async function homeDailyCheckin(dailyId, isChecked){
       await apiRequest('/daily/checkin',{method:'POST'});
       showToast('打卡成功 🎉','success');triggerCheckinEffect();
     }
-  }catch(e){
-    // 已打卡则静默刷新，不报错
-    if(!e.message||!e.message.includes('已经打过卡')) showToast(e.message,'error');
-  }
+  }catch(e){}
   loadHomeDailyCard();
 }
 
