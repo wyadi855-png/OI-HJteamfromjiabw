@@ -119,21 +119,28 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:1
 /* ── NAV ── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
-  background:rgba(255,255,255,0.055);
+  background:rgba(6,8,15,0.72);
   backdrop-filter:blur(48px) saturate(200%);
   -webkit-backdrop-filter:blur(48px) saturate(200%);
-  border-bottom:1px solid rgba(255,255,255,0.1);
+  border-bottom:1px solid rgba(108,142,245,0.1);
   box-shadow:
-    inset 0 -1px 0 rgba(0,0,0,0.08),
-    0 1px 0 rgba(255,255,255,0.06),
-    0 8px 32px rgba(0,0,0,0.35);
+    0 1px 0 rgba(108,142,245,0.06),
+    0 8px 32px rgba(0,0,0,0.45);
   display:flex;flex-direction:column;justify-content:center;overflow:visible;
-  transition:background 0.4s,box-shadow 0.4s,border-color 0.4s;}
+  transition:background 0.35s,box-shadow 0.35s,border-color 0.35s;}
 nav.scrolled{
-  background:rgba(255,255,255,0.07);
-  border-bottom-color:rgba(255,255,255,0.14);
-  box-shadow:inset 0 -1px 0 rgba(0,0,0,0.1),0 8px 40px rgba(0,0,0,0.5);}
-.nav-top{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;}
+  background:rgba(4,6,12,0.88);
+  border-bottom-color:rgba(108,142,245,0.16);
+  box-shadow:0 1px 0 rgba(108,142,245,0.08),0 12px 48px rgba(0,0,0,0.6);}
+/* 收缩：nav-top 高度压缩 */
+.nav-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 24px;
+  transition:padding 0.35s cubic-bezier(0.4,0,0.2,1);}
+nav.scrolled .nav-top{padding:9px 24px;}
+/* nav-bottom 也轻微压缩 */
+.nav-bottom{transition:padding 0.35s;}
+nav.scrolled .nav-bottom .nav-links{padding-bottom:7px;}
 .nav-invite-btn{
   font-family:var(--mono);font-size:11px;font-weight:500;
   padding:5px 11px;border-radius:100px;
@@ -156,27 +163,62 @@ nav.scrolled{
 .nav-hjoi-svg{width:88px;height:32px;display:block;overflow:visible;transition:filter 0.3s;}
 .nav-logo:hover .nav-hjoi-svg{filter:drop-shadow(0 0 6px rgba(45,232,176,0.6));}
 .nav-actions{display:flex;align-items:center;gap:10px;}
-.nav-links{display:flex;flex-wrap:wrap;gap:3px;padding:0 16px 10px;border-top:1px solid rgba(255,255,255,0.06);list-style:none;margin:0;position:relative;}
+.nav-links{display:flex;flex-wrap:wrap;gap:2px;padding:0 16px 10px;border-top:1px solid rgba(255,255,255,0.05);list-style:none;margin:0;position:relative;}
 .nav-links a{
-  font-size:13px;color:rgba(255,255,255,0.6);text-decoration:none;
-  padding:6px 14px;border-radius:100px;cursor:pointer;
+  font-size:13px;color:rgba(255,255,255,0.5);text-decoration:none;
+  padding:5px 13px;border-radius:100px;cursor:pointer;
   font-family:var(--mono);letter-spacing:0.02em;
-  transition:color 0.2s ease,background 0.2s ease;
+  transition:color 0.18s ease,background 0.18s ease;
   position:relative;
 }
-.nav-links a:hover{ color:rgba(255,255,255,0.92); }
-.nav-links a.active{ color:#fff; }
-/* 活跃指示线 */
+.nav-links a:hover{color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.07);}
+/* 活跃 tab — 背景高亮 pill */
+.nav-links a.active{
+  color:#fff !important;
+  background:linear-gradient(135deg,rgba(108,142,245,0.28),rgba(45,232,176,0.18)) !important;
+  border:1px solid rgba(108,142,245,0.28) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 0 12px rgba(108,142,245,0.18) !important;
+  text-shadow:none !important;
+}
+/* 底部活跃指示线保留，但改为在 pill 内部底边渲染 */
 #nav-indicator{
   position:absolute;bottom:0;left:0;height:2px;
   background:linear-gradient(90deg,var(--accent2),var(--accent));
   border-radius:2px;
   transition:left 0.3s cubic-bezier(0.34,1.56,0.64,1),width 0.3s cubic-bezier(0.34,1.56,0.64,1),opacity 0.2s;
-  pointer-events:none;opacity:0;
+  pointer-events:none;opacity:0;  /* 隐藏旧指示线，pill 已足够醒目 */
 }
 .nav-more-wrap{position:relative;display:inline-block;}
-.nav-more-menu{position:fixed;background:rgba(10,13,24,0.97);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:10px;padding:6px;min-width:150px;display:none;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
-.nav-more-menu.open{display:block;animation:fadeIn 0.15s ease;}
+.nav-more-menu{
+  position:fixed;
+  background:
+    linear-gradient(160deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.01) 100%),
+    rgba(8,11,22,0.97);
+  backdrop-filter:blur(32px) saturate(180%);
+  -webkit-backdrop-filter:blur(32px) saturate(180%);
+  border:1px solid rgba(108,142,245,0.18);
+  border-radius:14px;
+  padding:8px;
+  min-width:190px;
+  display:none;
+  z-index:9000;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 0 0 1px rgba(0,0,0,0.25),
+    0 16px 48px rgba(0,0,0,0.6),
+    0 0 24px rgba(108,142,245,0.06);
+  transform-origin:top left;
+}
+.nav-more-menu.open{
+  display:block;
+  animation:moreMenuIn 0.2s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes moreMenuIn{
+  from{opacity:0;transform:translateY(-8px) scale(0.96);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
 /* .nav-more-menu a — see definition below at line ~611 */
 .nav-more-menu a:hover{background:rgba(108,142,245,0.12);color:var(--accent);}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
@@ -1755,20 +1797,96 @@ footer span{color:var(--accent2);}
 /* 导航 pill 按钮（群聊/私信/通知） */
 .nav-pill-btn{
   display:inline-flex;align-items:center;gap:5px;
-  font-family:var(--mono);font-size:11px;font-weight:500;color:rgba(255,255,255,0.55);
-  background:rgba(255,255,255,0.055);
-  border:1px solid rgba(255,255,255,0.09);
-  border-radius:100px;padding:5px 10px;
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  color:rgba(255,255,255,0.55);
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:100px;padding:5px 11px;
   cursor:pointer;position:relative;
-  transition:color 0.18s,background 0.18s,border-color 0.18s;
+  transition:color 0.18s,background 0.2s,border-color 0.18s,transform 0.22s var(--spring),box-shadow 0.2s;
   white-space:nowrap;letter-spacing:0.02em;
 }
 .nav-pill-btn:hover{
-  color:rgba(255,255,255,0.9);
+  color:rgba(255,255,255,0.92);
   background:rgba(255,255,255,0.1);
-  border-color:rgba(255,255,255,0.18);
+  border-color:rgba(255,255,255,0.16);
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);
 }
-.nav-pill-btn svg{flex-shrink:0;color:inherit;}
+.nav-pill-btn:active{transform:translateY(0) scale(0.97);}
+.nav-pill-btn svg{flex-shrink:0;color:inherit;transition:transform 0.2s var(--spring);}
+.nav-pill-btn:hover svg{transform:scale(1.1);}
+
+/* 群聊按钮 — 蓝色主题 */
+#gc-nav-btn{
+  border-color:rgba(108,142,245,0.2);
+  color:rgba(108,142,245,0.8);
+}
+#gc-nav-btn:hover{
+  background:rgba(108,142,245,0.12);
+  border-color:rgba(108,142,245,0.4);
+  color:#a5b8ff;
+  box-shadow:0 4px 14px rgba(108,142,245,0.2);
+}
+/* 私信按钮 — 绿色主题 */
+#dm-nav-btn{
+  border-color:rgba(45,232,176,0.18);
+  color:rgba(45,232,176,0.75);
+}
+#dm-nav-btn:hover{
+  background:rgba(45,232,176,0.1);
+  border-color:rgba(45,232,176,0.38);
+  color:#2de8b0;
+  box-shadow:0 4px 14px rgba(45,232,176,0.18);
+}
+/* 通知按钮 — 紫/黄主题 */
+#notif-btn{
+  border-color:rgba(200,114,234,0.18);
+  color:rgba(200,114,234,0.75);
+}
+#notif-btn:hover{
+  background:rgba(200,114,234,0.1);
+  border-color:rgba(200,114,234,0.35);
+  color:#c772ea;
+  box-shadow:0 4px 14px rgba(200,114,234,0.18);
+}
+
+/* 未读角标 — 统一升级 */
+.gc-notif-badge,.notif-badge{
+  position:absolute;top:-4px;right:-4px;
+  min-width:16px;height:16px;
+  border-radius:100px;
+  display:none;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  padding:0 4px;line-height:16px;
+  border:1.5px solid rgba(6,9,20,0.9);
+}
+.gc-notif-badge{
+  background:var(--accent);
+  color:var(--bg);
+  box-shadow:0 0 8px rgba(108,142,245,0.6);
+}
+.notif-badge{
+  background:var(--red);
+  color:#fff;
+  box-shadow:0 0 8px rgba(255,83,112,0.6);
+}
+.gc-notif-badge.show,.notif-badge.show{
+  display:flex;
+  animation:badgePop 0.3s var(--spring) both;
+}
+@keyframes badgePop{
+  from{transform:scale(0);opacity:0;}
+  to{transform:scale(1);opacity:1;}
+}
+/* 有未读时 pill 本身也有 glow */
+#gc-nav-btn:has(.gc-notif-badge.show){
+  box-shadow:0 0 0 1px rgba(108,142,245,0.3),0 0 12px rgba(108,142,245,0.15);
+}
+#dm-nav-btn:has(.notif-badge.show),
+#notif-btn:has(.notif-badge.show){
+  box-shadow:0 0 0 1px rgba(255,83,112,0.3),0 0 12px rgba(255,83,112,0.12);
+}
 #gc-panel{
   position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-8px);
   width:920px;max-width:98vw;height:min(640px,82vh);
@@ -2718,10 +2836,37 @@ footer span{color:var(--accent2);}
 .lb-div-cnt{font-size:12px;opacity:0.7;font-family:var(--mono);font-weight:400;}
 
 /* ── NAV MORE MENU GROUPS ── */
-.nav-more-group-label{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;padding:6px 12px 3px;pointer-events:none;margin-top:2px;}
-.nav-more-divider{height:1px;background:rgba(108,142,245,0.08);margin:4px 8px;}
-.nav-more-menu a{display:block;padding:7px 12px;border-radius:6px;font-size:13px;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.15s;}
-.nav-more-menu a:hover{background:rgba(108,142,245,0.1);color:var(--accent);}
+.nav-more-group-label{
+  font-family:var(--mono);font-size:10px;color:var(--text3);
+  letter-spacing:0.14em;text-transform:uppercase;
+  padding:8px 10px 4px;pointer-events:none;
+  opacity:0.55;margin-top:2px;
+}
+.nav-more-divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(108,142,245,0.12),transparent);
+  margin:5px 4px;
+}
+.nav-more-menu a{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:8px;
+  font-family:var(--mono);font-size:12px;
+  color:rgba(200,210,240,0.75);
+  text-decoration:none;cursor:pointer;
+  transition:background 0.14s,color 0.14s,transform 0.18s var(--spring);
+  letter-spacing:0.02em;
+}
+.nav-more-menu a:hover{
+  background:rgba(108,142,245,0.13);
+  color:#fff;
+  transform:translateX(3px);
+}
+.nav-more-menu a.active{
+  background:rgba(108,142,245,0.18);
+  color:var(--accent);
+  border-left:2px solid var(--accent);
+  padding-left:8px;
+}
 
 /* ── TYPEWRITER ── */
 .typewriter-cursor{
@@ -3343,17 +3488,21 @@ body::after {
 
 /* 5. Nav — deeper frost + glow border */
 nav {
-  background: rgba(6,8,15,0.65);
+  background: rgba(6,8,15,0.72);
   border-bottom: 1px solid rgba(108,142,245,0.10);
   box-shadow:
     0  1px 0   rgba(108,142,245,0.06),
     0  8px 32px rgba(0,0,0,0.45),
     0  0  80px  rgba(0,0,0,0.25);
 }
+/* active pill 最终样式（覆盖前面所有层） */
 .nav-links a.active {
-  color: rgba(255,255,255,0.95) !important;
-  background: rgba(255,255,255,0.12) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2) !important;
+  color: #fff !important;
+  background: linear-gradient(135deg,rgba(108,142,245,0.28),rgba(45,232,176,0.15)) !important;
+  border: 1px solid rgba(108,142,245,0.30) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    0 0 14px rgba(108,142,245,0.20) !important;
   text-shadow: none !important;
 }
 
@@ -4618,6 +4767,57 @@ section:not(.active) {
   box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(45,232,176,0.06);
   backdrop-filter: blur(24px);
 }
+
+/* ══════════════════════════════════════════════
+   NAV UPGRADE — Active Pill · Compact Scroll
+   More Menu · Pill Buttons · Badges
+   ══════════════════════════════════════════════ */
+
+/* ── 更多菜单触发器 ── */
+.nav-more-trigger {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  color: rgba(255,255,255,0.5) !important;
+  font-family: var(--mono) !important;
+  font-size: 13px !important;
+  padding: 5px 13px !important;
+  border-radius: 100px !important;
+  transition: color 0.18s, background 0.18s !important;
+  cursor: pointer;
+  user-select: none;
+}
+.nav-more-trigger::after {
+  content: '';
+  display: inline-block;
+  width: 0; height: 0;
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+  border-top: 4px solid currentColor;
+  opacity: 0.55;
+  transition: transform 0.22s var(--smooth);
+}
+.nav-more-trigger:hover {
+  color: rgba(255,255,255,0.88) !important;
+  background: rgba(255,255,255,0.07) !important;
+}
+.nav-more-trigger.open-state::after {
+  transform: rotate(180deg);
+  opacity: 0.8;
+}
+
+/* ── Nav 收缩时 logo 同步缩小 ── */
+.nav-logo { transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+nav.scrolled .nav-logo { transform: scale(0.93); }
+nav.scrolled .nav-hjoi-svg { filter: drop-shadow(0 0 4px rgba(45,232,176,0.4)); }
+
+/* ── nav-bottom 分隔线收缩时淡化 ── */
+nav.scrolled .nav-bottom { border-top-color: rgba(255,255,255,0.03); }
+
+/* ── 移动端 nav 收缩 ── */
+@media (max-width: 768px) {
+  nav.scrolled .nav-top { padding: 7px 14px !important; }
+}
 </style>
 </head>
 <body>
@@ -4750,19 +4950,55 @@ section:not(.active) {
 
 <!-- 更多菜单：在nav外，避免nav的backdrop-filter破坏position:fixed -->
 <div class="nav-more-menu" id="nav-more-menu">
+  <div class="nav-more-group-label">学习</div>
+  <a onclick="closeMoreMenu();show('daily')" id="nav-daily">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M4 1v2M10 1v2M1 6h12" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+    每日一题
+  </a>
+  <a onclick="closeMoreMenu();show('archive')" id="nav-archive-m">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h7M2 11h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    题库
+  </a>
+  <a onclick="closeMoreMenu();show('knowledge')" id="nav-knowledge-m">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1L2 4v6l5 3 5-3V4L7 1z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+    知识库
+  </a>
+  <a onclick="closeMoreMenu();show('resources')" id="nav-resources">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 2h6l3 3v7H2V2z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/><path d="M8 2v3h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+    资料
+  </a>
+  <div class="nav-more-divider"></div>
   <div class="nav-more-group-label">工具</div>
-  <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
-  <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
-  <a onclick="closeMoreMenu();show('judge')" id="nav-judge">⚡ 在线评测</a>
-  <a onclick="closeMoreMenu();show('quiz')" id="nav-quiz">🧠 判断题练习</a>
+  <a onclick="closeMoreMenu();show('judge')" id="nav-judge">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 2h10v9H2z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/><path d="M5 7l2 2 3-3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    在线评测
+  </a>
+  <a onclick="closeMoreMenu();show('quiz')" id="nav-quiz">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.1"/><path d="M7 4.5a1.5 1.5 0 010 3M7 9.5v.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+    判断题练习
+  </a>
+  <a onclick="closeMoreMenu();show('search')" id="nav-search">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.1"/><path d="M8.5 8.5L12 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    搜索
+  </a>
+  <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M3 2h8v10l-4-2.5L3 12V2z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+    收藏
+  </a>
   <div class="nav-more-divider"></div>
   <div class="nav-more-group-label">数据</div>
-  <a onclick="closeMoreMenu();show('stats')" id="nav-stats">📊 统计</a>
-  <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">🏆 排行榜</a>
-  <div class="nav-more-divider"></div>
-  <a onclick="closeMoreMenu();show('daily')" id="nav-daily">📅 每日一题</a>
-  <a onclick="closeMoreMenu();show('resources')" id="nav-resources">📚 资料</a>
-  <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">⚙️ 后台</a>
+  <a onclick="closeMoreMenu();show('stats')" id="nav-stats">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 11l3-4 3 2 4-6" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    统计
+  </a>
+  <a onclick="closeMoreMenu();show('leaderboard')" id="nav-leaderboard-m">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 3.5L12 5l-2.5 2.5.5 3.5L7 9.5 4 11l.5-3.5L2 5l3.5-.5L7 1z" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
+    排行榜
+  </a>
+  <a onclick="closeMoreMenu();show('admin')" id="nav-admin" style="display:none">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.1"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.5 2.5l1.5 1.5M10 10l1.5 1.5M2.5 11.5L4 10M10 4l1.5-1.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+    后台管理
+  </a>
 </div>
 
 <!-- 移动端抽屉导航 -->
@@ -7733,11 +7969,22 @@ function toggleMoreMenu(e){
   menu.style.top=(rect.bottom+6)+'px';
   menu.style.left=rect.left+'px';
   menu.classList.toggle('open');
+  // 箭头旋转
+  trigger.style.setProperty('--arrow-rot', menu.classList.contains('open') ? '180deg' : '0deg');
   if(menu.classList.contains('open')){
+    trigger.style.transform='';
+    // 直接旋转 ::after 用 class 方式
+    trigger.classList.toggle('open-state', true);
     setTimeout(()=>document.addEventListener('click',closeMoreMenuOutside),50);
+  } else {
+    trigger.classList.remove('open-state');
   }
 }
-function closeMoreMenu(){document.getElementById('nav-more-menu').classList.remove('open');}
+function closeMoreMenu(){
+  document.getElementById('nav-more-menu').classList.remove('open');
+  const t=document.querySelector('.nav-more-trigger');
+  if(t) t.classList.remove('open-state');
+}
 function closeMoreMenuOutside(e){
   const menu=document.getElementById('nav-more-menu');
   if(!menu.contains(e.target)&&!e.target.closest('.nav-more-wrap')){
