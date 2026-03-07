@@ -6136,9 +6136,13 @@ async function loadHomeDailyCard(){
     let myCheckin=false;
     if(currentUser){
       try{
+        // 优先走后端接口（绕过RLS）
         const st=await apiRequest('/daily/checkin/status?daily_id='+daily.id);
         myCheckin=st.checked||false;
-      }catch(e){}
+      }catch(e){
+        // 接口不存在时降级：直接在已拉取的 checkins 列表里找
+        myCheckin=!!(checkins||[]).find(ch=>ch.user_id===currentUser.id);
+      }
     }
     const luoguUrl=daily.problem_id?'https://www.luogu.com.cn/problem/'+daily.problem_id:'#';
     const count=(checkins||[]).length;
@@ -6165,14 +6169,20 @@ async function loadHomeDailyCard(){
 
 async function homeDailyCheckin(dailyId, isChecked){
   if(!currentUser){showToast('请先登录','error');return;}
+  if(isChecked){
+    // 取消打卡
+    try{ await apiRequest('/daily/checkin/undo',{method:'POST',body:JSON.stringify({daily_id:dailyId})}); }catch(e){}
+    loadHomeDailyCard();
+    return;
+  }
+  // 打卡
   try{
-    if(isChecked){
-      await apiRequest('/daily/checkin/undo',{method:'POST',body:JSON.stringify({daily_id:dailyId})});
-    } else {
-      await apiRequest('/daily/checkin',{method:'POST'});
-      showToast('打卡成功 🎉','success');triggerCheckinEffect();
-    }
-  }catch(e){}
+    await apiRequest('/daily/checkin',{method:'POST'});
+    showToast('打卡成功 🎉','success');
+    triggerCheckinEffect();
+  }catch(e){
+    // 不管什么错误，都刷新状态（可能已经打过卡了）
+  }
   loadHomeDailyCard();
 }
 
