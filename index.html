@@ -7318,7 +7318,7 @@ function presetProblems(key){
   preview.innerHTML = `✅ 已填入 ${list.length} 道题：<br>` + list.map(p=>`<span style="color:var(--accent)">${p.id}</span> ${p.title}`).join(' &nbsp;·&nbsp; ');
 }
 
-// ── 洛谷批量导入（从洛谷实时拉取题目数据）─────────────────
+// ── 洛谷批量导入（后端拉取，绕过 CORS）────────────────────
 async function submitLuoguImport(){
   if(!isCoach()){showToast('仅教练可操作','error');return;}
   const raw = document.getElementById('luogu-import-ids').value;
@@ -7334,69 +7334,23 @@ async function submitLuoguImport(){
 
   const btn    = document.getElementById('luogu-import-btn');
   const status = document.getElementById('luogu-fetch-status');
-  btn.disabled=true; btn.textContent='拉取中…';
+  btn.disabled=true; btn.textContent='导入中…';
   status.style.display='block';
+  status.textContent = '⏳ 后端正在从洛谷拉取题目数据，请稍候…';
 
-  const DIFF_MAP = {0:'unrated',1:'入门',2:'入门',3:'普及',4:'普及',5:'提高',6:'提高',7:'省选',8:'省选',9:'省选'};
-
-  // 逐题从洛谷拉取，并发限制5个
-  const rows = [];
-  const skipped = [];
-  const failed  = [];
-  let done = 0;
-
-  async function fetchOne(pid){
-    try{
-      const res = await fetch(`https://www.luogu.com.cn/problem/${pid}?_contentOnly=1`,{
-        headers:{'x-luogu-type':'content-only'},
-        signal: AbortSignal.timeout(8000)
-      });
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      const text = await res.text();
-      if(!text||text.trim().startsWith('<')) throw new Error('非JSON');
-      const data = JSON.parse(text);
-      const p = data?.currentData?.problem;
-      if(!p) throw new Error('无数据');
-      const tags = (p.tags||[]).map(t=>t.name).filter(Boolean);
-      return {
-        problem_id: pid,
-        title: p.title || pid,
-        difficulty: forceDiff || DIFF_MAP[p.difficulty] || null,
-        topic: forceTopic || tags.slice(0,3).join(', ') || null,
-        time_limit: p.limits?.time?.[0] || null,
-        memory_limit: p.limits?.memory?.[0] || null,
-        description: p.content?.description ? p.content.description.slice(0,500) : null,
-      };
-    }catch(e){
-      failed.push(pid);
-      return null;
-    }finally{
-      done++;
-      status.textContent = `⏳ 已处理 ${done}/${ids.length}：${pid}`;
-    }
-  }
-
-  // 并发分批，每批5个
-  for(let i=0;i<ids.length;i+=5){
-    const batch = ids.slice(i,i+5);
-    const results = await Promise.all(batch.map(fetchOne));
-    results.forEach(r=>r&&rows.push(r));
-    if(i+5<ids.length) await new Promise(r=>setTimeout(r,300)); // 限速
-  }
-
-  if(!rows.length){
-    btn.disabled=false; btn.textContent='导入题目';
-    status.style.display='none';
-    showToast('所有题目拉取失败','error'); return;
-  }
-
-  // 走后端写入（绕过 RLS）
-  status.textContent = `⏳ 正在写入 ${rows.length} 道题目…`;
   try{
-    const res = await apiRequest('/archive/batch-import',{method:'POST',body:JSON.stringify({problems:rows})});
-    showToast(`✅ 导入 ${res.imported} 道，跳过已有 ${res.skipped} 道${failed.length?'，'+failed.length+' 道拉取失败':''}`, 'success');
+    // 把题号列表和覆盖参数一起发给后端，后端负责拉取+写入
+    const res = await apiRequest('/archive/luogu-import', {
+      method: 'POST',
+      body: JSON.stringify({
+        problem_ids: ids,
+        force_difficulty: forceDiff || null,
+        force_topic: forceTopic || null,
+      })
+    });
+    showToast('✅ 导入 '+res.imported+' 道，跳过已有 '+res.skipped+' 道'+(res.failed?'，'+res.failed+' 道拉取失败':''), 'success');
   }catch(e){
-    showToast('写入失败: '+e.message,'error');
+    showToast('导入失败: '+e.message,'error');
   }finally{
     btn.disabled=false; btn.textContent='导入题目';
     status.style.display='none';
