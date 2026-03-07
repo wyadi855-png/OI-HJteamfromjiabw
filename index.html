@@ -1556,9 +1556,26 @@ footer span{color:var(--accent2);}
 /* ══════════════════════════════════════
    群聊面板 CSS
 ══════════════════════════════════════ */
+/* 导航 pill 按钮（群聊/私信/通知） */
+.nav-pill-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--mono);font-size:11px;font-weight:500;color:rgba(255,255,255,0.55);
+  background:rgba(255,255,255,0.055);
+  border:1px solid rgba(255,255,255,0.09);
+  border-radius:100px;padding:5px 10px;
+  cursor:pointer;position:relative;
+  transition:color 0.18s,background 0.18s,border-color 0.18s;
+  white-space:nowrap;letter-spacing:0.02em;
+}
+.nav-pill-btn:hover{
+  color:rgba(255,255,255,0.9);
+  background:rgba(255,255,255,0.1);
+  border-color:rgba(255,255,255,0.18);
+}
+.nav-pill-btn svg{flex-shrink:0;color:inherit;}
 #gc-panel{
   position:fixed;top:60px;left:50%;transform:translateX(-50%);
-  width:900px;max-width:98vw;height:600px;
+  width:900px;max-width:98vw;height:min(600px,80vh);
   background:rgba(8,12,24,0.98);
   backdrop-filter:blur(24px);
   border:1px solid rgba(108,142,245,0.15);
@@ -1667,6 +1684,15 @@ footer span{color:var(--accent2);}
   word-break:break-word;white-space:pre-wrap;
 }
 .gc-msg-content.retracted{color:var(--text3);font-style:italic;font-size:12px;}
+/* 连续消息分组 */
+.gc-msg-grouped{padding-top:1px;padding-bottom:1px;}
+.gc-msg-av-ph{visibility:hidden;pointer-events:none;}
+.gc-msg-time-hover{
+  font-family:var(--mono);font-size:10px;color:var(--text3);
+  opacity:0;transition:opacity 0.15s;margin-right:6px;
+  display:inline-block;vertical-align:middle;
+}
+.gc-msg-grouped:hover .gc-msg-time-hover{opacity:1;}
 .gc-msg-img{max-width:320px;max-height:240px;border-radius:8px;cursor:pointer;margin-top:4px;display:block;object-fit:cover;}
 .gc-mention{color:var(--accent);font-weight:600;cursor:pointer;}
 .gc-mention:hover{text-decoration:underline;}
@@ -1682,7 +1708,29 @@ footer span{color:var(--accent2);}
   text-align:center;font-family:var(--mono);font-size:11px;
   color:var(--text3);padding:4px 0;
 }
-.gc-date-divider{
+/* 新消息提示按钮 */
+#gc-new-msg-btn{
+  position:absolute;bottom:72px;left:50%;transform:translateX(-50%);
+  background:var(--accent);color:var(--bg);
+  border:none;border-radius:100px;padding:5px 14px;
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  cursor:pointer;z-index:10;display:none;
+  box-shadow:0 4px 16px rgba(108,142,245,0.4);
+  animation:fadeSlideUp 0.2s ease;white-space:nowrap;
+}
+#gc-new-msg-btn.show{display:block;}
+/* 骨架屏 */
+.gc-skeleton{padding:10px 16px;display:flex;gap:10px;align-items:flex-start;}
+.gc-sk-av{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.07);flex-shrink:0;animation:skPulse 1.4s ease infinite;}
+.gc-sk-body{flex:1;display:flex;flex-direction:column;gap:6px;padding-top:2px;}
+.gc-sk-line{height:10px;border-radius:4px;background:rgba(255,255,255,0.07);animation:skPulse 1.4s ease infinite;}
+.gc-sk-line.short{width:35%;}
+.gc-sk-line.mid{width:60%;}
+.gc-sk-line.long{width:85%;}
+.gc-sk-line:nth-child(2){animation-delay:0.15s;}
+.gc-sk-line:nth-child(3){animation-delay:0.3s;}
+@keyframes skPulse{0%,100%{opacity:0.5;}50%{opacity:1;}}
+/* 日期分割线 */
   text-align:center;font-family:var(--mono);font-size:10px;
   color:var(--text3);margin:6px 0;padding:4px;
 }
@@ -3861,46 +3909,19 @@ section:not(.active) {
       </svg>
     </div>
     <div style="display:flex;align-items:center;gap:6px">
-      <button class="notif-btn dm-nav-btn" id="gc-nav-btn" onclick="toggleGCPanel()" title="群聊" style="display:none">
-        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
-          <path d="M2 3h12a1 1 0 011 1v7a1 1 0 01-1 1H5l-3 2V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-          <circle cx="5.5" cy="7.5" r="0.8" fill="currentColor"/>
-          <circle cx="8" cy="7.5" r="0.8" fill="currentColor"/>
-          <circle cx="10.5" cy="7.5" r="0.8" fill="currentColor"/>
-        </svg>
+      <button class="nav-pill-btn" id="gc-nav-btn" onclick="toggleGCPanel()" style="display:none">
+        <svg viewBox="0 0 14 14" width="13" height="13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 2.5h12a.5.5 0 01.5.5v6a.5.5 0 01-.5.5H4.5L1 12V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/><circle cx="4.5" cy="6" r=".7" fill="currentColor"/><circle cx="7" cy="6" r=".7" fill="currentColor"/><circle cx="9.5" cy="6" r=".7" fill="currentColor"/></svg>
+        <span>群聊</span>
         <div class="gc-notif-badge" id="gc-badge"></div>
       </button>
-      <button class="notif-btn dm-nav-btn" id="dm-nav-btn" onclick="toggleDMPanel()" title="私信" style="display:none">
-        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
-          <rect x="1" y="2" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/>
-          <path d="M1 4l7 5 7-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-        </svg>
+      <button class="nav-pill-btn" id="dm-nav-btn" onclick="toggleDMPanel()" style="display:none">
+        <svg viewBox="0 0 14 14" width="13" height="13" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x=".5" y="1.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M.5 3.5l6.5 4 6.5-4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+        <span>私信</span>
         <div class="notif-badge" id="dm-badge"></div>
       </button>
-            <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()">
-  <svg class="notif-bell-svg" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-    <!-- 像素铃铛：用rect堆砌 -->
-    <!-- 顶部小圆 -->
-    <rect x="7" y="0" width="2" height="1" fill="currentColor"/>
-    <!-- 钟帽 -->
-    <rect x="6" y="1" width="4" height="1" fill="currentColor"/>
-    <!-- 左肩 -->
-    <rect x="4" y="2" width="2" height="1" fill="currentColor"/>
-    <rect x="10" y="2" width="2" height="1" fill="currentColor"/>
-    <!-- 钟身左右 -->
-    <rect x="3" y="3" width="1" height="1" fill="currentColor"/>
-    <rect x="12" y="3" width="1" height="1" fill="currentColor"/>
-    <rect x="3" y="4" width="1" height="4" fill="currentColor"/>
-    <rect x="12" y="4" width="1" height="4" fill="currentColor"/>
-    <!-- 钟身内部 -->
-    <rect x="4" y="3" width="8" height="5" fill="currentColor"/>
-    <!-- 底部展开 -->
-    <rect x="2" y="8" width="12" height="1" fill="currentColor"/>
-    <rect x="3" y="9" width="10" height="1" fill="currentColor"/>
-    <!-- 铃舌 -->
-    <rect x="6" y="10" width="4" height="1" fill="currentColor"/>
-    <rect x="7" y="11" width="2" height="1" fill="currentColor"/>
-  </svg>
+            <button class="nav-pill-btn" id="notif-btn" onclick="toggleNotifPanel()">
+  <svg viewBox="0 0 14 14" width="13" height="13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 1a4 4 0 00-4 4v2.5L1.5 9h11L11 7.5V5a4 4 0 00-4-4zM5.5 9.5a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span>通知</span>
   <div class="notif-badge" id="notif-dot"></div>
 </button>
       <div id="nav-auth-area"><button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button></div>
@@ -11461,7 +11482,7 @@ async function showContestChart(contestId, preloaded, title){
       </div>
     </div>
     <!-- 右侧聊天区 -->
-    <div id="gc-chat-pane">
+    <div id="gc-chat-pane" style="position:relative">
       <div id="gc-chat-header">
         <span id="gc-chat-title"># 全员</span>
         <div id="gc-online-info">
@@ -11470,6 +11491,7 @@ async function showContestChart(contestId, preloaded, title){
         </div>
       </div>
       <div id="gc-messages"></div>
+      <button id="gc-new-msg-btn" onclick="gcScrollToBottom();this.classList.remove('show')">↓ 新消息</button>
       <div id="gc-input-wrap">
         <div id="gc-img-preview"></div>
         <div id="gc-input-row">
@@ -11617,7 +11639,7 @@ function gcConnect() {
 
   const wsUrl = API_BASE.replace(/^https?/, ws => ws === 'https' ? 'wss' : 'ws').replace('/api/v1', '') + '/ws/chat';
   try {
-    _gcWs = new WebSocket(wsUrl + '?token=' + encodeURIComponent(localStorage.getItem('hjoi_token') || ''));
+    _gcWs = new WebSocket(wsUrl + '?token=' + encodeURIComponent(currentUser?.access_token || ''));
   } catch(e) {
     console.warn('[GC] WS连接失败:', e);
     _gcReconnectTimer = setTimeout(gcConnect, 3000);
@@ -11628,8 +11650,17 @@ function gcConnect() {
     console.log('[GC] WebSocket已连接');
     gcWsSend({ type: 'join', channel: _gcCurrentChannel });
     // 25秒心跳
-    _gcHeartbeatTimer = setInterval(() => {
+    _gcHeartbeatTimer = setInterval(async () => {
       if (_gcWs?.readyState === WebSocket.OPEN) gcWsSend({ type: 'ping' });
+      // Presence 心跳：每25秒更新 last_seen，防止异常断线残留
+      if (currentUser) {
+        try {
+          await apiRequest('/chat/presence', {
+            method: 'POST',
+            body: JSON.stringify({ room: _gcCurrentChannel })
+          });
+        } catch {}
+      }
     }, 25000);
   };
 
@@ -11681,8 +11712,16 @@ function gcHandleWsMessage(msg) {
     case 'message': {
       // {type:'message', channel:str, message:{...}}
       if (msg.channel === _gcCurrentChannel) {
-        gcAppendMessage(msg.message, true);
-        gcScrollToBottom();
+        const atBottom = gcIsAtBottom();
+        // 获取上一条消息用于分组判断
+        const msgs = document.getElementById('gc-messages').querySelectorAll('.gc-msg-row');
+        const lastMsgId = msgs.length ? msgs[msgs.length-1].id.replace('gc-msg-','') : null;
+        gcAppendMessage(msg.message, true, lastMsgId ? {id: lastMsgId, user: {username: msgs[msgs.length-1].querySelector('.gc-msg-author')?.textContent}, created_at: null} : null);
+        if (atBottom) {
+          gcScrollToBottom();
+        } else {
+          document.getElementById('gc-new-msg-btn').classList.add('show');
+        }
       } else {
         // 其他频道有新消息，提示
         if (_gcOpen) {
@@ -11716,28 +11755,36 @@ function gcHandleWsMessage(msg) {
 
 // ── 拉取历史消息 ──────────────────────────────────────
 async function gcLoadHistory(channelId) {
+  const container = document.getElementById('gc-messages');
+  // 骨架屏
+  container.innerHTML = [1,2,3].map(i => `
+    <div class="gc-skeleton">
+      <div class="gc-sk-av"></div>
+      <div class="gc-sk-body">
+        <div class="gc-sk-line short"></div>
+        <div class="gc-sk-line ${i===1?'long':i===2?'mid':'long'}"></div>
+        ${i===1?'<div class="gc-sk-line mid"></div>':''}
+      </div>
+    </div>`).join('');
   try {
     const data = await apiRequest(`/chat/history/${channelId}?limit=50`);
     const msgs = Array.isArray(data) ? data : (data.messages || []);
-    const container = document.getElementById('gc-messages');
     container.innerHTML = '';
     if (msgs.length === 0) {
       container.innerHTML = '<div class="gc-system-msg" style="padding:24px 0">这里还没有消息，来打个招呼吧 👋</div>';
       return;
     }
-    msgs.forEach(m => gcAppendMessage(m, false));
+    msgs.forEach((m, i) => gcAppendMessage(m, false, msgs[i-1]));
     gcScrollToBottom();
   } catch (e) {
-    document.getElementById('gc-messages').innerHTML =
-      '<div class="gc-system-msg" style="color:var(--red);padding:24px 0">加载失败，请检查网络连接</div>';
+    container.innerHTML = '<div class="gc-system-msg" style="color:var(--red);padding:24px 0">加载失败，请检查网络连接</div>';
   }
 }
 
 // ── 渲染单条消息 ──────────────────────────────────────
-function gcAppendMessage(msg, animate) {
+function gcAppendMessage(msg, animate, prevMsg) {
   if (!msg || !msg.id) return;
   const container = document.getElementById('gc-messages');
-  // 去重
   if (document.getElementById('gc-msg-' + msg.id)) return;
 
   const isMine = msg.user_id === currentUser?.id;
@@ -11747,10 +11794,27 @@ function gcAppendMessage(msg, animate) {
   const username = user.username || msg.username || '?';
   const avatarUrl = user.avatar_url || msg.avatar_url || '';
 
-  // 时间
-  const timeStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'}) : '';
+  // 日期分割线
+  if (msg.created_at) {
+    const msgDate = new Date(msg.created_at).toLocaleDateString('zh-CN');
+    const prevDate = prevMsg?.created_at ? new Date(prevMsg.created_at).toLocaleDateString('zh-CN') : null;
+    if (msgDate !== prevDate) {
+      const divider = document.createElement('div');
+      divider.className = 'gc-date-divider';
+      const today = new Date().toLocaleDateString('zh-CN');
+      const yesterday = new Date(Date.now()-86400000).toLocaleDateString('zh-CN');
+      divider.textContent = msgDate === today ? '今天' : msgDate === yesterday ? '昨天' : msgDate;
+      container.appendChild(divider);
+    }
+  }
 
-  // 内容处理（高亮@提及）
+  // 连续消息分组：同一人5分钟内连续发，隐藏头像+名字
+  const timeStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'}) : '';
+  const prevUser = prevMsg?.user?.username || prevMsg?.username;
+  const prevTime = prevMsg?.created_at ? new Date(prevMsg.created_at).getTime() : 0;
+  const currTime = msg.created_at ? new Date(msg.created_at).getTime() : 0;
+  const isGrouped = prevUser === username && (currTime - prevTime) < 5 * 60 * 1000 && !prevMsg?.retracted;
+
   let contentHtml = '';
   if (isRetracted) {
     contentHtml = '<span class="gc-msg-content retracted">[ 此消息已撤回 ]</span>';
@@ -11760,6 +11824,26 @@ function gcAppendMessage(msg, animate) {
   } else {
     contentHtml = `<div class="gc-msg-content">${gcFormatContent(msg.content || '')}</div>`;
   }
+
+  const retractBtn = canRetract && !isRetracted
+    ? `<button class="gc-retract-btn" onclick="gcRetractMsg('${escHtml(msg.id)}')">撤回</button>`
+    : '';
+
+  const row = document.createElement('div');
+  row.className = 'gc-msg-row' + (animate ? ' gc-msg-anim' : '') + (isGrouped ? ' gc-msg-grouped' : '');
+  row.id = 'gc-msg-' + msg.id;
+
+  if (isGrouped) {
+    const avPlaceholder = `<div class="gc-msg-av gc-msg-av-ph"></div>`;
+    row.innerHTML = `${avPlaceholder}<div class="gc-msg-body"><span class="gc-msg-time-hover">${timeStr}</span>${contentHtml}</div>${retractBtn}`;
+  } else {
+    const avHtml = avatarUrl
+      ? `<div class="gc-msg-av" onclick="showProfile('${escHtml(username)}')"><img src="${escHtml(avatarUrl)}" alt=""></div>`
+      : `<div class="gc-msg-av" style="background:${avatarGradient(username)}" onclick="showProfile('${escHtml(username)}')">${username.charAt(0).toUpperCase()}</div>`;
+    row.innerHTML = `${avHtml}<div class="gc-msg-body"><div class="gc-msg-meta"><span class="gc-msg-author" onclick="showProfile('${escHtml(username)}')">${escHtml(username)}</span><span class="gc-msg-time">${timeStr}</span></div>${contentHtml}</div>${retractBtn}`;
+  }
+  container.appendChild(row);
+}
 
   const avHtml = avatarUrl
     ? `<div class="gc-msg-av" onclick="showProfile('${escHtml(username)}')"><img src="${escHtml(avatarUrl)}" alt=""></div>`
@@ -11792,9 +11876,14 @@ function gcFormatContent(text) {
     '<span class="gc-mention" onclick="showProfile(\'$1\')">@$1</span>');
 }
 
+function gcIsAtBottom() {
+  const el = document.getElementById('gc-messages');
+  return el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+}
 function gcScrollToBottom() {
   const el = document.getElementById('gc-messages');
   el.scrollTop = el.scrollHeight;
+  document.getElementById('gc-new-msg-btn').classList.remove('show');
 }
 
 function gcAppendSystemMsg(text) {
