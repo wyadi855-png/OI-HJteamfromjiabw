@@ -735,7 +735,11 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .activity-count{font-family:var(--mono);font-size:12px;color:var(--text2);width:32px;text-align:right;}
 
 /* ── PROFILE ── */
-.profile-hero{display:flex;gap:24px;align-items:flex-start;padding:28px;background:var(--glass-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);margin-bottom:24px;}
+.profile-hero{display:flex;gap:24px;align-items:flex-start;padding:28px;background:var(--glass-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);margin-bottom:24px;position:relative;overflow:hidden;}
+.profile-hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.18;z-index:0;pointer-events:none;filter:blur(1px);}
+.profile-hero>*:not(.profile-hero-bg){position:relative;z-index:1;}
+.profile-hero-upload-btn{position:absolute;top:10px;right:12px;z-index:2;font-size:11px;padding:4px 10px;border-radius:100px;border:1px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.35);color:rgba(255,255,255,0.7);cursor:pointer;font-family:var(--mono);transition:all 0.2s;backdrop-filter:blur(6px);}
+.profile-hero-upload-btn:hover{background:rgba(0,0,0,0.55);color:#fff;}
 .profile-name{font-size:20px;font-weight:700;color:var(--accent2);font-family:var(--mono);margin-bottom:4px;}
 .profile-role-tag{font-size:12px;color:var(--text3);margin-bottom:8px;}
 .profile-stats{display:flex;gap:24px;margin-top:14px;}
@@ -2027,6 +2031,10 @@ mark.search-hl{
   border-radius:20px;padding:1px 8px;font-size:12px;color:var(--text3);}
 
 /* ── FOLLOW BUTTON ── */
+.profile-follow-btn{font-family:var(--mono);font-size:13px;padding:6px 16px;border-radius:100px;border:1px solid rgba(108,142,245,0.35);background:rgba(108,142,245,0.1);color:var(--accent);cursor:pointer;transition:all 0.2s;}
+.profile-follow-btn:hover{background:rgba(108,142,245,0.2);}
+.profile-follow-btn.following{border-color:rgba(255,83,112,0.25);background:rgba(255,83,112,0.06);color:var(--red);}
+.profile-follow-btn.mutual{border-color:rgba(45,232,176,0.35);background:rgba(45,232,176,0.08);color:var(--accent2);}
 .follow-btn{
   font-family:var(--mono);font-size:12px;padding:4px 10px;
   border-radius:6px;border:1px solid rgba(108,142,245,0.25);
@@ -7023,7 +7031,22 @@ async function showProfile(username){
   const mottoText = normalizeText(profile.motto);
   const bioText = normalizeText(profile.bio);
   const luoguUid = normalizeLuoguUid(profile.luogu_uid);
+  // 查关注状态（异步，先渲好再填）
+  let iFollowProfile = false, profileFollowsMe = false;
+  if(currentUser && !isSelf){
+    const [f1,f2] = await Promise.all([
+      sb.from('follows').select('id').eq('follower_id',currentUser.id).eq('following_id',profile.id).maybeSingle(),
+      sb.from('follows').select('id').eq('follower_id',profile.id).eq('following_id',currentUser.id).maybeSingle(),
+    ]);
+    iFollowProfile = !!f1.data;
+    profileFollowsMe = !!f2.data;
+  }
+  const followLabel = isSelf ? '' : iFollowProfile && profileFollowsMe ? '💞 互相关注' : iFollowProfile ? '✓ 已关注' : profileFollowsMe ? '回关 TA' : '+ 关注';
+  const followClass = isSelf ? '' : iFollowProfile ? 'profile-edit-btn' + (profileFollowsMe ? ' mutual' : ' following') : 'btn btn-primary btn-sm';
+
   let html='<div class="profile-hero">';
+  // 背景图
+  if(profile.banner_url) html+='<img class="profile-hero-bg" src="'+escHtml(profile.banner_url)+'" alt="">';
   html+=avatarEl(username,profile.avatar_url||'',80,28);
   html+='<div style="flex:1;min-width:0">';
   html+='<div class="profile-name">@'+escHtml(username)+'</div>';
@@ -7037,8 +7060,15 @@ async function showProfile(username){
   if(mottoText)html+='<div class="profile-motto">「'+escHtml(mottoText)+'」</div>';
   if(bioText)html+='<div class="profile-bio">'+escHtml(bioText)+'</div>';
   html+='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">';
-  if(isSelf)html+='<button class="profile-edit-btn" onclick="openModal(&apos;settings-modal&apos;);loadSettingsData()">编辑资料</button>';
-  if(!isSelf&&currentUser)html+='<button class="profile-dm-btn" data-uid="'+escHtml(profile.id)+'" data-uname="'+escHtml(username)+'">💬 发私信</button>';
+  if(isSelf){
+    html+='<button class="profile-edit-btn" onclick="openModal(&apos;settings-modal&apos;);loadSettingsData()">编辑资料</button>';
+    html+='<label class="profile-hero-upload-btn" for="profile-banner-file">🖼 换背景</label>';
+    html+='<input type="file" id="profile-banner-file" accept="image/*" style="display:none" onchange="uploadProfileBanner(this)">';
+  }
+  if(!isSelf&&currentUser){
+    html+='<button class="profile-follow-btn '+followClass+'" data-uid="'+escHtml(profile.id)+'" data-following="'+iFollowProfile+'" data-username="'+escHtml(username)+'">'+followLabel+'</button>';
+    html+='<button class="profile-dm-btn" data-uid="'+escHtml(profile.id)+'" data-uname="'+escHtml(username)+'">💬 发私信</button>';
+  }
   html+='</div>';
   html+='<div class="profile-stats">';
   html+='<div class="profile-stat"><div class="num">'+(notes?notes.length:0)+'</div><div class="lbl">题解</div></div>';
@@ -7102,6 +7132,18 @@ async function showProfile(username){
     });
   }
   buildHeatmap(profile.id).then(h=>{const hel=document.getElementById('heatmap-'+username);if(hel)hel.innerHTML=h;});
+  // 绑定关注按钮
+  const pfBtn = el.querySelector('.profile-follow-btn');
+  if(pfBtn){
+    pfBtn.addEventListener('click', async ()=>{
+      const uid = pfBtn.dataset.uid;
+      const isNowFollowing = pfBtn.dataset.following === 'true';
+      try{
+        await apiRequest(`/members/${uid}/follow`,{method:'POST',body:JSON.stringify({action:isNowFollowing?'unfollow':'follow'})});
+        await showProfile(username);
+      }catch(e){showToast(e.message||'操作失败','error');}
+    });
+  }
   // 有洛谷UID则拉洛谷数据，否则用本站题解
   if(profile.luogu_uid){
     fetchLuoguAndBuildRadar(profile.luogu_uid, notes||[], username);
@@ -7331,8 +7373,9 @@ function showLabelInput(container,toId,toUsername,current){
     const label=inp.value.trim();
     if(!label){showToast('标签不能为空','error');return;}
     if([...label].length>4){showToast('最多4个字','error');return;}
-    const{error}=await sb.from('relationships').upsert({from_id:currentUser.id,to_id:toId,label},{onConflict:'from_id,to_id'});
-    if(error){showToast('保存失败','error');return;}
+    try{
+      await apiRequest('/members/label',{method:'POST',body:JSON.stringify({to_id:toId,label})});
+    }catch(e){showToast(e.message||'保存失败','error');return;}
     showToast('标签已保存 ✓','success');showProfile(toUsername);
   });
   cancel.addEventListener('click',()=>row.remove());
@@ -7825,6 +7868,7 @@ async function loadSettingsData(){
     document.getElementById('motto-count').textContent = (currentProfile.motto||'').length;
     motto.addEventListener('input',()=>document.getElementById('motto-count').textContent=motto.value.length);
   }
+  const unameEl=document.getElementById('set-username');if(unameEl)unameEl.value=currentProfile.username||'';
   document.getElementById('set-bio').value=currentProfile.bio||'';
   document.getElementById('set-luogu-uid').value=currentProfile.luogu_uid||'';
   const grpEl=document.getElementById('set-group');
@@ -7843,10 +7887,29 @@ function previewAvatar(input){
   };
   reader.readAsDataURL(file);
 }
+async function uploadProfileBanner(input){
+  const file = input.files[0];
+  if(!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!['jpg','jpeg','png','webp'].includes(ext)){showToast('仅支持 JPG/PNG/WebP','error');return;}
+  if(file.size > 5*1024*1024){showToast('图片不能超过 5MB','error');return;}
+  showToast('上传中…','info');
+  const path = 'banners/'+currentUser.id+'.'+ext;
+  const{error:upErr}=await sb.storage.from('note-images').upload(path,file,{upsert:true,contentType:file.type});
+  if(upErr){showToast('上传失败: '+upErr.message,'error');return;}
+  const{data:urlData}=sb.storage.from('note-images').getPublicUrl(path);
+  const banner_url = urlData.publicUrl+'?t='+Date.now();
+  await sb.from('profiles').update({banner_url}).eq('id',currentUser.id);
+  currentProfile.banner_url = banner_url;
+  showToast('背景图已更新 ✓','success');
+  await showProfile(currentProfile.username);
+}
+
 async function saveSettings(){
   const bio=document.getElementById('set-bio').value.trim();
   const motto=(document.getElementById('set-motto')?.value||'').trim();
   const luogu_uid=document.getElementById('set-luogu-uid').value.trim();
+  const newUsername=(document.getElementById('set-username')?.value||'').trim();
   const gv=document.getElementById('set-group')?.value;
   const group_id=gv?parseInt(gv):null;
   const errEl=document.getElementById('settings-avatar-error');
@@ -7875,9 +7938,18 @@ async function saveSettings(){
 
   // 确保所有字段都显式包含，避免undefined被跳过
   const payload={avatar_url,bio:bio||'',motto:motto||'',group_id,luogu_uid:luogu_uid||''};
+  // 用户名修改：校验 + 单独调后端接口
+  if(newUsername && newUsername !== currentProfile.username){
+    if(newUsername.length < 2){errEl.textContent='用户名至少2位';return;}
+    if(!/^[\u4e00-\u9fa5a-zA-Z0-9_\-]+$/.test(newUsername)){errEl.textContent='用户名只能含中文/英文/数字/下划线';return;}
+    try{
+      await apiRequest('/auth/rename',{method:'POST',body:JSON.stringify({username:newUsername})});
+      payload.username = newUsername;
+    }catch(e){errEl.textContent=e.message||'用户名修改失败';return;}
+  }
   const{error}=await sb.from('profiles').update(payload).eq('id',currentUser.id);
   if(error){errEl.textContent=error.message;return;}
-  currentProfile={...currentProfile,...payload,bio:normalizeText(bio),motto:normalizeText(motto),luogu_uid:normalizeLuoguUid(luogu_uid)};
+  currentProfile={...currentProfile,...payload,bio:normalizeText(bio),motto:normalizeText(motto),luogu_uid:normalizeLuoguUid(luogu_uid),username:payload.username||currentProfile.username};
   renderAuthArea();
   closeModal('settings-modal');showToast('设置已保存 ✓','success');
   // 无论当前在哪个tab，只要profile区域存在就刷新
@@ -10876,6 +10948,10 @@ async function showContestChart(contestId, preloaded, title){
             </div>
           </div>
         </div>
+      </div>
+      <div class="form-group">
+        <label>用户名 <span style="font-size:11px;color:var(--text3);font-weight:400">（修改后需重新登录）</span></label>
+        <input type="text" id="set-username" placeholder="2-20位字母/数字/中文" maxlength="20">
       </div>
       <div class="form-group">
         <label>座右铭 <span style="font-size:11px;color:var(--text3);font-weight:400">（展示在个人主页）</span></label>
