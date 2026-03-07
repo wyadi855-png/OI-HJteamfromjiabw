@@ -6443,6 +6443,7 @@ function avatarEl(username,avatarUrl,size,fontSize){
   }
 
   let frame = 0;
+  let _bgRunning = true;
   function draw() {
     ctx.clearRect(0, 0, W, H);
 
@@ -6468,7 +6469,7 @@ function avatarEl(username,avatarUrl,size,fontSize){
     }
 
     frame++;
-    if(!document.hidden && (typeof _bgRunning === 'undefined' || _bgRunning)) requestAnimationFrame(draw);
+    if(!document.hidden && _bgRunning) requestAnimationFrame(draw);
   }
   // 移动端：canvas 已 CSS 隐藏，但 rAF 循环仍耗 CPU——直接不启动
   if (window.matchMedia('(max-width:768px)').matches || 'ontouchstart' in window) return;
@@ -6480,7 +6481,6 @@ function avatarEl(username,avatarUrl,size,fontSize){
     if(!document.hidden) draw();
   });
   // 背景强度切换时重启
-  let _bgRunning = true;
   document.addEventListener('hjoi-bg-restart', () => {
     const bi = document.documentElement.dataset.bgIntensity;
     if (bi === '0') { _bgRunning = false; return; }
