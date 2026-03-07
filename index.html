@@ -7501,6 +7501,8 @@ async function showProfile(username){
   html+=(luoguUid
     ? '<a href="https://www.luogu.com.cn/user/'+escHtml(luoguUid)+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:6px 14px;border-radius:100px;background:rgba(255,179,71,.10);border:1px solid rgba(255,179,71,.35);color:#ffcb6b;text-decoration:none;font-family:var(--mono);transition:background 0.2s,border-color 0.2s;" onmouseover="this.style.background=&quot;rgba(255,179,71,.2)&quot;;this.style.borderColor=&quot;rgba(255,179,71,.6)&quot;" onmouseout="this.style.background=&quot;rgba(255,179,71,.10)&quot;;this.style.borderColor=&quot;rgba(255,179,71,.35)&quot;">🔗 洛谷 · '+escHtml(luoguUid)+'</a>'
     : '<span style="display:inline-flex;align-items:center;font-size:13px;padding:6px 14px;border-radius:100px;background:rgba(255,179,71,.05);border:1px solid rgba(255,179,71,.18);color:rgba(255,203,107,0.5);font-family:var(--mono);">洛谷暂未绑定</span>');
+  // 洛谷数据异步加载占位（rating、等级、通过数）
+  if(luoguUid) html+='<span id="luogu-stats-'+escHtml(luoguUid)+'" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:100px;background:rgba(255,179,71,.06);border:1px solid rgba(255,179,71,.15);color:rgba(255,203,107,0.6);font-family:var(--mono);">拉取中…</span>';
   if(profile.group_id) html+='<span style="display:inline-flex;align-items:center;font-size:13px;padding:6px 14px;border-radius:100px;background:rgba(108,142,245,.08);border:1px solid rgba(108,142,245,.25);color:var(--accent);font-family:var(--mono);">训练组 · L'+escHtml(profile.group_id)+'</span>';
   html+='</div>';
   if(mottoText)html+='<div class="profile-motto">「'+escHtml(mottoText)+'」</div>';
@@ -7529,6 +7531,8 @@ async function showProfile(username){
     if(ce) ce.innerHTML=s.current+'<span style="font-size:12px;font-family:var(--mono);color:var(--text3)"> 天</span>';
     if(le) le.innerHTML=s.longest+'<span style="font-size:12px;font-family:var(--mono);color:var(--text3)"> 天</span>';
   });
+  // 异步拉取洛谷用户数据
+  if(luoguUid) fetchLuoguUserStats(luoguUid);
   // Heatmap placeholder
   html+='<div class="profile-section"><div class="profile-section-title">能力雷达</div><canvas id="radar-'+escHtml(username)+'" width="340" height="280" style="display:block;margin:0 auto"></canvas></div>';
   html+='<div class="profile-section"><div class="profile-section-title">活跃度</div><div id="heatmap-'+escHtml(username)+'">加载中…</div></div>';
@@ -8103,6 +8107,89 @@ const LUOGU_TAG_KEYWORDS = {
   '贪心':'贪心',
 };
 
+// ── 洛谷用户数据展示（主页） ─────────────────────────────
+async function fetchLuoguUserStats(uid) {
+  const el = document.getElementById('luogu-stats-' + uid);
+  if(!el) return;
+  try {
+    const res = await fetch(`https://www.luogu.com.cn/user/${uid}?_contentOnly=1`, {
+      headers: {'x-luogu-type': 'content-only'},
+      signal: AbortSignal.timeout(8000)
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if(!text || text.trim().startsWith('<')) throw new Error('非JSON');
+    const data = JSON.parse(text);
+    const u = data?.currentData?.user;
+    if(!u) throw new Error('无数据');
+
+    const passed = data?.currentData?.passedProblems?.length ?? u.passedProblemCount ?? '?';
+    const rating = u.rating ?? null;
+    const color  = u.color ?? '';   // 颜色段位
+    const ccfLevel = u.ccfLevel ?? 0;
+
+    // 颜色 → 段位名
+    const colorName = {'Gray':'入门','Blue':'普及','Green':'提高','Dark Green':'提高+','Yellow':'省选','Red':'NOI','Purple':'NOIP/NOI','Black':'IOI/ICPC'}[color] || color;
+
+    let parts = [];
+    if(passed !== '?') parts.push(`✓ ${passed} 题`);
+    if(rating)         parts.push(`Rating ${rating}`);
+    if(colorName)      parts.push(colorName);
+    if(ccfLevel > 0)   parts.push(`CCF Lv.${ccfLevel}`);
+
+    el.textContent = parts.length ? parts.join(' · ') : '已绑定';
+    el.style.color = '#ffcb6b';
+    el.style.borderColor = 'rgba(255,179,71,.35)';
+  } catch(e) {
+    el.textContent = '洛谷数据加载失败';
+    el.style.opacity = '0.4';
+  }
+}
+
+// ── 题库：输入题号自动填充标题和标签 ─────────────────────
+let _luoguFillTimer = null;
+async function autoFillFromLuogu(val) {
+  clearTimeout(_luoguFillTimer);
+  const pid = val.trim().toUpperCase();
+  if(!/^[A-Z]+\d+$/.test(pid)) return;   // 格式不对就不请求
+  _luoguFillTimer = setTimeout(async () => {
+    const titleEl = document.getElementById('p-title');
+    const tagsEl  = document.getElementById('p-tags');
+    const urlEl   = document.getElementById('p-url');
+    const diffEl  = document.getElementById('p-diff');
+    // 只在字段为空时自动填，避免覆盖用户已输入的内容
+    if(titleEl.value && tagsEl.value) return;
+    try {
+      const res = await fetch(`https://www.luogu.com.cn/problem/${pid}?_contentOnly=1`, {
+        headers: {'x-luogu-type': 'content-only'},
+        signal: AbortSignal.timeout(8000)
+      });
+      if(!res.ok) return;
+      const text = await res.text();
+      if(!text || text.trim().startsWith('<')) return;
+      const data = JSON.parse(text);
+      const p = data?.currentData?.problem;
+      if(!p) return;
+
+      if(!titleEl.value) titleEl.value = p.title || '';
+      if(!urlEl.value)   urlEl.value   = `https://www.luogu.com.cn/problem/${pid}`;
+
+      // 标签
+      const tags = (p.tags || []).map(t => t.name).filter(Boolean);
+      if(!tagsEl.value && tags.length) tagsEl.value = tags.join(', ');
+
+      // 难度映射
+      if(diffEl && p.difficulty !== undefined) {
+        const diffMap = {0:'unrated', 1:'入门', 2:'入门', 3:'普及', 4:'普及', 5:'提高', 6:'提高', 7:'省选', 8:'省选', 9:'省选'};
+        const mapped = diffMap[p.difficulty];
+        if(mapped) diffEl.value = mapped;
+      }
+      showToast(`已从洛谷自动填充「${p.title}」`, 'success');
+    } catch(e) { /* 静默失败 */ }
+  }, 600);  // 600ms 防抖
+}
+
+
 async function fetchLuoguAndBuildRadar(uid, localNotes, username){
   const canvas = document.getElementById('radar-'+username);
   if(!canvas) return;
@@ -8114,7 +8201,7 @@ async function fetchLuoguAndBuildRadar(uid, localNotes, username){
   ctx.fillText('正在拉取洛谷数据…', canvas.width/2, canvas.height/2);
 
   try {
-    // 直接请求洛谷（浏览器端，洛谷允许跨域读取公开数据）
+    // 第一步：拉用户通过题列表
     const url = `https://www.luogu.com.cn/user/${uid}?_contentOnly=1`;
     const res = await fetch(url, {
       headers: { 'x-luogu-type': 'content-only' },
@@ -8125,8 +8212,23 @@ async function fetchLuoguAndBuildRadar(uid, localNotes, username){
     if(!text || text.trim().startsWith('<')) throw new Error('非JSON响应');
     const data = JSON.parse(text);
     const passed = data?.currentData?.passedProblems || [];
+
+    // 第二步：批量拉取题目 tags（限制前50题，避免请求过多）
     const luoguTags = [];
-    passed.forEach(p => (p.tags||[]).forEach(t => t.name && luoguTags.push(t.name)));
+    const toFetch = passed.slice(0, 50);
+    const tagResults = await Promise.allSettled(
+      toFetch.map(p => p.pid
+        ? fetch(`https://www.luogu.com.cn/problem/${p.pid}?_contentOnly=1`, {
+            headers: {'x-luogu-type': 'content-only'},
+            signal: AbortSignal.timeout(5000)
+          }).then(r => r.text()).then(t => {
+            if(!t || t.trim().startsWith('<')) return;
+            const d = JSON.parse(t);
+            (d?.currentData?.problem?.tags || []).forEach(tag => tag.name && luoguTags.push(tag.name));
+          })
+        : Promise.resolve()
+      )
+    );
     buildRadar(localNotes, luoguTags, username, passed.length);
   } catch(e) {
     console.warn('洛谷数据拉取失败:', e);
@@ -11256,7 +11358,7 @@ async function showContestChart(contestId, preloaded, title){
         </div>
         <div class="form-group">
           <label>题目编号（洛谷等）</label>
-          <input id="p-id" type="text" placeholder="如：P1001">
+          <input id="p-id" type="text" placeholder="如：P1001" oninput="autoFillFromLuogu(this.value)">
         </div>
         <div class="form-group">
           <label>原题链接</label>
