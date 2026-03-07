@@ -7082,30 +7082,74 @@ async function deleteLecture(id){if(!confirm('确认删除？'))return;try{await
 // ── Archive ────────────────────────────────────────────────
 let _archiveData = [];
 
+// 分页渲染
+let _archivePage = 0;
+const _archivePageSize = 50;
+let _archiveRenderData = [];
+
 function renderArchiveTable(data){
+  _archivePage = 0;
+  _archiveRenderData = data;
   const list = document.getElementById('archive-list');
   if(!data||!data.length){list.innerHTML='<div class="empty">暂无匹配题目</div>';return;}
-  list.innerHTML=`<div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-bottom:10px">共 ${data.length} 道题</div>
-  <div class="archive-table-wrap"><table class="archive-table"><thead><tr><th>题目</th><th>题号 / 链接</th><th>难度</th><th>知识点</th>${isCoach()?'<th></th>':''}</tr></thead><tbody>${data.map(p=>`<tr>
-    <td>${escHtml(p.title)}</td>
-    <td><a href="https://www.luogu.com.cn/problem/${escHtml(p.problem_id)}" target="_blank" style="font-family:var(--mono);color:var(--accent)">${escHtml(p.problem_id)}</a>
-    <button class="archive-judge-btn" onclick="toggleArchiveJudge(${p.id},'${escHtml(p.title)}')">⚡ 做题</button></td>
-    <td><span class="diff-badge diff-${p.difficulty||''}">${p.difficulty||'-'}</span></td>
-    <td style="font-family:var(--mono);font-size:12px;color:var(--text3)">${escHtml(p.topic||'-')}</td>
-    ${isCoach()?`<td><button class="btn btn-danger btn-sm" onclick="deleteProblem(${p.id})">删除</button></td>`:''}
-  </tr>`).join('')}</tbody></table></div>
-  ${data.map(p=>`<div id="archive-judge-${p.id}" class="archive-judge-wrap">
-    <div class="judge-toolbar" style="padding:8px 10px;border-radius:8px 8px 0 0">
-      <span style="font-family:var(--mono);font-size:12px;color:var(--accent2)">⚡ ${escHtml(p.title)}</span>
-      <span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3)">C++ · Ctrl+Enter 运行</span>
-    </div>
-    <div class="archive-judge-editor" style="border:1px solid rgba(108,142,245,0.15);border-top:none"></div>
-    <div style="display:flex;gap:8px;padding:8px;background:rgba(6,8,15,0.4);border:1px solid rgba(108,142,245,0.1);border-top:none">
-      <textarea class="archive-judge-stdin judge-io-textarea" style="height:60px;flex:1" placeholder="自定义输入…"></textarea>
-      <button class="judge-btn judge-run-btn" onclick="runArchiveCode(${p.id},document.getElementById('archive-judge-${p.id}')._editor)" style="align-self:flex-end">▶ 运行</button>
-    </div>
-    <div class="archive-judge-output judge-output" style="min-height:80px;max-height:200px">点击运行查看结果</div>
-  </div>`).join('')}`;
+  list.innerHTML=
+    '<div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-bottom:10px">共 '+data.length+' 道题</div>'+
+    '<div class="archive-table-wrap"><table class="archive-table">'+
+    '<thead><tr><th>题目</th><th>题号</th><th>难度</th><th>知识点</th><th>限制</th>'+(isCoach()?'<th></th>':'')+
+    '</tr></thead><tbody id="archive-tbody"></tbody></table></div>'+
+    '<div id="archive-judge-container"></div>'+
+    '<div id="archive-load-more" style="text-align:center;padding:16px;display:none">'+
+    '<button class="btn btn-outline btn-sm" onclick="archiveLoadMore()">加载更多</button></div>';
+  renderArchivePage();
+}
+
+function renderArchivePage(){
+  const tbody = document.getElementById('archive-tbody');
+  if(!tbody) return;
+  const slice = _archiveRenderData.slice(0, (_archivePage+1)*_archivePageSize);
+  tbody.innerHTML = slice.map(function(p){
+    return '<tr>'+
+      '<td>'+escHtml(p.title)+'</td>'+
+      '<td><a href="https://www.luogu.com.cn/problem/'+escHtml(p.problem_id)+'" target="_blank" style="font-family:var(--mono);color:var(--accent)">'+escHtml(p.problem_id)+'</a> '+
+      '<button class="archive-judge-btn" onclick="toggleArchiveJudge('+p.id+',\''+escHtml(p.title).replace(/'/g,"\\'")+'\')" >⚡</button></td>'+
+      '<td><span class="diff-badge diff-'+(p.difficulty||'')+'">'+( p.difficulty||'-')+'</span></td>'+
+      '<td style="font-family:var(--mono);font-size:12px;color:var(--text3)">'+escHtml(p.topic||'-')+'</td>'+
+      '<td style="font-family:var(--mono);font-size:11px;color:var(--text3)">'+(p.time_limit?p.time_limit+'ms':'-')+'</td>'+
+      (isCoach()?'<td><button class="btn btn-danger btn-sm" onclick="deleteProblem('+p.id+')">删除</button></td>':'')+
+      '</tr>';
+  }).join('');
+  const more = document.getElementById('archive-load-more');
+  if(more) more.style.display = slice.length < _archiveRenderData.length ? 'block' : 'none';
+}
+
+function archiveLoadMore(){
+  _archivePage++;
+  renderArchivePage();
+}
+
+// Judge 容器懒插入：点击时才创建，不预先渲染所有题目的编辑器
+function toggleArchiveJudge(id, title){
+  const container = document.getElementById('archive-judge-container');
+  let wrap = document.getElementById('archive-judge-'+id);
+  if(!wrap){
+    wrap = document.createElement('div');
+    wrap.id = 'archive-judge-'+id;
+    wrap.className = 'archive-judge-wrap';
+    wrap.innerHTML =
+      '<div class="judge-toolbar" style="padding:8px 10px;border-radius:8px 8px 0 0">'+
+      '<span style="font-family:var(--mono);font-size:12px;color:var(--accent2)">⚡ '+escHtml(title)+'</span>'+
+      '<span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3)">C++ · Ctrl+Enter 运行</span></div>'+
+      '<div class="archive-judge-editor" style="border:1px solid rgba(108,142,245,0.15);border-top:none"></div>'+
+      '<div style="display:flex;gap:8px;padding:8px;background:rgba(6,8,15,0.4);border:1px solid rgba(108,142,245,0.1);border-top:none">'+
+      '<textarea class="archive-judge-stdin judge-io-textarea" style="height:60px;flex:1" placeholder="自定义输入…"></textarea>'+
+      '<button class="judge-btn judge-run-btn" onclick="runArchiveCode('+id+',document.getElementById(\'archive-judge-'+id+'\')._editor)" style="align-self:flex-end">▶ 运行</button></div>'+
+      '<div class="archive-judge-output judge-output" style="min-height:80px;max-height:200px">点击运行查看结果</div>';
+    if(container) container.appendChild(wrap);
+    initArchiveJudgeEditor(id);
+  }
+  const isOpen = wrap.classList.contains('open');
+  document.querySelectorAll('.archive-judge-wrap.open').forEach(function(w){w.classList.remove('open');});
+  if(!isOpen) wrap.classList.add('open');
 }
 
 async function loadArchive(){
@@ -7274,12 +7318,12 @@ function presetProblems(key){
   preview.innerHTML = `✅ 已填入 ${list.length} 道题：<br>` + list.map(p=>`<span style="color:var(--accent)">${p.id}</span> ${p.title}`).join(' &nbsp;·&nbsp; ');
 }
 
-// ── 洛谷批量导入 ───────────────────────────────────────────
+// ── 洛谷批量导入（从洛谷实时拉取题目数据）─────────────────
 async function submitLuoguImport(){
   if(!isCoach()){showToast('仅教练可操作','error');return;}
   const raw = document.getElementById('luogu-import-ids').value;
-  const diff = document.getElementById('luogu-import-diff').value;
-  const topic= document.getElementById('luogu-import-topic').value.trim();
+  const forceDiff  = document.getElementById('luogu-import-diff').value;
+  const forceTopic = document.getElementById('luogu-import-topic').value.trim();
   const ids = [...new Set(
     raw.split(/[\s,，\n]+/)
       .map(s=>s.trim().toUpperCase())
@@ -7288,55 +7332,108 @@ async function submitLuoguImport(){
   )];
   if(!ids.length){showToast('未识别到有效题号','error');return;}
 
-  // 检查已存在
-  const{data:existing}=await sb.from('problem_archive').select('problem_id').in('problem_id',ids);
-  const existSet = new Set((existing||[]).map(p=>p.problem_id));
-  const toAdd = ids.filter(id=>!existSet.has(id));
-  if(!toAdd.length){showToast('所有题目已在题库中','success');return;}
-
-  const btn = document.getElementById('luogu-import-btn');
+  const btn    = document.getElementById('luogu-import-btn');
   const status = document.getElementById('luogu-fetch-status');
-  btn.disabled=true; btn.textContent='导入中…';
+  btn.disabled=true; btn.textContent='拉取中…';
   status.style.display='block';
 
-  // 构建题目信息：优先从预置库查找题名
-  const allPreset = Object.values(LUOGU_PRESETS).flat();
-  const presetMap = {};
-  allPreset.forEach(p=>presetMap[p.id]=p);
+  const DIFF_MAP = {0:'unrated',1:'入门',2:'入门',3:'普及',4:'普及',5:'提高',6:'提高',7:'省选',8:'省选',9:'省选'};
 
-  const rows = toAdd.map(id=>{
-    const preset = presetMap[id];
-    return {
-      problem_id: id,
-      title: preset ? preset.title : id,
-      difficulty: diff || (preset ? preset.diff : null) || null,
-      topic: topic || (preset ? preset.topic : null) || null,
-      created_by: currentUser.id
-    };
-  });
+  // 逐题从洛谷拉取，并发限制5个
+  const rows = [];
+  const skipped = [];
+  const failed  = [];
+  let done = 0;
 
+  async function fetchOne(pid){
+    try{
+      const res = await fetch(`https://www.luogu.com.cn/problem/${pid}?_contentOnly=1`,{
+        headers:{'x-luogu-type':'content-only'},
+        signal: AbortSignal.timeout(8000)
+      });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const text = await res.text();
+      if(!text||text.trim().startsWith('<')) throw new Error('非JSON');
+      const data = JSON.parse(text);
+      const p = data?.currentData?.problem;
+      if(!p) throw new Error('无数据');
+      const tags = (p.tags||[]).map(t=>t.name).filter(Boolean);
+      return {
+        problem_id: pid,
+        title: p.title || pid,
+        difficulty: forceDiff || DIFF_MAP[p.difficulty] || null,
+        topic: forceTopic || tags.slice(0,3).join(', ') || null,
+        time_limit: p.limits?.time?.[0] || null,
+        memory_limit: p.limits?.memory?.[0] || null,
+        description: p.content?.description ? p.content.description.slice(0,500) : null,
+      };
+    }catch(e){
+      failed.push(pid);
+      return null;
+    }finally{
+      done++;
+      status.textContent = `⏳ 已处理 ${done}/${ids.length}：${pid}`;
+    }
+  }
+
+  // 并发分批，每批5个
+  for(let i=0;i<ids.length;i+=5){
+    const batch = ids.slice(i,i+5);
+    const results = await Promise.all(batch.map(fetchOne));
+    results.forEach(r=>r&&rows.push(r));
+    if(i+5<ids.length) await new Promise(r=>setTimeout(r,300)); // 限速
+  }
+
+  if(!rows.length){
+    btn.disabled=false; btn.textContent='导入题目';
+    status.style.display='none';
+    showToast('所有题目拉取失败','error'); return;
+  }
+
+  // 走后端写入（绕过 RLS）
   status.textContent = `⏳ 正在写入 ${rows.length} 道题目…`;
-  const{error}=await sb.from('problem_archive').insert(rows);
-  btn.disabled=false; btn.textContent='导入题目';
-  status.style.display='none';
-  if(error){showToast('导入失败: '+error.message,'error');return;}
-  const named = rows.filter(r=>r.title!==r.problem_id).length;
-  showToast(`✅ 成功导入 ${toAdd.length} 道题（${named} 道已自动填名）${existSet.size?'，'+existSet.size+'道已存在跳过':''}`, 'success');
-  closeModal('luogu-import-modal');
-  document.getElementById('luogu-import-ids').value='';
-  document.getElementById('luogu-import-preview').style.display='none';
-  loadArchive();
+  try{
+    const res = await apiRequest('/archive/batch-import',{method:'POST',body:JSON.stringify({problems:rows})});
+    showToast(`✅ 导入 ${res.imported} 道，跳过已有 ${res.skipped} 道${failed.length?'，'+failed.length+' 道拉取失败':''}`, 'success');
+  }catch(e){
+    showToast('写入失败: '+e.message,'error');
+  }finally{
+    btn.disabled=false; btn.textContent='导入题目';
+    status.style.display='none';
+    closeModal('luogu-import-modal');
+    document.getElementById('luogu-import-ids').value='';
+    document.getElementById('luogu-import-preview').style.display='none';
+    loadArchive();
+  }
 }
 function openProblemModal(){if(!isCoach())return;openModal('problem-modal');}
 async function submitProblem(){
-  const title=document.getElementById('p-title').value.trim(),problem_id=document.getElementById('p-id').value.trim();
+  const title=document.getElementById('p-title').value.trim();
+  const problem_id=document.getElementById('p-id').value.trim().toUpperCase();
   if(!title||!problem_id){document.getElementById('problem-error').textContent='请填写题目名称和题号';return;}
-  const{error}=await sb.from('problem_archive').insert({title,problem_id,difficulty:document.getElementById('p-diff').value,topic:document.getElementById('p-tags').value.trim(),created_by:currentUser.id});
-  if(error){document.getElementById('problem-error').textContent=error.message;return;}
-  closeModal('problem-modal');['p-title','p-id','p-tags'].forEach(id=>document.getElementById(id).value='');
-  showToast('题目已添加 ✓','success');loadArchive();
+  try{
+    await apiRequest('/archive/add',{method:'POST',body:JSON.stringify({
+      title,
+      problem_id,
+      difficulty: document.getElementById('p-diff').value,
+      topic: document.getElementById('p-tags').value.trim(),
+      url: document.getElementById('p-url')?.value.trim()||'',
+      time_limit: parseInt(document.getElementById('p-time')?.value)||1000,
+      memory_limit: parseInt(document.getElementById('p-mem')?.value)||256,
+    })});
+    closeModal('problem-modal');
+    ['p-title','p-id','p-tags','p-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    showToast('题目已添加 ✓','success');
+    loadArchive();
+  }catch(e){document.getElementById('problem-error').textContent=e.message||'添加失败';}
 }
-async function deleteProblem(id){if(!confirm('确认删除？'))return;await sb.from('problem_archive').delete().eq('id',id);showToast('已删除','success');loadArchive();}
+async function deleteProblem(id){
+  if(!confirm('确认删除？'))return;
+  try{
+    await apiRequest(`/archive/${id}`,{method:'DELETE'});
+    showToast('已删除','success');loadArchive();
+  }catch(e){showToast(e.message||'删除失败','error');}
+}
 
 // ── Search (realtime) ────────────────────────────────────
 let allNotes=[],allPosts=[],searchFilter='';
