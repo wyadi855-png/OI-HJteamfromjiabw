@@ -9,19 +9,23 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://dgsugcvedimcecudstkq.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://zestful-determination-production.up.railway.app" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 <link rel="dns-prefetch" href="https://dgsugcvedimcecudstkq.supabase.co">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&family=Space+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" media="print" onload="this.media='all'">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
   onload="window._katexReady=true;document.dispatchEvent(new Event('katex-ready'))"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" media="print" onload="this.media='all'">
 <!-- highlight.js loaded on demand -->
 <style>
 /* ── Variables ── */
@@ -7046,26 +7050,75 @@ async function loadProfileSocial(profile, username){
       return { ...p, x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius };
     });
     const svgH = Math.max(220, cy + radius + 70);
-    let svg = `<svg class="rel-graph-svg" viewBox="0 0 ${W} ${svgH}" xmlns="http://www.w3.org/2000/svg"><defs><filter id="rg-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><radialGradient id="rg-center" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#a0eaff"/><stop offset="100%" stop-color="#2090c8"/></radialGradient><radialGradient id="rg-peer" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#c0d8ff"/><stop offset="100%" stop-color="#4060a8"/></radialGradient></defs><pattern id="rg-grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(108,142,245,0.04)" stroke-width="1"/></pattern><rect width="${W}" height="${svgH}" fill="url(#rg-grid)"/>`;
+    const R = 28; // 统一节点半径
+    // defs: glow filter + gradients + arrowhead markers
+    let svg = `<svg class="rel-graph-svg" viewBox="0 0 ${W} ${svgH}" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <filter id="rg-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <radialGradient id="rg-center" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#a0eaff"/><stop offset="100%" stop-color="#2090c8"/></radialGradient>
+  <radialGradient id="rg-peer" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#c0d8ff"/><stop offset="100%" stop-color="#4060a8"/></radialGradient>
+  <!-- 箭头：中心→周围 (out) -->
+  <marker id="arr-out" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="rgba(45,232,176,0.7)"/>
+  </marker>
+  <!-- 箭头：周围→中心 (in) -->
+  <marker id="arr-in" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="rgba(108,142,245,0.7)"/>
+  </marker>
+</defs>
+<pattern id="rg-grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(108,142,245,0.04)" stroke-width="1"/></pattern>
+<rect width="${W}" height="${svgH}" fill="url(#rg-grid)"/>`;
+
     peerPositions.forEach((peer, i) => {
       const dx = peer.x - cx, dy = peer.y - cy;
-      const len = Math.ceil(Math.sqrt(dx*dx + dy*dy) + 10);
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const ux = dx/dist, uy = dy/dist;
+      // 线段起止点缩进到节点边缘
+      const x1 = (cx + ux*R).toFixed(1), y1 = (cy + uy*R).toFixed(1);
+      const x2 = (peer.x - ux*R).toFixed(1), y2 = (peer.y - uy*R).toFixed(1);
+      const len = Math.ceil(dist - R*2 + 10);
       const delay = (i * 0.08).toFixed(2);
-      const labelAB = labelMap[profileId]?.[peer.id] || '';
-      const labelBA = labelMap[peer.id]?.[profileId] || '';
+      const labelAB = labelMap[profileId]?.[peer.id] || ''; // 中心→peer
+      const labelBA = labelMap[peer.id]?.[profileId] || ''; // peer→中心
       const midX = ((cx + peer.x) / 2).toFixed(1);
       const midY = ((cy + peer.y) / 2).toFixed(1);
-      svg += `<line class="rel-edge" x1="${cx}" y1="${cy}" x2="${peer.x.toFixed(1)}" y2="${peer.y.toFixed(1)}" stroke="rgba(108,142,245,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="${len}" stroke-dashoffset="${len}" style="animation-delay:${delay}s"/>`;
-      if (labelAB || labelBA) {
-        const txt = [labelAB, labelBA].filter(Boolean).join(' · ');
-        const bw = txt.length * 7 + 14;
-        svg += `<rect x="${(parseFloat(midX)-bw/2).toFixed(0)}" y="${(parseFloat(midY)-10).toFixed(0)}" width="${bw}" height="18" rx="9" fill="rgba(10,14,26,0.88)" stroke="rgba(45,232,176,0.3)" stroke-width="1"/><text x="${midX}" y="${(parseFloat(midY)+4).toFixed(0)}" text-anchor="middle" class="rel-label-bubble">${escHtml(txt)}</text>`;
+
+      // 中心→peer 有向线（绿色箭头）
+      if (labelAB) {
+        // 偏移一点避免重叠
+        const ox = (-uy*5).toFixed(1), oy = (ux*5).toFixed(1);
+        svg += `<line x1="${(parseFloat(x1)+parseFloat(ox)).toFixed(1)}" y1="${(parseFloat(y1)+parseFloat(oy)).toFixed(1)}" x2="${(parseFloat(x2)+parseFloat(ox)).toFixed(1)}" y2="${(parseFloat(y2)+parseFloat(oy)).toFixed(1)}" stroke="rgba(45,232,176,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="${len}" stroke-dashoffset="${len}" marker-end="url(#arr-out)" class="rel-edge" style="animation-delay:${delay}s"/>`;
+      }
+      // peer→中心 有向线（蓝色箭头）
+      if (labelBA) {
+        const ox = (uy*5).toFixed(1), oy = (-ux*5).toFixed(1);
+        svg += `<line x1="${(parseFloat(x2)+parseFloat(ox)).toFixed(1)}" y1="${(parseFloat(y2)+parseFloat(oy)).toFixed(1)}" x2="${(parseFloat(x1)+parseFloat(ox)).toFixed(1)}" y2="${(parseFloat(y1)+parseFloat(oy)).toFixed(1)}" stroke="rgba(108,142,245,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="${len}" stroke-dashoffset="${len}" marker-end="url(#arr-in)" class="rel-edge" style="animation-delay:${delay}s"/>`;
+      }
+      // 无标签时画普通线
+      if (!labelAB && !labelBA) {
+        svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(108,142,245,0.25)" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="${len}" stroke-dashoffset="${len}" class="rel-edge" style="animation-delay:${delay}s"/>`;
+      }
+
+      // 标签气泡（偏移避开线）
+      if (labelAB) {
+        const bw = labelAB.length * 7 + 14;
+        const lx = (parseFloat(midX) - uy*18).toFixed(1);
+        const ly = (parseFloat(midY) + ux*18).toFixed(1);
+        svg += `<rect x="${(parseFloat(lx)-bw/2).toFixed(0)}" y="${(parseFloat(ly)-10).toFixed(0)}" width="${bw}" height="18" rx="9" fill="rgba(10,14,26,0.9)" stroke="rgba(45,232,176,0.4)" stroke-width="1"/><text x="${lx}" y="${(parseFloat(ly)+4).toFixed(0)}" text-anchor="middle" class="rel-label-bubble" fill="rgba(45,232,176,0.9)">${escHtml(labelAB)}</text>`;
+      }
+      if (labelBA) {
+        const bw = labelBA.length * 7 + 14;
+        const lx = (parseFloat(midX) + uy*18).toFixed(1);
+        const ly = (parseFloat(midY) - ux*18).toFixed(1);
+        svg += `<rect x="${(parseFloat(lx)-bw/2).toFixed(0)}" y="${(parseFloat(ly)-10).toFixed(0)}" width="${bw}" height="18" rx="9" fill="rgba(10,14,26,0.9)" stroke="rgba(108,142,245,0.4)" stroke-width="1"/><text x="${lx}" y="${(parseFloat(ly)+4).toFixed(0)}" text-anchor="middle" class="rel-label-bubble" fill="rgba(108,142,245,0.9)">${escHtml(labelBA)}</text>`;
       }
     });
-    svg += `<circle cx="${cx}" cy="${cy}" r="30" fill="url(#rg-center)" filter="url(#rg-glow)"/><text x="${cx}" y="${cy-7}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.45)">@</text><text x="${cx}" y="${cy+7}" text-anchor="middle" font-family="var(--mono)" font-size="12" font-weight="700" fill="#e8f8ff">${escHtml(username.slice(0,8))}</text>`;
+
+    // 所有节点统一大小 R=28
+    svg += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#rg-center)" filter="url(#rg-glow)"/><text x="${cx}" y="${cy-7}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.45)">@</text><text x="${cx}" y="${cy+7}" text-anchor="middle" font-family="var(--mono)" font-size="12" font-weight="700" fill="#e8f8ff">${escHtml(username.slice(0,8))}</text>`;
     peerPositions.forEach((peer, i) => {
       const delay = (0.1 + i * 0.08).toFixed(2);
-      svg += `<g style="cursor:pointer;opacity:0;animation:logoFadeIn 0.3s ease forwards;animation-delay:${delay}s" onclick="showProfile('${escHtml(peer.username)}')"><circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="24" fill="url(#rg-peer)" filter="url(#rg-glow)"/><text x="${peer.x.toFixed(1)}" y="${(peer.y-5).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.4)">@</text><text x="${peer.x.toFixed(1)}" y="${(peer.y+7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="600" fill="#c8dcff">${escHtml(peer.username.slice(0,7))}</text></g>`;
+      svg += `<g style="cursor:pointer;opacity:0;animation:logoFadeIn 0.3s ease forwards;animation-delay:${delay}s" onclick="showProfile('${escHtml(peer.username)}')"><circle cx="${peer.x.toFixed(1)}" cy="${peer.y.toFixed(1)}" r="${R}" fill="url(#rg-peer)" filter="url(#rg-glow)"/><text x="${peer.x.toFixed(1)}" y="${(peer.y-7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.4)">@</text><text x="${peer.x.toFixed(1)}" y="${(peer.y+7).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="600" fill="#c8dcff">${escHtml(peer.username.slice(0,7))}</text></g>`;
     });
     svg += `</svg>`;
     wrap.innerHTML = svg;
