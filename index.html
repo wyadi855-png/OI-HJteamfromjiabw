@@ -2800,10 +2800,10 @@ mark.search-hl{
 }
 .hd-avatar-more{background:rgba(108,142,245,0.18);color:var(--accent);font-size:10px;border-color:rgba(108,142,245,0.25);}
 .home-daily-checkin-count{font-family:var(--mono);font-size:12px;color:var(--text3);}
+.community-tab{font-family:var(--mono);font-size:13px;padding:8px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);cursor:pointer;transition:all 0.2s;margin-bottom:-1px;}
+.community-tab:hover{color:var(--text);}
+.community-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .checkin-btn{
-  font-family:var(--mono);font-size:13px;font-weight:600;
-  padding:10px 24px;border-radius:10px;cursor:pointer;transition:all 0.3s;
-  border:2px solid rgba(45,232,176,0.3);background:rgba(45,232,176,0.08);color:var(--accent2);}
 .checkin-btn:hover{background:rgba(45,232,176,0.18);transform:translateY(-1px);}
 .checkin-btn.checked{border-color:rgba(108,142,245,0.3);background:rgba(108,142,245,0.08);color:var(--accent);}
 .checkin-count{font-family:var(--mono);font-size:12px;color:var(--text3);margin:12px 0 8px;}
@@ -4194,7 +4194,7 @@ section:not(.active) {
       <li><a onclick="show('announcements')" id="nav-announcements">公告</a></li>
       <li><a onclick="show('contests')" id="nav-contests">模拟赛</a></li>
       <li><a onclick="show('notes')" id="nav-notes">题解</a></li>
-      <li><a onclick="show('emotions')" id="nav-emotions">随笔</a></li>
+      <li><a onclick="show('community')" id="nav-community">社区</a></li>
       <li><a onclick="show('lectures')" id="nav-lectures">课程</a></li>
       <li><a onclick="show('archive')" id="nav-archive">题库</a></li>
       <li><a onclick="show('leaderboard')" id="nav-leaderboard">排行榜</a></li>
@@ -4202,8 +4202,7 @@ section:not(.active) {
         <a onclick="toggleMoreMenu(event)" class="nav-more-trigger">更多 ▾</a>
         <div class="nav-more-menu" id="nav-more-menu">
           <div class="nav-more-group-label">社区</div>
-          <a onclick="closeMoreMenu();show('members')" id="nav-members">👥 成员</a>
-          <a onclick="closeMoreMenu();show('emotions')" id="nav-emotions-m">✍️ 随笔</a>
+          <a onclick="closeMoreMenu();show('community')" id="nav-community-m">🌐 社区</a>
           <div class="nav-more-divider"></div>
           <div class="nav-more-group-label">教学</div>
           <div class="nav-more-divider"></div>
@@ -4530,7 +4529,29 @@ section:not(.active) {
   <div class="emotion-feed" id="emotions-list"></div>
 </div></section>
 
-<!-- LECTURES -->
+<!-- COMMUNITY -->
+<section id="community"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// community</div><h1>社区</h1><p>认识每一位 Oier，分享训练中的感悟与成长。</p></div>
+    <button class="btn btn-primary btn-sm" id="btn-new-post-community" onclick="openPostModal()" style="display:none">+ 写随笔</button>
+  </div>
+  <!-- 标签切换 -->
+  <div style="display:flex;gap:8px;margin-bottom:28px;border-bottom:1px solid rgba(30,37,64,0.6);padding-bottom:0">
+    <button class="community-tab active" id="ctab-members" onclick="switchCommunityTab('members')">👥 成员</button>
+    <button class="community-tab" id="ctab-emotions" onclick="switchCommunityTab('emotions')">✍️ 随笔</button>
+  </div>
+  <!-- 成员面板 -->
+  <div id="community-members-panel">
+    <div style="margin-bottom:16px">
+      <input type="text" id="community-member-search" placeholder="搜索成员…" style="width:180px;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--mono)" oninput="filterCommunityMembers()">
+    </div>
+    <div id="community-members-list"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+  </div>
+  <!-- 随笔面板 -->
+  <div id="community-emotions-panel" style="display:none">
+    <div class="emotion-feed" id="community-emotions-list"></div>
+  </div>
+</div></section>
 <section id="lectures"><div class="container">
   <div class="page-header">
     <div class="page-header-left"><div class="label">// courses</div><h1>课程</h1><p>课程记录与各班教学计划。</p></div>
@@ -5462,7 +5483,7 @@ function show(id){
   // 同步移动端抽屉 active 状态
   syncDrawerActive(id);
   window.scrollTo(0,0);
-  const loaders={syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,quiz:initQuiz,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks,daily:loadDaily};
+  const loaders={syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,quiz:initQuiz,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks,daily:loadDaily,community:loadCommunity};
   if(loaders[id])loaders[id]();
 }
 
@@ -5527,14 +5548,14 @@ function renderAuthArea(){
       </div>
     </div>`;
     if(isCoach()){coachNav.style.display='';const da=document.getElementById('drawer-admin');if(da)da.style.display='';}
-    ['btn-new-note','btn-new-post'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
+    ['btn-new-note','btn-new-post','btn-new-post-community'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
     if(isCoach())['btn-new-contest','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
     // 所有登录用户可添加题目
     const btnP=document.getElementById('btn-new-problem');if(btnP)btnP.style.display='inline-flex';
   }else{
     area.innerHTML=`<button class="btn btn-primary btn-sm" onclick="openModal('auth-modal')">登录 / 注册</button>`;
     coachNav.style.display='none';const da2=document.getElementById('drawer-admin');if(da2)da2.style.display='none';
-    ['btn-new-note','btn-new-post','btn-new-contest','btn-new-lecture','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+    ['btn-new-note','btn-new-post','btn-new-post-community','btn-new-contest','btn-new-lecture','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
     const btnP2=document.getElementById('btn-new-problem');if(btnP2)btnP2.style.display='none';
   }
 }
@@ -6109,6 +6130,107 @@ async function loadDaily(){
   } catch(e){ console.error('loadDaily:', e); showToast('加载失败，请刷新重试','error'); }
 }
 
+
+// ── Community ─────────────────────────────────────────
+let _communityTab = 'members';
+let _communityMembersLoaded = false;
+
+function switchCommunityTab(tab){
+  _communityTab = tab;
+  document.querySelectorAll('.community-tab').forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById('ctab-'+tab);
+  if(btn) btn.classList.add('active');
+  document.getElementById('community-members-panel').style.display = tab==='members'?'':'none';
+  document.getElementById('community-emotions-panel').style.display = tab==='emotions'?'':'none';
+  const postBtn = document.getElementById('btn-new-post-community');
+  if(postBtn) postBtn.style.display = (tab==='emotions'&&currentUser)?'inline-flex':'none';
+  if(tab==='emotions'){
+    const el=document.getElementById('community-emotions-list');
+    if(!el.children.length||el.innerHTML.trim()==='') loadCommunityEmotions();
+  }
+}
+
+async function loadCommunity(){
+  if(!_communityMembersLoaded) await loadCommunityMembers();
+  // 同步 btn-new-post-community 显示
+  const postBtn = document.getElementById('btn-new-post-community');
+  if(postBtn) postBtn.style.display = (_communityTab==='emotions'&&currentUser)?'inline-flex':'none';
+}
+
+async function loadCommunityMembers(){
+  _communityMembersLoaded = true;
+  const el = document.getElementById('community-members-list');
+  if(!el) return;
+  try{
+    const sb2 = get_supabase ? get_supabase() : sb;
+    const{data:members} = await sb.from('profiles').select('id,username,avatar_url,role').order('created_at');
+    if(!members||!members.length){ el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><p>暂无成员</p></div>'; return; }
+    el.innerHTML = `<div class="members-grid">${members.map(m=>{
+      const av = m.avatar_url?`<img src="${escHtml(m.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:`<span style="font-size:16px;font-weight:700;color:#060610">${(m.username||'?')[0].toUpperCase()}</span>`;
+      const bg = m.avatar_url?'transparent':avatarGradient(m.username||'');
+      return `<div class="member-card" onclick="show('profile');showProfile('${escHtml(m.username)}')">
+        <div class="member-avatar" style="background:${bg}">${av}</div>
+        <div class="member-name">@${escHtml(m.username||'')}</div>
+        ${m.role==='coach'?'<span class="coach-badge" style="font-size:10px;margin-top:2px">教练</span>':''}
+      </div>`;
+    }).join('')}</div>`;
+    _allCommunityMembers = members;
+  }catch(e){ el.innerHTML='<div class="empty-state"><p>加载失败</p></div>'; }
+}
+
+let _allCommunityMembers = [];
+function filterCommunityMembers(){
+  const q = (document.getElementById('community-member-search')?.value||'').toLowerCase();
+  const el = document.getElementById('community-members-list');
+  if(!el||!_allCommunityMembers.length) return;
+  const filtered = _allCommunityMembers.filter(m=>(m.username||'').toLowerCase().includes(q));
+  el.innerHTML = `<div class="members-grid">${filtered.map(m=>{
+    const av = m.avatar_url?`<img src="${escHtml(m.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:`<span style="font-size:16px;font-weight:700;color:#060610">${(m.username||'?')[0].toUpperCase()}</span>`;
+    const bg = m.avatar_url?'transparent':avatarGradient(m.username||'');
+    return `<div class="member-card" onclick="show('profile');showProfile('${escHtml(m.username)}')">
+      <div class="member-avatar" style="background:${bg}">${av}</div>
+      <div class="member-name">@${escHtml(m.username||'')}</div>
+      ${m.role==='coach'?'<span class="coach-badge" style="font-size:10px;margin-top:2px">教练</span>':''}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+async function loadCommunityEmotions(){
+  const list = document.getElementById('community-emotions-list');
+  if(!list) return;
+  list.innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  try{
+    const{data}=await sb.from('posts').select('*,profiles(username,id)').order('created_at',{ascending:false});
+    if(!data||!data.length){ list.innerHTML='<div class="empty-state"><div class="empty-state-icon">✍️</div><p>还没有随笔，来写第一篇吧</p></div>'; return; }
+    list.innerHTML='';
+    for(const p of data){
+      const card=document.createElement('div');
+      card.className='post-card emotion-post';
+      card.dataset.postId='c'+p.id;
+      const isMine=currentUser&&p.profiles?.id===currentUser.id;
+      const canDel=isMine||isCoach();
+      card.innerHTML=`
+        <div class="post-card-header">
+          <span class="post-card-author" onclick="event.stopPropagation();showProfile('${escHtml(p.profiles?.username||'')}')">@${escHtml(p.profiles?.username||'匿名')}</span>
+          <span class="post-card-date">${fmtDate(p.created_at)}</span>
+        </div>
+        ${p.mood?`<div class="post-mood-tag">${escHtml(p.mood)}</div>`:''}
+        <div class="post-card-body markdown-body">${(()=>{try{return DOMPurify.sanitize(marked.parse(p.content||''));}catch(e){return escHtml(p.content||'').replace(/\n/g,'<br>');}})()}</div>
+        <div class="post-card-footer">
+          <span class="post-comment-toggle" onclick="event.stopPropagation();togglePostComments(${p.id},this)">💬 <span class="cmt-count">...</span> 条评论</span>
+          <button class="orz-btn" id="orz-btn-c${p.id}" onclick="event.stopPropagation();togglePostLike(${p.id},this)"><span class="orz-text">orz</span><span class="orz-count" id="orz-count-c${p.id}">0</span></button>
+          <div class="post-card-actions">
+            ${isMine?`<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openEditPost(${p.id},'${escHtml((p.content||'').replace(/'/g,"\\'"))}')">编辑</button>`:''}
+            ${canDel?`<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deletePost(${p.id})">删除</button>`:''}
+          </div>
+        </div>
+        <div class="post-comments" id="post-cmt-c${p.id}"></div>`;
+      list.appendChild(card);
+      loadPostCommentCount(p.id);
+      loadPostLikeCount(p.id);
+    }
+  }catch(e){ list.innerHTML='<div class="empty-state"><p>加载失败</p></div>'; }
+}
 
 // ── Home Daily Mini-Card ─────────────────────────────────
 async function loadHomeDailyCard(){
