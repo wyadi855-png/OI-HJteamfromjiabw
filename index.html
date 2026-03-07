@@ -778,6 +778,49 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .member-card:hover{border-color:rgba(108,142,245,0.3);transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.3);}
 .member-name{font-family:var(--mono);font-size:12px;color:var(--accent2);margin-bottom:4px;}
 
+/* ── Knowledge 知识库 ── */
+.kw-cat-tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid rgba(30,37,64,0.6);}
+.kw-cat-tab{font-family:var(--mono);font-size:13px;padding:9px 22px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);cursor:pointer;transition:all 0.2s;margin-bottom:-1px;white-space:nowrap;}
+.kw-cat-tab:hover{color:var(--text);}
+.kw-cat-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.kw-layout{display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start;min-height:60vh;}
+.kw-sidebar{position:sticky;top:80px;max-height:calc(100vh - 120px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(108,142,245,0.2) transparent;}
+.kw-tree{display:flex;flex-direction:column;gap:2px;}
+/* 树节点 */
+.kw-dir{font-family:var(--mono);font-size:12px;font-weight:600;color:rgba(255,255,255,0.45);letter-spacing:0.06em;text-transform:uppercase;padding:10px 8px 4px;margin-top:6px;cursor:pointer;display:flex;align-items:center;gap:6px;border-radius:6px;transition:background 0.15s;}
+.kw-dir:hover{background:rgba(255,255,255,0.04);}
+.kw-dir-arrow{font-size:10px;transition:transform 0.2s;color:rgba(255,255,255,0.3);}
+.kw-dir.open .kw-dir-arrow{transform:rotate(90deg);}
+.kw-dir-children{margin-left:12px;border-left:1px solid rgba(255,255,255,0.06);padding-left:8px;display:none;flex-direction:column;gap:1px;}
+.kw-dir.open + .kw-dir-children{display:flex;}
+.kw-leaf{font-family:var(--mono);font-size:12.5px;color:var(--text2);padding:6px 10px;border-radius:7px;cursor:pointer;transition:all 0.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid transparent;}
+.kw-leaf:hover{background:rgba(108,142,245,0.08);color:var(--text);}
+.kw-leaf.active{background:rgba(108,142,245,0.13);color:var(--accent);border-color:rgba(108,142,245,0.2);}
+/* 右侧文章 */
+.kw-content{min-height:400px;}
+.kw-welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:320px;color:var(--text3);}
+.kw-article{animation:fadeSlideUp 0.25s ease;}
+.kw-article-header{margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.kw-article-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.kw-article-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.kw-source-tag{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:5px;background:rgba(45,232,176,0.08);border:1px solid rgba(45,232,176,0.18);color:var(--accent2);}
+.kw-source-link{font-family:var(--mono);font-size:11px;color:var(--accent);opacity:0.7;text-decoration:none;}
+.kw-source-link:hover{opacity:1;text-decoration:underline;}
+.kw-edit-btn{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:6px;background:transparent;border:1px solid var(--border);color:var(--text3);cursor:pointer;transition:all 0.15s;margin-left:auto;}
+.kw-edit-btn:hover{border-color:var(--accent);color:var(--accent);}
+.kw-add-child-btn{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:6px;background:transparent;border:1px solid rgba(45,232,176,0.2);color:var(--accent2);cursor:pointer;transition:all 0.15s;}
+.kw-add-child-btn:hover{background:rgba(45,232,176,0.08);}
+/* 搜索结果 */
+.kw-search-results{display:flex;flex-direction:column;gap:8px;}
+.kw-search-item{padding:12px 14px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:10px;cursor:pointer;transition:all 0.15s;}
+.kw-search-item:hover{border-color:rgba(108,142,245,0.3);transform:translateY(-1px);}
+.kw-search-item-title{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.kw-search-item-excerpt{font-size:12px;color:var(--text3);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+@media(max-width:768px){
+  .kw-layout{grid-template-columns:1fr;gap:16px;}
+  .kw-sidebar{position:static;max-height:none;}
+  .kw-cat-tab{padding:8px 14px;font-size:12px;}
+}
 .cm-group-header{display:flex;align-items:baseline;gap:10px;margin:20px 0 10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.05);}
 .cm-group-header:first-child{margin-top:0;}
 .cm-group-label{font-family:var(--mono);font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:0.06em;text-transform:uppercase;}
@@ -4262,6 +4305,7 @@ section:not(.active) {
       <li><a onclick="show('community')" id="nav-community">社区</a></li>
       <li><a onclick="show('lectures')" id="nav-lectures">课程</a></li>
       <li><a onclick="show('archive')" id="nav-archive">题库</a></li>
+      <li><a onclick="show('knowledge')" id="nav-knowledge">知识库</a></li>
       <li><a onclick="show('leaderboard')" id="nav-leaderboard">排行榜</a></li>
       <li class="nav-more-wrap">
         <a onclick="toggleMoreMenu(event)" class="nav-more-trigger">更多 ▾</a>
@@ -4617,6 +4661,67 @@ section:not(.active) {
     <div class="emotion-feed" id="community-emotions-list"></div>
   </div>
 </div></section>
+
+<!-- KNOWLEDGE -->
+<section id="knowledge"><div class="container">
+  <div class="page-header">
+    <div class="page-header-left"><div class="label">// knowledge</div><h1>知识库</h1><p>信息学、数学、人工智能、经济与金融学。</p></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input type="text" id="kw-search" placeholder="搜索知识点…" style="width:160px;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--mono)" oninput="kwSearch()">
+      <button class="btn btn-primary btn-sm" id="btn-kw-new" onclick="openKwEditor(null,null)" style="display:none">+ 新增节点</button>
+    </div>
+  </div>
+  <!-- 分类 tabs -->
+  <div class="kw-cat-tabs" id="kw-cat-tabs">
+    <button class="kw-cat-tab active" data-cat="信息学"    onclick="kwSelectCat('信息学')">信息学</button>
+    <button class="kw-cat-tab"        data-cat="数学"      onclick="kwSelectCat('数学')">数学</button>
+    <button class="kw-cat-tab"        data-cat="人工智能"  onclick="kwSelectCat('人工智能')">人工智能</button>
+    <button class="kw-cat-tab"        data-cat="经济与金融学" onclick="kwSelectCat('经济与金融学')">经济与金融学</button>
+  </div>
+  <!-- 主体：左侧目录 + 右侧文章 -->
+  <div class="kw-layout">
+    <aside class="kw-sidebar" id="kw-sidebar">
+      <div class="kw-tree" id="kw-tree"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+    </aside>
+    <main class="kw-content" id="kw-content">
+      <div class="kw-welcome">
+        <div style="font-size:36px;margin-bottom:12px">📖</div>
+        <div style="font-family:var(--mono);font-size:14px;color:var(--text3)">从左侧目录选择知识点</div>
+      </div>
+    </main>
+  </div>
+</div></section>
+
+<!-- KNOWLEDGE 编辑器 Modal -->
+<div class="modal-overlay" id="kw-editor-modal">
+  <div class="modal" style="max-width:760px;width:95vw">
+    <div class="modal-header"><h2 id="kw-editor-title">新增知识节点</h2><button class="modal-close" onclick="closeKwEditor()">✕</button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <select id="kw-edit-cat" style="flex:1;min-width:120px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:13px">
+          <option>信息学</option><option>数学</option><option>人工智能</option><option>经济与金融学</option>
+        </select>
+        <select id="kw-edit-parent" style="flex:2;min-width:160px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:13px">
+          <option value="">顶级节点（无父级）</option>
+        </select>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);cursor:pointer">
+          <input type="checkbox" id="kw-edit-isdir"> 目录节点
+        </label>
+      </div>
+      <input type="text" id="kw-edit-title" placeholder="标题" style="padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:13px">
+      <textarea id="kw-edit-content" placeholder="正文（Markdown）" rows="14" style="padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:13px;resize:vertical"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input type="text" id="kw-edit-source" placeholder="来源（如 OI-Wiki）" style="flex:1;min-width:120px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:12px">
+        <input type="text" id="kw-edit-url" placeholder="原始链接" style="flex:2;min-width:160px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:12px">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeKwEditor()">取消</button>
+      <button class="btn btn-danger btn-sm" id="kw-edit-del" onclick="deleteKwNode()" style="display:none">删除</button>
+      <button class="btn btn-primary" onclick="saveKwNode()">保存</button>
+    </div>
+  </div>
+</div>
 
 <!-- LECTURES -->
 <section id="lectures"><div class="container">
@@ -5550,7 +5655,7 @@ function show(id){
   // 同步移动端抽屉 active 状态
   syncDrawerActive(id);
   window.scrollTo(0,0);
-  const loaders={syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,quiz:initQuiz,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks,daily:loadDaily,community:loadCommunity};
+  const loaders={syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,quiz:initQuiz,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks,daily:loadDaily,community:loadCommunity,knowledge:loadKnowledge};
   if(loaders[id])loaders[id]();
 }
 
@@ -6197,6 +6302,202 @@ async function loadDaily(){
   } catch(e){ console.error('loadDaily:', e); showToast('加载失败，请刷新重试','error'); }
 }
 
+
+// ── Knowledge 知识库 ────────────────────────────────────
+let _kwCat = '信息学';
+let _kwNodes = {};        // category -> [{...}]
+let _kwActiveId = null;
+let _kwEditingId = null;
+
+async function loadKnowledge(){
+  document.getElementById('btn-kw-new').style.display = isCoach() ? 'inline-flex' : 'none';
+  if(!_kwNodes[_kwCat]) await kwFetchCat(_kwCat);
+  kwRenderTree();
+}
+
+async function kwFetchCat(cat){
+  const{data}=await sb.from('knowledge_nodes')
+    .select('id,parent_id,title,slug,is_dir,sort_order,source,source_url,content')
+    .eq('category',cat)
+    .order('sort_order');
+  _kwNodes[cat]=data||[];
+}
+
+function kwSelectCat(cat){
+  _kwCat=cat;
+  _kwActiveId=null;
+  document.querySelectorAll('.kw-cat-tab').forEach(b=>b.classList.toggle('active',b.dataset.cat===cat));
+  document.getElementById('kw-content').innerHTML=`<div class="kw-welcome"><div style="font-size:36px;margin-bottom:12px">📖</div><div style="font-family:var(--mono);font-size:14px;color:var(--text3)">从左侧目录选择知识点</div></div>`;
+  document.getElementById('kw-tree').innerHTML='<div class="loading"><div class="spinner"></div>加载中…</div>';
+  kwFetchCat(cat).then(kwRenderTree);
+}
+
+function kwRenderTree(){
+  const nodes=_kwNodes[_kwCat]||[];
+  const tree=document.getElementById('kw-tree');
+  if(!nodes.length){tree.innerHTML='<div style="font-family:var(--mono);font-size:12px;color:var(--text3);padding:16px 8px">暂无内容</div>';return;}
+  // 构建树
+  const roots=nodes.filter(n=>!n.parent_id);
+  const children={};
+  for(const n of nodes){
+    if(n.parent_id){
+      if(!children[n.parent_id]) children[n.parent_id]=[];
+      children[n.parent_id].push(n);
+    }
+  }
+  function renderNode(n){
+    if(n.is_dir){
+      const kids=(children[n.id]||[]);
+      const isOpen=kids.some(k=>k.id===_kwActiveId||children[k.id]?.some(g=>g.id===_kwActiveId));
+      return `<div class="kw-dir${isOpen?' open':''}" onclick="kwToggleDir(this)">
+        <span class="kw-dir-arrow">▶</span>${escHtml(n.title)}
+        ${isCoach()?`<span style="margin-left:auto;font-size:10px;opacity:0.4;cursor:pointer" onclick="event.stopPropagation();openKwEditor(null,${n.id})">＋</span>`:''}
+      </div>
+      <div class="kw-dir-children">${kids.map(renderNode).join('')}</div>`;
+    }
+    return `<div class="kw-leaf${n.id===_kwActiveId?' active':''}" onclick="kwOpenArticle(${n.id})" title="${escHtml(n.title)}">${escHtml(n.title)}</div>`;
+  }
+  tree.innerHTML=roots.map(renderNode).join('');
+}
+
+function kwToggleDir(el){
+  el.classList.toggle('open');
+}
+
+async function kwOpenArticle(id){
+  _kwActiveId=id;
+  // 更新高亮
+  document.querySelectorAll('.kw-leaf').forEach(el=>el.classList.toggle('active',el.onclick?.toString().includes(`(${id})`)));
+  // 先从缓存找
+  let node=(_kwNodes[_kwCat]||[]).find(n=>n.id===id);
+  if(!node){
+    const{data}=await sb.from('knowledge_nodes').select('*').eq('id',id).maybeSingle();
+    node=data;
+  }
+  if(!node) return;
+  const content=document.getElementById('kw-content');
+  let bodyHtml='<div style="font-family:var(--mono);font-size:13px;color:var(--text3);padding:40px 0;text-align:center">这是一个目录节点，暂无正文</div>';
+  if(node.content){
+    try{ bodyHtml=`<div class="markdown-body">${DOMPurify.sanitize(marked.parse(node.content))}</div>`; }
+    catch(e){ bodyHtml=`<pre style="white-space:pre-wrap;font-size:13px;color:var(--text2)">${escHtml(node.content)}</pre>`; }
+  }
+  const editBtn=isCoach()?`<button class="kw-edit-btn" onclick="openKwEditor(${node.id},null)">编辑</button>`:'';
+  const addChildBtn=isCoach()&&node.is_dir?`<button class="kw-add-child-btn" onclick="openKwEditor(null,${node.id})">＋ 子节点</button>`:'';
+  content.innerHTML=`<div class="kw-article">
+    <div class="kw-article-header">
+      <div class="kw-article-title">${escHtml(node.title)}</div>
+      <div class="kw-article-meta">
+        ${node.source?`<span class="kw-source-tag">${escHtml(node.source)}</span>`:''}
+        ${node.source_url?`<a class="kw-source-link" href="${escHtml(node.source_url)}" target="_blank">原文 ↗</a>`:''}
+        ${addChildBtn}${editBtn}
+      </div>
+    </div>
+    ${bodyHtml}
+  </div>`;
+}
+
+function kwSearch(){
+  const q=(document.getElementById('kw-search')?.value||'').trim().toLowerCase();
+  const content=document.getElementById('kw-content');
+  if(!q){
+    content.innerHTML=`<div class="kw-welcome"><div style="font-size:36px;margin-bottom:12px">📖</div><div style="font-family:var(--mono);font-size:14px;color:var(--text3)">从左侧目录选择知识点</div></div>`;
+    return;
+  }
+  // 搜索所有已加载的分类
+  const allNodes=Object.values(_kwNodes).flat();
+  const results=allNodes.filter(n=>
+    !n.is_dir&&(
+      (n.title||'').toLowerCase().includes(q)||
+      (n.content||'').toLowerCase().includes(q)
+    )
+  ).slice(0,20);
+  if(!results.length){
+    content.innerHTML='<div style="font-family:var(--mono);font-size:13px;color:var(--text3);padding:40px;text-align:center">没有找到相关内容</div>';
+    return;
+  }
+  content.innerHTML=`<div class="kw-search-results">${results.map(n=>{
+    const excerpt=(n.content||'').replace(/[#*`\[\]]/g,'').slice(0,120);
+    return `<div class="kw-search-item" onclick="kwOpenArticle(${n.id})">
+      <div class="kw-search-item-title">${escHtml(n.title)}</div>
+      <div class="kw-search-item-excerpt">${escHtml(excerpt)}…</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── 教练编辑器 ──────────────────────────────
+async function openKwEditor(nodeId, parentId){
+  _kwEditingId=nodeId;
+  document.getElementById('kw-editor-title').textContent=nodeId?'编辑节点':'新增节点';
+  document.getElementById('kw-edit-del').style.display=nodeId?'inline-flex':'none';
+  // 填充父级下拉
+  const allNodes=(_kwNodes[_kwCat]||[]).filter(n=>n.is_dir);
+  const parentSel=document.getElementById('kw-edit-parent');
+  parentSel.innerHTML='<option value="">顶级节点（无父级）</option>'+
+    allNodes.map(n=>`<option value="${n.id}"${n.id===parentId?' selected':''}>${escHtml(n.title)}</option>`).join('');
+  if(nodeId){
+    const node=(_kwNodes[_kwCat]||[]).find(n=>n.id===nodeId);
+    if(!node) return;
+    document.getElementById('kw-edit-cat').value=node.category||_kwCat;
+    document.getElementById('kw-edit-title').value=node.title||'';
+    document.getElementById('kw-edit-content').value=node.content||'';
+    document.getElementById('kw-edit-source').value=node.source||'';
+    document.getElementById('kw-edit-url').value=node.source_url||'';
+    document.getElementById('kw-edit-isdir').checked=!!node.is_dir;
+    if(node.parent_id) parentSel.value=node.parent_id;
+  } else {
+    document.getElementById('kw-edit-cat').value=_kwCat;
+    document.getElementById('kw-edit-title').value='';
+    document.getElementById('kw-edit-content').value='';
+    document.getElementById('kw-edit-source').value='';
+    document.getElementById('kw-edit-url').value='';
+    document.getElementById('kw-edit-isdir').checked=false;
+  }
+  openModal('kw-editor-modal');
+}
+
+function closeKwEditor(){document.getElementById('kw-editor-modal').classList.remove('open');}
+
+async function saveKwNode(){
+  const title=document.getElementById('kw-edit-title').value.trim();
+  if(!title){showToast('请填写标题','error');return;}
+  const payload={
+    category:document.getElementById('kw-edit-cat').value,
+    title,
+    slug:title.toLowerCase().replace(/\s+/g,'-').replace(/[^\w\u4e00-\u9fa5\-]/g,''),
+    content:document.getElementById('kw-edit-content').value,
+    source:document.getElementById('kw-edit-source').value,
+    source_url:document.getElementById('kw-edit-url').value,
+    is_dir:document.getElementById('kw-edit-isdir').checked,
+    parent_id:document.getElementById('kw-edit-parent').value||null,
+    author_id:currentUser?.id||null,
+  };
+  try{
+    if(_kwEditingId){
+      await sb.from('knowledge_nodes').update(payload).eq('id',_kwEditingId);
+      showToast('已保存 ✓','success');
+    } else {
+      await sb.from('knowledge_nodes').insert(payload);
+      showToast('已创建 ✓','success');
+    }
+    closeKwEditor();
+    delete _kwNodes[payload.category];
+    if(payload.category===_kwCat) await kwFetchCat(_kwCat);
+    kwRenderTree();
+  }catch(e){showToast('保存失败: '+e.message,'error');}
+}
+
+async function deleteKwNode(){
+  if(!_kwEditingId||!confirm('确认删除？子节点也会一并删除。')) return;
+  try{
+    await sb.from('knowledge_nodes').delete().eq('id',_kwEditingId);
+    showToast('已删除','success');
+    closeKwEditor();
+    delete _kwNodes[_kwCat];
+    await kwFetchCat(_kwCat);
+    kwRenderTree();
+    document.getElementById('kw-content').innerHTML='<div class="kw-welcome"><div style="font-size:36px;margin-bottom:12px">📖</div></div>';
+  }catch(e){showToast('删除失败: '+e.message,'error');}
+}
 
 // ── Community ─────────────────────────────────────────
 let _communityTab='members', _communityMembersLoaded=false, _allCommunityMembers=[];
