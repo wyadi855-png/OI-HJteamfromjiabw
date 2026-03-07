@@ -32,6 +32,25 @@
 .p-src-btn{font-family:var(--mono);font-size:12px;padding:5px 14px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.15s;}
 .p-src-btn.active{border-color:var(--accent);background:rgba(108,142,245,0.12);color:var(--accent);}
 .p-src-btn:hover{border-color:rgba(108,142,245,0.4);color:var(--text);}
+
+/* ── OI Badge 选择器 ── */
+.oi-badge-section{margin:14px 0 6px;}
+.oi-badge-section-label{font-size:11px;font-family:var(--mono);color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;}
+.oi-badge-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:2px;}
+.oi-badge-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 11px;border-radius:100px;font-size:12px;font-family:var(--mono);
+  border:1px solid var(--border);background:rgba(255,255,255,.02);
+  color:var(--text2);cursor:pointer;transition:all .14s ease;user-select:none;white-space:nowrap;
+}
+.oi-badge-chip:hover{border-color:rgba(108,142,245,.4);color:var(--text);}
+.oi-badge-chip.on{border-color:var(--accent);background:rgba(108,142,245,.12);color:var(--accent);box-shadow:0 0 0 1px rgba(108,142,245,.18);}
+.oi-badge-chip .bdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.oi-province-wrap{display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid var(--border);}
+.oi-province-wrap.open{display:block;}
+.oi-province-grid{display:flex;flex-wrap:wrap;gap:4px;max-height:100px;overflow-y:auto;scrollbar-width:none;}
+/* 展示用 badge（个人主页） */
+.oi-rank-tag{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:100px;font-size:11px;font-family:var(--mono);border:1px solid;}
 /* ── Variables ── */
 :root{
   --bg:#080b12;--surface:#0f1320;--surface2:#161c2e;--border:#1e2540;
@@ -5425,7 +5444,23 @@ function renderAuthArea(){
   const area=document.getElementById('nav-auth-area');
   const coachNav=document.getElementById('nav-admin');
   if(currentUser&&currentProfile){
-    area.innerHTML=`<span class="nav-user" style="cursor:pointer" onclick="showProfile('${currentProfile.username}')">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}<button class="btn btn-outline btn-sm" onclick="openModal('settings-modal');loadSettingsData()">设置</button><button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
+    area.innerHTML=`<span class="nav-user" style="cursor:pointer" onclick="showProfile('${currentProfile.username}')">@${currentProfile.username}</span>${isCoach()?'<span class="coach-badge">教练</span>':''}${(function(){
+  const b=profileData.oi_badge||'';if(!b)return '';
+  const cfg={
+    '蒟蒻':     {c:'#9b9b9b',bg:'rgba(155,155,155,.1)',br:'rgba(155,155,155,.25)'},
+    'CSP-J':    {c:'#4e9af1',bg:'rgba(78,154,241,.1)', br:'rgba(78,154,241,.25)'},
+    'CSP-S':    {c:'#4e9af1',bg:'rgba(78,154,241,.1)', br:'rgba(78,154,241,.25)'},
+    'NOIP一等': {c:'#2de8b0',bg:'rgba(45,232,176,.1)', br:'rgba(45,232,176,.25)'},
+    'NOIP二等': {c:'#2de8b0',bg:'rgba(45,232,176,.1)', br:'rgba(45,232,176,.25)'},
+    'NOIP三等': {c:'#2de8b0',bg:'rgba(45,232,176,.1)', br:'rgba(45,232,176,.25)'},
+    'NOI金':    {c:'#FFD700',bg:'rgba(255,215,0,.1)',   br:'rgba(255,215,0,.3)'},
+    'NOI银':    {c:'#C0C0C0',bg:'rgba(192,192,192,.1)', br:'rgba(192,192,192,.3)'},
+    'NOI铜':    {c:'#CD7F32',bg:'rgba(205,127,50,.1)',  br:'rgba(205,127,50,.3)'},
+  };
+  const label = b.startsWith('省队-')?'省队·'+b.slice(3):b;
+  const s = cfg[b]||{c:'#c792ea',bg:'rgba(199,146,234,.1)',br:'rgba(199,146,234,.25)'};
+  return '<span class="oi-rank-tag" style="color:'+s.c+';background:'+s.bg+';border-color:'+s.br+'">'+escHtml(label)+'</span>';
+})()}<button class="btn btn-outline btn-sm" onclick="openModal('settings-modal');loadSettingsData()">设置</button><button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>`;
     if(isCoach()){coachNav.style.display='';const da=document.getElementById('drawer-admin');if(da)da.style.display='';}
     ['btn-new-note','btn-new-post'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
     if(isCoach())['btn-new-contest','btn-new-ann','btn-luogu-import'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='inline-flex';});
@@ -8664,6 +8699,55 @@ function switchSettingsTab(tab){
   document.getElementById('settings-avatar-tab').style.display=tab==='avatar'?'block':'none';
   document.getElementById('settings-password-tab').style.display=tab==='password'?'block':'none';
 }
+
+// ── OI Badge（设置页）──
+const _OI_PROVINCES=['北京','天津','河北','山西','内蒙古','辽宁','吉林','黑龙江','上海','江苏','浙江','安徽','福建','江西','山东','河南','湖北','湖南','广东','广西','海南','重庆','四川','贵州','云南','西藏','陕西','甘肃','青海','宁夏','新疆'];
+let _oiBadge = '';
+
+function initSetProvincePicker(){
+  const grid = document.getElementById('set-province-grid');
+  if(!grid || grid.children.length) return;
+  _OI_PROVINCES.forEach(p=>{
+    const d = document.createElement('div');
+    d.className = 'oi-badge-chip'; d.dataset.badge = '省队-'+p;
+    d.style.cssText='font-size:11px;padding:3px 8px';
+    d.textContent = p;
+    d.onclick = function(){ setOiBadge(this, '省队-'+p); };
+    grid.appendChild(d);
+  });
+}
+
+function setOiBadge(el, badge){
+  document.querySelectorAll('#set-badge-block .oi-badge-chip').forEach(c=>c.classList.remove('on'));
+  if(_oiBadge === badge){ _oiBadge = ''; return; }
+  el.classList.add('on'); _oiBadge = badge;
+  // 非省队则关闭省份面板
+  const pw = document.getElementById('set-province-wrap');
+  if(pw) pw.classList.toggle('open', badge.startsWith('省队'));
+}
+
+function toggleSetProvince(el){
+  initSetProvincePicker();
+  const pw = document.getElementById('set-province-wrap');
+  const isOpen = pw.classList.contains('open');
+  document.querySelectorAll('#set-badge-block .oi-badge-chip').forEach(c=>c.classList.remove('on'));
+  if(isOpen && _oiBadge.startsWith('省队')){ _oiBadge=''; pw.classList.remove('open'); return; }
+  el.classList.add('on');
+  pw.classList.add('open');
+  if(!_oiBadge.startsWith('省队')) _oiBadge='省队';
+}
+
+function loadOiBadge(badge){
+  _oiBadge = badge || '';
+  document.querySelectorAll('#set-badge-block .oi-badge-chip').forEach(c=>c.classList.remove('on'));
+  if(!badge) return;
+  if(badge.startsWith('省队-')) initSetProvincePicker();
+  setTimeout(()=>{
+    const el = document.querySelector('#set-badge-block .oi-badge-chip[data-badge="'+badge+'"]');
+    if(el){ el.classList.add('on'); if(badge.startsWith('省队')) document.getElementById('set-province-wrap')?.classList.add('open'); }
+  }, 50);
+}
+
 async function loadSettingsData(){
   if(!currentProfile)return;
   // 渲染当前头像预览
@@ -8687,6 +8771,7 @@ async function loadSettingsData(){
   document.getElementById('set-luogu-uid').value=currentProfile.luogu_uid||'';
   const grpEl=document.getElementById('set-group');
   if(grpEl) grpEl.value=currentProfile.group_id||'';
+  loadOiBadge(currentProfile.oi_badge||'');
 }
 
 function previewAvatar(input){
@@ -8762,12 +8847,13 @@ async function saveSettings(){
     motto:motto||'',
     group_id,
     luogu_uid:normalizeLuoguUid(luogu_uid)||'',
+    oi_badge:_oiBadge||'',
     ...(newUsername && newUsername !== currentProfile.username ? {username:newUsername} : {})
   };
   try{
-    await apiRequest('/auth/profile',{method:'PATCH',body:JSON.stringify(payload)});
+    await apiRequest('/profile',{method:'PATCH',body:JSON.stringify(payload)});
   }catch(e){errEl.textContent=e.message||'保存失败';return;}
-  currentProfile={...currentProfile,...payload,bio:normalizeText(bio),motto:normalizeText(motto),luogu_uid:normalizeLuoguUid(luogu_uid),username:payload.username||currentProfile.username};
+  currentProfile={...currentProfile,...payload,bio:normalizeText(bio),motto:normalizeText(motto),luogu_uid:normalizeLuoguUid(luogu_uid),username:payload.username||currentProfile.username,oi_badge:_oiBadge||''};
   renderAuthArea();
   closeModal('settings-modal');showToast('设置已保存 ✓','success');
   // 无论当前在哪个tab，只要profile区域存在就刷新
@@ -11760,6 +11846,35 @@ async function showContestChart(contestId, preloaded, title){
           <option value="6">L6</option>
           <option value="7">Oth</option>
         </select>
+      </div>
+      <div class="oi-badge-section" id="set-badge-block">
+        <div class="oi-badge-section-label">OI 水平 <span style="font-size:10px;color:var(--text3);letter-spacing:0">（选填，展示在主页）</span></div>
+        <!-- 基础 -->
+        <div class="oi-badge-row">
+          <div class="oi-badge-chip" data-badge="蒟蒻"    onclick="setOiBadge(this,'蒟蒻')"><span class="bdot" style="background:#9b9b9b"></span>蒟蒻</div>
+          <div class="oi-badge-chip" data-badge="CSP-J"   onclick="setOiBadge(this,'CSP-J')"><span class="bdot" style="background:#4e9af1"></span>CSP-J</div>
+          <div class="oi-badge-chip" data-badge="CSP-S"   onclick="setOiBadge(this,'CSP-S')"><span class="bdot" style="background:#4e9af1"></span>CSP-S</div>
+        </div>
+        <!-- NOIP -->
+        <div class="oi-badge-row" style="margin-top:6px">
+          <div class="oi-badge-chip" data-badge="NOIP一等" onclick="setOiBadge(this,'NOIP一等')"><span class="bdot" style="background:#2de8b0"></span>NOIP 一等</div>
+          <div class="oi-badge-chip" data-badge="NOIP二等" onclick="setOiBadge(this,'NOIP二等')"><span class="bdot" style="background:#2de8b0"></span>NOIP 二等</div>
+          <div class="oi-badge-chip" data-badge="NOIP三等" onclick="setOiBadge(this,'NOIP三等')"><span class="bdot" style="background:#2de8b0"></span>NOIP 三等</div>
+        </div>
+        <!-- 省队 -->
+        <div class="oi-badge-row" style="margin-top:6px">
+          <div class="oi-badge-chip" data-badge="省队" onclick="toggleSetProvince(this)"><span class="bdot" style="background:#c792ea"></span>省队</div>
+        </div>
+        <div class="oi-province-wrap" id="set-province-wrap">
+          <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:6px">选择省份</div>
+          <div class="oi-province-grid" id="set-province-grid"></div>
+        </div>
+        <!-- NOI -->
+        <div class="oi-badge-row" style="margin-top:6px">
+          <div class="oi-badge-chip" data-badge="NOI金" onclick="setOiBadge(this,'NOI金')"><span class="bdot" style="background:#FFD700"></span>NOI 金</div>
+          <div class="oi-badge-chip" data-badge="NOI银" onclick="setOiBadge(this,'NOI银')"><span class="bdot" style="background:#C0C0C0"></span>NOI 银</div>
+          <div class="oi-badge-chip" data-badge="NOI铜" onclick="setOiBadge(this,'NOI铜')"><span class="bdot" style="background:#CD7F32"></span>NOI 铜</div>
+        </div>
       </div>
       <div id="settings-avatar-error" class="form-error"></div>
       <div class="modal-footer">
