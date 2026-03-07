@@ -806,6 +806,25 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .kw-source-tag{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:5px;background:rgba(45,232,176,0.08);border:1px solid rgba(45,232,176,0.18);color:var(--accent2);}
 .kw-source-link{font-family:var(--mono);font-size:11px;color:var(--accent);opacity:0.7;text-decoration:none;}
 .kw-source-link:hover{opacity:1;text-decoration:underline;}
+/* 知识库文章 markdown 样式 */
+.kw-content .markdown-body{font-size:14px;line-height:1.8;color:var(--text2);}
+.kw-content .markdown-body h1,.kw-content .markdown-body h2,.kw-content .markdown-body h3,.kw-content .markdown-body h4{color:var(--text);font-weight:700;margin:1.4em 0 0.6em;}
+.kw-content .markdown-body h1{font-size:20px;border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:8px;}
+.kw-content .markdown-body h2{font-size:17px;}
+.kw-content .markdown-body h3{font-size:15px;}
+.kw-content .markdown-body p{margin:0.7em 0;}
+.kw-content .markdown-body code{background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.15);padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:12.5px;color:var(--accent2);}
+.kw-content .markdown-body pre{background:rgba(10,13,24,0.8);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px;overflow-x:auto;margin:1em 0;}
+.kw-content .markdown-body pre code{background:none;border:none;padding:0;font-size:13px;color:rgba(255,255,255,0.85);}
+.kw-content .markdown-body ul,.kw-content .markdown-body ol{padding-left:24px;margin:0.6em 0;}
+.kw-content .markdown-body li{margin:0.3em 0;}
+.kw-content .markdown-body blockquote{border-left:3px solid rgba(108,142,245,0.4);margin:1em 0;padding:8px 16px;background:rgba(108,142,245,0.05);border-radius:0 8px 8px 0;color:var(--text3);}
+.kw-content .markdown-body table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13px;}
+.kw-content .markdown-body th,.kw-content .markdown-body td{border:1px solid rgba(255,255,255,0.08);padding:8px 12px;text-align:left;}
+.kw-content .markdown-body th{background:rgba(108,142,245,0.08);color:var(--text);font-weight:600;}
+.kw-content .markdown-body a{color:var(--accent);text-decoration:none;}
+.kw-content .markdown-body a:hover{text-decoration:underline;}
+.kw-content .markdown-body img{max-width:100%;border-radius:8px;}
 .kw-edit-btn{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:6px;background:transparent;border:1px solid var(--border);color:var(--text3);cursor:pointer;transition:all 0.15s;margin-left:auto;}
 .kw-edit-btn:hover{border-color:var(--accent);color:var(--accent);}
 .kw-add-child-btn{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:6px;background:transparent;border:1px solid rgba(45,232,176,0.2);color:var(--accent2);cursor:pointer;transition:all 0.15s;}
@@ -6366,20 +6385,21 @@ function kwToggleDir(el){
 
 async function kwOpenArticle(id){
   _kwActiveId=id;
-  // 更新高亮
-  document.querySelectorAll('.kw-leaf').forEach(el=>el.classList.toggle('active',el.onclick?.toString().includes(`(${id})`)));
-  // 先从缓存找
-  let node=(_kwNodes[_kwCat]||[]).find(n=>n.id===id);
-  if(!node){
-    const{data}=await sb.from('knowledge_nodes').select('*').eq('id',id).maybeSingle();
-    node=data;
-  }
+  document.querySelectorAll('.kw-leaf').forEach(el=>{
+    const m=el.getAttribute('onclick');
+    el.classList.toggle('active', m&&m.includes(`(${id})`));
+  });
+  // 每次都从数据库拉完整内容（缓存里content可能被截断）
+  const{data:node}=await sb.from('knowledge_nodes').select('*').eq('id',id).maybeSingle();
   if(!node) return;
   const content=document.getElementById('kw-content');
   let bodyHtml='<div style="font-family:var(--mono);font-size:13px;color:var(--text3);padding:40px 0;text-align:center">这是一个目录节点，暂无正文</div>';
-  if(node.content){
-    try{ bodyHtml=`<div class="markdown-body">${DOMPurify.sanitize(marked.parse(node.content))}</div>`; }
-    catch(e){ bodyHtml=`<pre style="white-space:pre-wrap;font-size:13px;color:var(--text2)">${escHtml(node.content)}</pre>`; }
+  if(node.content&&node.content.trim()){
+    try{
+      bodyHtml=`<div class="markdown-body">${DOMPurify.sanitize(marked.parse(node.content))}</div>`;
+    }catch(e){
+      bodyHtml=`<pre style="white-space:pre-wrap;font-size:13px;color:var(--text2)">${escHtml(node.content)}</pre>`;
+    }
   }
   const editBtn=isCoach()?`<button class="kw-edit-btn" onclick="openKwEditor(${node.id},null)">编辑</button>`:'';
   const addChildBtn=isCoach()&&node.is_dir?`<button class="kw-add-child-btn" onclick="openKwEditor(null,${node.id})">＋ 子节点</button>`:'';
