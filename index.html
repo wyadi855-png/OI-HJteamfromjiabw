@@ -6071,8 +6071,16 @@ async function loadHomeDailyCard(){
       </div>`;
       return;
     }
+    // 打卡人数走 Supabase（公开数据，无需登录）
     const{data:checkins}=await sb.from('daily_checkins').select('user_id,profiles(username)').eq('daily_id',daily.id);
-    const myCheckin=currentUser&&(checkins||[]).find(c=>c.user_id===currentUser.id);
+    // 自己是否打卡走后端（绕过 RLS）
+    let myCheckin=false;
+    if(currentUser){
+      try{
+        const st=await apiRequest('/daily/checkin/status?daily_id='+daily.id);
+        myCheckin=st.checked||false;
+      }catch(e){}
+    }
     const luoguUrl=daily.problem_id?'https://www.luogu.com.cn/problem/'+daily.problem_id:'#';
     const count=(checkins||[]).length;
     const avatarsHtml=(checkins||[]).slice(0,5).map(c=>`<div class="hd-avatar" title="@${escHtml(c.profiles?.username||'')}" style="background:${avatarGradient(c.profiles?.username||'')}">${(c.profiles?.username||'?')[0].toUpperCase()}</div>`).join('');
@@ -6084,7 +6092,7 @@ async function loadHomeDailyCard(){
         ${daily.note?`<div class="hd-note">${escHtml(daily.note)}</div>`:''}
         <div class="hd-actions">
           ${daily.problem_id?`<a class="hd-btn hd-btn-outline" href="${luoguUrl}" target="_blank" onclick="event.stopPropagation()">洛谷 ${escHtml(daily.problem_id)} ↗</a>`:''}
-          ${currentUser?`<button class="hd-btn${myCheckin?' hd-btn-done':' hd-btn-primary'}" onclick="homeDailyCheckin(${daily.id},${!!myCheckin})">${myCheckin?'✓ 已打卡':'我做出来了 🎉'}</button>`:''}
+          ${currentUser?`<button class="hd-btn${myCheckin?' hd-btn-done':' hd-btn-primary'}" onclick="homeDailyCheckin(${daily.id},${myCheckin})">${myCheckin?'✓ 已打卡':'我做出来了 🎉'}</button>`:''}
         </div>
       </div>
       <div class="hd-right">
