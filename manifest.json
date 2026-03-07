@@ -1,0 +1,48 @@
+{
+  "name": "HJOI — OI 教学平台",
+  "short_name": "HJOI",
+  "description": "信息学竞赛教学平台，题解、模拟赛、排行榜、群聊",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#080b12",
+  "theme_color": "#080b12",
+  "lang": "zh-CN",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "题解",
+      "short_name": "题解",
+      "url": "/?page=notes",
+      "description": "浏览题解"
+    },
+    {
+      "name": "排行榜",
+      "short_name": "排行榜",
+      "url": "/?page=leaderboard",
+      "description": "查看排行榜"
+    },
+    {
+      "name": "每日一题",
+      "short_name": "每日一题",
+      "url": "/?page=daily",
+      "description": "今日打卡"
+    }
+  ]
+}
