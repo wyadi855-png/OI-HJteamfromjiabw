@@ -1553,7 +1553,7 @@ footer span{color:var(--accent2);}
   z-index:300;display:none;
   flex-direction:column;overflow:hidden;
 }
-#dm-panel.open{display:flex;animation:fadeIn 0.2s ease;}
+#dm-panel.open{display:flex!important;animation:fadeIn 0.2s ease;}
 .dm-panel-header{
   display:flex;align-items:center;justify-content:space-between;
   padding:14px 16px 12px;
@@ -9025,12 +9025,9 @@ async function showDMConvList(){
 
 // 从外部打开私信（个人主页按钮）
 async function openDMWith(userId, username){
-  console.log('[DM] openDMWith', userId, username, 'currentUser:', currentUser);
-  if(!currentUser){console.log('[DM] no currentUser, abort');return;}
+  if(!currentUser) return;
   _dmOpen = true;
-  const panel=document.getElementById('dm-panel');
-  console.log('[DM] panel element:', panel);
-  if(panel) panel.classList.add('open');
+  document.getElementById('dm-panel').classList.add('open');
   document.getElementById('notif-panel')?.classList.remove('open');
   // 直接用已知信息构造 peer，避免依赖 sb session
   let peer = {id: userId, username: username || userId, avatar_url: null};
