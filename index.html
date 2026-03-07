@@ -8497,19 +8497,23 @@ async function saveSettings(){
     setTimeout(()=>prog.style.display='none',600);
   }
 
-  // 确保所有字段都显式包含，避免undefined被跳过
-  const payload={avatar_url,bio:bio||'',motto:motto||'',group_id,luogu_uid:luogu_uid||''};
-  // 用户名修改：校验 + 单独调后端接口
+  // 用户名校验
   if(newUsername && newUsername !== currentProfile.username){
     if(newUsername.length < 2){errEl.textContent='用户名至少2位';return;}
     if(!/^[\u4e00-\u9fa5a-zA-Z0-9_\-]+$/.test(newUsername)){errEl.textContent='用户名只能含中文/英文/数字/下划线';return;}
-    try{
-      await apiRequest('/auth/rename',{method:'POST',body:JSON.stringify({username:newUsername})});
-      payload.username = newUsername;
-    }catch(e){errEl.textContent=e.message||'用户名修改失败';return;}
   }
-  const{error}=await sb.from('profiles').update(payload).eq('id',currentUser.id);
-  if(error){errEl.textContent=error.message;return;}
+  // 统一走后端 API，避免 RLS 权限问题
+  const payload={
+    avatar_url,
+    bio:bio||'',
+    motto:motto||'',
+    group_id,
+    luogu_uid:normalizeLuoguUid(luogu_uid)||'',
+    ...(newUsername && newUsername !== currentProfile.username ? {username:newUsername} : {})
+  };
+  try{
+    await apiRequest('/auth/profile',{method:'PATCH',body:JSON.stringify(payload)});
+  }catch(e){errEl.textContent=e.message||'保存失败';return;}
   currentProfile={...currentProfile,...payload,bio:normalizeText(bio),motto:normalizeText(motto),luogu_uid:normalizeLuoguUid(luogu_uid),username:payload.username||currentProfile.username};
   renderAuthArea();
   closeModal('settings-modal');showToast('设置已保存 ✓','success');
