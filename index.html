@@ -778,6 +778,10 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .member-card:hover{border-color:rgba(108,142,245,0.3);transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.3);}
 .member-name{font-family:var(--mono);font-size:12px;color:var(--accent2);margin-bottom:4px;}
 
+.cm-group-header{display:flex;align-items:baseline;gap:10px;margin:20px 0 10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.cm-group-header:first-child{margin-top:0;}
+.cm-group-label{font-family:var(--mono);font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:0.06em;text-transform:uppercase;}
+.cm-group-count{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.2);}
 /* ── Community 成员横向卡片 ── */
 .cm-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
 .cm-card{
@@ -4598,7 +4602,15 @@ section:not(.active) {
     <button class="community-tab" id="ctab-emotions" onclick="switchCommunityTab('emotions')">✍️ 随笔</button>
   </div>
   <div id="community-members-panel">
-    <div style="margin-bottom:16px"><input type="text" id="community-member-search" placeholder="搜索成员…" style="width:180px;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--mono)" oninput="filterCommunityMembers()"></div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+      <input type="text" id="community-member-search" placeholder="搜索成员…" style="width:160px;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--mono)" oninput="filterCommunityMembers()">
+      <select id="community-group-by" onchange="renderCommunityMembers()" style="padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--mono);cursor:pointer">
+        <option value="">不分组</option>
+        <option value="province">按省份</option>
+        <option value="oi_badge">按 OI 成就</option>
+        <option value="role">按角色</option>
+      </select>
+    </div>
     <div id="community-members-list"><div class="loading"><div class="spinner"></div>加载中…</div></div>
   </div>
   <div id="community-emotions-panel" style="display:none">
@@ -6217,38 +6229,98 @@ async function loadCommunityMembers(){
     const{data:members}=await sb.from('profiles').select('id,username,avatar_url,role,oi_badge,province').order('created_at');
     if(!members||!members.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><p>暂无成员</p></div>';return;}
     _allCommunityMembers=members;
-    el.innerHTML=renderCmGrid(members);
+    renderCommunityMembers();
   }catch(e){el.innerHTML='<div class="empty-state"><p>加载失败</p></div>';}
 }
 
 function renderCmGrid(members){
-  return `<div class="cm-grid">${members.map(m=>{
-    const isCoach=m.role==='coach';
-    const bg=m.avatar_url?'transparent':avatarGradient(m.username||'');
-    const av=m.avatar_url
-      ?`<img src="${escHtml(m.avatar_url)}" alt="">`
-      :`<span style="font-size:18px;font-weight:700;color:#fff;mix-blend-mode:luminosity">${(m.username||'?')[0].toUpperCase()}</span>`;
-    // OI badge颜色
-    let badgeHtml='';
-    if(m.oi_badge){
-      const cfg={'蒟蒻':{c:'#9b9b9b',bg:'rgba(155,155,155,.1)',br:'rgba(155,155,155,.2)'},'CSP-J':{c:'#4e9af1',bg:'rgba(78,154,241,.1)',br:'rgba(78,154,241,.2)'},'CSP-S':{c:'#4e9af1',bg:'rgba(78,154,241,.1)',br:'rgba(78,154,241,.2)'},'NOIP一等':{c:'#2de8b0',bg:'rgba(45,232,176,.1)',br:'rgba(45,232,176,.2)'},'NOIP二等':{c:'#2de8b0',bg:'rgba(45,232,176,.1)',br:'rgba(45,232,176,.2)'},'NOIP三等':{c:'#2de8b0',bg:'rgba(45,232,176,.1)',br:'rgba(45,232,176,.2)'},'NOI金':{c:'#FFD700',bg:'rgba(255,215,0,.1)',br:'rgba(255,215,0,.25)'},'NOI银':{c:'#C0C0C0',bg:'rgba(192,192,192,.1)',br:'rgba(192,192,192,.25)'},'NOI铜':{c:'#CD7F32',bg:'rgba(205,127,50,.1)',br:'rgba(205,127,50,.25)'}};
-      const label=m.oi_badge.startsWith('省队-')?'省队·'+m.oi_badge.slice(3):m.oi_badge;
-      const s=cfg[m.oi_badge]||{c:'#c792ea',bg:'rgba(199,146,234,.1)',br:'rgba(199,146,234,.2)'};
-      badgeHtml=`<span class="cm-tag" style="color:${s.c};background:${s.bg};border:1px solid ${s.br}">${escHtml(label)}</span>`;
-    }
-    const coachTag=isCoach?'<span class="cm-tag cm-tag-coach">教练</span>':'';
-    const provTag=m.province?`<span class="cm-tag cm-tag-province">${escHtml(m.province)}</span>`:'';
-    const hasTags=isCoach||m.oi_badge||m.province;
-    return `<div class="cm-card" onclick="show('profile');showProfile('${escHtml(m.username)}')">
-      <div class="cm-avatar${isCoach?' is-coach':''}" style="background:${bg}">${av}</div>
-      <div class="cm-info">
-        <div class="cm-username">@${escHtml(m.username||'')}</div>
-        ${hasTags?`<div class="cm-tags">${coachTag}${badgeHtml}${provTag}</div>`:''}
-      </div>
-      <span class="cm-arrow">›</span>
-    </div>`;
-  }).join('')}</div>`;
+  return `<div class="cm-grid">${members.map(m=>renderCmCard(m)).join('')}</div>`;
 }
+
+function renderCmCard(m){
+  const isCoach=m.role==='coach';
+  const bg=m.avatar_url?'transparent':avatarGradient(m.username||'');
+  const av=m.avatar_url
+    ?`<img src="${escHtml(m.avatar_url)}" alt="">`
+    :`<span style="font-size:18px;font-weight:700;color:#fff;mix-blend-mode:luminosity">${(m.username||'?')[0].toUpperCase()}</span>`;
+  let badgeHtml='';
+  if(m.oi_badge){
+    const cfg={'蒟蒻':{c:'#9b9b9b',bg:'rgba(155,155,155,.1)',br:'rgba(155,155,155,.2)'},'CSP-J':{c:'#4e9af1',bg:'rgba(78,154,241,.1)',br:'rgba(78,154,241,.2)'},'CSP-S':{c:'#4e9af1',bg:'rgba(78,154,241,.1)',br:'rgba(78,154,241,.2)'},'NOIP一等':{c:'#2de8b0',bg:'rgba(45,232,176,.1)',br:'rgba(45,232,176,.2)'},'NOIP二等':{c:'#2de8b0',bg:'rgba(45,232,176,.1)',br:'rgba(45,232,176,.2)'},'NOIP三等':{c:'#2de8b0',bg:'rgba(45,232,176,.1)',br:'rgba(45,232,176,.2)'},'NOI金':{c:'#FFD700',bg:'rgba(255,215,0,.1)',br:'rgba(255,215,0,.25)'},'NOI银':{c:'#C0C0C0',bg:'rgba(192,192,192,.1)',br:'rgba(192,192,192,.25)'},'NOI铜':{c:'#CD7F32',bg:'rgba(205,127,50,.1)',br:'rgba(205,127,50,.25)'}};
+    const label=m.oi_badge.startsWith('省队-')?'省队·'+m.oi_badge.slice(3):m.oi_badge;
+    const s=cfg[m.oi_badge]||{c:'#c792ea',bg:'rgba(199,146,234,.1)',br:'rgba(199,146,234,.2)'};
+    badgeHtml=`<span class="cm-tag" style="color:${s.c};background:${s.bg};border:1px solid ${s.br}">${escHtml(label)}</span>`;
+  }
+  const coachTag=isCoach?'<span class="cm-tag cm-tag-coach">教练</span>':'';
+  const provTag=m.province?`<span class="cm-tag cm-tag-province">${escHtml(m.province)}</span>`:'';
+  const hasTags=isCoach||m.oi_badge||m.province;
+  return `<div class="cm-card" onclick="show('profile');showProfile('${escHtml(m.username)}')">
+    <div class="cm-avatar${isCoach?' is-coach':''}" style="background:${bg}">${av}</div>
+    <div class="cm-info">
+      <div class="cm-username">@${escHtml(m.username||'')}</div>
+      ${hasTags?`<div class="cm-tags">${coachTag}${badgeHtml}${provTag}</div>`:''}
+    </div>
+    <span class="cm-arrow">›</span>
+  </div>`;
+}
+
+// 分组顺序定义
+const _cmBadgeOrder=['NOI金','NOI银','NOI铜','省队','NOIP一等','NOIP二等','NOIP三等','CSP-S','CSP-J','蒟蒻'];
+
+function _cmGroupKey(m, by){
+  if(by==='province') return m.province||'未填写';
+  if(by==='role') return m.role==='coach'?'教练':'学生';
+  if(by==='oi_badge'){
+    if(!m.oi_badge) return '暂无成就';
+    if(m.oi_badge.startsWith('省队-')) return '省队';
+    return m.oi_badge;
+  }
+  return '';
+}
+
+function renderCommunityMembers(){
+  const q=(document.getElementById('community-member-search')?.value||'').toLowerCase();
+  const by=document.getElementById('community-group-by')?.value||'';
+  const el=document.getElementById('community-members-list');
+  if(!el||!_allCommunityMembers.length) return;
+  let list=_allCommunityMembers.filter(m=>
+    (m.username||'').toLowerCase().includes(q)||(m.province||'').toLowerCase().includes(q)
+  );
+  if(!by){
+    el.innerHTML=renderCmGrid(list);
+    return;
+  }
+  // 分组
+  const groups={};
+  for(const m of list){
+    const key=_cmGroupKey(m,by);
+    if(!groups[key]) groups[key]=[];
+    groups[key].push(m);
+  }
+  // 排序组名
+  let keys=Object.keys(groups);
+  if(by==='oi_badge'){
+    keys.sort((a,b)=>{
+      const ia=_cmBadgeOrder.indexOf(a); const ib=_cmBadgeOrder.indexOf(b);
+      if(ia===-1&&ib===-1) return a.localeCompare(b,'zh');
+      if(ia===-1) return 1; if(ib===-1) return -1;
+      return ia-ib;
+    });
+  } else if(by==='role'){
+    keys=['教练','学生'].filter(k=>groups[k]);
+  } else {
+    const noKey=keys.filter(k=>k==='未填写');
+    keys=keys.filter(k=>k!=='未填写').sort((a,b)=>a.localeCompare(b,'zh')).concat(noKey);
+  }
+  el.innerHTML=keys.map(k=>`
+    <div class="cm-group-header">
+      <span class="cm-group-label">${escHtml(k)}</span>
+      <span class="cm-group-count">${groups[k].length} 人</span>
+    </div>
+    <div class="cm-grid" style="margin-bottom:20px">${groups[k].map(m=>renderCmCard(m)).join('')}</div>
+  `).join('');
+}
+
+function filterCommunityMembers(){renderCommunityMembers();}
 
 function filterCommunityMembers(){
   const q=(document.getElementById('community-member-search')?.value||'').toLowerCase();
