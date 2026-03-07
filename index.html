@@ -741,6 +741,49 @@ section.active.visible{opacity:1;transform:translateY(0);}
 .profile-hero-upload-btn{position:absolute;top:10px;right:12px;z-index:2;font-size:11px;padding:4px 10px;border-radius:100px;border:1px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.35);color:rgba(255,255,255,0.7);cursor:pointer;font-family:var(--mono);transition:all 0.2s;backdrop-filter:blur(6px);}
 .profile-hero-upload-btn:hover{background:rgba(0,0,0,0.55);color:#fff;}
 .profile-name{font-size:20px;font-weight:700;color:var(--accent2);font-family:var(--mono);margin-bottom:4px;}
+
+/* ── 活跃度火焰 ── */
+.streak-flame{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;padding:3px 10px 3px 6px;border-radius:100px;border:1px solid;transition:all 0.3s;margin-left:8px;vertical-align:middle;}
+.streak-flame.cold{border-color:rgba(120,140,180,.2);background:rgba(120,140,180,.05);color:var(--text3);}
+.streak-flame.warm{border-color:rgba(255,179,71,.3);background:rgba(255,179,71,.07);color:#ffb347;}
+.streak-flame.hot{border-color:rgba(255,100,50,.35);background:rgba(255,100,50,.08);color:#ff6432;animation:flamePulse 1.8s ease-in-out infinite;}
+.streak-flame.fire{border-color:rgba(255,50,50,.4);background:linear-gradient(135deg,rgba(255,80,30,.1),rgba(255,180,0,.07));color:#ff4820;animation:flamePulse 1.2s ease-in-out infinite;}
+@keyframes flamePulse{0%,100%{box-shadow:0 0 0 rgba(255,100,30,0);}50%{box-shadow:0 0 10px rgba(255,100,30,0.3);}}
+
+/* ── 数字滚动计数 ── */
+.count-up{display:inline-block;}
+
+/* ── 时间轴 Feed ── */
+.timeline-feed{display:flex;flex-direction:column;gap:0;padding:4px 0 4px 0;}
+.tl-item{display:flex;gap:0;opacity:0;transform:translateX(18px);animation:tlSlideIn 0.38s cubic-bezier(0.4,0,0.2,1) forwards;}
+@keyframes tlSlideIn{to{opacity:1;transform:translateX(0);}}
+.tl-left{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0;padding-top:3px;}
+.tl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;border:2px solid;}
+.tl-dot.note{background:rgba(108,142,245,.5);border-color:var(--accent);}
+.tl-dot.post{background:rgba(45,232,176,.5);border-color:var(--accent2);}
+.tl-dot.contest{background:rgba(255,83,112,.5);border-color:var(--red);}
+.tl-dot.lecture{background:rgba(200,114,234,.5);border-color:var(--purple);}
+.tl-dot.ann{background:rgba(255,203,107,.5);border-color:var(--yellow);}
+.tl-line{width:1px;flex:1;min-height:14px;background:linear-gradient(to bottom,rgba(108,142,245,.2),transparent);}
+.tl-right{flex:1;padding:0 0 16px 10px;min-width:0;}
+.tl-meta{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.tl-date{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.tl-content{font-size:13px;color:var(--text2);line-height:1.55;}
+
+/* ── 返回顶部 ── */
+#back-to-top{
+  position:fixed;bottom:28px;right:28px;z-index:500;
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(15,19,32,0.85);
+  border:1px solid rgba(108,142,245,0.25);
+  backdrop-filter:blur(12px);
+  color:var(--accent);font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all 0.25s;
+  opacity:0;pointer-events:none;transform:translateY(10px);
+  box-shadow:0 4px 20px rgba(0,0,0,0.3);}
+#back-to-top.visible{opacity:1;pointer-events:all;transform:translateY(0);}
+#back-to-top:hover{background:rgba(108,142,245,0.15);border-color:rgba(108,142,245,0.5);transform:translateY(-2px);}
 .profile-role-tag{font-size:12px;color:var(--text3);margin-bottom:8px;}
 .profile-stats{display:flex;gap:24px;margin-top:14px;}
 .profile-stat .num{font-family:var(--space);font-size:20px;font-weight:700;color:var(--text);}
@@ -5314,15 +5357,26 @@ async function loadHomeFeed(){
     </div>`;
     return;
   }
-  feed.innerHTML=items.map(item=>{
+  const tlHtml = items.map((item, idx)=>{
     let content='';
     if(item.type==='note')content=`<span class="clickable-name" onclick="showProfile('${item.profiles?.username||''}')">${item.profiles?.username||'匿名'}</span> 发布了题解：<span class="clickable-name" onclick="show('notes');setTimeout(()=>showNote(${item.id}),100)">${escHtml(item.title)}</span> <span class="update-tag tag-note">题解</span>`;
     else if(item.type==='post')content=`<span class="clickable-name" onclick="showProfile('${item.profiles?.username||''}')">${item.profiles?.username||'匿名'}</span> 写了随笔：${escHtml((item.content||'').slice(0,40))}… <span class="update-tag tag-post">随笔</span>`;
     else if(item.type==='contest')content=`新增模拟赛：<span class="clickable-name" onclick="show('contests')">${escHtml(item.title)}</span> <span class="update-tag tag-contest">模拟赛</span>`;
     else if(item.type==='lecture')content=`新增课程：<span class="clickable-name" onclick="show('lectures')">${escHtml(item.topic)}</span> <span class="update-tag tag-lecture">课程</span>`;
     else if(item.type==='ann')content=`📢 <span class="clickable-name" onclick="show('announcements')">${escHtml(item.title)}</span> <span class="update-tag tag-ann">公告</span>`;
-    return`<div class="update-item"><div class="update-date">${fmtDate(item.created_at)}</div><div class="update-content">${content}</div></div>`;
+    const isLast = idx===items.length-1;
+    return`<div class="tl-item" style="animation-delay:${(idx*0.045).toFixed(2)}s">
+  <div class="tl-left">
+    <div class="tl-dot ${item.type}"></div>
+    ${isLast?'':'<div class="tl-line"></div>'}
+  </div>
+  <div class="tl-right">
+    <div class="tl-meta"><span class="tl-date">${fmtDate(item.created_at)}</span></div>
+    <div class="tl-content">${content}</div>
+  </div>
+</div>`;
   }).join('');
+  feed.innerHTML=`<div class="timeline-feed">${tlHtml}</div>`;
   } catch(e){ console.error("loadHomeFeed:", e); showToast("加载失败，请刷新重试", "error"); }
 }
 
@@ -7054,7 +7108,7 @@ async function showProfile(username){
   if(profile.banner_url) html+='<img class="profile-hero-bg" src="'+escHtml(profile.banner_url)+'" alt="">';
   html+=avatarEl(username,profile.avatar_url||'',80,28);
   html+='<div style="flex:1;min-width:0">';
-  html+='<div class="profile-name">@'+escHtml(username)+'</div>';
+  html+='<div class="profile-name">@'+escHtml(username)+'<span id="profile-flame-'+escHtml(profile.id)+'"></span></div>';
   html+='<div class="profile-role-tag">'+(profile.role==='coach'?'🎓 教练':'🧑‍💻 学生')+'</div>';
   html+='<div style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 10px">';
   html+=(luoguUid
@@ -7076,17 +7130,45 @@ async function showProfile(username){
   }
   html+='</div>';
   html+='<div class="profile-stats">';
-  html+='<div class="profile-stat"><div class="num">'+(notes?notes.length:0)+'</div><div class="lbl">题解</div></div>';
-  html+='<div class="profile-stat"><div class="num">'+(posts?posts.length:0)+'</div><div class="lbl">随笔</div></div>';
+  html+='<div class="profile-stat"><div class="num count-up" id="stat-notes-'+escHtml(profile.id)+'">0</div><div class="lbl">题解</div></div>';
+  html+='<div class="profile-stat"><div class="num count-up" id="stat-posts-'+escHtml(profile.id)+'">0</div><div class="lbl">随笔</div></div>';
   html+='<div class="profile-stat"><div class="num" id="streak-current-'+escHtml(profile.id)+'">…</div><div class="lbl">连续打卡</div></div>';
   html+='<div class="profile-stat"><div class="num" id="streak-longest-'+escHtml(profile.id)+'">…</div><div class="lbl">最长连续</div></div>';
   html+='</div></div></div>';
+  // 数字滚动（notes/posts）
+  setTimeout(()=>{
+    function cu(id,val){const el=document.getElementById(id);if(!el)return;let v=0;const inc=Math.max(1,Math.ceil(val/30));const t=setInterval(()=>{v=Math.min(v+inc,val);el.textContent=v;if(v>=val)clearInterval(t);},16);}
+    cu('stat-notes-'+profile.id, notes?notes.length:0);
+    cu('stat-posts-'+profile.id, posts?posts.length:0);
+  }, 80);
   // 异步加载 streak
   calcStreak(profile.id).then(s=>{
     const ce=document.getElementById('streak-current-'+profile.id);
     const le=document.getElementById('streak-longest-'+profile.id);
-    if(ce) ce.innerHTML=s.current+'<span style="font-size:12px;font-family:var(--mono);color:var(--text3)"> 天</span>';
-    if(le) le.innerHTML=s.longest+'<span style="font-size:12px;font-family:var(--mono);color:var(--text3)"> 天</span>';
+    const cur=s.current||0;
+    // 数字滚动动画
+    function countUp(el, target, suffix=''){
+      let start=0; const dur=600; const step=16;
+      const inc=target/Math.max(1,dur/step);
+      const tid=setInterval(()=>{
+        start=Math.min(start+inc,target);
+        el.innerHTML=Math.round(start)+'<span style="font-size:12px;font-family:var(--mono);color:var(--text3)">'+suffix+'</span>';
+        if(start>=target)clearInterval(tid);
+      },step);
+    }
+    if(ce) countUp(ce, cur, ' 天');
+    if(le) countUp(le, s.longest||0, ' 天');
+    // 火焰图标
+    const nameEl=document.getElementById('profile-flame-'+profile.id);
+    if(nameEl){
+      let cls='cold', emoji='🧊', label='';
+      if(cur>=1  && cur<3) {cls='warm';emoji='🔥';label=cur+'天';}
+      if(cur>=3  && cur<7) {cls='warm';emoji='🔥';label=cur+'天';}
+      if(cur>=7  && cur<14){cls='hot'; emoji='🔥';label=cur+'天';}
+      if(cur>=14 && cur<30){cls='hot'; emoji='🔥🔥';label=cur+'天';}
+      if(cur>=30)           {cls='fire';emoji='🔥🔥🔥';label=cur+'天';}
+      if(cur>0) nameEl.innerHTML=`<span class="streak-flame ${cls}">${emoji} ${label}</span>`;
+    }
   });
   // Heatmap placeholder
   html+='<div class="profile-section"><div class="profile-section-title">能力雷达</div><canvas id="radar-'+escHtml(username)+'" width="340" height="280" style="display:block;margin:0 auto"></canvas></div>';
@@ -8037,15 +8119,18 @@ async function uploadProfileBanner(input){
   if(!['jpg','jpeg','png','webp'].includes(ext)){showToast('仅支持 JPG/PNG/WebP','error');return;}
   if(file.size > 5*1024*1024){showToast('图片不能超过 5MB','error');return;}
   showToast('上传中…','info');
-  const path = 'banners/'+currentUser.id+'.'+ext;
-  const{error:upErr}=await sb.storage.from('note-images').upload(path,file,{upsert:true,'content-type':file.type});
-  if(upErr){showToast('上传失败: '+upErr.message,'error');return;}
-  const{data:urlData}=sb.storage.from('note-images').getPublicUrl(path);
-  const banner_url = urlData.publicUrl+'?t='+Date.now();
-  await sb.from('profiles').update({banner_url}).eq('id',currentUser.id);
-  currentProfile.banner_url = banner_url;
-  showToast('背景图已更新 ✓','success');
-  await showProfile(currentProfile.username);
+  try{
+    const fd = new FormData();
+    fd.append('file', file);
+    const token = localStorage.getItem('hjoi_token')||'';
+    const res = await fetch(API_BASE+'/auth/banner', {method:'POST', headers:{'Authorization':'Bearer '+token}, body:fd});
+    if(!res.ok){const e=await res.json().catch(()=>({}));showToast('上传失败: '+(e.detail||res.status),'error');return;}
+    const data = await res.json();
+    currentProfile.banner_url = data.banner_url;
+    await sb.from('profiles').update({banner_url:data.banner_url}).eq('id',currentUser.id);
+    showToast('背景图已更新 ✓','success');
+    await showProfile(currentProfile.username);
+  }catch(e){showToast('上传失败: '+e.message,'error');}
 }
 
 async function saveSettings(){
@@ -11260,5 +11345,15 @@ async function showContestChart(contestId, preloaded, title){
     </div>
   </div>
 </div>
+<!-- 返回顶部 -->
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="返回顶部">↑</button>
+<script>
+(function(){
+  const btn=document.getElementById('back-to-top');
+  window.addEventListener('scroll',()=>{
+    btn.classList.toggle('visible', window.scrollY>320);
+  },{passive:true});
+})();
+</script>
 </body>
 </html>
