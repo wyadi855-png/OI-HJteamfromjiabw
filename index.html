@@ -7032,7 +7032,7 @@ async function showProfile(username){
   html+=(luoguUid
     ? '<a href="https://www.luogu.com.cn/user/'+escHtml(luoguUid)+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:6px 14px;border-radius:100px;background:rgba(255,179,71,.10);border:1px solid rgba(255,179,71,.35);color:#ffcb6b;text-decoration:none;font-family:var(--mono);transition:background 0.2s,border-color 0.2s;" onmouseover="this.style.background=&quot;rgba(255,179,71,.2)&quot;;this.style.borderColor=&quot;rgba(255,179,71,.6)&quot;" onmouseout="this.style.background=&quot;rgba(255,179,71,.10)&quot;;this.style.borderColor=&quot;rgba(255,179,71,.35)&quot;">🔗 洛谷 · '+escHtml(luoguUid)+'</a>'
     : '<span style="display:inline-flex;align-items:center;font-size:13px;padding:6px 14px;border-radius:100px;background:rgba(255,179,71,.05);border:1px solid rgba(255,179,71,.18);color:rgba(255,203,107,0.5);font-family:var(--mono);">洛谷暂未绑定</span>');
-  if(profile.group_id) html+='<span class="topic-badge">训练组 · '+escHtml(profile.group_id)+'</span>';
+  if(profile.group_id) html+='<span style="display:inline-flex;align-items:center;font-size:13px;padding:6px 14px;border-radius:100px;background:rgba(108,142,245,.08);border:1px solid rgba(108,142,245,.25);color:var(--accent);font-family:var(--mono);">训练组 · L'+escHtml(profile.group_id)+'</span>';
   html+='</div>';
   if(mottoText)html+='<div class="profile-motto">「'+escHtml(mottoText)+'」</div>';
   if(bioText)html+='<div class="profile-bio">'+escHtml(bioText)+'</div>';
