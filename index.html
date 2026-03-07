@@ -2146,6 +2146,205 @@ mark.search-hl{
   cursor:pointer;transition:all 0.2s;}
 .follow-chip:hover{color:var(--accent);border-color:rgba(108,142,245,0.3);}
 
+
+/* ═══════════════════════════════════════
+   群聊面板
+═══════════════════════════════════════ */
+#chat-section { display:flex; flex-direction:column; height:calc(100vh - 120px); min-height:500px; padding:0; }
+.chat-layout  { display:flex; flex:1; gap:0; overflow:hidden; border:1px solid rgba(108,142,245,0.12); border-radius:16px; background:rgba(8,12,26,0.7); }
+
+/* 侧边栏：房间列表 */
+.chat-sidebar {
+  width:180px; flex-shrink:0;
+  border-right:1px solid rgba(108,142,245,0.1);
+  display:flex; flex-direction:column;
+  background:rgba(6,9,20,0.8);
+  border-radius:16px 0 0 16px;
+}
+.chat-sidebar-title { font-family:var(--mono); font-size:11px; color:var(--text3); padding:16px 14px 8px; letter-spacing:0.08em; text-transform:uppercase; }
+.chat-room-item {
+  display:flex; align-items:center; gap:9px;
+  padding:9px 14px; cursor:pointer; transition:all 0.15s;
+  font-size:13px; color:var(--text2); font-family:var(--mono);
+  border-left:2px solid transparent; position:relative;
+}
+.chat-room-item:hover  { background:rgba(108,142,245,0.07); color:var(--text); }
+.chat-room-item.active { background:rgba(108,142,245,0.1); color:var(--accent); border-left-color:var(--accent); }
+.chat-room-dot  { width:7px; height:7px; border-radius:50%; background:rgba(108,142,245,0.3); flex-shrink:0; }
+.chat-room-item.active .chat-room-dot { background:var(--accent); box-shadow:0 0 6px var(--accent); }
+.chat-room-unread {
+  margin-left:auto; background:var(--red); color:#fff;
+  font-size:10px; font-weight:700; padding:1px 6px;
+  border-radius:100px; min-width:16px; text-align:center;
+  display:none;
+}
+.chat-room-unread.show { display:block; }
+
+/* 在线用户折叠区 */
+.chat-online-area { margin-top:auto; border-top:1px solid rgba(108,142,245,0.08); padding:10px 14px; }
+.chat-online-label { font-size:11px; font-family:var(--mono); color:var(--text3); margin-bottom:6px; }
+.chat-online-list  { display:flex; flex-wrap:wrap; gap:4px; }
+.chat-online-avatar{
+  width:24px; height:24px; border-radius:50%; overflow:hidden;
+  border:1.5px solid rgba(45,232,176,0.3); cursor:pointer;
+  transition:transform 0.15s; flex-shrink:0;
+}
+.chat-online-avatar:hover { transform:scale(1.15); }
+.chat-online-avatar img { width:100%; height:100%; object-fit:cover; }
+.chat-online-count { font-size:12px; color:var(--accent2); font-family:var(--mono); }
+
+/* 主聊天区 */
+.chat-main  { flex:1; display:flex; flex-direction:column; min-width:0; }
+.chat-header{
+  display:flex; align-items:center; gap:10px;
+  padding:14px 20px; border-bottom:1px solid rgba(108,142,245,0.1);
+  flex-shrink:0;
+}
+.chat-header-title { font-family:var(--mono); font-size:15px; font-weight:700; color:var(--text); }
+.chat-header-sub   { font-size:12px; color:var(--text3); margin-left:auto; font-family:var(--mono); }
+.chat-online-dot   { width:8px; height:8px; border-radius:50%; background:#2de8b0; box-shadow:0 0 6px #2de8b0; flex-shrink:0; }
+
+/* 消息列表 */
+.chat-messages {
+  flex:1; overflow-y:auto; padding:12px 16px; display:flex; flex-direction:column; gap:2px;
+  scroll-behavior:smooth;
+}
+.chat-messages::-webkit-scrollbar { width:4px; }
+.chat-messages::-webkit-scrollbar-track { background:transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background:rgba(108,142,245,0.2); border-radius:2px; }
+
+/* 消息气泡 */
+.chat-msg { display:flex; gap:9px; padding:5px 0; align-items:flex-start; animation:msgIn 0.22s ease; }
+.chat-msg.mine { flex-direction:row-reverse; }
+@keyframes msgIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+.chat-msg-avatar { width:32px; height:32px; border-radius:50%; overflow:hidden; flex-shrink:0; cursor:pointer; }
+.chat-msg-avatar img { width:100%; height:100%; object-fit:cover; }
+.chat-msg-avatar-fallback {
+  width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,rgba(108,142,245,0.3),rgba(45,232,176,0.2));
+  font-size:13px; font-weight:700; color:var(--accent); flex-shrink:0; cursor:pointer;
+}
+
+.chat-msg-body  { display:flex; flex-direction:column; gap:3px; max-width:68%; }
+.chat-msg.mine .chat-msg-body { align-items:flex-end; }
+
+.chat-msg-meta  { display:flex; align-items:center; gap:6px; }
+.chat-msg.mine .chat-msg-meta { flex-direction:row-reverse; }
+.chat-msg-name  { font-family:var(--mono); font-size:11px; color:var(--text3); cursor:pointer; }
+.chat-msg-name:hover { color:var(--accent); }
+.chat-msg-time  { font-size:10px; color:rgba(255,255,255,0.2); }
+
+.chat-bubble {
+  padding:8px 13px; border-radius:14px; font-size:13px; line-height:1.6;
+  word-break:break-word; position:relative; max-width:100%;
+}
+.chat-msg:not(.mine) .chat-bubble {
+  background:rgba(108,142,245,0.1); border:1px solid rgba(108,142,245,0.15); color:var(--text);
+  border-radius:4px 14px 14px 14px;
+}
+.chat-msg.mine .chat-bubble {
+  background:linear-gradient(135deg,rgba(45,232,176,0.18),rgba(108,142,245,0.15));
+  border:1px solid rgba(45,232,176,0.25); color:var(--text);
+  border-radius:14px 4px 14px 14px;
+}
+.chat-bubble.deleted { color:var(--text3); font-style:italic; background:transparent; border:1px dashed rgba(255,255,255,0.08); }
+
+/* 图片消息 */
+.chat-img-msg { max-width:220px; border-radius:10px; cursor:zoom-in; border:1px solid rgba(108,142,245,0.15); display:block; }
+
+/* @ 高亮 */
+.chat-at { color:var(--accent); font-weight:600; cursor:pointer; }
+.chat-at:hover { text-decoration:underline; }
+
+/* 撤回按钮（hover显示） */
+.chat-msg:hover .chat-delete-btn { opacity:1; }
+.chat-delete-btn {
+  opacity:0; transition:opacity 0.15s; cursor:pointer;
+  font-size:11px; color:var(--text3); padding:2px 6px;
+  border-radius:6px; border:1px solid rgba(255,255,255,0.08);
+  background:rgba(0,0,0,0.4); align-self:center; flex-shrink:0;
+  margin:0 4px; white-space:nowrap;
+}
+.chat-delete-btn:hover { color:var(--red); border-color:rgba(255,83,112,0.3); }
+
+/* 系统消息（加入/离开）*/
+.chat-sys-msg { text-align:center; font-size:11px; color:var(--text3); font-family:var(--mono); padding:4px 0; }
+
+/* 输入区 */
+.chat-input-area {
+  border-top:1px solid rgba(108,142,245,0.1);
+  padding:12px 16px; flex-shrink:0;
+  background:rgba(6,9,20,0.6);
+  border-radius:0 0 16px 0;
+}
+.chat-at-suggestions {
+  background:rgba(10,14,26,0.95); border:1px solid rgba(108,142,245,0.2);
+  border-radius:10px; padding:4px 0; margin-bottom:6px;
+  display:none; max-height:140px; overflow-y:auto;
+}
+.chat-at-item {
+  display:flex; align-items:center; gap:8px; padding:7px 12px;
+  cursor:pointer; font-size:13px; color:var(--text2); transition:background 0.1s;
+}
+.chat-at-item:hover, .chat-at-item.selected { background:rgba(108,142,245,0.12); color:var(--text); }
+.chat-at-item img { width:22px; height:22px; border-radius:50%; object-fit:cover; }
+.chat-input-row { display:flex; align-items:flex-end; gap:8px; }
+.chat-input-box {
+  flex:1; resize:none; overflow:hidden;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(108,142,245,0.18);
+  border-radius:12px; padding:9px 13px; color:var(--text); font-size:13px;
+  font-family:inherit; line-height:1.5; outline:none; transition:border-color 0.2s;
+  max-height:120px; min-height:40px;
+}
+.chat-input-box:focus { border-color:rgba(108,142,245,0.4); }
+.chat-input-box::placeholder { color:var(--text3); }
+.chat-send-btn {
+  width:40px; height:40px; border-radius:12px; border:none; cursor:pointer;
+  background:linear-gradient(135deg,rgba(108,142,245,0.8),rgba(45,232,176,0.7));
+  color:#fff; font-size:16px; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.2s; opacity:0.7;
+}
+.chat-send-btn:hover { opacity:1; transform:scale(1.05); }
+.chat-send-btn:active { transform:scale(0.96); }
+.chat-img-btn {
+  width:36px; height:36px; border-radius:10px; border:1px solid rgba(108,142,245,0.2);
+  background:rgba(108,142,245,0.06); color:var(--text3); font-size:16px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.18s;
+}
+.chat-img-btn:hover { color:var(--accent); border-color:rgba(108,142,245,0.4); background:rgba(108,142,245,0.1); }
+
+/* 未登录提示 */
+.chat-login-tip {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:12px; color:var(--text3); font-family:var(--mono);
+}
+.chat-login-tip button {
+  font-family:var(--mono); font-size:13px; padding:8px 22px;
+  border-radius:8px; border:1px solid rgba(108,142,245,0.25);
+  background:rgba(108,142,245,0.08); color:var(--accent); cursor:pointer;
+  transition:all 0.2s;
+}
+.chat-login-tip button:hover { background:rgba(108,142,245,0.16); }
+
+/* 图片灯箱 */
+#chat-lightbox {
+  display:none; position:fixed; inset:0; z-index:1000;
+  background:rgba(0,0,0,0.85); align-items:center; justify-content:center;
+  cursor:zoom-out;
+}
+#chat-lightbox.open { display:flex; }
+#chat-lightbox img { max-width:90vw; max-height:88vh; border-radius:8px; }
+
+/* 响应式 */
+@media(max-width:600px){
+  .chat-sidebar { width:44px; }
+  .chat-sidebar-title,.chat-room-item span,.chat-online-label,.chat-online-count { display:none; }
+  .chat-room-item { justify-content:center; padding:10px 0; }
+  #chat-section { height:calc(100vh - 80px); }
+}
+
 /* ── 关系网图 (飞书风格) ── */
 .rel-graph-section { margin-bottom: 28px; }
 .rel-graph-wrap {
@@ -3600,6 +3799,163 @@ section:not(.active) {
   .page-header-left h1 { font-size: 17px !important; }
   .stats-grid { grid-template-columns: 1fr; }
 }
+
+/* ── 群聊面板 ── */
+#gc-panel{
+  position:fixed;top:60px;right:20px;
+  width:720px;max-height:600px;
+  background:rgba(8,12,24,0.98);
+  backdrop-filter:blur(24px);
+  border:1px solid rgba(45,232,176,0.15);
+  border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.7);
+  z-index:99998;display:none;
+  flex-direction:column;overflow:hidden;
+}
+#gc-panel.open{display:flex!important;animation:fadeIn 0.2s ease;}
+#gc-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px 0;border-bottom:1px solid rgba(45,232,176,0.1);
+  flex-shrink:0;
+}
+.gc-tabs{display:flex;gap:4px;}
+.gc-tab{
+  font-family:var(--mono);font-size:12px;padding:7px 16px;
+  border-radius:8px 8px 0 0;border:none;background:none;
+  color:var(--text3);cursor:pointer;transition:all 0.18s;
+}
+.gc-tab.active{background:rgba(45,232,176,0.1);color:var(--accent2);border-bottom:2px solid var(--accent2);}
+.gc-tab:hover:not(.active){color:var(--text2);}
+#gc-close-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px;margin-bottom:8px;}
+#gc-close-btn:hover{color:var(--text);}
+#gc-body{display:flex;flex:1;overflow:hidden;min-height:0;}
+#gc-sidebar{
+  width:230px;flex-shrink:0;
+  border-right:1px solid rgba(45,232,176,0.08);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.gc-sidebar-top{
+  padding:10px 10px 6px;border-bottom:1px solid rgba(45,232,176,0.06);
+  display:flex;gap:6px;flex-shrink:0;
+}
+.gc-new-btn{
+  flex:1;font-family:var(--mono);font-size:11px;padding:6px 0;
+  border-radius:8px;border:1px solid rgba(45,232,176,0.25);
+  background:rgba(45,232,176,0.07);color:var(--accent2);
+  cursor:pointer;transition:all 0.18s;
+}
+.gc-new-btn:hover{background:rgba(45,232,176,0.14);}
+#gc-room-list{flex:1;overflow-y:auto;padding:6px 0;}
+.gc-room-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;cursor:pointer;
+  border-radius:10px;margin:0 6px;transition:background 0.15s;
+}
+.gc-room-item:hover{background:rgba(45,232,176,0.07);}
+.gc-room-item.active{background:rgba(45,232,176,0.12);}
+.gc-room-avatar{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  background:linear-gradient(135deg,rgba(45,232,176,0.2),rgba(108,142,245,0.2));
+  border:1px solid rgba(45,232,176,0.15);
+}
+.gc-room-info{flex:1;min-width:0;}
+.gc-room-name{font-family:var(--mono);font-size:12px;color:var(--accent2);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gc-room-preview{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gc-unread-dot{width:8px;height:8px;border-radius:50%;background:var(--accent2);flex-shrink:0;}
+/* 右侧聊天区 */
+#gc-chat-pane{flex:1;display:flex;flex-direction:column;min-width:0;}
+#gc-placeholder{flex:1;display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:var(--mono);font-size:12px;}
+#gc-chat{display:none;flex-direction:column;flex:1;min-height:0;}
+.gc-chat-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-bottom:1px solid rgba(45,232,176,0.1);flex-shrink:0;
+}
+.gc-chat-title{font-family:var(--mono);font-size:13px;color:var(--text);font-weight:600;}
+.gc-member-count{font-size:11px;color:var(--text3);font-family:var(--mono);}
+#gc-messages{
+  flex:1;overflow-y:auto;padding:10px 0 6px;
+  display:flex;flex-direction:column;gap:2px;min-height:0;
+}
+.gc-msg-row{display:flex;gap:8px;margin:3px 12px;}
+.gc-msg-row.self{flex-direction:row-reverse;}
+.gc-msg-avatar{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;overflow:hidden;align-self:flex-end;
+}
+.gc-msg-avatar img{width:100%;height:100%;object-fit:cover;border-radius:8px;}
+.gc-msg-body{display:flex;flex-direction:column;max-width:68%;}
+.gc-msg-row.self .gc-msg-body{align-items:flex-end;}
+.gc-msg-sender{font-family:var(--mono);font-size:10px;color:var(--accent2);margin-bottom:2px;cursor:pointer;}
+.gc-msg-sender:hover{text-decoration:underline;}
+.gc-msg-bubble{
+  padding:8px 12px;font-size:13px;line-height:1.55;
+  word-break:break-word;border-radius:14px;
+}
+.gc-msg-row:not(.self) .gc-msg-bubble{
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:4px 14px 14px 14px;color:var(--text);
+}
+.gc-msg-row.self .gc-msg-bubble{
+  background:linear-gradient(135deg,#2a4ec9,#1ab88a);
+  border-radius:14px 4px 14px 14px;color:#fff;
+}
+.gc-msg-time{font-size:10px;color:var(--text3);margin-top:2px;font-family:var(--mono);}
+.gc-date-divider{text-align:center;font-family:var(--mono);font-size:10px;color:var(--text3);margin:6px 0;}
+.gc-input-wrap{
+  display:flex;gap:8px;padding:10px 12px;
+  border-top:1px solid rgba(45,232,176,0.1);flex-shrink:0;align-items:flex-end;
+}
+#gc-input{
+  flex:1;background:rgba(255,255,255,0.05);
+  border:1px solid rgba(45,232,176,0.15);border-radius:8px;
+  padding:8px 10px;font-family:var(--mono);font-size:13px;color:var(--text);
+  outline:none;resize:none;line-height:1.5;max-height:80px;transition:border-color 0.2s;
+}
+#gc-input:focus{border-color:rgba(45,232,176,0.4);}
+#gc-input::placeholder{color:var(--text3);}
+.gc-send-btn{
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
+  border:none;border-radius:8px;padding:8px 14px;
+  font-family:var(--mono);font-size:12px;font-weight:600;
+  color:var(--bg);cursor:pointer;flex-shrink:0;transition:opacity 0.2s;
+}
+.gc-send-btn:hover{opacity:0.85;}
+/* 创建群组modal内嵌区 */
+.gc-create-form{padding:16px;}
+.gc-create-form input,.gc-create-form textarea{
+  width:100%;font-family:var(--mono);font-size:13px;padding:8px 10px;
+  border-radius:8px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);outline:none;
+  margin-bottom:10px;
+}
+.gc-create-form input:focus,.gc-create-form textarea:focus{border-color:rgba(45,232,176,0.4);}
+.gc-member-search{position:relative;}
+.gc-member-results{
+  position:absolute;top:100%;left:0;right:0;z-index:10;
+  background:rgba(10,14,26,0.98);border:1px solid rgba(45,232,176,0.2);
+  border-radius:8px;max-height:160px;overflow-y:auto;display:none;
+}
+.gc-member-results.open{display:block;}
+.gc-member-result-item{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;
+}
+.gc-member-result-item:hover{background:rgba(45,232,176,0.08);}
+.gc-selected-members{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:28px;}
+.gc-member-tag{
+  display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;
+  padding:3px 8px 3px 6px;border-radius:100px;
+  background:rgba(45,232,176,0.1);border:1px solid rgba(45,232,176,0.25);color:var(--accent2);
+}
+.gc-member-tag button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;padding:0;line-height:1;}
+.gc-member-tag button:hover{color:var(--red);}
+@media(max-width:480px){
+  #gc-panel{width:calc(100vw - 20px);right:10px;max-height:72vh;}
+  #gc-sidebar{width:180px;}
+}
 </style>
 </head>
 <body>
@@ -3689,6 +4045,10 @@ section:not(.active) {
       </svg>
     </div>
     <div style="display:flex;align-items:center;gap:6px">
+      <button class="notif-btn" id="gc-nav-btn" onclick="toggleGCPanel()" title="群聊" style="display:none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div class="notif-badge" id="gc-badge"></div>
+      </button>
       <button class="notif-btn dm-nav-btn" id="dm-nav-btn" onclick="toggleDMPanel()" title="私信" style="display:none">
         <svg viewBox="0 0 16 16" width="15" height="15" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
           <rect x="1" y="2" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/>
@@ -3745,6 +4105,7 @@ section:not(.active) {
         <div class="nav-more-menu" id="nav-more-menu">
           <div class="nav-more-group-label">社区</div>
           <a onclick="closeMoreMenu();show('members')" id="nav-members">👥 成员</a>
+          <a onclick="closeMoreMenu();show('chat');initChat()" id="nav-chat">💬 群聊</a>
           <a onclick="closeMoreMenu();show('emotions')" id="nav-emotions-m">✍️ 随笔</a>
           <div class="nav-more-divider"></div>
           <div class="nav-more-group-label">教学</div>
@@ -4223,6 +4584,56 @@ section:not(.active) {
   <div class="admin-section"><h2>用户管理</h2><div id="admin-users"></div></div>
   <div class="admin-section"><h2>题解管理</h2><div id="admin-notes"></div></div>
 </div></section>
+
+
+<section id="chat"><div class="container" style="padding:0;max-width:100%">
+  <div id="chat-section">
+    <!-- 未登录遮罩 -->
+    <div id="chat-login-wall" class="chat-layout" style="display:none;align-items:center;justify-content:center;min-height:400px;">
+      <div class="chat-login-tip">
+        <div style="font-size:32px">💬</div>
+        <div>登录后才能使用群聊</div>
+        <button onclick="openModal('auth-modal')">去登录</button>
+      </div>
+    </div>
+    <!-- 主体 -->
+    <div class="chat-layout" id="chat-body">
+      <!-- 侧边栏 -->
+      <div class="chat-sidebar">
+        <div class="chat-sidebar-title">频道</div>
+        <div id="chat-room-list"></div>
+        <div class="chat-online-area">
+          <div class="chat-online-label">在线 <span class="chat-online-count" id="chat-online-count">0</span></div>
+          <div class="chat-online-list" id="chat-online-list"></div>
+        </div>
+      </div>
+      <!-- 聊天主区 -->
+      <div class="chat-main">
+        <div class="chat-header">
+          <div class="chat-online-dot"></div>
+          <div class="chat-header-title" id="chat-header-title"># 全员</div>
+          <div class="chat-header-sub" id="chat-header-sub"></div>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area" id="chat-input-area">
+          <div class="chat-at-suggestions" id="chat-at-suggestions"></div>
+          <div class="chat-input-row">
+            <button class="chat-img-btn" onclick="document.getElementById('chat-img-input').click()" title="发送图片">🖼</button>
+            <input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="chatSendImage(this)">
+            <textarea class="chat-input-box" id="chat-input-box" placeholder="发消息… 支持 @用户名" rows="1"
+              onkeydown="chatKeyDown(event)" oninput="chatInputChange(this)"></textarea>
+            <button class="chat-send-btn" onclick="chatSend()" title="发送 (Enter)">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- 图片灯箱 -->
+<div id="chat-lightbox" onclick="this.classList.remove('open')">
+  <img id="chat-lightbox-img" src="" alt="">
+</div>
 
 </main>
 <footer>// OI Training Team · 万家宝 老师 · <span>hjoi.com.cn</span> · Powered by Supabase</footer>
@@ -4989,7 +5400,7 @@ function show(id){
   // 同步移动端抽屉 active 状态
   syncDrawerActive(id);
   window.scrollTo(0,0);
-  const loaders={syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,quiz:initQuiz,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks,daily:loadDaily};
+  const loaders={chat:()=>initChat(),syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,quiz:initQuiz,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks,daily:loadDaily};
   if(loaders[id])loaders[id]();
 }
 
@@ -9328,6 +9739,356 @@ async function deleteSyllabus(id){
 loadSession();
 
 // ══════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════
+// 群聊系统 (Group Chat)
+// ══════════════════════════════════════════════════════
+let _gcOpen = false;
+let _gcCurrentRoom = null; // {id, name, member_count}
+let _gcRealtimeChannel = null;
+let _gcUnreadCount = 0;
+let _gcSelectedMembers = []; // [{id,username}]
+
+function initGC(){
+  refreshGCUnread();
+  subscribeGCRealtime();
+}
+
+function toggleGCPanel(){
+  _gcOpen = !_gcOpen;
+  const panel = document.getElementById('gc-panel');
+  if(_gcOpen){
+    panel.classList.add('open');
+    document.getElementById('dm-panel').classList.remove('open');
+    document.getElementById('notif-panel')?.classList.remove('open');
+    loadGCRooms();
+  } else {
+    panel.classList.remove('open');
+  }
+}
+
+function closeGCPanel(){
+  _gcOpen = false;
+  document.getElementById('gc-panel').classList.remove('open');
+}
+
+function gcSwitchTab(tab){
+  document.querySelectorAll('.gc-tab').forEach((t,i)=>t.classList.toggle('active', (tab==='rooms'&&i===0)||(tab==='create'&&i===1)));
+  if(tab==='rooms'){
+    document.getElementById('gc-placeholder').style.display='flex';
+    document.getElementById('gc-chat').style.display='none';
+    document.getElementById('gc-create-pane').style.display='none';
+    loadGCRooms();
+  } else {
+    document.getElementById('gc-placeholder').style.display='none';
+    document.getElementById('gc-chat').style.display='none';
+    document.getElementById('gc-create-pane').style.display='flex';
+    // 重置表单
+    document.getElementById('gc-new-name').value='';
+    document.getElementById('gc-new-desc').value='';
+    _gcSelectedMembers=[];
+    renderGCSelectedMembers();
+    document.getElementById('gc-member-search-input').value='';
+    document.getElementById('gc-member-results').classList.remove('open');
+    document.getElementById('gc-create-error').textContent='';
+  }
+}
+
+async function loadGCRooms(){
+  const list = document.getElementById('gc-room-list');
+  list.innerHTML='<div class="dm-loading">加载中…</div>';
+  try{
+    const rooms = await apiRequest('/groupchat/rooms');
+    if(!rooms||!rooms.length){
+      list.innerHTML='<div class="dm-empty">// 还没有群组<br><span style="opacity:.5">点「创建」发起第一个</span></div>';
+      return;
+    }
+    list.innerHTML='';
+    rooms.forEach(room=>{
+      const item=document.createElement('div');
+      item.className='gc-room-item';
+      item.dataset.id=room.id;
+      const emoji = room.emoji || '💬';
+      item.innerHTML=`
+        <div class="gc-room-avatar">${emoji}</div>
+        <div class="gc-room-info">
+          <div class="gc-room-name">${escHtml(room.name)}</div>
+          <div class="gc-room-preview">${room.last_message?escHtml(room.last_message.slice(0,30)):'暂无消息'}</div>
+        </div>
+        ${room.unread_count?'<div class="gc-unread-dot"></div>':''}
+      `;
+      item.onclick=()=>{
+        document.querySelectorAll('.gc-room-item').forEach(i=>i.classList.remove('active'));
+        item.classList.add('active');
+        openGCRoom(room);
+      };
+      list.appendChild(item);
+    });
+  }catch(e){list.innerHTML='<div class="dm-empty">加载失败</div>';}
+}
+
+async function openGCRoom(room){
+  _gcCurrentRoom = room;
+  document.getElementById('gc-placeholder').style.display='none';
+  document.getElementById('gc-create-pane').style.display='none';
+  const chatEl=document.getElementById('gc-chat');
+  chatEl.style.display='flex';
+  document.getElementById('gc-chat-title').textContent=room.name;
+  document.getElementById('gc-member-count').textContent=`${room.member_count||'?'} 人`;
+
+  const msgsEl=document.getElementById('gc-messages');
+  msgsEl.innerHTML='<div class="dm-loading">加载中…</div>';
+
+  try{
+    const msgs = await apiRequest(`/groupchat/rooms/${room.id}/messages`);
+    msgsEl.innerHTML='';
+    if(!msgs||!msgs.length){
+      msgsEl.innerHTML='<div class="dm-empty">// 还没有消息，发第一条吧</div>';
+    } else {
+      let lastDate='';
+      msgs.forEach(m=>{
+        const d=m.created_at.slice(0,10);
+        if(d!==lastDate){
+          const div=document.createElement('div');
+          div.className='gc-date-divider';div.textContent=d;
+          msgsEl.appendChild(div);lastDate=d;
+        }
+        appendGCMessage(m);
+      });
+    }
+    msgsEl.scrollTop=msgsEl.scrollHeight;
+    // 标已读
+    apiRequest(`/groupchat/rooms/${room.id}/read`,{method:'PATCH'}).catch(()=>{});
+    await refreshGCUnread();
+  }catch(e){msgsEl.innerHTML='<div class="dm-empty">加载失败</div>';}
+  setTimeout(()=>document.getElementById('gc-input')?.focus(),80);
+}
+
+function appendGCMessage(msg){
+  const msgsEl=document.getElementById('gc-messages');
+  const empty=msgsEl.querySelector('.dm-empty');
+  if(empty) empty.remove();
+  const isSelf=currentUser&&msg.sender_id===currentUser.id;
+  const row=document.createElement('div');
+  row.className='gc-msg-row'+(isSelf?' self':'');
+  const time=new Date(msg.created_at).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+  const avatarBg=avatarGradient(msg.sender_username||'?');
+  const avatarInner=msg.sender_avatar
+    ?`<img src="${escHtml(msg.sender_avatar)}">`
+    :`<span style="color:var(--bg)">${(msg.sender_username||'?').charAt(0).toUpperCase()}</span>`;
+  row.innerHTML=`
+    <div class="gc-msg-avatar" style="background:${avatarBg}">${avatarInner}</div>
+    <div class="gc-msg-body">
+      ${!isSelf?`<div class="gc-msg-sender" onclick="showProfile('${escHtml(msg.sender_username||'')}')">${escHtml(msg.sender_username||'?')}</div>`:''}
+      <div class="gc-msg-bubble">${escHtml(msg.content)}</div>
+      <div class="gc-msg-time">${time}</div>
+    </div>`;
+  msgsEl.appendChild(row);
+}
+
+async function sendGC(){
+  if(!_gcCurrentRoom||!currentUser) return;
+  const input=document.getElementById('gc-input');
+  const content=input.value.trim();
+  if(!content) return;
+  input.value='';gcAutoResize(input);
+  try{
+    const msg=await apiRequest(`/groupchat/rooms/${_gcCurrentRoom.id}/messages`,{
+      method:'POST',body:JSON.stringify({content})
+    });
+    appendGCMessage(msg);
+    document.getElementById('gc-messages').scrollTop=9999;
+  }catch(e){showToast('发送失败: '+e.message,'error');input.value=content;}
+}
+
+function gcInputKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendGC();}}
+function gcAutoResize(ta){ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,80)+'px';}
+
+// 创建群组
+let _gcMemberSearchTimer=null;
+async function gcSearchMembers(q){
+  clearTimeout(_gcMemberSearchTimer);
+  const results=document.getElementById('gc-member-results');
+  if(!q||q.length<1){results.classList.remove('open');return;}
+  _gcMemberSearchTimer=setTimeout(async()=>{
+    try{
+      const data=await apiRequest(`/members/?search=${encodeURIComponent(q)}`);
+      const filtered=(data||[]).filter(u=>u.id!==currentUser?.id&&!_gcSelectedMembers.find(m=>m.id===u.id)).slice(0,8);
+      if(!filtered.length){results.classList.remove('open');return;}
+      results.innerHTML=filtered.map(u=>`
+        <div class="gc-member-result-item" onclick="gcSelectMember('${escHtml(u.id)}','${escHtml(u.username)}')">
+          <span style="font-family:var(--mono);font-size:12px;color:var(--accent2)">@${escHtml(u.username)}</span>
+        </div>`).join('');
+      results.classList.add('open');
+    }catch(e){}
+  },250);
+}
+
+function gcSelectMember(id, username){
+  if(!_gcSelectedMembers.find(m=>m.id===id)){
+    _gcSelectedMembers.push({id,username});
+    renderGCSelectedMembers();
+  }
+  document.getElementById('gc-member-search-input').value='';
+  document.getElementById('gc-member-results').classList.remove('open');
+}
+
+function gcRemoveMember(id){
+  _gcSelectedMembers=_gcSelectedMembers.filter(m=>m.id!==id);
+  renderGCSelectedMembers();
+}
+
+function renderGCSelectedMembers(){
+  const el=document.getElementById('gc-selected-members');
+  el.innerHTML=_gcSelectedMembers.map(m=>`
+    <div class="gc-member-tag">
+      <span>@${escHtml(m.username)}</span>
+      <button onclick="gcRemoveMember('${escHtml(m.id)}')" title="移除">×</button>
+    </div>`).join('');
+}
+
+async function submitCreateGC(){
+  const name=document.getElementById('gc-new-name').value.trim();
+  const desc=document.getElementById('gc-new-desc').value.trim();
+  const errEl=document.getElementById('gc-create-error');
+  errEl.textContent='';
+  if(!name||name.length<2){errEl.textContent='群组名称至少2个字';return;}
+  try{
+    const room=await apiRequest('/groupchat/rooms',{
+      method:'POST',
+      body:JSON.stringify({name,description:desc,member_ids:_gcSelectedMembers.map(m=>m.id)})
+    });
+    showToast('群组创建成功 ✓','success');
+    gcSwitchTab('rooms');
+    loadGCRooms();
+    setTimeout(()=>openGCRoom(room),300);
+  }catch(e){errEl.textContent=e.message||'创建失败';}
+}
+
+function gcShowMembers(){
+  if(!_gcCurrentRoom) return;
+  apiRequest(`/groupchat/rooms/${_gcCurrentRoom.id}`).then(r=>{
+    const members = r.members || [];
+    const myRole = r.my_role || 'member';
+    let html = `<div style="font-family:var(--mono);padding:4px 0;max-height:320px;overflow-y:auto">`;
+    html += `<div style="font-size:11px;color:var(--text3);margin-bottom:10px">${_gcCurrentRoom.name} · ${members.length}人</div>`;
+    members.forEach(m=>{
+      const isMe = currentUser && m.user_id === currentUser.id;
+      const roleBadge = m.role==='owner'?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(255,203,107,.15);color:#ffcb6b;margin-left:6px">群主</span>'
+        : m.role==='admin'?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(108,142,245,.15);color:var(--accent);margin-left:6px">管理</span>':'';
+      const kickBtn = !isMe && (myRole==='owner'||(myRole==='admin'&&m.role==='member'))
+        ? `<button onclick="gcKickMember('${escHtml(m.user_id)}','${escHtml(m.username)}')" style="margin-left:auto;background:none;border:1px solid rgba(255,83,112,.25);border-radius:6px;color:var(--red);font-size:10px;padding:2px 8px;cursor:pointer">踢出</button>` : '';
+      const inviteBtn = myRole==='owner'||myRole==='admin'
+        ? `<button onclick="gcOpenInvite()" style="margin-top:8px;width:100%;font-family:var(--mono);font-size:11px;padding:6px;border-radius:8px;border:1px dashed rgba(45,232,176,.2);background:none;color:var(--accent2);cursor:pointer">+ 邀请成员</button>` : '';
+      html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+        <span style="font-size:13px;color:var(--text2);cursor:pointer" onclick="showProfile('${escHtml(m.username)}');closeModal('member-list-modal')">@${escHtml(m.username)}</span>
+        ${roleBadge}
+        ${kickBtn}
+      </div>`;
+    });
+    if(myRole==='owner'||myRole==='admin'){
+      html+=`<button onclick="gcOpenInvite()" style="margin-top:10px;width:100%;font-family:var(--mono);font-size:11px;padding:7px;border-radius:8px;border:1px dashed rgba(45,232,176,.2);background:none;color:var(--accent2);cursor:pointer">+ 邀请成员</button>`;
+    }
+    html += `</div>`;
+    // 用 showToast 不够用，改用简单inline modal
+    const mid = 'member-list-modal';
+    let mo = document.getElementById(mid);
+    if(!mo){
+      mo = document.createElement('div');
+      mo.id = mid;
+      mo.style.cssText='position:fixed;inset:0;z-index:200000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)';
+      mo.onclick = e=>{ if(e.target===mo) mo.remove(); };
+      document.body.appendChild(mo);
+    }
+    mo.innerHTML=`<div style="background:rgba(10,14,26,0.98);border:1px solid rgba(45,232,176,0.15);border-radius:14px;padding:20px;min-width:280px;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.7)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-family:var(--mono);font-size:13px;color:var(--accent2)">群组成员</span>
+        <button onclick="document.getElementById('${mid}').remove()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px">×</button>
+      </div>
+      ${html}
+    </div>`;
+    mo.style.display='flex';
+  }).catch(()=>showToast('加载失败','error'));
+}
+
+async function gcKickMember(userId, username){
+  if(!_gcCurrentRoom) return;
+  if(!confirm(`确定踢出 @${username}？`)) return;
+  try{
+    await apiRequest(`/groupchat/rooms/${_gcCurrentRoom.id}/members/${userId}`,{method:'DELETE'});
+    showToast(`已踢出 @${username}`,'success');
+    document.getElementById('member-list-modal')?.remove();
+    gcShowMembers();
+  }catch(e){showToast('操作失败: '+e.message,'error');}
+}
+
+function gcOpenInvite(){
+  document.getElementById('member-list-modal')?.remove();
+  gcSwitchTab('create');
+  setTimeout(()=>document.getElementById('gc-member-search-input')?.focus(),100);
+}
+
+async function gcLeaveRoom(){
+  if(!_gcCurrentRoom) return;
+  const name = _gcCurrentRoom.name;
+  if(!confirm(`确定退出「${name}」？`)) return;
+  try{
+    const res = await apiRequest(`/groupchat/rooms/${_gcCurrentRoom.id}/leave`,{method:'DELETE'});
+    showToast(res.dissolved ? `已解散「${name}」` : `已退出「${name}」`,'success');
+    document.getElementById('gc-chat').style.display='none';
+    document.getElementById('gc-placeholder').style.display='flex';
+    _gcCurrentRoom=null;
+    loadGCRooms();
+  }catch(e){showToast('退出失败: '+e.message,'error');}
+}
+
+// 实时订阅
+function subscribeGCRealtime(){
+  if(_gcRealtimeChannel) _gcRealtimeChannel.unsubscribe();
+  if(!currentUser) return;
+  _gcRealtimeChannel=sb.channel('gc-'+currentUser.id)
+    .on('postgres_changes',{
+      event:'INSERT',schema:'public',table:'group_messages',
+    },payload=>{
+      const msg=payload.new;
+      // 如果正在看这个群
+      if(_gcOpen&&_gcCurrentRoom&&_gcCurrentRoom.id===msg.room_id){
+        // 补充sender信息后追加（简单处理）
+        if(msg.sender_id===currentUser.id) return; // 自己发的已经本地追加了
+        apiRequest(`/groupchat/msg-detail/${msg.id}`).then(m=>appendGCMessage(m)).catch(()=>{});
+      } else {
+        _gcUnreadCount++;
+        updateGCBadge();
+      }
+    })
+    .subscribe();
+}
+
+async function refreshGCUnread(){
+  if(!currentUser) return;
+  try{
+    const{count}=await apiRequest('/groupchat/unread/count');
+    _gcUnreadCount=count||0;
+  }catch(e){_gcUnreadCount=0;}
+  updateGCBadge();
+}
+
+function updateGCBadge(){
+  const badge=document.getElementById('gc-badge');
+  if(!badge) return;
+  if(_gcUnreadCount>0){badge.textContent=_gcUnreadCount>99?'99+':_gcUnreadCount;badge.classList.add('show');}
+  else badge.classList.remove('show');
+}
+
+// 点外部关闭
+document.addEventListener('click',e=>{
+  const panel=document.getElementById('gc-panel');
+  const btn=document.getElementById('gc-nav-btn');
+  if(_gcOpen&&panel&&!panel.contains(e.target)&&!btn?.contains(e.target)){
+    closeGCPanel();
+  }
+});
+
 // 私信系统 (DM)
 // ══════════════════════════════════════════════════════
 let _dmOpen = false;
@@ -9339,8 +10100,11 @@ let _dmUnreadCount = 0;
 async function initDM(){
   const btn = document.getElementById('dm-nav-btn');
   if(btn) btn.style.display = '';
+  const gcBtn = document.getElementById('gc-nav-btn');
+  if(gcBtn) gcBtn.style.display = '';
   await refreshDMUnread();
   subscribeDMRealtime();
+  initGC();
 }
 
 // 订阅实时新消息
@@ -11319,6 +12083,58 @@ async function showContestChart(contestId, preloaded, title){
   <div class="emoji-grid" id="emoji-grid"></div>
 </div>
 <!-- DM PANEL -->
+<!-- GROUP CHAT PANEL -->
+<div id="gc-panel">
+  <div id="gc-header">
+    <div class="gc-tabs">
+      <button class="gc-tab active" onclick="gcSwitchTab('rooms')">💬 群组</button>
+      <button class="gc-tab" onclick="gcSwitchTab('create')">＋ 创建</button>
+    </div>
+    <button id="gc-close-btn" onclick="closeGCPanel()">✕</button>
+  </div>
+  <div id="gc-body">
+    <!-- 左侧群组列表 -->
+    <div id="gc-sidebar">
+      <div id="gc-room-list"><div class="dm-empty" style="padding:24px 12px;font-size:12px">加载中…</div></div>
+    </div>
+    <!-- 右侧聊天区 -->
+    <div id="gc-chat-pane">
+      <div id="gc-placeholder">// 选择一个群组</div>
+      <div id="gc-chat" style="flex-direction:column;flex:1;min-height:0;">
+        <div class="gc-chat-header">
+          <div>
+            <div class="gc-chat-title" id="gc-chat-title"></div>
+            <div class="gc-member-count" id="gc-member-count"></div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="gcShowMembers()">👥 成员</button>
+              <button class="gc-new-btn" style="width:auto;padding:4px 10px;flex:none;font-size:11px;border-color:rgba(255,83,112,.25);color:var(--red)" onclick="gcLeaveRoom()">退出</button>
+        </div>
+        <div id="gc-messages"></div>
+        <div class="gc-input-wrap">
+          <textarea id="gc-input" placeholder="发送消息…" rows="1" maxlength="2000"
+            onkeydown="gcInputKey(event)" oninput="gcAutoResize(this)"></textarea>
+          <button class="gc-send-btn" onclick="sendGC()">发送</button>
+        </div>
+      </div>
+      <!-- 创建群组表单 -->
+      <div id="gc-create-pane" style="display:none;flex-direction:column;flex:1;overflow-y:auto;">
+        <div class="gc-create-form">
+          <div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-bottom:12px;">创建新群组</div>
+          <input type="text" id="gc-new-name" placeholder="群组名称（2-20字）" maxlength="20">
+          <textarea id="gc-new-desc" rows="2" placeholder="群组简介（可选）" maxlength="100" style="resize:none;"></textarea>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px;">添加成员</div>
+          <div class="gc-member-search">
+            <input type="text" id="gc-member-search-input" placeholder="搜索用户名…" oninput="gcSearchMembers(this.value)" autocomplete="off" style="margin-bottom:4px;">
+            <div id="gc-member-results" class="gc-member-results"></div>
+          </div>
+          <div id="gc-selected-members" class="gc-selected-members"></div>
+          <div id="gc-create-error" style="color:var(--red);font-size:12px;margin-bottom:8px;"></div>
+          <button class="btn btn-primary" style="width:100%;" onclick="submitCreateGC()">创建群组</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <div id="dm-panel">
   <div class="dm-panel-header">
     <span id="dm-panel-title">私信</span>
@@ -11354,6 +12170,367 @@ async function showContestChart(contestId, preloaded, title){
     btn.classList.toggle('visible', window.scrollY>320);
   },{passive:true});
 })();
+
+// ═══════════════════════════════════════════════════════
+//  群聊 Chat Module
+// ═══════════════════════════════════════════════════════
+const WS_BASE = API_BASE.replace(/^http/, 'ws').replace('/api/v1', '');
+
+const CHAT_ROOMS = [
+  { id:'global',  label:'# 全员',   desc:'所有人' },
+  { id:'group_1', label:'# L1组',   desc:'训练组 L1' },
+  { id:'group_2', label:'# L2组',   desc:'训练组 L2' },
+  { id:'group_3', label:'# L3组',   desc:'训练组 L3' },
+  { id:'group_4', label:'# L4组',   desc:'训练组 L4' },
+  { id:'group_5', label:'# L5组',   desc:'训练组 L5' },
+  { id:'group_6', label:'# L6组',   desc:'训练组 L6' },
+  { id:'group_7', label:'# L7组',   desc:'训练组 L7' },
+];
+
+let chatWs        = null;
+let chatRoom      = 'global';
+let chatOnlineMap = {};      // user_id -> {username, avatar_url}
+let chatUnread    = {};      // room -> count
+let chatAtQuery   = '';      // 当前@搜索词
+let chatAtIdx     = -1;
+let chatInited    = false;
+let chatPingTimer = null;
+
+// ── 初始化 ──────────────────────────────────────────────
+function initChat() {
+  if (!currentUser) {
+    document.getElementById('chat-login-wall').style.display = 'flex';
+    document.getElementById('chat-body').style.display = 'none';
+    return;
+  }
+  document.getElementById('chat-login-wall').style.display = 'none';
+  document.getElementById('chat-body').style.display = 'flex';
+
+  renderRoomList();
+  chatJoinRoom(chatRoom);
+  chatInited = true;
+}
+
+// ── 渲染房间列表 ─────────────────────────────────────────
+function renderRoomList() {
+  const ul = document.getElementById('chat-room-list');
+  ul.innerHTML = CHAT_ROOMS.map(r => `
+    <div class="chat-room-item ${r.id===chatRoom?'active':''}" id="chat-ri-${r.id}" onclick="chatJoinRoom('${r.id}')">
+      <div class="chat-room-dot"></div>
+      <span>${r.label}</span>
+      <span class="chat-room-unread" id="chat-unread-${r.id}"></span>
+    </div>`).join('');
+}
+
+// ── 加入/切换房间 ────────────────────────────────────────
+function chatJoinRoom(room) {
+  if (chatRoom === room && chatWs && chatWs.readyState === WebSocket.OPEN) return;
+  chatCloseWs();
+  chatRoom = room;
+
+  // 更新UI激活态
+  document.querySelectorAll('.chat-room-item').forEach(el => el.classList.remove('active'));
+  const ri = document.getElementById('chat-ri-' + room);
+  if (ri) ri.classList.add('active');
+  const info = CHAT_ROOMS.find(r => r.id === room) || {};
+  document.getElementById('chat-header-title').textContent = info.label || room;
+
+  // 清未读
+  chatUnread[room] = 0;
+  const ub = document.getElementById('chat-unread-' + room);
+  if (ub) { ub.textContent = ''; ub.classList.remove('show'); }
+
+  // 连接 WS
+  const token = localStorage.getItem('hjoi_token') || '';
+  const wsUrl = `${WS_BASE}/api/v1/chat/ws/${room}?token=${encodeURIComponent(token)}`;
+  chatWs = new WebSocket(wsUrl);
+
+  chatWs.onopen = () => {
+    chatStartPing();
+  };
+
+  chatWs.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    chatHandleMsg(msg);
+  };
+
+  chatWs.onerror = () => showToast('聊天连接失败', 'error');
+  chatWs.onclose = () => {
+    clearInterval(chatPingTimer);
+    // 3s后自动重连（如果还在群聊页）
+    setTimeout(() => {
+      const sec = document.getElementById('chat');
+      if (sec && sec.classList.contains('active') && currentUser) {
+        chatJoinRoom(chatRoom);
+      }
+    }, 3000);
+  };
+}
+
+function chatCloseWs() {
+  clearInterval(chatPingTimer);
+  if (chatWs) { try { chatWs.close(); } catch(e){} chatWs = null; }
+  chatOnlineMap = {};
+}
+
+function chatStartPing() {
+  clearInterval(chatPingTimer);
+  chatPingTimer = setInterval(() => {
+    if (chatWs && chatWs.readyState === WebSocket.OPEN) {
+      chatWs.send(JSON.stringify({ type: 'ping' }));
+    }
+  }, 25000);
+}
+
+// ── 处理收到的消息 ───────────────────────────────────────
+function chatHandleMsg(msg) {
+  const box = document.getElementById('chat-messages');
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+
+  if (msg.type === 'history') {
+    box.innerHTML = '';
+    (msg.messages || []).forEach(m => box.appendChild(chatBubbleEl(m)));
+    // 在线用户
+    chatOnlineMap = {};
+    (msg.online_users || []).forEach(u => chatOnlineMap[u.user_id] = u);
+    renderOnlineUsers(msg.online);
+    box.scrollTop = box.scrollHeight;
+    return;
+  }
+
+  if (msg.type === 'message') {
+    const el = chatBubbleEl(msg);
+    box.appendChild(el);
+    if (atBottom) box.scrollTop = box.scrollHeight;
+    // 不在当前房间时计未读（此处消息来自当前房间ws，所以直接判断是否在视图内）
+    const sec = document.getElementById('chat');
+    if (!sec.classList.contains('active')) {
+      chatUnread[chatRoom] = (chatUnread[chatRoom] || 0) + 1;
+      const ub = document.getElementById('chat-unread-' + chatRoom);
+      if (ub) { ub.textContent = chatUnread[chatRoom]; ub.classList.add('show'); }
+    }
+    return;
+  }
+
+  if (msg.type === 'delete') {
+    const el = document.getElementById('chat-msg-' + msg.id);
+    if (el) {
+      el.querySelector('.chat-bubble').classList.add('deleted');
+      el.querySelector('.chat-bubble').textContent = '该消息已撤回';
+      const db = el.querySelector('.chat-delete-btn');
+      if (db) db.remove();
+    }
+    return;
+  }
+
+  if (msg.type === 'presence') {
+    if (msg.event === 'join') {
+      chatOnlineMap[msg.user_id] = { username: msg.username, avatar_url: msg.avatar_url };
+      appendSysMsg(`${escHtml(msg.username)} 加入了频道`);
+    } else if (msg.event === 'leave') {
+      delete chatOnlineMap[msg.user_id];
+      const name = chatOnlineMap[msg.user_id]?.username || '有人';
+      appendSysMsg(`${escHtml(msg.username||name)} 离开了频道`);
+    }
+    renderOnlineUsers(msg.online);
+    return;
+  }
+}
+
+// ── 渲染在线用户 ─────────────────────────────────────────
+function renderOnlineUsers(count) {
+  document.getElementById('chat-online-count').textContent = count || 0;
+  document.getElementById('chat-header-sub').textContent = `${count||0} 人在线`;
+  const list = document.getElementById('chat-online-list');
+  list.innerHTML = Object.entries(chatOnlineMap).slice(0, 8).map(([uid, u]) => {
+    const av = u.avatar_url
+      ? `<img src="${escHtml(u.avatar_url)}" alt="">`
+      : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(108,142,245,0.3);font-weight:700;font-size:11px;color:var(--accent)">${escHtml((u.username||'?').charAt(0).toUpperCase())}</div>`;
+    return `<div class="chat-online-avatar" title="@${escHtml(u.username)}" onclick="showProfile('${escHtml(u.username)}')">${av}</div>`;
+  }).join('');
+}
+
+function appendSysMsg(text) {
+  const box = document.getElementById('chat-messages');
+  const el = document.createElement('div');
+  el.className = 'chat-sys-msg';
+  el.textContent = text;
+  box.appendChild(el);
+}
+
+// ── 构造气泡元素 ─────────────────────────────────────────
+function chatBubbleEl(msg) {
+  const isMine = currentUser && msg.user_id === currentUser.id;
+  const isCoach = currentProfile?.role === 'coach';
+  const canDelete = isMine || isCoach;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-msg' + (isMine ? ' mine' : '');
+  wrap.id = 'chat-msg-' + msg.id;
+
+  // 头像
+  const avHtml = msg.avatar_url
+    ? `<div class="chat-msg-avatar" onclick="showProfile('${escHtml(msg.username||'')}')" title="@${escHtml(msg.username||'')}"><img src="${escHtml(msg.avatar_url)}" loading="lazy" onerror="this.parentNode.outerHTML=chatFallbackAv('${escHtml(msg.username||'')}')"></div>`
+    : `<div class="chat-msg-avatar-fallback" onclick="showProfile('${escHtml(msg.username||'')}')" title="@${escHtml(msg.username||'')}">${escHtml((msg.username||'?').charAt(0).toUpperCase())}</div>`;
+
+  // 内容
+  let bodyHtml = '';
+  if (msg.is_deleted) {
+    bodyHtml = `<div class="chat-bubble deleted">该消息已撤回</div>`;
+  } else if (msg.image_url) {
+    bodyHtml = `<img class="chat-img-msg" src="${escHtml(msg.image_url)}" loading="lazy" onclick="chatOpenLightbox('${escHtml(msg.image_url)}')">`;
+  } else {
+    const rendered = chatRenderContent(msg.content || '');
+    bodyHtml = `<div class="chat-bubble">${rendered}</div>`;
+  }
+
+  const timeStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}) : '';
+  const deleteBtn = (!msg.is_deleted && canDelete)
+    ? `<span class="chat-delete-btn" onclick="chatDelete(${msg.id})">撤回</span>` : '';
+
+  wrap.innerHTML = avHtml + `
+  <div class="chat-msg-body">
+    <div class="chat-msg-meta">
+      <span class="chat-msg-name" onclick="showProfile('${escHtml(msg.username||'')}')">${escHtml(msg.username||'匿名')}</span>
+      <span class="chat-msg-time">${timeStr}</span>
+      ${deleteBtn}
+    </div>
+    ${bodyHtml}
+  </div>`;
+  return wrap;
+}
+
+function chatFallbackAv(username) {
+  return `<div class="chat-msg-avatar-fallback" onclick="showProfile('${escHtml(username)}')">${escHtml((username||'?').charAt(0).toUpperCase())}</div>`;
+}
+
+// ── 渲染消息内容（@高亮、换行）───────────────────────────
+function chatRenderContent(text) {
+  return escHtml(text)
+    .replace(/@(\S+)/g, (_, name) =>
+      `<span class="chat-at" onclick="showProfile('${escHtml(name)}')">@${escHtml(name)}</span>`)
+    .replace(/\n/g, '<br>');
+}
+
+// ── 发送文字消息 ─────────────────────────────────────────
+function chatSend() {
+  const inp = document.getElementById('chat-input-box');
+  const text = inp.value.trim();
+  if (!text || !chatWs || chatWs.readyState !== WebSocket.OPEN) return;
+  chatWs.send(JSON.stringify({ type: 'message', content: text }));
+  inp.value = '';
+  inp.style.height = '';
+  hideChatAt();
+}
+
+function chatKeyDown(e) {
+  const sug = document.getElementById('chat-at-suggestions');
+  const visible = sug.style.display === 'block';
+  if (visible) {
+    const items = sug.querySelectorAll('.chat-at-item');
+    if (e.key === 'ArrowDown') { e.preventDefault(); chatAtIdx = Math.min(chatAtIdx+1, items.length-1); chatAtHighlight(items); return; }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); chatAtIdx = Math.max(chatAtIdx-1, 0); chatAtHighlight(items); return; }
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      if (chatAtIdx >= 0 && items[chatAtIdx]) { e.preventDefault(); items[chatAtIdx].click(); return; }
+    }
+    if (e.key === 'Escape') { hideChatAt(); return; }
+  }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatSend(); }
+}
+
+function chatAtHighlight(items) {
+  items.forEach((el,i) => el.classList.toggle('selected', i===chatAtIdx));
+  if (chatAtIdx >= 0) items[chatAtIdx]?.scrollIntoView({block:'nearest'});
+}
+
+// ── @ 建议 ──────────────────────────────────────────────
+function chatInputChange(ta) {
+  // 自动扩高
+  ta.style.height = '';
+  ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+
+  // 检测@
+  const val = ta.value;
+  const cur = ta.selectionStart;
+  const atMatch = val.slice(0, cur).match(/@(\S*)$/);
+  if (atMatch) {
+    chatAtQuery = atMatch[1].toLowerCase();
+    showChatAt(chatAtQuery);
+  } else {
+    hideChatAt();
+  }
+}
+
+function showChatAt(query) {
+  const sug = document.getElementById('chat-at-suggestions');
+  const users = Object.values(chatOnlineMap).filter(u =>
+    u.username.toLowerCase().includes(query)
+  ).slice(0, 6);
+  if (!users.length) { hideChatAt(); return; }
+  chatAtIdx = -1;
+  sug.style.display = 'block';
+  sug.innerHTML = users.map(u => {
+    const av = u.avatar_url ? `<img src="${escHtml(u.avatar_url)}" loading="lazy">` : `<div style="width:22px;height:22px;border-radius:50%;background:rgba(108,142,245,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent)">${escHtml(u.username.charAt(0).toUpperCase())}</div>`;
+    return `<div class="chat-at-item" onclick="chatInsertAt('${escHtml(u.username)}')">${av} @${escHtml(u.username)}</div>`;
+  }).join('');
+}
+
+function hideChatAt() {
+  const sug = document.getElementById('chat-at-suggestions');
+  sug.style.display = 'none';
+  chatAtIdx = -1;
+}
+
+function chatInsertAt(username) {
+  const ta = document.getElementById('chat-input-box');
+  const val = ta.value;
+  const cur = ta.selectionStart;
+  const before = val.slice(0, cur).replace(/@(\S*)$/, '');
+  ta.value = before + '@' + username + ' ' + val.slice(cur);
+  ta.focus();
+  hideChatAt();
+}
+
+// ── 撤回消息 ─────────────────────────────────────────────
+function chatDelete(id) {
+  if (!chatWs || chatWs.readyState !== WebSocket.OPEN) return;
+  chatWs.send(JSON.stringify({ type: 'delete', id }));
+}
+
+// ── 发送图片 ─────────────────────────────────────────────
+async function chatSendImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 8 * 1024 * 1024) { showToast('图片不能超过 8MB', 'error'); return; }
+  showToast('图片上传中…', 'info');
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const token = localStorage.getItem('hjoi_token') || '';
+    const res = await fetch(`${API_BASE}/chat/image?room=${encodeURIComponent(chatRoom)}`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+      body: fd,
+    });
+    if (!res.ok) { showToast('图片上传失败', 'error'); return; }
+    showToast('图片已发送 ✓', 'success');
+  } catch(e) { showToast('图片上传失败: ' + e.message, 'error'); }
+  input.value = '';
+}
+
+// ── 灯箱 ─────────────────────────────────────────────────
+function chatOpenLightbox(url) {
+  document.getElementById('chat-lightbox-img').src = url;
+  document.getElementById('chat-lightbox').classList.add('open');
+}
+
+// ── 离开聊天页时断开 WS ──────────────────────────────────
+const _origShow = show;
+window.show = function(id) {
+  if (id !== 'chat' && chatWs) { chatCloseWs(); chatInited = false; }
+  _origShow(id);
+};
+
 </script>
 </body>
 </html>
