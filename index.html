@@ -4898,6 +4898,7 @@ async function loadSession(){
   renderAuthArea();
   loadHomeFeed();
   checkNotifDot(); initCheckinState();
+  initDM();
 }
 
 function usernameToEmail(u){return`${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@oiteam.local`;}
@@ -4921,6 +4922,7 @@ async function doLogin(){
     showToast('登录成功 ✓','success');
     loadHomeFeed();
     checkNotifDot();
+    initDM();
   }catch(e){
     document.getElementById('login-error').textContent=e.message||'用户名或密码错误';
   }
