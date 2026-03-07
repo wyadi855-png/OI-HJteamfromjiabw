@@ -1969,6 +1969,9 @@ mark.search-hl{
   color:var(--text3);background:none;border:none;
   cursor:pointer;padding:8px 0 0;transition:color 0.2s;display:block;}
 .ann-read-btn:hover{color:var(--accent2);}
+.ann-expand-btn{display:inline-block;margin-top:8px;font-size:12px;color:var(--accent);cursor:pointer;font-family:var(--mono);letter-spacing:0.03em;transition:color 0.15s;}
+.ann-expand-btn:hover{color:var(--accent2);}
+.ann-content.ann-preview{white-space:pre-wrap;}
 
 /* ── NAV BADGE ── */
 .nav-badge{
@@ -4234,7 +4237,7 @@ section:not(.active) {
 </div></div>
 
 <!-- CONTEST MODAL -->
-<div class="modal-overlay" id="contest-modal"><div class="modal" style="width:580px">
+<div class="modal-overlay" id="contest-modal"><div class="modal" style="width:620px">
   <h2>🏆 录入模拟赛</h2>
   <div class="form-row">
     <div class="form-group"><label>赛名</label><input type="text" id="c-title" placeholder="第X次模拟赛 · 主题"></div>
@@ -4244,7 +4247,7 @@ section:not(.active) {
   <div class="form-group"><label>教练点评</label><textarea id="c-comment" placeholder="本次比赛总结…"></textarea></div>
   <h3 style="font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 10px;">成绩录入</h3>
   <div class="results-editor">
-    <table><thead><tr><th>姓名</th><th>AC数</th><th>总分</th><th>排名</th><th></th></tr></thead><tbody id="results-rows"></tbody></table>
+    <table><thead><tr><th>姓名</th><th>组别</th><th>AC数</th><th>总分</th><th></th></tr></thead><tbody id="results-rows"></tbody></table>
     <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="addResultRow()">+ 添加选手</button>
   </div>
   <div id="contest-error" class="form-error"></div>
@@ -5187,19 +5190,40 @@ async function loadAnnouncements(){
   localStorage.setItem('ann_last_visit', Date.now().toString());
 
   list.innerHTML='';
+  function renderMd(s){try{return DOMPurify.sanitize(marked.parse(s));}catch(e){return escHtml(s);}}
   data.forEach(a=>{
     const isNew=new Date(a.created_at).getTime()>lastVisit;
     const card=document.createElement('div');
     card.className='ann-card'+(a.is_pinned?' pinned':'')+(isNew?' ann-unread':'');
+    // 预览：截取前120字符
+    const preview=a.content.length>120?a.content.slice(0,120)+'…':a.content;
     card.innerHTML=
       '<div class="ann-card-top">'
       +'<div class="ann-title">'+escHtml(a.title)+(isNew?'<span class="ann-new-dot"></span>':'')+'</div>'
       +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'
       +(a.is_pinned?'<span class="ann-pin">📌 置顶</span>':'')
-      +(isCoach()?'<button class="btn btn-danger btn-sm" onclick="deleteAnn('+a.id+')">删除</button>':'')
+      +(isCoach()?'<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteAnn('+a.id+')">删除</button>':'')
       +'</div></div>'
       +'<div class="ann-meta">'+fmtDate(a.created_at)+' · '+(a.profiles?.username||'教练')+'</div>'
-      +'<div class="ann-content ann-preview">'+escHtml(a.content)+'</div>';
+      +'<div class="ann-content ann-preview" data-full="0">'+escHtml(preview)+'</div>'
+      +(a.content.length>120?'<span class="ann-expand-btn">展开 ▾</span>':'');
+    // 展开/折叠
+    if(a.content.length>120){
+      const expandBtn=card.querySelector('.ann-expand-btn');
+      const contentDiv=card.querySelector('.ann-content');
+      expandBtn.addEventListener('click',e=>{
+        e.stopPropagation();
+        if(contentDiv.dataset.full==='0'){
+          contentDiv.innerHTML=renderMd(a.content);
+          contentDiv.dataset.full='1';
+          expandBtn.textContent='收起 ▴';
+        } else {
+          contentDiv.innerHTML=escHtml(preview);
+          contentDiv.dataset.full='0';
+          expandBtn.textContent='展开 ▾';
+        }
+      });
+    }
     list.appendChild(card);
   });
   updateUnreadAnnBadge(data);
@@ -5745,12 +5769,17 @@ async function loadContests(){
 }
 
 function openContestModal(){if(!isCoach())return;document.getElementById('results-rows').innerHTML='';addResultRow();addResultRow();addResultRow();openModal('contest-modal');}
-function addResultRow(){const tr=document.createElement('tr');tr.innerHTML=`<td><input type="text" placeholder="姓名"></td><td><input type="number" placeholder="0" min="0" style="width:60px"></td><td><input type="number" placeholder="0" min="0" style="width:70px"></td><td><input type="number" placeholder="1" min="1" style="width:55px"></td><td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">×</button></td>`;document.getElementById('results-rows').appendChild(tr);}
+function addResultRow(){const tr=document.createElement('tr');tr.innerHTML=`<td><input type="text" placeholder="姓名" style="width:80px"></td><td><select style="width:70px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:12px"><option value="2">Div.2</option><option value="1">Div.1</option></select></td><td><input type="number" placeholder="0" min="0" style="width:55px"></td><td><input type="number" placeholder="0" min="0" style="width:65px"></td><td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">×</button></td>`;document.getElementById('results-rows').appendChild(tr);}
 async function submitContest(){
   const title=document.getElementById('c-title').value.trim(),date=document.getElementById('c-date').value;
   if(!title||!date){document.getElementById('contest-error').textContent='请填写赛名和日期';return;}
   const rows=document.querySelectorAll('#results-rows tr');const results=[];
-  rows.forEach(row=>{const inputs=row.querySelectorAll('input');const name=inputs[0].value.trim();if(name)results.push({student_name:name,solved:parseInt(inputs[1].value)||0,score:parseInt(inputs[2].value)||0,rank:parseInt(inputs[3].value)||0});});
+  rows.forEach(row=>{
+    const inputs=row.querySelectorAll('input');
+    const sel=row.querySelector('select');
+    const name=inputs[0].value.trim();
+    if(name)results.push({student_name:name,division:parseInt(sel?.value||'2'),solved:parseInt(inputs[1].value)||0,score:parseInt(inputs[2].value)||0});
+  });
   try{
     await apiRequest('/contests',{method:'POST',body:JSON.stringify({title,contest_date:date,problems:document.getElementById('c-problems').value.trim(),comment:document.getElementById('c-comment').value.trim(),results})});
     closeModal('contest-modal');showToast('模拟赛录入成功 ✓','success');loadContests();
