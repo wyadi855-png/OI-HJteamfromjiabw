@@ -4838,7 +4838,7 @@ function show(id){
   // 同步移动端抽屉 active 状态
   syncDrawerActive(id);
   window.scrollTo(0,0);
-  const loaders={syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,quiz:initQuiz,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks};
+  const loaders={syllabus:()=>{show('lectures');switchCourseTab('syllabus');},judge:initJudge,quiz:initQuiz,contests:loadContests,notes:loadNotes,emotions:loadPosts,lectures:()=>{loadLectures();switchCourseTab('lectures');},archive:loadArchive,admin:loadAdmin,announcements:loadAnnouncements,search:initSearch,leaderboard:()=>loadLeaderboard('notes'),members:loadMembers,stats:loadStats,bookmarks:loadBookmarks,daily:loadDaily};
   if(loaders[id])loaders[id]();
 }
 
