@@ -5448,29 +5448,27 @@ async function loadHomeDailyCard(){
 
 async function homeDailyCheckin(dailyId, isChecked){
   if(!currentUser){showToast('请先登录','error');return;}
-  if(isChecked){
-    await sb.from('daily_checkins').delete().eq('daily_id',dailyId).eq('user_id',currentUser.id);
-  } else {
-    const{error}=await sb.from('daily_checkins').insert({daily_id:dailyId,user_id:currentUser.id});
-    if(error){showToast('打卡失败: '+error.message,'error');return;}
-    showToast('打卡成功 🎉','success');
-    triggerCheckinEffect();
-  }
-  loadHomeDailyCard();
+  try{
+    if(isChecked){
+      await apiRequest('/daily/checkin/undo',{method:'POST',body:JSON.stringify({daily_id:dailyId})});
+    } else {
+      await apiRequest('/daily/checkin',{method:'POST',body:JSON.stringify({daily_id:dailyId})});
+      showToast('打卡成功 🎉','success');triggerCheckinEffect();
+    }
+    loadHomeDailyCard();
+  }catch(e){showToast(e.message,'error');}
 }
 
 async function doCheckin(dailyId){
   if(!currentUser){showToast('请先登录','error');return;}
-  const{error}=await sb.from('daily_checkins').insert({daily_id:dailyId,user_id:currentUser.id});
-  if(error){showToast('打卡失败: '+error.message,'error');return;}
-  showToast('打卡成功 🎉','success');
-  triggerCheckinEffect();
-  loadDaily();
+  try{
+    await apiRequest('/daily/checkin',{method:'POST',body:JSON.stringify({daily_id:dailyId})});
+    showToast('打卡成功 🎉','success');triggerCheckinEffect();loadDaily();
+  }catch(e){showToast('打卡失败: '+e.message,'error');}
 }
 
 async function undoCheckin(dailyId){
-  await sb.from('daily_checkins').delete().eq('daily_id',dailyId).eq('user_id',currentUser.id);
-  loadDaily();
+  try{await apiRequest('/daily/checkin/undo',{method:'POST',body:JSON.stringify({daily_id:dailyId})});loadDaily();}catch(e){showToast(e.message,'error');}
 }
 
 async function deleteDaily(id){
@@ -5964,8 +5962,8 @@ function copyCode(btn){
   });
 }
 async function toggleLike(noteId,isLiked){if(!currentUser){showToast('请先登录','error');return;}if(isLiked)await sb.from('likes').delete().eq('note_id',noteId).eq('user_id',currentUser.id);else await sb.from('likes').insert({note_id:noteId,user_id:currentUser.id});showNote(noteId);}
-async function submitComment(noteId){const input=document.getElementById(`ci-${noteId}`);const content=input.value.trim();if(!content)return;const{error}=await sb.from('comments').insert({note_id:noteId,author_id:currentUser.id,content});if(error){showToast('评论失败','error');return;}input.value='';showNote(noteId);showToast('评论成功 ✓','success');}
-async function deleteNote(id){if(!confirm('确认删除这篇题解？'))return;await sb.from('notes').delete().eq('id',id);showToast('已删除','success');loadNotes();}
+async function submitComment(noteId){const input=document.getElementById(`ci-${noteId}`);const content=input.value.trim();if(!content)return;try{await apiRequest(`/notes/${noteId}/comments`,{method:'POST',body:JSON.stringify({content})});input.value='';showNote(noteId);showToast('评论成功 ✓','success');}catch(e){showToast('评论失败','error');}}
+async function deleteNote(id){if(!confirm('确认删除这篇题解？'))return;try{await apiRequest(`/notes/${id}`,{method:'DELETE'});showToast('已删除','success');loadNotes();}catch(e){showToast(e.message,'error');}}
 
 // ── Mobile Drawer Navigation ─────────────────────────────────
 function toggleNavDrawer(){
@@ -6180,18 +6178,21 @@ async function submitNote(){
   if(btn){btn.disabled=true;btn.textContent='发布中…';}
   // 上传图片
   const images=await uploadNoteImages();
-  const{error}=await sb.from('notes').insert({
-    author_id:currentUser.id,
-    title,
-    problem_id:document.getElementById('note-problem').value.trim(),
-    topic:document.getElementById('note-topic').value.trim(),
-    content:document.getElementById('note-content').value.trim(),
-    code:document.getElementById('note-code').value.trim(),
-    reflection:document.getElementById('note-reflection').value.trim(),
-    images,
-  });
+  try{
+    await apiRequest('/notes',{method:'POST',body:JSON.stringify({
+      title,
+      problem_id:document.getElementById('note-problem').value.trim()||null,
+      topic:document.getElementById('note-topic').value.trim()||null,
+      content:document.getElementById('note-content').value.trim(),
+      code:document.getElementById('note-code').value.trim()||null,
+      reflection:document.getElementById('note-reflection').value.trim()||null,
+      images,
+    })});
+  }catch(e){
+    if(btn){btn.disabled=false;btn.textContent='发布题解';}
+    document.getElementById('note-error').textContent=e.message;return;
+  }
   if(btn){btn.disabled=false;btn.textContent='发布题解';}
-  if(error){document.getElementById('note-error').textContent=error.message;return;}
   _noteImgFiles=[];
   document.getElementById('note-img-preview-list').innerHTML='';
   closeNoteDrawer();
@@ -6344,11 +6345,10 @@ async function submitPostComment(postId){
   const ta=document.getElementById(`cmt-ta-${postId}`);
   const content=ta.value.trim();
   if(!content)return;
-  const{error}=await sb.from('post_comments').insert({post_id:postId,author_id:currentUser.id,content});
-  if(error){showToast('评论失败','error');return;}
-  ta.value='';
-  showToast('评论成功 ✓','success');
-  await renderPostComments(postId);
+  try{
+    await apiRequest(`/posts/${postId}/comments`,{method:'POST',body:JSON.stringify({content})});
+    ta.value='';showToast('评论成功 ✓','success');await renderPostComments(postId);
+  }catch(e){showToast('评论失败','error');}
 }
 
 async function submitReply(parentId,postId){
@@ -6357,27 +6357,20 @@ async function submitReply(parentId,postId){
   const content=ta.value.trim();
   if(!content)return;
   const replyToId=ta.dataset.replyToId||null;
-  const{error}=await sb.from('post_comments').insert({
-    post_id:postId,author_id:currentUser.id,content,
-    parent_id:parentId,
-    reply_to:replyToId||undefined
-  });
-  if(error){showToast('回复失败','error');return;}
-  ta.value='';
-  document.getElementById(`reply-input-${parentId}`).style.display='none';
-  showToast('回复成功 ✓','success');
-  await renderPostComments(postId);
+  try{
+    await apiRequest(`/posts/${postId}/comments`,{method:'POST',body:JSON.stringify({content,parent_id:parentId,reply_to:replyToId||null})});
+    ta.value='';document.getElementById(`reply-input-${parentId}`).style.display='none';
+    showToast('回复成功 ✓','success');await renderPostComments(postId);
+  }catch(e){showToast('回复失败','error');}
 }
 
 async function deletePostComment(id,postId){
   if(!confirm('确认删除？'))return;
-  await sb.from('post_comments').delete().eq('id',id);
-  showToast('已删除','success');
-  await renderPostComments(postId);
+  try{await apiRequest(`/posts/comments/${id}`,{method:'DELETE'});showToast('已删除','success');await renderPostComments(postId);}catch(e){showToast(e.message,'error');}
 }
 function openPostModal(){if(!currentUser){openModal('auth-modal');return;}openModal('post-modal');}
-async function submitPost(){const content=document.getElementById('post-content').value.trim();if(!content){document.getElementById('post-error').textContent='请填写内容';return;}const{error}=await sb.from('posts').insert({author_id:currentUser.id,content});if(error){document.getElementById('post-error').textContent=error.message;return;}closeModal('post-modal');document.getElementById('post-content').value='';showToast('随笔发布成功 ✓','success');loadPosts();}
-async function deletePost(id){if(!confirm('确认删除？'))return;await sb.from('posts').delete().eq('id',id);showToast('已删除','success');loadPosts();}
+async function submitPost(){const content=document.getElementById('post-content').value.trim();if(!content){document.getElementById('post-error').textContent='请填写内容';return;}try{await apiRequest('/posts',{method:'POST',body:JSON.stringify({content})});closeModal('post-modal');document.getElementById('post-content').value='';showToast('随笔发布成功 ✓','success');loadPosts();}catch(e){document.getElementById('post-error').textContent=e.message;}}
+async function deletePost(id){if(!confirm('确认删除？'))return;try{await apiRequest(`/posts/${id}`,{method:'DELETE'});showToast('已删除','success');loadPosts();}catch(e){showToast(e.message,'error');}}
 
 // ── Lectures ───────────────────────────────────────────────
 async function loadLectures(){
@@ -6435,14 +6428,15 @@ async function submitLecture(){
     conclusions:document.getElementById('l-conclusions').value.trim(),
     level:document.getElementById('l-level').value,
     created_by:currentUser.id};
-  const{error}=await sb.from('lectures').insert(row);
-  if(error){document.getElementById('lecture-error').textContent=error.message;return;}
-  closeModal('lecture-modal');
-  ['l-date','l-topic','l-content','l-problems','l-homework','l-conclusions'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('l-level').value='';
-  showToast('课程记录已保存 ✓','success');loadLectures();
+  try{
+    await apiRequest('/lectures',{method:'POST',body:JSON.stringify(row)});
+    closeModal('lecture-modal');
+    ['l-date','l-topic','l-content','l-problems','l-homework','l-conclusions'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('l-level').value='';
+    showToast('课程记录已保存 ✓','success');loadLectures();
+  }catch(e){document.getElementById('lecture-error').textContent=e.message;}
 }
-async function deleteLecture(id){if(!confirm('确认删除？'))return;await sb.from('lectures').delete().eq('id',id);showToast('已删除','success');loadLectures();}
+async function deleteLecture(id){if(!confirm('确认删除？'))return;try{await apiRequest(`/lectures/${id}`,{method:'DELETE'});showToast('已删除','success');loadLectures();}catch(e){showToast(e.message,'error');}}
 
 // ── Archive ────────────────────────────────────────────────
 let _archiveData = [];
@@ -7677,15 +7671,17 @@ async function submitEditNote(){
   const id=document.getElementById('edit-note-id').value;
   const title=document.getElementById('edit-note-title').value.trim();
   if(!title){document.getElementById('edit-note-error').textContent='请填写标题';return;}
-  const{error}=await sb.from('notes').update({
-    title,problem_id:document.getElementById('edit-note-problem').value.trim(),
-    topic:document.getElementById('edit-note-topic').value.trim(),
-    content:document.getElementById('edit-note-content').value.trim(),
-    code:document.getElementById('edit-note-code').value.trim(),
-    reflection:document.getElementById('edit-note-reflection').value.trim()
-  }).eq('id',id);
-  if(error){document.getElementById('edit-note-error').textContent=error.message;return;}
-  closeModal('edit-note-modal');showToast('题解已更新 ✓','success');showNote(parseInt(id));
+  try{
+    await apiRequest(`/notes/${id}`,{method:'PATCH',body:JSON.stringify({
+      title,
+      problem_id:document.getElementById('edit-note-problem').value.trim()||null,
+      topic:document.getElementById('edit-note-topic').value.trim()||null,
+      content:document.getElementById('edit-note-content').value.trim(),
+      code:document.getElementById('edit-note-code').value.trim()||null,
+      reflection:document.getElementById('edit-note-reflection').value.trim()||null,
+    })});
+    closeModal('edit-note-modal');showToast('题解已更新 ✓','success');showNote(parseInt(id));
+  }catch(e){document.getElementById('edit-note-error').textContent=e.message;}
 }
 
 // ── Edit Post ───────────────────────────────────────────────
@@ -7693,9 +7689,10 @@ async function submitEditPost(){
   const id=document.getElementById('edit-post-id').value;
   const content=document.getElementById('edit-post-content').value.trim();
   if(!content){document.getElementById('edit-post-error').textContent='请填写内容';return;}
-  const{error}=await sb.from('posts').update({content}).eq('id',id);
-  if(error){document.getElementById('edit-post-error').textContent=error.message;return;}
-  closeModal('edit-post-modal');showToast('随笔已更新 ✓','success');loadPosts();
+  try{
+    await apiRequest(`/posts/${id}`,{method:'PATCH',body:JSON.stringify({content})});
+    closeModal('edit-post-modal');showToast('随笔已更新 ✓','success');loadPosts();
+  }catch(e){document.getElementById('edit-post-error').textContent=e.message;}
 }
 
 // ── Init ────────────────────────────────────────────────────
