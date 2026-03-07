@@ -4201,11 +4201,6 @@ section:not(.active) {
       <li class="nav-more-wrap">
         <a onclick="toggleMoreMenu(event)" class="nav-more-trigger">更多 ▾</a>
         <div class="nav-more-menu" id="nav-more-menu">
-          <div class="nav-more-group-label">社区</div>
-          <a onclick="closeMoreMenu();show('community')" id="nav-community-m">🌐 社区</a>
-          <div class="nav-more-divider"></div>
-          <div class="nav-more-group-label">教学</div>
-          <div class="nav-more-divider"></div>
           <div class="nav-more-group-label">工具</div>
           <a onclick="closeMoreMenu();show('search')" id="nav-search">🔍 搜索</a>
           <a onclick="closeMoreMenu();show('bookmarks')" id="nav-bookmarks">🔖 收藏</a>
@@ -6162,7 +6157,6 @@ async function loadCommunityMembers(){
   const el = document.getElementById('community-members-list');
   if(!el) return;
   try{
-    const sb2 = get_supabase ? get_supabase() : sb;
     const{data:members} = await sb.from('profiles').select('id,username,avatar_url,role').order('created_at');
     if(!members||!members.length){ el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><p>暂无成员</p></div>'; return; }
     el.innerHTML = `<div class="members-grid">${members.map(m=>{
@@ -9031,15 +9025,17 @@ async function uploadProfileBanner(input){
   if(!['jpg','jpeg','png','webp'].includes(ext)){showToast('仅支持 JPG/PNG/WebP','error');return;}
   if(file.size > 5*1024*1024){showToast('图片不能超过 5MB','error');return;}
   showToast('上传中…','info');
-  const path = 'banners/'+currentUser.id+'.'+ext;
-  const{error:upErr}=await sb.storage.from('note-images').upload(path,file,{upsert:true,'content-type':file.type});
-  if(upErr){showToast('上传失败: '+upErr.message,'error');return;}
-  const{data:urlData}=sb.storage.from('note-images').getPublicUrl(path);
-  const banner_url = urlData.publicUrl+'?t='+Date.now();
-  await sb.from('profiles').update({banner_url}).eq('id',currentUser.id);
-  currentProfile.banner_url = banner_url;
-  showToast('背景图已更新 ✓','success');
-  await showProfile(currentProfile.username);
+  try{
+    const fd = new FormData();
+    fd.append('file', file);
+    const token = localStorage.getItem('hjoi_token');
+    const res = await fetch(API_BASE+'/upload/banner',{method:'POST',headers:{...(token?{'Authorization':'Bearer '+token}:{})},body:fd});
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.detail||'上传失败');}
+    const{url}=await res.json();
+    currentProfile.banner_url = url;
+    showToast('背景图已更新 ✓','success');
+    await showProfile(currentProfile.username);
+  }catch(e){showToast('上传失败: '+e.message,'error');}
 }
 
 async function saveSettings(){
@@ -9058,19 +9054,21 @@ async function saveSettings(){
 
   if(fileInput?.files?.length){
     const file=fileInput.files[0];
-    // 显示进度条
     const prog=document.getElementById('avatar-upload-progress');
     const fill=document.getElementById('avatar-upload-fill');
     const lbl=document.getElementById('avatar-upload-label');
     prog.style.display='block'; fill.style.width='30%'; lbl.textContent='上传中…';
-    const ext=file.name.split('.').pop();
-    const path=`avatars/${currentUser.id}.${ext}`;
-    const{error:upErr}=await sb.storage.from('note-images').upload(path,file,{upsert:true,contentType:file.type});
-    if(upErr){errEl.textContent='头像上传失败: '+upErr.message;prog.style.display='none';return;}
-    fill.style.width='100%'; lbl.textContent='完成 ✓';
-    const{data:urlData}=sb.storage.from('note-images').getPublicUrl(path);
-    avatar_url=urlData.publicUrl+'?t='+Date.now();
-    setTimeout(()=>prog.style.display='none',600);
+    try{
+      const fd=new FormData();
+      fd.append('file',file);
+      const token=localStorage.getItem('hjoi_token');
+      const res=await fetch(API_BASE+'/upload/avatar',{method:'POST',headers:{...(token?{'Authorization':'Bearer '+token}:{})},body:fd});
+      if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.detail||'上传失败');}
+      const{url}=await res.json();
+      avatar_url=url;
+      fill.style.width='100%'; lbl.textContent='完成 ✓';
+      setTimeout(()=>prog.style.display='none',600);
+    }catch(e){errEl.textContent='头像上传失败: '+e.message;prog.style.display='none';return;}
   }
 
   // 用户名校验
