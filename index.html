@@ -6110,11 +6110,14 @@ async function homeDailyCheckin(dailyId, isChecked){
     if(isChecked){
       await apiRequest('/daily/checkin/undo',{method:'POST',body:JSON.stringify({daily_id:dailyId})});
     } else {
-      await apiRequest('/daily/checkin',{method:'POST',body:JSON.stringify({daily_id:dailyId})});
+      await apiRequest('/daily/checkin',{method:'POST'});
       showToast('打卡成功 🎉','success');triggerCheckinEffect();
     }
-    loadHomeDailyCard();
-  }catch(e){showToast(e.message,'error');}
+  }catch(e){
+    // 已打卡则静默刷新，不报错
+    if(!e.message||!e.message.includes('已经打过卡')) showToast(e.message,'error');
+  }
+  loadHomeDailyCard();
 }
 
 async function doDailyCheckin(dailyId){
