@@ -5325,7 +5325,12 @@ function normalizeText(v){
 }
 function normalizeLuoguUid(v){
   const s=normalizeText(v);
-  return s.replace(/^@/,'');
+  if(!s) return '';
+  // 兼容完整链接：https://www.luogu.com.cn/user/123456
+  const urlMatch = s.match(/luogu\.com\.cn\/user\/(\d+)/);
+  if(urlMatch) return urlMatch[1];
+  // 去掉 @ 前缀和非数字字符，只保留数字
+  return s.replace(/^@/,'').replace(/[^0-9]/g,'');
 }
 async function hydrateCurrentProfile(seed={}){
   if(!currentUser?.id) return null;
@@ -8109,29 +8114,14 @@ async function fetchLuoguAndBuildRadar(uid, localNotes, username){
   ctx.fillText('正在拉取洛谷数据…', canvas.width/2, canvas.height/2);
 
   try {
-    // 使用 allorigins 代理绕过 CORS
-    const url = `https://www.luogu.com.cn/user/${uid}?_contentOnly=1`;
-    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-    const res = await fetch(proxy, {signal: AbortSignal.timeout(8000)});
-    const json = await res.json();
-    const data = JSON.parse(json.contents);
-
-    // 提取通过题目的标签
-    const luoguTags = [];
-    const passed = data?.currentData?.passedProblems || [];
-    passed.forEach(p => {
-      (p.tags||[]).forEach(tag => {
-        const name = tag.name||'';
-        luoguTags.push(name);
-      });
-    });
-
-    buildRadar(localNotes, luoguTags, username, passed.length);
+    // 走后端代理，避免 CORS 和不稳定第三方代理
+    const data = await apiRequest(`/luogu/user/${uid}`);
+    const luoguTags = data.tags || [];
+    const passedCount = data.passed_count || 0;
+    buildRadar(localNotes, luoguTags, username, passedCount);
   } catch(e) {
     console.warn('洛谷数据拉取失败:', e);
-    // fallback到本地题解
     buildRadar(localNotes, [], username);
-    // 提示
     const canvas2 = document.getElementById('radar-'+username);
     if(canvas2){
       const ctx2 = canvas2.getContext('2d');
