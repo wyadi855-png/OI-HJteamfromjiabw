@@ -6130,26 +6130,24 @@ async function loadHomeDailyCard(){
       </div>`;
       return;
     }
-    // 分两步查：先拿 user_id 列表（count用），再批量查 profiles（avatar用）
-    const{data:checkinRows}=await sb.from('daily_checkins').select('user_id').eq('daily_id',daily.id);
-    const checkinUids=(checkinRows||[]).map(c=>c.user_id);
-    let checkinProfiles=[];
-    if(checkinUids.length){
-      const{data:pf}=await sb.from('profiles').select('id,username').in('id',checkinUids);
-      checkinProfiles=pf||[];
-    }
-    // 自己是否打卡走后端（绕过 RLS）
-    let myCheckin=false;
-    if(currentUser){
-      try{
-        const st=await apiRequest('/daily/checkin/status?daily_id='+daily.id);
-        myCheckin=st.checked||false;
-      }catch(e){
-        myCheckin=checkinUids.includes(currentUser.id);
-      }
+    // 全部走后端 /daily/today（service_role key，绕过RLS，同时返回already_checked）
+    let checkinProfiles=[], myCheckin=false, count=0;
+    try{
+      const todayData=await apiRequest('/daily/today');
+      count=todayData.checkin_count||0;
+      checkinProfiles=(todayData.checkins||[]).map(c=>({
+        id:c.user_id,
+        username:c.profiles?.username||''
+      }));
+      if(currentUser) myCheckin=todayData.already_checked||false;
+    }catch(e){
+      // 降级走supabase（可能受RLS限制，count可能不准）
+      const{data:rows}=await sb.from('daily_checkins').select('user_id').eq('daily_id',daily.id);
+      const uids=(rows||[]).map(r=>r.user_id);
+      count=uids.length;
+      if(currentUser) myCheckin=uids.includes(currentUser.id);
     }
     const luoguUrl=daily.problem_id?'https://www.luogu.com.cn/problem/'+daily.problem_id:'#';
-    const count=checkinUids.length;
     const avatarsHtml=checkinProfiles.slice(0,5).map(p=>`<div class="hd-avatar" title="@${escHtml(p.username||'')}" style="background:${avatarGradient(p.username||'')}">${(p.username||'?')[0].toUpperCase()}</div>`).join('');
     el.innerHTML=`<div class="home-daily-card">
       <div class="hd-glow"></div>
